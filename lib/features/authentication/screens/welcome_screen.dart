@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/theme/app_theme.dart';
+
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F4FF),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(24),
@@ -21,34 +22,28 @@ class WelcomeScreen extends StatelessWidget {
                   color: Color(0xFFE8DEFF),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(
+                child:  Icon(
                   Icons.family_restroom,
                   size: 64,
-                  color: Color(0xFF6750A4),
+                  color: AppTheme.primaryColor,
                 ),
               ),
 
               const SizedBox(height: 28),
 
-              const Text(
+              Text(
                 'KinQuest',
-                style: TextStyle(
-                  fontSize: 40,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF241A35),
-                ),
+                style: Theme.of(context).textTheme.displaySmall,
               ),
 
               const SizedBox(height: 12),
 
-              const Text(
+              Text(
                 'Play Together. Learn Together. Grow Together.',
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 18,
-                  height: 1.5,
-                  color: Color(0xFF625B71),
-                ),
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      height: 1.5,
+                    ),
               ),
 
               const Spacer(),
@@ -56,45 +51,19 @@ class WelcomeScreen extends StatelessWidget {
               SizedBox(
                 width: double.infinity,
                 child: FilledButton(
-                  onPressed: () {},
-                  style: FilledButton.styleFrom(
-                    backgroundColor: const Color(0xFF6750A4),
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 16,
-                    ),
-                  ),
-                  child: const Text(
-                    'Log In',
-                    style: TextStyle(
-                      fontSize: 17,
-                    ),
-                  ),
+                onPressed: () {},
+                child: const Text('Log In'),
                 ),
-              ),
-
+            ),
               const SizedBox(height: 12),
 
               SizedBox(
                 width: double.infinity,
                 child: OutlinedButton(
-                  onPressed: () {},
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: const Color(0xFF6750A4),
-                    side: const BorderSide(
-                      color: Color(0xFF6750A4),
-                    ),
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 16,
-                    ),
-                  ),
-                  child: const Text(
-                    'Create Account',
-                    style: TextStyle(
-                      fontSize: 17,
-                    ),
-                  ),
-                ),
-              ),
+                onPressed: () {},
+                child: const Text('Create Account'),
+               ),
+          ),
 
               const SizedBox(height: 20),
             ],
