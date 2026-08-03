@@ -89,4 +89,27 @@ class FormValidators {
 
     return null;
   }
+  static String? validateFamilyName(String? value) {
+  final familyName = value?.trim() ?? '';
+
+  if (familyName.isEmpty) {
+    return 'Family name is required.';
+  }
+
+  if (familyName.length < 2) {
+    return 'Family name must contain at least 2 characters.';
+  }
+
+  if (familyName.length > 40) {
+    return 'Family name cannot contain more than 40 characters.';
+  }
+
+  final validPattern = RegExp(r"^[a-zA-ZÀ-ÿ0-9\s'-]+$");
+
+  if (!validPattern.hasMatch(familyName)) {
+    return 'Family name contains invalid characters.';
+  }
+
+  return null;
+}
 }
