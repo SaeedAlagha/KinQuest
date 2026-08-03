@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/validation/form_validators.dart';
 import 'login_screen.dart';
+import 'family_choice_screen.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -94,13 +95,12 @@ class _SignupScreenState extends State<SignupScreen> {
       return;
     }
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text(
-          'Account information is valid. Firebase will be connected later.',
-        ),
-      ),
-    );
+    Navigator.pushReplacement(
+    context,
+    MaterialPageRoute(
+    builder: (context) => const FamilyChoiceScreen(),
+   ),
+  );
   }
 
   void _openLogin() {
