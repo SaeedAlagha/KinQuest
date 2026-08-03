@@ -112,4 +112,21 @@ class FormValidators {
 
   return null;
 }
+static String? validateInvitationCode(String? value) {
+  final code = value?.trim() ?? '';
+
+  if (code.isEmpty) {
+    return 'Invitation code is required.';
+  }
+
+  if (code.length != 6) {
+    return 'Invitation code must contain exactly 6 characters.';
+  }
+
+  if (!RegExp(r'^[A-Za-z0-9]{6}$').hasMatch(code)) {
+    return 'Invitation code can only contain letters and numbers.';
+  }
+
+  return null;
+}
 }
