@@ -23,9 +23,27 @@ class FormValidators {
     return null;
   }
 
-  static String? validateLoginPassword(String? value) {
-    if (value == null || value.isEmpty) {
+  static String? validatePassword(String? value) {
+    final password = value ?? '';
+
+    if (password.isEmpty) {
       return 'Password is required.';
+    }
+
+    if (password.length < 8) {
+      return 'Password must contain at least 8 characters.';
+    }
+
+    if (!RegExp(r'[A-Z]').hasMatch(password)) {
+      return 'Password must contain an uppercase letter.';
+    }
+
+    if (!RegExp(r'[a-z]').hasMatch(password)) {
+      return 'Password must contain a lowercase letter.';
+    }
+
+    if (!RegExp(r'[0-9]').hasMatch(password)) {
+      return 'Password must contain a number.';
     }
 
     return null;

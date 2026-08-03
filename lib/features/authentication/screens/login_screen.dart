@@ -101,7 +101,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   controller: _passwordController,
                   obscureText: _hidePassword,
                   textInputAction: TextInputAction.done,
-                  validator: FormValidators.validateLoginPassword,
+                  validator: FormValidators.validatePassword,
                   onFieldSubmitted: (_) => _login(),
                   decoration: InputDecoration(
                     labelText: 'Password',
