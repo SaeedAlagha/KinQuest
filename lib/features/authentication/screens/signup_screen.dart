@@ -1,7 +1,116 @@
 import 'package:flutter/material.dart';
 
-class SignupScreen extends StatelessWidget {
+import '../../../core/validation/form_validators.dart';
+import 'login_screen.dart';
+
+class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
+
+  @override
+  State<SignupScreen> createState() => _SignupScreenState();
+}
+
+class _SignupScreenState extends State<SignupScreen> {
+  final _formKey = GlobalKey<FormState>();
+
+  final _nameController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _birthDateController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
+
+  bool _hidePassword = true;
+  bool _hideConfirmPassword = true;
+  bool _acceptedTerms = false;
+
+  DateTime? _selectedBirthDate;
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _emailController.dispose();
+    _birthDateController.dispose();
+    _passwordController.dispose();
+    _confirmPasswordController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _selectBirthDate() async {
+    final now = DateTime.now();
+
+    final selectedDate = await showDatePicker(
+      context: context,
+      initialDate: DateTime(now.year - 18),
+      firstDate: DateTime(1900),
+      lastDate: now,
+    );
+
+    if (selectedDate == null) {
+      return;
+    }
+
+    setState(() {
+      _selectedBirthDate = selectedDate;
+      _birthDateController.text =
+          '${selectedDate.day.toString().padLeft(2, '0')}/'
+          '${selectedDate.month.toString().padLeft(2, '0')}/'
+          '${selectedDate.year}';
+    });
+  }
+
+  String? _validateBirthDate(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return 'Date of birth is required.';
+    }
+
+    if (_selectedBirthDate == null) {
+      return 'Select a valid date of birth.';
+    }
+
+    if (_selectedBirthDate!.isAfter(DateTime.now())) {
+      return 'Date of birth cannot be in the future.';
+    }
+
+    return null;
+  }
+
+  void _createAccount() {
+    FocusScope.of(context).unfocus();
+
+    final isValid = _formKey.currentState?.validate() ?? false;
+
+    if (!isValid) {
+      return;
+    }
+
+    if (!_acceptedTerms) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'You must accept the Terms of Service and Privacy Policy.',
+          ),
+        ),
+      );
+      return;
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text(
+          'Account information is valid. Firebase will be connected later.',
+        ),
+      ),
+    );
+  }
+
+  void _openLogin() {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const LoginScreen(),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -9,12 +118,169 @@ class SignupScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Create Account'),
       ),
-      body: const Center(
-        child: Text(
-          'Create Account Screen',
-          style: TextStyle(
-            fontSize: 28,
-            fontWeight: FontWeight.bold,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Join KinQuest',
+                  style: Theme.of(context).textTheme.headlineMedium,
+                ),
+
+                const SizedBox(height: 8),
+
+                Text(
+                  'Create your account and begin your family journey.',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+
+                const SizedBox(height: 28),
+
+                TextFormField(
+                  controller: _nameController,
+                  keyboardType: TextInputType.name,
+                  textCapitalization: TextCapitalization.words,
+                  textInputAction: TextInputAction.next,
+                  validator: FormValidators.validateName,
+                  decoration: const InputDecoration(
+                    labelText: 'Full name',
+                    prefixIcon: Icon(Icons.person_outline),
+                  ),
+                ),
+
+                const SizedBox(height: 18),
+
+                TextFormField(
+                  controller: _emailController,
+                  keyboardType: TextInputType.emailAddress,
+                  textInputAction: TextInputAction.next,
+                  autocorrect: false,
+                  validator: FormValidators.validateEmail,
+                  decoration: const InputDecoration(
+                    labelText: 'Email address',
+                    hintText: 'name@example.com',
+                    prefixIcon: Icon(Icons.email_outlined),
+                  ),
+                ),
+
+                const SizedBox(height: 18),
+
+                TextFormField(
+                  controller: _birthDateController,
+                  readOnly: true,
+                  onTap: _selectBirthDate,
+                  validator: _validateBirthDate,
+                  decoration: const InputDecoration(
+                    labelText: 'Date of birth',
+                    hintText: 'DD/MM/YYYY',
+                    prefixIcon: Icon(Icons.cake_outlined),
+                    suffixIcon: Icon(Icons.calendar_today_outlined),
+                  ),
+                ),
+
+                const SizedBox(height: 18),
+
+                TextFormField(
+                  controller: _passwordController,
+                  obscureText: _hidePassword,
+                  textInputAction: TextInputAction.next,
+                  validator: FormValidators.validatePassword,
+                  decoration: InputDecoration(
+                    labelText: 'Password',
+                    helperText:
+                        '8+ characters, uppercase, lowercase, and number',
+                    prefixIcon: const Icon(Icons.lock_outline),
+                    suffixIcon: IconButton(
+                      onPressed: () {
+                        setState(() {
+                          _hidePassword = !_hidePassword;
+                        });
+                      },
+                      icon: Icon(
+                        _hidePassword
+                            ? Icons.visibility_outlined
+                            : Icons.visibility_off_outlined,
+                      ),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 18),
+
+                TextFormField(
+                  controller: _confirmPasswordController,
+                  obscureText: _hideConfirmPassword,
+                  textInputAction: TextInputAction.done,
+                  validator: (value) {
+                    return FormValidators.validateConfirmPassword(
+                      value,
+                      _passwordController.text,
+                    );
+                  },
+                  onFieldSubmitted: (_) => _createAccount(),
+                  decoration: InputDecoration(
+                    labelText: 'Confirm password',
+                    prefixIcon: const Icon(Icons.lock_reset_outlined),
+                    suffixIcon: IconButton(
+                      onPressed: () {
+                        setState(() {
+                          _hideConfirmPassword =
+                              !_hideConfirmPassword;
+                        });
+                      },
+                      icon: Icon(
+                        _hideConfirmPassword
+                            ? Icons.visibility_outlined
+                            : Icons.visibility_off_outlined,
+                      ),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 14),
+
+                CheckboxListTile(
+                  contentPadding: EdgeInsets.zero,
+                  controlAffinity: ListTileControlAffinity.leading,
+                  value: _acceptedTerms,
+                  onChanged: (value) {
+                    setState(() {
+                      _acceptedTerms = value ?? false;
+                    });
+                  },
+                  title: const Text(
+                    'I agree to the Terms of Service and Privacy Policy.',
+                  ),
+                ),
+
+                const SizedBox(height: 18),
+
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton(
+                    onPressed: _createAccount,
+                    child: const Text('Create Account'),
+                  ),
+                ),
+
+                const SizedBox(height: 22),
+
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text('Already have an account?'),
+                    TextButton(
+                      onPressed: _openLogin,
+                      child: const Text('Log in'),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
