@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 
 import '../../../core/validation/form_validators.dart';
+import '../../home/screens/main_navigation_screen.dart';
 
 class CreateFamilyScreen extends StatefulWidget {
   const CreateFamilyScreen({super.key});
@@ -195,18 +196,38 @@ class _CreateFamilyScreenState extends State<CreateFamilyScreen> {
                         const SizedBox(height: 14),
 
                         OutlinedButton.icon(
-                          onPressed: () {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text(
-                                  'Copying will be connected next.',
-                                ),
-                              ),
-                            );
-                          },
-                          icon: const Icon(Icons.copy_outlined),
-                          label: const Text('Copy Code'),
-                        ),
+  onPressed: () {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text(
+          'Copying will be connected next.',
+        ),
+      ),
+    );
+  },
+  icon: const Icon(Icons.copy_outlined),
+  label: const Text('Copy Code'),
+),
+
+const SizedBox(height: 12),
+
+SizedBox(
+  width: double.infinity,
+  child: FilledButton(
+    onPressed: () {
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(
+          builder: (context) =>
+              const MainNavigationScreen(),
+        ),
+        (route) => false,
+      );
+    },
+    child: const Text('Continue to Home'),
+  ),
+),
+                        
                       ],
                     ),
                   ),

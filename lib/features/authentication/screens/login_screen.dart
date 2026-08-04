@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/validation/form_validators.dart';
 import 'signup_screen.dart';
+import '../../home/screens/main_navigation_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -34,13 +35,13 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text(
-          'Login information is valid. Firebase will be connected later.',
-        ),
-      ),
-    );
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const MainNavigationScreen(),
+    ),
+    (route) => false,
+  );
   }
 
   void _openSignup() {

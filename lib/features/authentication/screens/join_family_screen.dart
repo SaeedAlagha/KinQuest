@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../../core/validation/form_validators.dart';
+import '../../home/screens/main_navigation_screen.dart';
 
 class JoinFamilyScreen extends StatefulWidget {
   const JoinFamilyScreen({super.key});
@@ -31,12 +32,12 @@ void _joinFamily() {
 
   final invitationCode = _codeController.text.trim().toUpperCase();
 
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(
-      content: Text(
-        'Code $invitationCode is valid. Firebase verification will be added later.',
-      ),
-    ),
+  Navigator.pushAndRemoveUntil(
+  context,
+  MaterialPageRoute(
+    builder: (context) => const MainNavigationScreen(),
+  ),
+  (route) => false,
   );
 }
   @override
