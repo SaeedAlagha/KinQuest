@@ -1,26 +1,25 @@
 import 'package:flutter/material.dart';
 
-import 'home_screen.dart';
-import 'home_screen.dart';
+import '../../games/screens/games_screen.dart';
 import '../../memories/screens/memories_screen.dart';
+import 'home_screen.dart';
 
 class MainNavigationScreen extends StatefulWidget {
   const MainNavigationScreen({super.key});
 
   @override
-  State<MainNavigationScreen> createState() =>
-      _MainNavigationScreenState();
+  State<MainNavigationScreen> createState() => _MainNavigationScreenState();
 }
 
 class _MainNavigationScreenState extends State<MainNavigationScreen> {
   int _selectedIndex = 0;
 
   final List<Widget> _screens = const [
-  HomeScreen(),
-  _PlaceholderScreen(title: 'Games'),
-  MemoriesScreen(),
-  _PlaceholderScreen(title: 'Competitions'),
-  _PlaceholderScreen(title: 'Profile'),
+    HomeScreen(),
+    GamesScreen(),
+    MemoriesScreen(),
+    _PlaceholderScreen(title: 'Competitions'),
+    _PlaceholderScreen(title: 'Profile'),
   ];
 
   void _selectScreen(int index) {
@@ -76,10 +75,7 @@ class _PlaceholderScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Text(
-        title,
-        style: Theme.of(context).textTheme.headlineMedium,
-      ),
+      child: Text(title, style: Theme.of(context).textTheme.headlineMedium),
     );
   }
 }
