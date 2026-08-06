@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-import 'home_screen.dart';
+import '../../games/screens/games_screen.dart';
 import '../../memories/screens/memories_screen.dart';
-import '../../competitions/screens/competitions_screen.dart';
+import 'home_screen.dart';
 
 class MainNavigationScreen extends StatefulWidget {
   const MainNavigationScreen({super.key});
@@ -16,9 +16,9 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
 
   final List<Widget> _screens = const [
     HomeScreen(),
-    _PlaceholderScreen(title: 'Games'),
+    GamesScreen(),
     MemoriesScreen(),
-    CompetitionsScreen(),
+    _PlaceholderScreen(title: 'Competitions'),
     _PlaceholderScreen(title: 'Profile'),
   ];
 
