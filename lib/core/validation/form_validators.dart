@@ -129,4 +129,21 @@ static String? validateInvitationCode(String? value) {
 
   return null;
 }
+static String? validateMemoryTitle(String? value) {
+  final title = value?.trim() ?? '';
+
+  if (title.isEmpty) {
+    return 'Memory title is required.';
+  }
+
+  if (title.length < 2) {
+    return 'Memory title must contain at least 2 characters.';
+  }
+
+  if (title.length > 60) {
+    return 'Memory title cannot exceed 60 characters.';
+  }
+
+  return null;
+}
 }

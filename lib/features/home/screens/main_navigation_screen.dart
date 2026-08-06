@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import 'home_screen.dart';
+import 'home_screen.dart';
+import '../../memories/screens/memories_screen.dart';
 
 class MainNavigationScreen extends StatefulWidget {
   const MainNavigationScreen({super.key});
@@ -14,11 +16,11 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   int _selectedIndex = 0;
 
   final List<Widget> _screens = const [
-    HomeScreen(),
-    _PlaceholderScreen(title: 'Games'),
-    _PlaceholderScreen(title: 'Memories'),
-    _PlaceholderScreen(title: 'Competitions'),
-    _PlaceholderScreen(title: 'Profile'),
+  HomeScreen(),
+  _PlaceholderScreen(title: 'Games'),
+  MemoriesScreen(),
+  _PlaceholderScreen(title: 'Competitions'),
+  _PlaceholderScreen(title: 'Profile'),
   ];
 
   void _selectScreen(int index) {
