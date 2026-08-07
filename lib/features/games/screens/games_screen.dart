@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'would_you_rather_screen.dart';
+
 class GamesScreen extends StatelessWidget {
   const GamesScreen({super.key});
 
@@ -58,7 +60,9 @@ class GamesScreen extends StatelessWidget {
             onPlay: () {
               Navigator.of(context).push(
                 MaterialPageRoute(
-                  builder: (_) => GamePlaceholderScreen(gameTitle: game.title),
+                  builder: (_) => game.title == 'Party Games'
+                      ? const WouldYouRatherScreen()
+                      : GamePlaceholderScreen(gameTitle: game.title),
                 ),
               );
             },
