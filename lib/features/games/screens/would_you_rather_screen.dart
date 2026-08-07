@@ -1,0 +1,686 @@
+import 'dart:math';
+
+import 'package:flutter/material.dart';
+
+class WouldYouRatherScreen extends StatefulWidget {
+  const WouldYouRatherScreen({super.key});
+
+  @override
+  State<WouldYouRatherScreen> createState() => _WouldYouRatherScreenState();
+}
+
+enum _GamePhase { setup, playing, results }
+
+class WouldYouRatherQuestion {
+  final String optionA;
+  final String optionB;
+
+  const WouldYouRatherQuestion({required this.optionA, required this.optionB});
+}
+
+class _WouldYouRatherScreenState extends State<WouldYouRatherScreen> {
+  static const Map<String, List<WouldYouRatherQuestion>> _questionBank = {
+    'Family': [
+      WouldYouRatherQuestion(
+        optionA: 'Eat a pancake breakfast with everyone',
+        optionB: 'Have a movie night with everyone',
+      ),
+      WouldYouRatherQuestion(
+        optionA: 'Build a blanket fort',
+        optionB: 'Play a board game together',
+      ),
+      WouldYouRatherQuestion(
+        optionA: 'Tell a funny story',
+        optionB: 'Sing a silly song',
+      ),
+      WouldYouRatherQuestion(
+        optionA: 'Go on a picnic in the park',
+        optionB: 'Bake cookies together',
+      ),
+      WouldYouRatherQuestion(
+        optionA: 'Draw a family portrait',
+        optionB: 'Make a paper airplane race',
+      ),
+      WouldYouRatherQuestion(
+        optionA: 'Have a game night with cards',
+        optionB: 'Have a scavenger hunt around the house',
+      ),
+      WouldYouRatherQuestion(
+        optionA: 'Make up a new handshake',
+        optionB: 'Make up a new joke',
+      ),
+      WouldYouRatherQuestion(
+        optionA: 'Share a happy memory',
+        optionB: 'Share a dream for the future',
+      ),
+    ],
+    'Travel': [
+      WouldYouRatherQuestion(
+        optionA: 'Visit a beach town',
+        optionB: 'Visit a mountain town',
+      ),
+      WouldYouRatherQuestion(
+        optionA: 'Ride a train through the countryside',
+        optionB: 'Fly above the clouds on an airplane',
+      ),
+      WouldYouRatherQuestion(
+        optionA: 'Eat a new snack in a different city',
+        optionB: 'Take pictures of every new place',
+      ),
+      WouldYouRatherQuestion(
+        optionA: 'See a sunrise on vacation',
+        optionB: 'See a sunset on vacation',
+      ),
+      WouldYouRatherQuestion(
+        optionA: 'Find a treasure map',
+        optionB: 'Find a hidden playground',
+      ),
+      WouldYouRatherQuestion(
+        optionA: 'Ride a bike on vacation',
+        optionB: 'Take a boat ride on vacation',
+      ),
+      WouldYouRatherQuestion(
+        optionA: 'Visit a zoo or aquarium',
+        optionB: 'Visit a science museum',
+      ),
+      WouldYouRatherQuestion(
+        optionA: 'Try a local dessert',
+        optionB: 'Try a local drink',
+      ),
+    ],
+    'At Home': [
+      WouldYouRatherQuestion(
+        optionA: 'Build a pillow fort',
+        optionB: 'Make a LEGO city',
+      ),
+      WouldYouRatherQuestion(
+        optionA: 'Have a family cooking challenge',
+        optionB: 'Have a family art challenge',
+      ),
+      WouldYouRatherQuestion(
+        optionA: 'Read a story together',
+        optionB: 'Invent a new story together',
+      ),
+      WouldYouRatherQuestion(
+        optionA: 'Decorate cookies',
+        optionB: 'Decorate cupcakes',
+      ),
+      WouldYouRatherQuestion(
+        optionA: 'Have a dance party',
+        optionB: 'Have a quiet game night',
+      ),
+      WouldYouRatherQuestion(
+        optionA: 'Make a treasure map',
+        optionB: 'Make a friendship bracelet',
+      ),
+      WouldYouRatherQuestion(
+        optionA: 'Play hide and seek',
+        optionB: 'Play charades',
+      ),
+      WouldYouRatherQuestion(
+        optionA: 'Plant a small garden',
+        optionB: 'Paint a picture',
+      ),
+    ],
+    'Food': [
+      WouldYouRatherQuestion(
+        optionA: 'Eat strawberries',
+        optionB: 'Eat blueberries',
+      ),
+      WouldYouRatherQuestion(
+        optionA: 'Make a fruit salad',
+        optionB: 'Make a yogurt parfait',
+      ),
+      WouldYouRatherQuestion(
+        optionA: 'Have a picnic lunch',
+        optionB: 'Have a backyard barbecue',
+      ),
+      WouldYouRatherQuestion(
+        optionA: 'Try a new sandwich',
+        optionB: 'Try a new smoothie',
+      ),
+      WouldYouRatherQuestion(
+        optionA: 'Eat crunchy carrots',
+        optionB: 'Eat juicy grapes',
+      ),
+      WouldYouRatherQuestion(
+        optionA: 'Choose pizza toppings',
+        optionB: 'Choose ice cream toppings',
+      ),
+      WouldYouRatherQuestion(
+        optionA: 'Sip hot chocolate',
+        optionB: 'Sip lemonade',
+      ),
+      WouldYouRatherQuestion(
+        optionA: 'Have breakfast for dinner',
+        optionB: 'Have dessert first',
+      ),
+    ],
+    'School': [
+      WouldYouRatherQuestion(
+        optionA: 'Learn about space',
+        optionB: 'Learn about animals',
+      ),
+      WouldYouRatherQuestion(
+        optionA: 'Write a story',
+        optionB: 'Draw a picture',
+      ),
+      WouldYouRatherQuestion(
+        optionA: 'Solve a puzzle',
+        optionB: 'Build something',
+      ),
+      WouldYouRatherQuestion(
+        optionA: 'Choose gym time',
+        optionB: 'Choose art time',
+      ),
+      WouldYouRatherQuestion(
+        optionA: 'Have quiet reading',
+        optionB: 'Have science experiments',
+      ),
+      WouldYouRatherQuestion(
+        optionA: 'Explore a history story',
+        optionB: 'Explore a nature story',
+      ),
+      WouldYouRatherQuestion(
+        optionA: 'Design a paper airplane',
+        optionB: 'Design a bookmark',
+      ),
+      WouldYouRatherQuestion(
+        optionA: 'Create a class cheer',
+        optionB: 'Create a class mural',
+      ),
+    ],
+  };
+
+  static const List<String> _categories = [
+    'Family',
+    'Travel',
+    'At Home',
+    'Food',
+    'School',
+  ];
+
+  String _selectedCategory = _categories[0];
+  int _selectedRounds = 5;
+  _GamePhase _phase = _GamePhase.setup;
+  final List<WouldYouRatherQuestion> _selectedQuestions = [];
+  final List<int> _selectedChoices = [];
+  int _gameSession = 0;
+  int _currentRound = 0;
+  int? _selectedChoiceIndex;
+
+  void _selectCategory(String category) {
+    setState(() {
+      _selectedCategory = category;
+      _selectedRounds = min(_selectedRounds, _questionBank[category]!.length);
+    });
+  }
+
+  void _setRounds(int change) {
+    final int next = _selectedRounds + change;
+    final int maxRounds = _questionBank[_selectedCategory]!.length;
+    setState(() {
+      _selectedRounds = next.clamp(3, maxRounds);
+    });
+  }
+
+  void _startGame() {
+    final List<WouldYouRatherQuestion> pool = List<WouldYouRatherQuestion>.from(
+      _questionBank[_selectedCategory]!,
+    );
+    pool.shuffle(Random());
+    setState(() {
+      _selectedQuestions
+        ..clear()
+        ..addAll(pool.take(_selectedRounds));
+      _selectedChoices.clear();
+      _gameSession += 1;
+      _currentRound = 0;
+      _selectedChoiceIndex = null;
+      _phase = _GamePhase.playing;
+    });
+  }
+
+  void _selectAnswer(int index) {
+    if (_selectedChoiceIndex == index) {
+      return;
+    }
+    setState(() {
+      _selectedChoiceIndex = index;
+    });
+  }
+
+  void _nextRound() {
+    if (_selectedChoiceIndex == null) {
+      return;
+    }
+    setState(() {
+      _selectedChoices.add(_selectedChoiceIndex!);
+      _selectedChoiceIndex = null;
+      _currentRound += 1;
+      if (_currentRound >= _selectedQuestions.length) {
+        _phase = _GamePhase.results;
+      }
+    });
+  }
+
+  void _resetToSetup() {
+    setState(() {
+      _phase = _GamePhase.setup;
+      _selectedQuestions.clear();
+      _selectedChoices.clear();
+      _currentRound = 0;
+      _selectedChoiceIndex = null;
+    });
+  }
+
+  void _playAgain() {
+    final List<WouldYouRatherQuestion> pool = List<WouldYouRatherQuestion>.from(
+      _questionBank[_selectedCategory]!,
+    );
+    pool.shuffle(Random());
+    setState(() {
+      _selectedQuestions
+        ..clear()
+        ..addAll(pool.take(_selectedRounds));
+      _selectedChoices.clear();
+      _gameSession += 1;
+      _currentRound = 0;
+      _selectedChoiceIndex = null;
+      _phase = _GamePhase.playing;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+
+    return Scaffold(
+      appBar: AppBar(title: const Text('Would You Rather')),
+      body: SafeArea(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return AnimatedSwitcher(
+              duration: const Duration(milliseconds: 200),
+              child: _phase == _GamePhase.setup
+                  ? _buildSetupView(context, colors, constraints)
+                  : _phase == _GamePhase.playing
+                  ? _buildQuestionView(context, colors, constraints)
+                  : _buildResultsView(context, colors, constraints),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSetupView(
+    BuildContext context,
+    ColorScheme colors,
+    BoxConstraints constraints,
+  ) {
+    return SingleChildScrollView(
+      key: const ValueKey(_GamePhase.setup),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          minHeight: max(0.0, constraints.maxHeight - 40),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              'Ready for a family-friendly question game?',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Choose a category and the number of rounds. Then make a choice in each round and see your results at the end.',
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 24),
+            Text(
+              'Pick a category',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const SizedBox(height: 12),
+            Wrap(
+              spacing: 10,
+              runSpacing: 10,
+              children: _categories.map((category) {
+                return ChoiceChip(
+                  label: Text(category),
+                  selected: category == _selectedCategory,
+                  selectedColor: colors.primary.withValues(alpha: 0.15),
+                  labelStyle: TextStyle(
+                    color: category == _selectedCategory
+                        ? colors.primary
+                        : colors.onSurface,
+                  ),
+                  onSelected: (_) => _selectCategory(category),
+                );
+              }).toList(),
+            ),
+            const SizedBox(height: 24),
+            Text('Rounds', style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 12),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                IconButton(
+                  onPressed: () => _setRounds(-1),
+                  tooltip: 'Decrease rounds',
+                  icon: Icon(Icons.remove, color: colors.primary),
+                ),
+                Text(
+                  '$_selectedRounds rounds',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                IconButton(
+                  onPressed: () => _setRounds(1),
+                  tooltip: 'Increase rounds',
+                  icon: Icon(Icons.add, color: colors.primary),
+                ),
+              ],
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'Use between 3 and ${_questionBank[_selectedCategory]!.length} rounds.',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: _startGame,
+              child: const Padding(
+                padding: EdgeInsets.symmetric(vertical: 16),
+                child: Text('Start Game'),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildQuestionView(
+    BuildContext context,
+    ColorScheme colors,
+    BoxConstraints constraints,
+  ) {
+    final question = _selectedQuestions[_currentRound];
+    final bool isWide = constraints.maxWidth >= 560;
+    final selected = _selectedChoiceIndex;
+    return Column(
+      key: const ValueKey(_GamePhase.playing),
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Semantics(
+                header: true,
+                liveRegion: true,
+                child: Text(
+                  'Round ${_currentRound + 1} of ${_selectedQuestions.length}',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+              ),
+              const SizedBox(height: 8),
+              LinearProgressIndicator(
+                value: (_currentRound + 1) / _selectedQuestions.length,
+                color: colors.primary,
+                backgroundColor: colors.primary.withValues(alpha: 0.2),
+                semanticsLabel: 'Game progress',
+                semanticsValue:
+                    'Round ${_currentRound + 1} of ${_selectedQuestions.length}',
+              ),
+            ],
+          ),
+        ),
+        Expanded(
+          child: ClipRect(
+            child: LayoutBuilder(
+              builder: (context, contentConstraints) {
+                return SingleChildScrollView(
+                  key: PageStorageKey('question-$_gameSession-$_currentRound'),
+                  padding: const EdgeInsets.fromLTRB(16, 24, 16, 20),
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minHeight: max(0.0, contentConstraints.maxHeight - 44),
+                    ),
+                    child: IntrinsicHeight(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Text(
+                            'Would you rather...',
+                            style: Theme.of(context).textTheme.titleLarge,
+                          ),
+                          const SizedBox(height: 16),
+                          Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(18),
+                            decoration: BoxDecoration(
+                              color: colors.surface,
+                              borderRadius: BorderRadius.circular(18),
+                              border: Border.all(
+                                color: colors.outline.withValues(alpha: 0.5),
+                              ),
+                            ),
+                            child: Text(
+                              'Choose the answer that sounds the most fun to you.',
+                              style: Theme.of(context).textTheme.bodyMedium,
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+                          Expanded(
+                            child: isWide
+                                ? Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.stretch,
+                                    children: [
+                                      _buildAnswerCard(
+                                        context,
+                                        question.optionA,
+                                        0,
+                                        selected,
+                                      ),
+                                      const SizedBox(width: 16),
+                                      _buildAnswerCard(
+                                        context,
+                                        question.optionB,
+                                        1,
+                                        selected,
+                                      ),
+                                    ],
+                                  )
+                                : Column(
+                                    children: [
+                                      _buildAnswerCard(
+                                        context,
+                                        question.optionA,
+                                        0,
+                                        selected,
+                                      ),
+                                      const SizedBox(height: 16),
+                                      _buildAnswerCard(
+                                        context,
+                                        question.optionB,
+                                        1,
+                                        selected,
+                                      ),
+                                    ],
+                                  ),
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            selected == null
+                                ? 'Tap one answer to lock it in.'
+                                : 'You selected: ${selected == 0 ? question.optionA : question.optionB}',
+                            style: Theme.of(context).textTheme.bodyMedium,
+                          ),
+                          const SizedBox(height: 12),
+                          ElevatedButton(
+                            key: ValueKey(_currentRound),
+                            onPressed: selected == null ? null : _nextRound,
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              child: Text(
+                                _currentRound + 1 >= _selectedQuestions.length
+                                    ? 'See Results'
+                                    : 'Next Round',
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildAnswerCard(
+    BuildContext context,
+    String text,
+    int index,
+    int? selectedIndex,
+  ) {
+    final colors = Theme.of(context).colorScheme;
+    final bool isSelected = selectedIndex == index;
+    return Expanded(
+      child: Semantics(
+        button: true,
+        selected: isSelected,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(18),
+          onTap: () => _selectAnswer(index),
+          child: Ink(
+            decoration: BoxDecoration(
+              color: isSelected
+                  ? colors.primary.withValues(alpha: 0.12)
+                  : colors.surface,
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(
+                color: isSelected ? colors.primary : colors.outline,
+                width: isSelected ? 2 : 1,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: colors.shadow.withValues(alpha: 0.08),
+                  blurRadius: 12,
+                  offset: const Offset(0, 8),
+                ),
+              ],
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Center(
+                child: Text(
+                  text,
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    color: isSelected ? colors.primary : colors.onSurface,
+                    fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildResultsView(
+    BuildContext context,
+    ColorScheme colors,
+    BoxConstraints constraints,
+  ) {
+    final totalRounds = _selectedQuestions.length;
+    return SingleChildScrollView(
+      key: const ValueKey(_GamePhase.results),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          minHeight: max(0.0, constraints.maxHeight - 40),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              'Great job!',
+              style: Theme.of(context).textTheme.headlineSmall,
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'You completed $totalRounds rounds in the $_selectedCategory category.',
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 20),
+            Container(
+              padding: const EdgeInsets.all(18),
+              decoration: BoxDecoration(
+                color: colors.surface,
+                borderRadius: BorderRadius.circular(18),
+                border: Border.all(
+                  color: colors.outline.withValues(alpha: 0.5),
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: List.generate(totalRounds, (index) {
+                  final answer = _selectedChoices[index];
+                  final question = _selectedQuestions[index];
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '${index + 1}.',
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            answer == 0 ? question.optionA : question.optionB,
+                            style: Theme.of(context).textTheme.bodyMedium,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }),
+              ),
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: _playAgain,
+              child: const Padding(
+                padding: EdgeInsets.symmetric(vertical: 16),
+                child: Text('Play Again'),
+              ),
+            ),
+            const SizedBox(height: 12),
+            OutlinedButton(
+              onPressed: _resetToSetup,
+              child: const Padding(
+                padding: EdgeInsets.symmetric(vertical: 16),
+                child: Text('Change Settings'),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
