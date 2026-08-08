@@ -83,7 +83,65 @@ Return ONLY valid JSON in this exact format:
     });
   }
 });
+app.post("/api/charades", async (req, res) => {
+  try {
+    const { category, count } = req.body;
 
+    if (!category) {
+      return res.status(400).json({ error: "Category is required" });
+    }
+
+    const requestedCount = Number(count) || 10;
+    const promptCount = Math.min(Math.max(requestedCount, 1), 20);
+
+    const prompt = `
+Generate exactly ${promptCount} unique Charades prompts.
+
+Category: ${category}
+
+This is for KinQuest, a family game.
+
+Rules:
+- Family friendly
+- Appropriate for children and adults
+- Easy to act out
+- No sexual content
+- No graphic violence
+- No drugs or alcohol
+- No politics
+- No hateful content
+- No duplicate prompts
+- Keep each prompt short
+- Return actions, animals, objects, people types, or situations depending on the category
+
+Return ONLY valid JSON in this exact format:
+
+{
+  "prompts": [
+    {
+      "text": "charades prompt"
+    }
+  ]
+}
+`;
+
+    const response = await ai.models.generateContent({
+      model: "gemini-3.5-flash",
+      contents: prompt,
+      config: {
+        responseMimeType: "application/json",
+      },
+    });
+
+    const result = JSON.parse(response.text);
+    res.json(result);
+  } catch (error) {
+    console.error("Charades generation error:", error);
+    res.status(500).json({
+      error: "Failed to generate charades prompts",
+    });
+  }
+});
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
