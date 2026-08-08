@@ -142,6 +142,89 @@ Return ONLY valid JSON in this exact format:
     });
   }
 });
+app.post("/api/never-have-i-ever", async (req, res) => {
+  try {
+    const { category, count } = req.body;
+
+    if (!category) {
+      return res.status(400).json({
+        error: "Category is required",
+      });
+    }
+
+    const requestedCount = Number(count) || 10;
+    const promptCount = Math.min(Math.max(requestedCount, 1), 20);
+
+    const prompt = `
+Generate exactly ${promptCount} unique Never Have I Ever statements.
+
+Category: ${category}
+
+This is for KinQuest, a family game.
+
+Rules:
+- Family friendly
+- Appropriate for children and adults
+- Fun and lighthearted
+- No sexual content
+- No graphic violence
+- No drugs or alcohol
+- No politics
+- No hateful content
+- No dangerous challenges
+- No duplicate statements
+- Keep each statement concise
+- Start each statement with "Never have I ever"
+
+Return ONLY valid JSON in this exact format:
+
+{
+  "prompts": [
+    {
+      "text": "Never have I ever..."
+    }
+  ]
+}
+`;
+
+    const response = await ai.models.generateContent({
+      model: "gemini-3.5-flash",
+      contents: prompt,
+      config: {
+  responseMimeType: "application/json",
+  responseJsonSchema: {
+    type: "object",
+    properties: {
+      prompts: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            text: {
+              type: "string",
+            },
+          },
+          required: ["text"],
+        },
+      },
+    },
+    required: ["prompts"],
+  },
+},
+    });
+
+    const result = JSON.parse(response.text);
+
+    res.json(result);
+  } catch (error) {
+    console.error("Never Have I Ever generation error:", error);
+
+    res.status(500).json({
+      error: "Failed to generate Never Have I Ever prompts",
+    });
+  }
+});
+
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {

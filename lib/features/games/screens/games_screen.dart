@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'charades_screen.dart';
+import 'never_have_i_ever_screen.dart';
 import 'would_you_rather_screen.dart';
 import 'charades_screen.dart';
 
@@ -213,6 +215,27 @@ class PartyGamesScreen extends StatelessWidget {
               },
             ),
           ),
+<<<<<<< HEAD
+          const SizedBox(height: 12),
+          Card(
+            child: ListTile(
+              leading: const Icon(Icons.sentiment_satisfied_alt),
+              title: const Text('Never Have I Ever'),
+              subtitle: const Text(
+                'Play with fun AI-generated family-friendly statements.',
+              ),
+              trailing: const Icon(Icons.arrow_forward_ios),
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => const NeverHaveIEverScreen(),
+                  ),
+                );
+              },
+            ),
+          ),
+=======
+>>>>>>> origin/main
         ],
       ),
     );
