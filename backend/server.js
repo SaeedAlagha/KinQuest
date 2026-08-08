@@ -329,6 +329,98 @@ Return ONLY valid JSON in this exact structure:
     });
   }
 });
+app.post("/api/truth-or-dare", async (req, res) => {
+  try {
+    const { category, count } = req.body;
+
+    if (!category) {
+      return res.status(400).json({
+        error: "Category is required",
+      });
+    }
+
+    const requestedCount = Number(count) || 10;
+    const promptCount = Math.min(Math.max(requestedCount, 1), 20);
+
+    const prompt = `
+Generate exactly ${promptCount} unique Truth or Dare prompts.
+
+Category: ${category}
+
+This is for KinQuest, a family game.
+
+Rules:
+- Family friendly
+- Appropriate for children and adults
+- Mix truth questions and dares
+- Fun and lighthearted
+- No sexual content
+- No graphic violence
+- No drugs or alcohol
+- No politics
+- No hateful content
+- No dangerous dares
+- No embarrassing or humiliating dares
+- No duplicate prompts
+- Keep each prompt concise
+
+Return ONLY valid JSON in this structure:
+
+{
+  "prompts": [
+    {
+      "type": "truth",
+      "text": "prompt text"
+    },
+    {
+      "type": "dare",
+      "text": "prompt text"
+    }
+  ]
+}
+`;
+
+    const response = await ai.models.generateContent({
+      model: "gemini-3.5-flash",
+      contents: prompt,
+      config: {
+        responseMimeType: "application/json",
+        responseJsonSchema: {
+          type: "object",
+          properties: {
+            prompts: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  type: {
+                    type: "string",
+                    enum: ["truth", "dare"],
+                  },
+                  text: {
+                    type: "string",
+                  },
+                },
+                required: ["type", "text"],
+              },
+            },
+          },
+          required: ["prompts"],
+        },
+      },
+    });
+
+    const result = JSON.parse(response.text);
+
+    res.json(result);
+  } catch (error) {
+    console.error("Truth or Dare generation error:", error);
+
+    res.status(500).json({
+      error: "Failed to generate Truth or Dare prompts",
+    });
+  }
+});
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {

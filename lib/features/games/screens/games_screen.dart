@@ -3,6 +3,7 @@ import 'trivia_screen.dart';
 import 'charades_screen.dart';
 import 'never_have_i_ever_screen.dart';
 import 'would_you_rather_screen.dart';
+import 'truth_or_dare_screen.dart';
 
 class GamesScreen extends StatelessWidget {
   const GamesScreen({super.key});
@@ -244,6 +245,22 @@ class PartyGamesScreen extends StatelessWidget {
                   MaterialPageRoute(
                     builder: (_) => const NeverHaveIEverScreen(),
                   ),
+                );
+              },
+            ),
+          ),
+          const SizedBox(height: 12),
+          Card(
+            child: ListTile(
+              leading: const Icon(Icons.casino),
+              title: const Text('Truth or Dare'),
+              subtitle: const Text(
+                'Play with AI-generated family-friendly truths and dares.',
+              ),
+              trailing: const Icon(Icons.arrow_forward_ios),
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const TruthOrDareScreen()),
                 );
               },
             ),
