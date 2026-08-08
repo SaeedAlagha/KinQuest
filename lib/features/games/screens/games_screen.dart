@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'would_you_rather_screen.dart';
+import 'charades_screen.dart';
 
 class GamesScreen extends StatelessWidget {
   const GamesScreen({super.key});
@@ -61,7 +62,7 @@ class GamesScreen extends StatelessWidget {
               Navigator.of(context).push(
                 MaterialPageRoute(
                   builder: (_) => game.title == 'Party Games'
-                      ? const WouldYouRatherScreen()
+                      ? const PartyGamesScreen()
                       : GamePlaceholderScreen(gameTitle: game.title),
                 ),
               );
@@ -164,6 +165,55 @@ class _GameCard extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class PartyGamesScreen extends StatelessWidget {
+  const PartyGamesScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Party Games')),
+      body: ListView(
+        padding: const EdgeInsets.all(20),
+        children: [
+          Card(
+            child: ListTile(
+              leading: const Icon(Icons.compare_arrows),
+              title: const Text('Would You Rather'),
+              subtitle: const Text(
+                'Choose between two fun AI-generated options.',
+              ),
+              trailing: const Icon(Icons.arrow_forward_ios),
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => const WouldYouRatherScreen(),
+                  ),
+                );
+              },
+            ),
+          ),
+          const SizedBox(height: 12),
+          Card(
+            child: ListTile(
+              leading: const Icon(Icons.theater_comedy),
+              title: const Text('Charades'),
+              subtitle: const Text(
+                'Act out AI-generated prompts for your family.',
+              ),
+              trailing: const Icon(Icons.arrow_forward_ios),
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const CharadesScreen()),
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
