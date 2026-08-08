@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import '../services/ai_question_service.dart';
 
 class WouldYouRatherScreen extends StatefulWidget {
   const WouldYouRatherScreen({super.key});
@@ -208,6 +209,8 @@ class _WouldYouRatherScreenState extends State<WouldYouRatherScreen> {
   int _gameSession = 0;
   int _currentRound = 0;
   int? _selectedChoiceIndex;
+  final AiQuestionService _aiQuestionService = AiQuestionService();
+  bool _isLoadingQuestions = false;
 
   void _selectCategory(String category) {
     setState(() {
@@ -224,21 +227,67 @@ class _WouldYouRatherScreenState extends State<WouldYouRatherScreen> {
     });
   }
 
-  void _startGame() {
-    final List<WouldYouRatherQuestion> pool = List<WouldYouRatherQuestion>.from(
-      _questionBank[_selectedCategory]!,
-    );
-    pool.shuffle(Random());
+  Future<void> _startGame() async {
     setState(() {
-      _selectedQuestions
-        ..clear()
-        ..addAll(pool.take(_selectedRounds));
-      _selectedChoices.clear();
-      _gameSession += 1;
-      _currentRound = 0;
-      _selectedChoiceIndex = null;
-      _phase = _GamePhase.playing;
+      _isLoadingQuestions = true;
     });
+
+    try {
+      final aiQuestions = await _aiQuestionService
+          .generateWouldYouRatherQuestions(
+            category: _selectedCategory,
+            count: _selectedRounds,
+          );
+
+      final generatedQuestions = aiQuestions
+          .map(
+            (question) => WouldYouRatherQuestion(
+              optionA: question.optionA,
+              optionB: question.optionB,
+            ),
+          )
+          .toList();
+
+      if (!mounted) return;
+
+      setState(() {
+        _selectedQuestions
+          ..clear()
+          ..addAll(generatedQuestions);
+
+        _selectedChoices.clear();
+        _gameSession += 1;
+        _currentRound = 0;
+        _selectedChoiceIndex = null;
+        _phase = _GamePhase.playing;
+        _isLoadingQuestions = false;
+      });
+    } catch (error) {
+      final fallbackQuestions = List<WouldYouRatherQuestion>.from(
+        _questionBank[_selectedCategory]!,
+      )..shuffle(Random());
+
+      if (!mounted) return;
+
+      setState(() {
+        _selectedQuestions
+          ..clear()
+          ..addAll(fallbackQuestions.take(_selectedRounds));
+
+        _selectedChoices.clear();
+        _gameSession += 1;
+        _currentRound = 0;
+        _selectedChoiceIndex = null;
+        _phase = _GamePhase.playing;
+        _isLoadingQuestions = false;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Could not reach AI. Using offline questions instead.'),
+        ),
+      );
+    }
   }
 
   void _selectAnswer(int index) {
@@ -274,21 +323,10 @@ class _WouldYouRatherScreenState extends State<WouldYouRatherScreen> {
     });
   }
 
-  void _playAgain() {
-    final List<WouldYouRatherQuestion> pool = List<WouldYouRatherQuestion>.from(
-      _questionBank[_selectedCategory]!,
-    );
-    pool.shuffle(Random());
-    setState(() {
-      _selectedQuestions
-        ..clear()
-        ..addAll(pool.take(_selectedRounds));
-      _selectedChoices.clear();
-      _gameSession += 1;
-      _currentRound = 0;
-      _selectedChoiceIndex = null;
-      _phase = _GamePhase.playing;
-    });
+  Future<void> _playAgain() async {
+    _phase = _GamePhase.setup;
+
+    await _startGame();
   }
 
   @override
@@ -391,10 +429,23 @@ class _WouldYouRatherScreenState extends State<WouldYouRatherScreen> {
             ),
             const SizedBox(height: 24),
             ElevatedButton(
-              onPressed: _startGame,
-              child: const Padding(
-                padding: EdgeInsets.symmetric(vertical: 16),
-                child: Text('Start Game'),
+              onPressed: _isLoadingQuestions ? null : _startGame,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                child: _isLoadingQuestions
+                    ? const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          ),
+                          SizedBox(width: 12),
+                          Text('Generating questions...'),
+                        ],
+                      )
+                    : const Text('Start Game'),
               ),
             ),
           ],
