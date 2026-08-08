@@ -421,6 +421,94 @@ Return ONLY valid JSON in this structure:
     });
   }
 });
+app.post("/api/emoji-guess", async (req, res) => {
+  try {
+    const { category, count } = req.body;
+
+    if (!category) {
+      return res.status(400).json({
+        error: "Category is required",
+      });
+    }
+
+    const requestedCount = Number(count) || 10;
+    const puzzleCount = Math.min(Math.max(requestedCount, 1), 20);
+
+    const prompt = `
+Generate exactly ${puzzleCount} unique Emoji Guess puzzles.
+
+Category: ${category}
+
+This is for KinQuest, a family game.
+
+Rules:
+- Family friendly
+- Appropriate for children and adults
+- Use emojis to represent the answer
+- Answers should be easy to medium difficulty
+- Keep answers concise
+- Give a short helpful hint
+- No duplicate puzzles
+- No sexual content
+- No graphic violence
+- No drugs or alcohol
+- No politics
+- No hateful content
+
+Return ONLY valid JSON in this structure:
+
+{
+  "puzzles": [
+    {
+      "emojis": "🍕🧀",
+      "answer": "Cheese Pizza",
+      "hint": "A popular food"
+    }
+  ]
+}
+`;
+
+    const response = await ai.models.generateContent({
+      model: "gemini-3.5-flash",
+      contents: prompt,
+      config: {
+        responseMimeType: "application/json",
+        responseJsonSchema: {
+          type: "object",
+          properties: {
+            puzzles: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  emojis: {
+                    type: "string",
+                  },
+                  answer: {
+                    type: "string",
+                  },
+                  hint: {
+                    type: "string",
+                  },
+                },
+                required: ["emojis", "answer", "hint"],
+              },
+            },
+          },
+          required: ["puzzles"],
+        },
+      },
+    });
+
+    const result = JSON.parse(response.text);
+    res.json(result);
+  } catch (error) {
+    console.error("Emoji Guess generation error:", error);
+    res.status(500).json({
+      error: "Failed to generate Emoji Guess puzzles",
+    });
+  }
+});
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {

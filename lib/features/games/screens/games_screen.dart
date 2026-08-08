@@ -4,6 +4,7 @@ import 'charades_screen.dart';
 import 'never_have_i_ever_screen.dart';
 import 'would_you_rather_screen.dart';
 import 'truth_or_dare_screen.dart';
+import 'emoji_guess_screen.dart';
 
 class GamesScreen extends StatelessWidget {
   const GamesScreen({super.key});
@@ -227,6 +228,22 @@ class PartyGamesScreen extends StatelessWidget {
               onTap: () {
                 Navigator.of(context).push(
                   MaterialPageRoute(builder: (_) => const CharadesScreen()),
+                );
+              },
+            ),
+          ),
+          const SizedBox(height: 12),
+          Card(
+            child: ListTile(
+              leading: const Icon(Icons.emoji_emotions),
+              title: const Text('Emoji Guess'),
+              subtitle: const Text(
+                'Guess AI-generated answers from emoji clues.',
+              ),
+              trailing: const Icon(Icons.arrow_forward_ios),
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const EmojiGuessScreen()),
                 );
               },
             ),
