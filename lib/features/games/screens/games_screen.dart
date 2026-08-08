@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-
+import 'trivia_screen.dart';
 import 'charades_screen.dart';
 import 'never_have_i_ever_screen.dart';
 import 'would_you_rather_screen.dart';
-import 'charades_screen.dart';
 
 class GamesScreen extends StatelessWidget {
   const GamesScreen({super.key});
@@ -182,6 +181,22 @@ class PartyGamesScreen extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.all(20),
         children: [
+          const SizedBox(height: 12),
+          Card(
+            child: ListTile(
+              leading: const Icon(Icons.quiz),
+              title: const Text('Trivia'),
+              subtitle: const Text(
+                'Answer AI-generated questions and test your knowledge.',
+              ),
+              trailing: const Icon(Icons.arrow_forward_ios),
+              onTap: () {
+                Navigator.of(
+                  context,
+                ).push(MaterialPageRoute(builder: (_) => const TriviaScreen()));
+              },
+            ),
+          ),
           Card(
             child: ListTile(
               leading: const Icon(Icons.compare_arrows),
@@ -215,7 +230,6 @@ class PartyGamesScreen extends StatelessWidget {
               },
             ),
           ),
-<<<<<<< HEAD
           const SizedBox(height: 12),
           Card(
             child: ListTile(
@@ -234,8 +248,6 @@ class PartyGamesScreen extends StatelessWidget {
               },
             ),
           ),
-=======
->>>>>>> origin/main
         ],
       ),
     );

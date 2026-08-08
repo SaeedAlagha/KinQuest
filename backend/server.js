@@ -224,7 +224,111 @@ Return ONLY valid JSON in this exact format:
     });
   }
 });
+app.post("/api/trivia", async (req, res) => {
+  try {
+    const { category, count } = req.body;
 
+    if (!category) {
+      return res.status(400).json({
+        error: "Category is required",
+      });
+    }
+
+    const requestedCount = Number(count) || 10;
+    const questionCount = Math.min(Math.max(requestedCount, 1), 15);
+
+    const prompt = `
+Generate exactly ${questionCount} unique multiple-choice trivia questions.
+
+Category: ${category}
+
+This is for KinQuest, a family game.
+
+Rules:
+- Family friendly
+- Appropriate for children and adults
+- Medium difficulty
+- Each question must have exactly 4 answer options
+- Only one answer can be correct
+- No politics
+- No sexual content
+- No graphic violence
+- No hateful content
+- No duplicate questions
+- Keep questions and answers concise
+
+Return ONLY valid JSON in this exact structure:
+
+{
+  "questions": [
+    {
+      "question": "question text",
+      "options": [
+        "answer 1",
+        "answer 2",
+        "answer 3",
+        "answer 4"
+      ],
+      "correctIndex": 0
+    }
+  ]
+}
+`;
+
+    const response = await ai.models.generateContent({
+      model: "gemini-3.5-flash",
+      contents: prompt,
+      config: {
+        responseMimeType: "application/json",
+        responseJsonSchema: {
+          type: "object",
+          properties: {
+            questions: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  question: {
+                    type: "string",
+                  },
+                  options: {
+                    type: "array",
+                    minItems: 4,
+                    maxItems: 4,
+                    items: {
+                      type: "string",
+                    },
+                  },
+                  correctIndex: {
+                    type: "integer",
+                    minimum: 0,
+                    maximum: 3,
+                  },
+                },
+                required: [
+                  "question",
+                  "options",
+                  "correctIndex",
+                ],
+              },
+            },
+          },
+          required: ["questions"],
+        },
+      },
+    });
+
+    const result = JSON.parse(response.text);
+
+    res.json(result);
+  } catch (error) {
+    console.error("Trivia generation error:", error);
+
+    res.status(500).json({
+      error: "Failed to generate trivia questions",
+    });
+  }
+});
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
