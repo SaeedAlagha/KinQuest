@@ -509,6 +509,138 @@ Return ONLY valid JSON in this structure:
     });
   }
 });
+app.post("/api/family-quiz", async (req, res) => {
+  try {
+const { category, count, familyMembers } = req.body;
+    if (!category) {
+      return res.status(400).json({
+        error: "Category is required",
+      });
+    }
+if (!Array.isArray(familyMembers) || familyMembers.length < 2) {
+  return res.status(400).json({
+    error: "At least 2 family members are required",
+  });
+}
+    const requestedCount = Number(count) || 10;
+    const questionCount = Math.min(Math.max(requestedCount, 1), 20);
+let categoryInstructions = "";
+
+if (category === "Family Fun") {
+  categoryInstructions =
+    "Generate general fun questions about the family and their personalities.";
+} else if (category === "Favorites") {
+  categoryInstructions =
+    "Generate questions only about favorite foods, movies, hobbies, places, activities, colors, or other preferences.";
+} else if (category === "Habits") {
+  categoryInstructions =
+    "Generate questions only about routines and habits, such as sleeping, waking up, cleaning, phone use, studying, eating, getting ready, or daily behavior. Avoid 'who is most likely to' questions.";
+} else if (category === "Memories") {
+  categoryInstructions =
+    "Generate questions only about shared family memories, trips, celebrations, funny moments, traditions, and past experiences.";
+} else if (category === "Most Likely To") {
+  categoryInstructions =
+    "Generate only 'Who is most likely to...' style questions.";
+}
+const prompt = `
+Generate exactly ${questionCount} unique Family Quiz questions.
+
+Category: ${category}
+Category instructions:
+${categoryInstructions}
+Family members:
+${familyMembers.join(", ")}
+
+This is for KinQuest, a family bonding game.
+
+Rules:
+- Every question must be about the listed family members
+- Use the real family member names provided above
+- Questions should be about habits, preferences, personality, funny situations, memories, or who is most likely to do something
+- Do NOT generate general knowledge questions
+- Do NOT invent extra family members
+- Family friendly
+- Appropriate for children and adults
+- Exactly 4 answer options per question
+- Every answer option must be one of the provided family member names
+- Only one answer must be marked as correct
+- Keep questions fun and lighthearted
+- No sexual content
+- No drugs or alcohol
+- No politics
+- No hateful content
+- No dangerous or humiliating content
+- No duplicate questions
+
+Return ONLY valid JSON in this structure:
+
+{
+  "questions": [
+    {
+      "question": "Who is most likely to wake up earliest?",
+      "options": [
+        "${familyMembers[0]}",
+        "${familyMembers[1]}",
+        "${familyMembers[2] ?? familyMembers[0]}",
+        "${familyMembers[3] ?? familyMembers[1]}"
+      ],
+      "correctIndex": 0
+    }
+  ]
+}
+`;
+    const response = await ai.models.generateContent({
+      model: "gemini-3.5-flash",
+      contents: prompt,
+      config: {
+        responseMimeType: "application/json",
+        responseJsonSchema: {
+          type: "object",
+          properties: {
+            questions: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  question: {
+                    type: "string",
+                  },
+                  options: {
+                    type: "array",
+                    minItems: 4,
+                    maxItems: 4,
+                    items: {
+                      type: "string",
+                    },
+                  },
+                  correctIndex: {
+                    type: "integer",
+                    minimum: 0,
+                    maximum: 3,
+                  },
+                },
+                required: [
+                  "question",
+                  "options",
+                  "correctIndex",
+                ],
+              },
+            },
+          },
+          required: ["questions"],
+        },
+      },
+    });
+
+    const result = JSON.parse(response.text);
+    res.json(result);
+  } catch (error) {
+    console.error("Family Quiz generation error:", error);
+    res.status(500).json({
+      error: "Failed to generate Family Quiz questions",
+    });
+  }
+});
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
