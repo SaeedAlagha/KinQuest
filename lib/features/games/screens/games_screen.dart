@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'charades_screen.dart';
 import 'never_have_i_ever_screen.dart';
 import 'would_you_rather_screen.dart';
+import 'charades_screen.dart';
 
 class GamesScreen extends StatelessWidget {
   const GamesScreen({super.key});
@@ -214,6 +215,7 @@ class PartyGamesScreen extends StatelessWidget {
               },
             ),
           ),
+<<<<<<< HEAD
           const SizedBox(height: 12),
           Card(
             child: ListTile(
@@ -232,6 +234,8 @@ class PartyGamesScreen extends StatelessWidget {
               },
             ),
           ),
+=======
+>>>>>>> origin/main
         ],
       ),
     );
