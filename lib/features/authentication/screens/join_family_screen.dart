@@ -16,93 +16,86 @@ class _JoinFamilyScreenState extends State<JoinFamilyScreen> {
   final _codeController = TextEditingController();
 
   @override
-void dispose() {
-  _codeController.dispose();
-  super.dispose();
-}
-
-void _joinFamily() {
-  FocusScope.of(context).unfocus();
-
-  final isValid = _formKey.currentState?.validate() ?? false;
-
-  if (!isValid) {
-    return;
+  void dispose() {
+    _codeController.dispose();
+    super.dispose();
   }
 
-  final invitationCode = _codeController.text.trim().toUpperCase();
+  void _joinFamily() {
+    FocusScope.of(context).unfocus();
 
-  Navigator.pushAndRemoveUntil(
-  context,
-  MaterialPageRoute(
-    builder: (context) => const MainNavigationScreen(),
-  ),
-  (route) => false,
-  );
-}
+    final isValid = _formKey.currentState?.validate() ?? false;
+
+    if (!isValid) {
+      return;
+    }
+
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (context) => const MainNavigationScreen()),
+      (route) => false,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Join Family'),
-      ),
+      appBar: AppBar(title: const Text('Join Family')),
       body: SafeArea(
-  child: SingleChildScrollView(
-    padding: const EdgeInsets.all(24),
-    child: Form(
-      key: _formKey,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const SizedBox(height: 20),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 20),
 
-          Text(
-            'Join your family',
-            style: Theme.of(context).textTheme.headlineMedium,
-          ),
+                Text(
+                  'Join your family',
+                  style: Theme.of(context).textTheme.headlineMedium,
+                ),
 
-          const SizedBox(height: 8),
+                const SizedBox(height: 8),
 
-          Text(
-            'Enter the six-character invitation code shared by your family.',
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
+                Text(
+                  'Enter the six-character invitation code shared by your family.',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
 
-          const SizedBox(height: 36),
+                const SizedBox(height: 36),
 
-          TextFormField(
-            controller: _codeController,
-            textCapitalization: TextCapitalization.characters,
-            textInputAction: TextInputAction.done,
-            maxLength: 6,
-            validator: FormValidators.validateInvitationCode,
-            onFieldSubmitted: (_) => _joinFamily(),
-            inputFormatters: [
-              FilteringTextInputFormatter.allow(
-                RegExp(r'[A-Za-z0-9]'),
-              ),
-            ],
-            decoration: const InputDecoration(
-              labelText: 'Invitation code',
-              hintText: 'A7K9Q2',
-              prefixIcon: Icon(Icons.key_outlined),
-              counterText: '',
-            ),
-          ),
-
-          const SizedBox(height: 24),
-
-          SizedBox(
-            width: double.infinity,
-            child: FilledButton.icon(
-              onPressed: _joinFamily,
-              icon: const Icon(Icons.group_add_outlined),
-              label: const Text('Join Family'),
+                TextFormField(
+                  controller: _codeController,
+                  textCapitalization: TextCapitalization.characters,
+                  textInputAction: TextInputAction.done,
+                  maxLength: 6,
+                  validator: FormValidators.validateInvitationCode,
+                  onFieldSubmitted: (_) => _joinFamily(),
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(RegExp(r'[A-Za-z0-9]')),
+                  ],
+                  decoration: const InputDecoration(
+                    labelText: 'Invitation code',
+                    hintText: 'A7K9Q2',
+                    prefixIcon: Icon(Icons.key_outlined),
+                    counterText: '',
                   ),
-               ),
+                ),
+
+                const SizedBox(height: 24),
+
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton.icon(
+                    onPressed: _joinFamily,
+                    icon: const Icon(Icons.group_add_outlined),
+                    label: const Text('Join Family'),
+                  ),
+                ),
               ],
             ),
-         ),
+          ),
         ),
       ),
     );

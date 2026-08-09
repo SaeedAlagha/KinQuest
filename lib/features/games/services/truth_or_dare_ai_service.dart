@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
+import 'package:kinquest/core/config/api_config.dart';
 
 class TruthOrDarePrompt {
   final String type;
@@ -17,15 +18,13 @@ class TruthOrDarePrompt {
 }
 
 class TruthOrDareAiService {
-  static const String _baseUrl = 'http://10.0.2.2:3000';
-
   Future<List<TruthOrDarePrompt>> generatePrompts({
     required String category,
     required int count,
   }) async {
     final response = await http
         .post(
-          Uri.parse('$_baseUrl/api/truth-or-dare'),
+          ApiConfig.endpoint('/api/truth-or-dare'),
           headers: {'Content-Type': 'application/json'},
           body: jsonEncode({'category': category, 'count': count}),
         )

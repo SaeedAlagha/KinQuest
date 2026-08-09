@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
+import 'package:kinquest/core/config/api_config.dart';
 
 class TriviaQuestion {
   final String question;
@@ -23,15 +24,13 @@ class TriviaQuestion {
 }
 
 class TriviaAiService {
-  static const String _baseUrl = 'http://10.0.2.2:3000';
-
   Future<List<TriviaQuestion>> generateQuestions({
     required String category,
     required int count,
   }) async {
     final response = await http
         .post(
-          Uri.parse('$_baseUrl/api/trivia'),
+          ApiConfig.endpoint('/api/trivia'),
           headers: {'Content-Type': 'application/json'},
           body: jsonEncode({'category': category, 'count': count}),
         )
