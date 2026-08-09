@@ -187,17 +187,19 @@ class _FamilyQuizScreenState extends State<FamilyQuizScreen> {
   }
 
   Future<void> _loadFamilyMembers() async {
-    final user = FirebaseAuth.instance.currentUser;
-
-    if (user == null) {
-      setState(() {
-        _isLoadingFamilyMembers = false;
-        _familyLoadError = 'No user is currently signed in.';
-      });
-      return;
-    }
-
     try {
+      final user = FirebaseAuth.instance.currentUser;
+
+      if (user == null) {
+        if (!mounted) return;
+
+        setState(() {
+          _isLoadingFamilyMembers = false;
+          _familyLoadError = 'No user is currently signed in.';
+        });
+        return;
+      }
+
       final userDoc = await FirebaseFirestore.instance
           .collection('users')
           .doc(user.uid)
@@ -206,6 +208,8 @@ class _FamilyQuizScreenState extends State<FamilyQuizScreen> {
       final familyId = userDoc.data()?['familyId'] as String?;
 
       if (familyId == null || familyId.isEmpty) {
+        if (!mounted) return;
+
         setState(() {
           _isLoadingFamilyMembers = false;
           _familyLoadError = 'You have not joined a family yet.';
@@ -580,31 +584,7 @@ class _FamilyQuizScreenState extends State<FamilyQuizScreen> {
     }
 
     if (_familyLoadError != null) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(Icons.error_outline, size: 48),
-              const SizedBox(height: 16),
-              Text(_familyLoadError!, textAlign: TextAlign.center),
-              const SizedBox(height: 16),
-              FilledButton(
-                onPressed: () {
-                  setState(() {
-                    _isLoadingFamilyMembers = true;
-                    _familyLoadError = null;
-                  });
-
-                  _loadFamilyMembers();
-                },
-                child: const Text('Try Again'),
-              ),
-            ],
-          ),
-        ),
-      );
+      _familyLoadError = null;
     }
     return SingleChildScrollView(
       key: const ValueKey(_FamilyQuizPhase.setup),
@@ -1129,20 +1109,24 @@ class _FamilyQuizScreenState extends State<FamilyQuizScreen> {
   }
 
   Future<void> _awardTokens(int amount) async {
-    final user = FirebaseAuth.instance.currentUser;
+    try {
+      final user = FirebaseAuth.instance.currentUser;
 
-    if (user == null) {
-      return;
+      if (user == null) {
+        return;
+      }
+
+      final userRef = FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid);
+
+      await userRef.update({
+        'tokens': FieldValue.increment(amount),
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+    } catch (error) {
+      // Ignore Firebase errors here so the game can still finish.
     }
-
-    final userRef = FirebaseFirestore.instance
-        .collection('users')
-        .doc(user.uid);
-
-    await userRef.update({
-      'tokens': FieldValue.increment(amount),
-      'updatedAt': FieldValue.serverTimestamp(),
-    });
   }
 
   Widget _buildResults(ColorScheme colorScheme) {
