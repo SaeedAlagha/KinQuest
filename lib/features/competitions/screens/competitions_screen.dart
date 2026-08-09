@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
+import '../../games/screens/games_screen.dart';
 
 class CompetitionsScreen extends StatelessWidget {
   const CompetitionsScreen({super.key});
@@ -61,6 +65,13 @@ class CompetitionsScreen extends StatelessWidget {
               child: _CompetitionCard(
                 competition: competition,
                 onTap: () {
+                  if (competition.title == 'Friendly Match') {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(builder: (_) => const GamesScreen()),
+                    );
+                    return;
+                  }
+
                   Navigator.of(context).push(
                     MaterialPageRoute(
                       builder: (_) => CompetitionPlaceholderScreen(
@@ -73,12 +84,7 @@ class CompetitionsScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 8),
-          const _SectionPlaceholder(
-            icon: Icons.leaderboard,
-            title: 'Leaderboard',
-            description:
-                'Family rankings and competition scores will appear here.',
-          ),
+          const _FamilyLeaderboard(),
           const SizedBox(height: 16),
           const _SectionPlaceholder(
             icon: Icons.military_tech,
@@ -174,6 +180,117 @@ class _CompetitionCard extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _FamilyLeaderboard extends StatelessWidget {
+  const _FamilyLeaderboard();
+
+  @override
+  Widget build(BuildContext context) {
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user == null) {
+      return const _SectionPlaceholder(
+        icon: Icons.leaderboard,
+        title: 'Leaderboard',
+        description: 'Sign in to view your family leaderboard.',
+      );
+    }
+
+    return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+      stream: FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .snapshots(),
+      builder: (context, userSnapshot) {
+        if (userSnapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        final familyId = userSnapshot.data?.data()?['familyId'] as String?;
+
+        if (familyId == null || familyId.isEmpty) {
+          return const _SectionPlaceholder(
+            icon: Icons.leaderboard,
+            title: 'Leaderboard',
+            description: 'Join or create a family to view the leaderboard.',
+          );
+        }
+
+        return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+          stream: FirebaseFirestore.instance
+              .collection('users')
+              .where('familyId', isEqualTo: familyId)
+              .snapshots(),
+          builder: (context, membersSnapshot) {
+            if (membersSnapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
+
+            if (membersSnapshot.hasError) {
+              return const _SectionPlaceholder(
+                icon: Icons.leaderboard,
+                title: 'Leaderboard',
+                description: 'Could not load the family leaderboard.',
+              );
+            }
+
+            final members = membersSnapshot.data?.docs.toList() ?? [];
+
+            members.sort((a, b) {
+              final aTokens = a.data()['tokens'] as num? ?? 0;
+              final bTokens = b.data()['tokens'] as num? ?? 0;
+
+              return bTokens.compareTo(aTokens);
+            });
+
+            if (members.isEmpty) {
+              return const _SectionPlaceholder(
+                icon: Icons.leaderboard,
+                title: 'Leaderboard',
+                description: 'No family members found.',
+              );
+            }
+
+            return Card(
+              margin: EdgeInsets.zero,
+              child: Padding(
+                padding: const EdgeInsets.all(18),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Family Leaderboard',
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    ...List.generate(members.length, (index) {
+                      final data = members[index].data();
+                      final name = data['name'] as String? ?? 'Family Member';
+                      final tokens = data['tokens'] as num? ?? 0;
+
+                      return ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        leading: CircleAvatar(child: Text('${index + 1}')),
+                        title: Text(name),
+                        trailing: Text(
+                          '$tokens tokens',
+                          style: Theme.of(context).textTheme.labelLarge
+                              ?.copyWith(fontWeight: FontWeight.bold),
+                        ),
+                      );
+                    }),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
     );
   }
 }
