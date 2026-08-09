@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 import '../../../core/validation/form_validators.dart';
 import 'signup_screen.dart';
@@ -18,6 +19,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _passwordController = TextEditingController();
 
   bool _hidePassword = true;
+  bool _isLoggingIn = false;
 
   @override
   void dispose() {
@@ -26,12 +28,26 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  void _login() {
-    FocusScope.of(context).unfocus();
+Future<void> _login() async {
+  FocusScope.of(context).unfocus();
 
-    final isValid = _formKey.currentState?.validate() ?? false;
+  final isValid = _formKey.currentState?.validate() ?? false;
 
-    if (!isValid) {
+  if (!isValid) {
+    return;
+  }
+
+  setState(() {
+    _isLoggingIn = true;
+  });
+
+  try {
+    await FirebaseAuth.instance.signInWithEmailAndPassword(
+      email: _emailController.text.trim(),
+      password: _passwordController.text,
+    );
+
+    if (!mounted) {
       return;
     }
 
@@ -39,10 +55,56 @@ class _LoginScreenState extends State<LoginScreen> {
       context,
       MaterialPageRoute(
         builder: (context) => const MainNavigationScreen(),
-    ),
-    (route) => false,
-  );
+      ),
+      (route) => false,
+    );
+  } on FirebaseAuthException catch (error) {
+    if (!mounted) {
+      return;
+    }
+
+    String message;
+
+    switch (error.code) {
+      case 'invalid-credential':
+        message = 'Incorrect email or password.';
+        break;
+
+      case 'user-disabled':
+        message = 'This account has been disabled.';
+        break;
+
+      case 'invalid-email':
+        message = 'Please enter a valid email address.';
+        break;
+
+      case 'too-many-requests':
+        message = 'Too many attempts. Please try again later.';
+        break;
+
+      case 'network-request-failed':
+        message = 'No internet connection. Please try again.';
+        break;
+
+      default:
+        message = 'Could not log in. Please try again.';
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+      ),
+    );
+  } finally {
+    if (mounted) {
+      setState(() {
+        _isLoggingIn = false;
+      });
+    }
   }
+}
+
+
 
   void _openSignup() {
     Navigator.pushReplacement(
@@ -145,8 +207,10 @@ class _LoginScreenState extends State<LoginScreen> {
                 SizedBox(
                   width: double.infinity,
                   child: FilledButton(
-                    onPressed: _login,
-                    child: const Text('Log In'),
+                    onPressed: _isLoggingIn ? null : _login,
+                    child: Text(
+                      _isLoggingIn ? 'Logging In...' : 'Log In',
+                    ),
                   ),
                 ),
 
