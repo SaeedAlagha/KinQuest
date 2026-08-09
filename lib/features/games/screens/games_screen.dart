@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'family_quiz_screen.dart';
 import 'trivia_screen.dart';
 import 'charades_screen.dart';
-import 'family_quiz_screen.dart';
 import 'never_have_i_ever_screen.dart';
 import 'would_you_rather_screen.dart';
 import 'truth_or_dare_screen.dart';

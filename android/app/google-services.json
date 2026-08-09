@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "292633186914",
+    "project_id": "kinquest-af379",
+    "storage_bucket": "kinquest-af379.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:292633186914:android:6134d1e467a2b75bdf373b",
+        "android_client_info": {
+          "package_name": "com.example.kinquest"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCpQUyv3dG_4j2NITGesdymHRfsuPNjyMQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
