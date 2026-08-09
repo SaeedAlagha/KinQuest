@@ -1,7 +1,8 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../services/family_quiz_ai_service.dart';
 
 enum _FamilyQuizPhase {
@@ -175,6 +176,87 @@ class _FamilyQuizScreenState extends State<FamilyQuizScreen> {
   final TextEditingController _memberController = TextEditingController();
 
   final List<String> _familyMembers = [];
+
+  bool _isLoadingFamilyMembers = true;
+  String? _familyLoadError;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadFamilyMembers();
+  }
+
+  Future<void> _loadFamilyMembers() async {
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user == null) {
+      setState(() {
+        _isLoadingFamilyMembers = false;
+        _familyLoadError = 'No user is currently signed in.';
+      });
+      return;
+    }
+
+    try {
+      final userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
+
+      final familyId = userDoc.data()?['familyId'] as String?;
+
+      if (familyId == null || familyId.isEmpty) {
+        setState(() {
+          _isLoadingFamilyMembers = false;
+          _familyLoadError = 'You have not joined a family yet.';
+        });
+        return;
+      }
+
+      final familyDoc = await FirebaseFirestore.instance
+          .collection('families')
+          .doc(familyId)
+          .get();
+
+      final memberIds = List<String>.from(
+        familyDoc.data()?['members'] ?? const [],
+      );
+
+      final names = <String>[];
+
+      for (final memberId in memberIds) {
+        final memberDoc = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(memberId)
+            .get();
+
+        final name = memberDoc.data()?['name'] as String?;
+
+        if (name != null && name.trim().isNotEmpty) {
+          names.add(name.trim());
+        }
+      }
+
+      if (!mounted) return;
+
+      setState(() {
+        _familyMembers
+          ..clear()
+          ..addAll(names.take(_maximumFamilyMembers));
+
+        _isLoadingFamilyMembers = false;
+        _familyLoadError = null;
+      });
+    } catch (error) {
+      if (!mounted) return;
+
+      setState(() {
+        _isLoadingFamilyMembers = false;
+        _familyLoadError = 'Could not load family members.';
+      });
+    }
+  }
+
   final List<_VoteRoundSummary> _voteSummaries = [];
 
   _FamilyQuizPhase _phase = _FamilyQuizPhase.setup;
@@ -489,6 +571,37 @@ class _FamilyQuizScreenState extends State<FamilyQuizScreen> {
   }
 
   Widget _buildSetup(ColorScheme colorScheme) {
+    if (_isLoadingFamilyMembers) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (_familyLoadError != null) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.error_outline, size: 48),
+              const SizedBox(height: 16),
+              Text(_familyLoadError!, textAlign: TextAlign.center),
+              const SizedBox(height: 16),
+              FilledButton(
+                onPressed: () {
+                  setState(() {
+                    _isLoadingFamilyMembers = true;
+                    _familyLoadError = null;
+                  });
+
+                  _loadFamilyMembers();
+                },
+                child: const Text('Try Again'),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
     return SingleChildScrollView(
       key: const ValueKey(_FamilyQuizPhase.setup),
       padding: const EdgeInsets.all(24),
