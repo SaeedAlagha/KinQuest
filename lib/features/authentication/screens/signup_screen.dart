@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 import '../../../core/validation/form_validators.dart';
 import 'login_screen.dart';
@@ -23,6 +24,7 @@ class _SignupScreenState extends State<SignupScreen> {
   bool _hidePassword = true;
   bool _hideConfirmPassword = true;
   bool _acceptedTerms = false;
+  bool _isCreatingAccount = false;
 
   DateTime? _selectedBirthDate;
 
@@ -75,33 +77,99 @@ class _SignupScreenState extends State<SignupScreen> {
     return null;
   }
 
-  void _createAccount() {
-    FocusScope.of(context).unfocus();
+  Future<void> _createAccount() async {
+  FocusScope.of(context).unfocus();
 
-    final isValid = _formKey.currentState?.validate() ?? false;
+  final isValid = _formKey.currentState?.validate() ?? false;
 
-    if (!isValid) {
-      return;
-    }
+  if (!isValid) {
+    return;
+  }
 
-    if (!_acceptedTerms) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'You must accept the Terms of Service and Privacy Policy.',
-          ),
+  if (!_acceptedTerms) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text(
+          'You must accept the Terms of Service and Privacy Policy.',
         ),
-      );
+      ),
+    );
+    return;
+  }
+
+  setState(() {
+    _isCreatingAccount = true;
+  });
+
+  try {
+    await FirebaseAuth.instance.createUserWithEmailAndPassword(
+      email: _emailController.text.trim(),
+      password: _passwordController.text,
+    );
+
+    if (!mounted) {
       return;
     }
 
     Navigator.pushReplacement(
-    context,
-    MaterialPageRoute(
-    builder: (context) => const FamilyChoiceScreen(),
-   ),
-  );
+      context,
+      MaterialPageRoute(
+        builder: (context) => const FamilyChoiceScreen(),
+      ),
+    );
+  } on FirebaseAuthException catch (error) {
+    if (!mounted) {
+      return;
+    }
+
+    String message;
+
+    switch (error.code) {
+      case 'email-already-in-use':
+        message = 'An account already exists with this email.';
+        break;
+
+      case 'invalid-email':
+        message = 'Please enter a valid email address.';
+        break;
+
+      case 'weak-password':
+        message = 'Your password is too weak.';
+        break;
+
+      case 'network-request-failed':
+        message = 'No internet connection. Please try again.';
+        break;
+
+      default:
+        message = 'Could not create your account. Please try again.';
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+      ),
+    );
+  } catch (_) {
+    if (!mounted) {
+      return;
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text(
+          'Something went wrong. Please try again.',
+        ),
+      ),
+    );
+  } finally {
+    if (mounted) {
+      setState(() {
+        _isCreatingAccount = false;
+      });
+    }
   }
+}
 
   void _openLogin() {
     Navigator.pushReplacement(
@@ -262,9 +330,11 @@ class _SignupScreenState extends State<SignupScreen> {
                 SizedBox(
                   width: double.infinity,
                   child: FilledButton(
-                    onPressed: _createAccount,
-                    child: const Text('Create Account'),
-                  ),
+                      onPressed: _isCreatingAccount ? null : _createAccount,
+                      child: Text(
+                        _isCreatingAccount ? 'Creating Account...' : 'Create Account',
+                      ),
+                    ),
                 ),
 
                 const SizedBox(height: 22),
