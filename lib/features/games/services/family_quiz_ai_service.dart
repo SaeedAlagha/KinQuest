@@ -6,19 +6,13 @@ import 'package:kinquest/core/config/api_config.dart';
 class FamilyQuizQuestion {
   final String question;
   final List<String> options;
-  final int correctIndex;
 
-  const FamilyQuizQuestion({
-    required this.question,
-    required this.options,
-    required this.correctIndex,
-  });
+  const FamilyQuizQuestion({required this.question, required this.options});
 
   factory FamilyQuizQuestion.fromJson(Map<String, dynamic> json) {
     return FamilyQuizQuestion(
       question: json['question'] as String,
       options: List<String>.from(json['options'] as List<dynamic>),
-      correctIndex: json['correctIndex'] as int,
     );
   }
 }

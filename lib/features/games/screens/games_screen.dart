@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'trivia_screen.dart';
 import 'charades_screen.dart';
+import 'family_quiz_screen.dart';
 import 'never_have_i_ever_screen.dart';
 import 'would_you_rather_screen.dart';
 import 'truth_or_dare_screen.dart';
@@ -64,9 +65,11 @@ class GamesScreen extends StatelessWidget {
             onPlay: () {
               Navigator.of(context).push(
                 MaterialPageRoute(
-                  builder: (_) => game.title == 'Party Games'
-                      ? const PartyGamesScreen()
-                      : GamePlaceholderScreen(gameTitle: game.title),
+                  builder: (_) => switch (game.title) {
+                    'Family Quiz' => const FamilyQuizScreen(),
+                    'Party Games' => const PartyGamesScreen(),
+                    _ => GamePlaceholderScreen(gameTitle: game.title),
+                  },
                 ),
               );
             },
