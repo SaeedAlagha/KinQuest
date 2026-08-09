@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../memories/screens/add_memory_screen.dart';
+import '../../games/screens/games_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -130,7 +132,14 @@ class HomeScreen extends StatelessWidget {
               icon: Icons.add_photo_alternate_outlined,
               title: 'Add a Memory',
               subtitle: 'Upload family photos and videos.',
-              onTap: () {},
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const AddMemoryScreen(),
+                  ),
+                );
+              },
             ),
 
             const SizedBox(height: 12),
@@ -139,7 +148,12 @@ class HomeScreen extends StatelessWidget {
               icon: Icons.sports_esports_outlined,
               title: 'Challenge a Family Member',
               subtitle: 'Start a friendly family match.',
-              onTap: () {},
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const GamesScreen()),
+                );
+              },
             ),
           ],
         ),
