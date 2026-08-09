@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../core/validation/form_validators.dart';
 import 'login_screen.dart';
 import 'family_choice_screen.dart';
@@ -78,114 +78,121 @@ class _SignupScreenState extends State<SignupScreen> {
   }
 
   Future<void> _createAccount() async {
-  FocusScope.of(context).unfocus();
+    FocusScope.of(context).unfocus();
 
-  final isValid = _formKey.currentState?.validate() ?? false;
+    final isValid = _formKey.currentState?.validate() ?? false;
 
-  if (!isValid) {
-    return;
-  }
+    if (!isValid) {
+      return;
+    }
 
-  if (!_acceptedTerms) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text(
-          'You must accept the Terms of Service and Privacy Policy.',
+    if (!_acceptedTerms) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'You must accept the Terms of Service and Privacy Policy.',
+          ),
         ),
-      ),
-    );
-    return;
-  }
-
-  setState(() {
-    _isCreatingAccount = true;
-  });
-
-  try {
-    await FirebaseAuth.instance.createUserWithEmailAndPassword(
-      email: _emailController.text.trim(),
-      password: _passwordController.text,
-    );
-
-    if (!mounted) {
+      );
       return;
     }
 
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const FamilyChoiceScreen(),
-      ),
-    );
-  } on FirebaseAuthException catch (error) {
-    if (!mounted) {
-      return;
-    }
+    setState(() {
+      _isCreatingAccount = true;
+    });
 
-    String message;
+    try {
+      final credential = await FirebaseAuth.instance
+          .createUserWithEmailAndPassword(
+            email: _emailController.text.trim(),
+            password: _passwordController.text,
+          );
 
-    switch (error.code) {
-      case 'email-already-in-use':
-        message = 'An account already exists with this email.';
-        break;
+      final user = credential.user;
 
-      case 'invalid-email':
-        message = 'Please enter a valid email address.';
-        break;
+      if (user == null) {
+        throw Exception('User account was not created.');
+      }
 
-      case 'weak-password':
-        message = 'Your password is too weak.';
-        break;
-
-      case 'network-request-failed':
-        message = 'No internet connection. Please try again.';
-        break;
-
-      default:
-        message = 'Could not create your account. Please try again.';
-    }
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-      ),
-    );
-  } catch (_) {
-    if (!mounted) {
-      return;
-    }
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text(
-          'Something went wrong. Please try again.',
-        ),
-      ),
-    );
-  } finally {
-    if (mounted) {
-      setState(() {
-        _isCreatingAccount = false;
+      await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+        'name': _nameController.text.trim(),
+        'email': _emailController.text.trim(),
+        'birthDate': Timestamp.fromDate(_selectedBirthDate!),
+        'familyId': null,
+        'tokens': 0,
+        'createdAt': FieldValue.serverTimestamp(),
+        'updatedAt': FieldValue.serverTimestamp(),
       });
+
+      if (!mounted) {
+        return;
+      }
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const FamilyChoiceScreen()),
+      );
+    } on FirebaseAuthException catch (error) {
+      if (!mounted) {
+        return;
+      }
+
+      String message;
+
+      switch (error.code) {
+        case 'email-already-in-use':
+          message = 'An account already exists with this email.';
+          break;
+
+        case 'invalid-email':
+          message = 'Please enter a valid email address.';
+          break;
+
+        case 'weak-password':
+          message = 'Your password is too weak.';
+          break;
+
+        case 'network-request-failed':
+          message = 'No internet connection. Please try again.';
+          break;
+
+        default:
+          message = 'Could not create your account. Please try again.';
+      }
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(message)));
+    } catch (_) {
+      if (!mounted) {
+        return;
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Something went wrong. Please try again.'),
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isCreatingAccount = false;
+        });
+      }
     }
   }
-}
 
   void _openLogin() {
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(
-        builder: (context) => const LoginScreen(),
-      ),
+      MaterialPageRoute(builder: (context) => const LoginScreen()),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Create Account'),
-      ),
+      appBar: AppBar(title: const Text('Create Account')),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
@@ -296,8 +303,7 @@ class _SignupScreenState extends State<SignupScreen> {
                     suffixIcon: IconButton(
                       onPressed: () {
                         setState(() {
-                          _hideConfirmPassword =
-                              !_hideConfirmPassword;
+                          _hideConfirmPassword = !_hideConfirmPassword;
                         });
                       },
                       icon: Icon(
@@ -330,11 +336,13 @@ class _SignupScreenState extends State<SignupScreen> {
                 SizedBox(
                   width: double.infinity,
                   child: FilledButton(
-                      onPressed: _isCreatingAccount ? null : _createAccount,
-                      child: Text(
-                        _isCreatingAccount ? 'Creating Account...' : 'Create Account',
-                      ),
+                    onPressed: _isCreatingAccount ? null : _createAccount,
+                    child: Text(
+                      _isCreatingAccount
+                          ? 'Creating Account...'
+                          : 'Create Account',
                     ),
+                  ),
                 ),
 
                 const SizedBox(height: 22),

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -8,10 +10,7 @@ class ProfileScreen extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Profile'),
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: const Text('Profile'), centerTitle: true),
       body: ListView(
         padding: const EdgeInsets.all(20),
         children: [
@@ -47,58 +46,92 @@ class ProfileScreen extends StatelessWidget {
 }
 
 class _ProfileHeader extends StatelessWidget {
-  const _ProfileHeader({
-    required this.colorScheme,
-  });
+  const _ProfileHeader({required this.colorScheme});
 
   final ColorScheme colorScheme;
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: EdgeInsets.zero,
-      elevation: 1,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(24),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(22),
-        child: Column(
-          children: [
-            CircleAvatar(
-              radius: 44,
-              backgroundColor: colorScheme.primaryContainer,
-              child: Icon(
-                Icons.person,
-                size: 48,
-                color: colorScheme.onPrimaryContainer,
-              ),
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user == null) {
+      return const Card(
+        child: Padding(
+          padding: EdgeInsets.all(20),
+          child: Text('No user is currently signed in.'),
+        ),
+      );
+    }
+
+    return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+      stream: FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Card(
+            child: Padding(
+              padding: EdgeInsets.all(24),
+              child: Center(child: CircularProgressIndicator()),
             ),
-            const SizedBox(height: 14),
-            Text(
-              'Demo User',
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+          );
+        }
+
+        final data = snapshot.data?.data();
+
+        final name = data?['name'] as String? ?? 'KinQuest User';
+        final email = data?['email'] as String? ?? user.email ?? '';
+        final familyId = data?['familyId'] as String?;
+
+        return Card(
+          margin: EdgeInsets.zero,
+          elevation: 1,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(22),
+            child: Column(
+              children: [
+                CircleAvatar(
+                  radius: 44,
+                  backgroundColor: colorScheme.primaryContainer,
+                  child: Icon(
+                    Icons.person,
+                    size: 48,
+                    color: colorScheme.onPrimaryContainer,
+                  ),
+                ),
+                const SizedBox(height: 14),
+                Text(
+                  name,
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              'Family Member',
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  email,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  familyId == null
+                      ? 'No family joined yet'
+                      : 'Family: $familyId',
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                     color: colorScheme.primary,
                     fontWeight: FontWeight.w600,
                   ),
+                ),
+              ],
             ),
-            const SizedBox(height: 4),
-            Text(
-              'Demo Family',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: colorScheme.onSurfaceVariant,
-                  ),
-            ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 }
@@ -114,21 +147,13 @@ class _StatisticsGrid extends StatelessWidget {
         label: 'Games Played',
         value: '0',
       ),
-      _StatisticItem(
-        icon: Icons.emoji_events,
-        label: 'Wins',
-        value: '0',
-      ),
+      _StatisticItem(icon: Icons.emoji_events, label: 'Wins', value: '0'),
       _StatisticItem(
         icon: Icons.local_fire_department,
         label: 'Current Streak',
         value: '0 days',
       ),
-      _StatisticItem(
-        icon: Icons.stars,
-        label: 'Achievements',
-        value: '0',
-      ),
+      _StatisticItem(icon: Icons.stars, label: 'Achievements', value: '0'),
     ];
 
     return GridView.builder(
@@ -151,9 +176,7 @@ class _StatisticsGrid extends StatelessWidget {
 }
 
 class _StatisticCard extends StatelessWidget {
-  const _StatisticCard({
-    required this.statistic,
-  });
+  const _StatisticCard({required this.statistic});
 
   final _StatisticItem statistic;
 
@@ -170,17 +193,13 @@ class _StatisticCard extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            statistic.icon,
-            color: colorScheme.primary,
-            size: 30,
-          ),
+          Icon(statistic.icon, color: colorScheme.primary, size: 30),
           const SizedBox(height: 10),
           Text(
             statistic.value,
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 4),
           Text(
@@ -199,24 +218,59 @@ class _RewardsSummary extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Row(
-      children: [
-        Expanded(
-          child: _RewardCard(
-            icon: Icons.monetization_on,
-            value: '0',
-            label: 'Family Tokens',
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user == null) {
+      return const Row(
+        children: [
+          Expanded(
+            child: _RewardCard(
+              icon: Icons.monetization_on,
+              value: '0',
+              label: 'Family Tokens',
+            ),
           ),
-        ),
-        SizedBox(width: 12),
-        Expanded(
-          child: _RewardCard(
-            icon: Icons.auto_awesome,
-            value: '0',
-            label: 'Family Wishes',
+          SizedBox(width: 12),
+          Expanded(
+            child: _RewardCard(
+              icon: Icons.auto_awesome,
+              value: '0',
+              label: 'Family Wishes',
+            ),
           ),
-        ),
-      ],
+        ],
+      );
+    }
+
+    return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+      stream: FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .snapshots(),
+      builder: (context, snapshot) {
+        final data = snapshot.data?.data();
+        final tokens = data?['tokens'] ?? 0;
+
+        return Row(
+          children: [
+            Expanded(
+              child: _RewardCard(
+                icon: Icons.monetization_on,
+                value: tokens.toString(),
+                label: 'Family Tokens',
+              ),
+            ),
+            const SizedBox(width: 12),
+            const Expanded(
+              child: _RewardCard(
+                icon: Icons.auto_awesome,
+                value: '0',
+                label: 'Family Wishes',
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }
@@ -239,24 +293,18 @@ class _RewardCard extends StatelessWidget {
     return Card(
       margin: EdgeInsets.zero,
       elevation: 1,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: Padding(
         padding: const EdgeInsets.all(18),
         child: Column(
           children: [
-            Icon(
-              icon,
-              color: colorScheme.primary,
-              size: 32,
-            ),
+            Icon(icon, color: colorScheme.primary, size: 32),
             const SizedBox(height: 10),
             Text(
               value,
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 4),
             Text(
@@ -314,9 +362,7 @@ class _AchievementsSection extends StatelessWidget {
 }
 
 class _AchievementCard extends StatelessWidget {
-  const _AchievementCard({
-    required this.achievement,
-  });
+  const _AchievementCard({required this.achievement});
 
   final _AchievementItem achievement;
 
@@ -327,9 +373,7 @@ class _AchievementCard extends StatelessWidget {
     return Card(
       margin: EdgeInsets.zero,
       elevation: 1,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: Padding(
         padding: const EdgeInsets.all(18),
         child: Row(
@@ -350,8 +394,8 @@ class _AchievementCard extends StatelessWidget {
                   Text(
                     achievement.title,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const SizedBox(height: 4),
                   Text(
@@ -359,9 +403,7 @@ class _AchievementCard extends StatelessWidget {
                     style: Theme.of(context).textTheme.bodyMedium,
                   ),
                   const SizedBox(height: 12),
-                  LinearProgressIndicator(
-                    value: achievement.progress,
-                  ),
+                  LinearProgressIndicator(value: achievement.progress),
                   const SizedBox(height: 6),
                   Text(
                     achievement.progressText,
@@ -414,17 +456,13 @@ class _EmptyStateCard extends StatelessWidget {
       ),
       child: Column(
         children: [
-          Icon(
-            icon,
-            size: 44,
-            color: colorScheme.primary,
-          ),
+          Icon(icon, size: 44, color: colorScheme.primary),
           const SizedBox(height: 12),
           Text(
             title,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 6),
           Text(
@@ -453,17 +491,13 @@ class _TrophyCabinetPlaceholder extends StatelessWidget {
       ),
       child: Column(
         children: [
-          Icon(
-            Icons.emoji_events,
-            size: 48,
-            color: colorScheme.primary,
-          ),
+          Icon(Icons.emoji_events, size: 48, color: colorScheme.primary),
           const SizedBox(height: 12),
           Text(
             'No trophies yet',
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 6),
           Text(
@@ -485,9 +519,7 @@ class _SettingsSection extends StatelessWidget {
     return Card(
       margin: EdgeInsets.zero,
       elevation: 1,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: const Column(
         children: [
           ListTile(
@@ -514,9 +546,7 @@ class _SettingsSection extends StatelessWidget {
 }
 
 class _SectionTitle extends StatelessWidget {
-  const _SectionTitle({
-    required this.title,
-  });
+  const _SectionTitle({required this.title});
 
   final String title;
 
@@ -524,9 +554,9 @@ class _SectionTitle extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       title,
-      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+      style: Theme.of(
+        context,
+      ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
     );
   }
 }
