@@ -162,7 +162,13 @@ class _CompetitionCard extends StatelessWidget {
                     ),
                   ),
                 ),
-                FilledButton(onPressed: onTap, child: const Text('View')),
+                SizedBox(
+                  width: 90,
+                  child: FilledButton(
+                    onPressed: onTap,
+                    child: const Text('View'),
+                  ),
+                ),
               ],
             ),
           ],
