@@ -425,6 +425,8 @@ class _FamilyQuizScreenState extends State<FamilyQuizScreen> {
 
   void _advancePrivateRound() {
     if (_currentQuestionIndex == _questions.length - 1) {
+      _awardTokens(5);
+
       setState(() {
         _phase = _FamilyQuizPhase.results;
       });
@@ -472,6 +474,8 @@ class _FamilyQuizScreenState extends State<FamilyQuizScreen> {
 
   void _advanceVotingRound() {
     if (_currentQuestionIndex == _questions.length - 1) {
+      _awardTokens(5);
+
       setState(() {
         _phase = _FamilyQuizPhase.results;
       });
@@ -1122,6 +1126,23 @@ class _FamilyQuizScreenState extends State<FamilyQuizScreen> {
         ),
       ],
     );
+  }
+
+  Future<void> _awardTokens(int amount) async {
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user == null) {
+      return;
+    }
+
+    final userRef = FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid);
+
+    await userRef.update({
+      'tokens': FieldValue.increment(amount),
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
   }
 
   Widget _buildResults(ColorScheme colorScheme) {
