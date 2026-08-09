@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 import '../../../core/validation/form_validators.dart';
 import '../../home/screens/main_navigation_screen.dart';
@@ -14,6 +16,7 @@ class JoinFamilyScreen extends StatefulWidget {
 class _JoinFamilyScreenState extends State<JoinFamilyScreen> {
   final _formKey = GlobalKey<FormState>();
   final _codeController = TextEditingController();
+  bool _isJoiningFamily = false;
 
   @override
   void dispose() {
@@ -21,21 +24,87 @@ class _JoinFamilyScreenState extends State<JoinFamilyScreen> {
     super.dispose();
   }
 
-  void _joinFamily() {
-    FocusScope.of(context).unfocus();
+  Future<void> _joinFamily() async {
+  FocusScope.of(context).unfocus();
 
-    final isValid = _formKey.currentState?.validate() ?? false;
+  final isValid = _formKey.currentState?.validate() ?? false;
 
-    if (!isValid) {
+  if (!isValid) {
+    return;
+  }
+
+  final user = FirebaseAuth.instance.currentUser;
+
+  if (user == null) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('You must be logged in to join a family.'),
+      ),
+    );
+    return;
+  }
+
+  setState(() {
+    _isJoiningFamily = true;
+  });
+
+  try {
+    final code = _codeController.text.trim().toUpperCase();
+
+    final familyReference =
+        FirebaseFirestore.instance.collection('families').doc(code);
+
+    final familySnapshot = await familyReference.get();
+
+    if (!familySnapshot.exists) {
+      if (!mounted) {
+        return;
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Invitation code not found.'),
+        ),
+      );
+
+      return;
+    }
+
+    await familyReference.update({
+      'members': FieldValue.arrayUnion([user.uid]),
+    });
+
+    if (!mounted) {
       return;
     }
 
     Navigator.pushAndRemoveUntil(
       context,
-      MaterialPageRoute(builder: (context) => const MainNavigationScreen()),
+      MaterialPageRoute(
+        builder: (context) => const MainNavigationScreen(),
+      ),
       (route) => false,
     );
+  } on FirebaseException {
+    if (!mounted) {
+      return;
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text(
+          'Could not join the family. Please try again.',
+        ),
+      ),
+    );
+  } finally {
+    if (mounted) {
+      setState(() {
+        _isJoiningFamily = false;
+      });
+    }
   }
+}
 
   @override
   Widget build(BuildContext context) {
@@ -88,9 +157,11 @@ class _JoinFamilyScreenState extends State<JoinFamilyScreen> {
                 SizedBox(
                   width: double.infinity,
                   child: FilledButton.icon(
-                    onPressed: _joinFamily,
+                    onPressed: _isJoiningFamily ? null : _joinFamily,
                     icon: const Icon(Icons.group_add_outlined),
-                    label: const Text('Join Family'),
+                    label: Text(
+                      _isJoiningFamily ? 'Joining Family...' : 'Join Family',
+                    ),
                   ),
                 ),
               ],
