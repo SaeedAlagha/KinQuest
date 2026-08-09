@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../core/validation/form_validators.dart';
 
 class AddMemoryScreen extends StatefulWidget {
@@ -63,7 +64,7 @@ class _AddMemoryScreenState extends State<AddMemoryScreen> {
     return null;
   }
 
-  void _saveMemory() {
+  Future<void> _saveMemory() async {
     FocusScope.of(context).unfocus();
 
     final isValid = _formKey.currentState?.validate() ?? false;
@@ -72,21 +73,71 @@ class _AddMemoryScreenState extends State<AddMemoryScreen> {
       return;
     }
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text(
-          'Memory information is valid. Database saving will be added later.',
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('You must be signed in to save a memory.'),
         ),
-      ),
-    );
+      );
+      return;
+    }
+
+    try {
+      final userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
+
+      final familyId = userDoc.data()?['familyId'] as String?;
+
+      if (familyId == null || familyId.isEmpty) {
+        if (!mounted) return;
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Join or create a family before adding memories.'),
+          ),
+        );
+        return;
+      }
+
+      await FirebaseFirestore.instance
+          .collection('families')
+          .doc(familyId)
+          .collection('memories')
+          .add({
+            'title': _titleController.text.trim(),
+            'description': _descriptionController.text.trim(),
+            'date': Timestamp.fromDate(_selectedDate!),
+            'location': _locationController.text.trim(),
+            'createdBy': user.uid,
+            'createdAt': FieldValue.serverTimestamp(),
+          });
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Memory saved successfully.')),
+      );
+
+      Navigator.pop(context);
+    } catch (error) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Could not save the memory. Please try again.'),
+        ),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Add Memory'),
-      ),
+      appBar: AppBar(title: const Text('Add Memory')),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
@@ -126,10 +177,7 @@ class _AddMemoryScreenState extends State<AddMemoryScreen> {
                     child: const Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(
-                          Icons.add_photo_alternate_outlined,
-                          size: 52,
-                        ),
+                        Icon(Icons.add_photo_alternate_outlined, size: 52),
                         SizedBox(height: 10),
                         Text('Add Photos or Videos'),
                       ],
