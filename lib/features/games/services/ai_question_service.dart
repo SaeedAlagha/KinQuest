@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
+import 'package:kinquest/core/config/api_config.dart';
 
 class AiQuestion {
   final String optionA;
@@ -17,15 +18,13 @@ class AiQuestion {
 }
 
 class AiQuestionService {
-  static const String _baseUrl = 'http://10.0.2.2:3000';
-
   Future<List<AiQuestion>> generateWouldYouRatherQuestions({
     required String category,
     required int count,
   }) async {
     final response = await http
         .post(
-          Uri.parse('$_baseUrl/api/would-you-rather'),
+          ApiConfig.endpoint('/api/would-you-rather'),
           headers: {'Content-Type': 'application/json'},
           body: jsonEncode({'category': category, 'count': count}),
         )
