@@ -18,6 +18,8 @@ class FamilyQuizQuestion {
 }
 
 class FamilyQuizAiService {
+  const FamilyQuizAiService();
+
   Future<List<FamilyQuizQuestion>> generateQuestions({
     required String category,
     required int count,

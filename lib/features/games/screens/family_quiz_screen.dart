@@ -25,7 +25,12 @@ class _VoteRoundSummary {
 }
 
 class FamilyQuizScreen extends StatefulWidget {
-  const FamilyQuizScreen({super.key});
+  const FamilyQuizScreen({
+    super.key,
+    this.aiService = const FamilyQuizAiService(),
+  });
+
+  final FamilyQuizAiService aiService;
 
   @override
   State<FamilyQuizScreen> createState() => _FamilyQuizScreenState();
@@ -167,7 +172,6 @@ class _FamilyQuizScreenState extends State<FamilyQuizScreen> {
     ],
   };
 
-  final FamilyQuizAiService _aiService = FamilyQuizAiService();
   final TextEditingController _memberController = TextEditingController();
 
   final List<String> _familyMembers = [];
@@ -267,7 +271,7 @@ class _FamilyQuizScreenState extends State<FamilyQuizScreen> {
     });
 
     try {
-      final generated = await _aiService.generateQuestions(
+      final generated = await widget.aiService.generateQuestions(
         category: _selectedCategory,
         count: _selectedRounds,
         familyMembers: _familyMembers,
