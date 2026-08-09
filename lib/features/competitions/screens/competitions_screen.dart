@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../games/screens/games_screen.dart';
 
 class CompetitionsScreen extends StatelessWidget {
   const CompetitionsScreen({super.key});
@@ -61,6 +62,13 @@ class CompetitionsScreen extends StatelessWidget {
               child: _CompetitionCard(
                 competition: competition,
                 onTap: () {
+                  if (competition.title == 'Friendly Match') {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(builder: (_) => const GamesScreen()),
+                    );
+                    return;
+                  }
+
                   Navigator.of(context).push(
                     MaterialPageRoute(
                       builder: (_) => CompetitionPlaceholderScreen(
