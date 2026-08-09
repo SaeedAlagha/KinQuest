@@ -84,6 +84,14 @@ class _CreateFamilyScreenState extends State<CreateFamilyScreen> {
       'members': [user.uid],
       'createdAt': FieldValue.serverTimestamp(),
     });
+    await FirebaseFirestore.instance
+    .collection('users')
+    .doc(user.uid)
+    .set({
+  'familyId': invitationCode,
+  'email': user.email,
+  'updatedAt': FieldValue.serverTimestamp(),
+  }, SetOptions(merge: true));
 
     if (!mounted) {
       return;

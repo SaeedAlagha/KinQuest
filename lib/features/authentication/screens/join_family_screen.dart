@@ -73,6 +73,14 @@ class _JoinFamilyScreenState extends State<JoinFamilyScreen> {
     await familyReference.update({
       'members': FieldValue.arrayUnion([user.uid]),
     });
+    await FirebaseFirestore.instance
+    .collection('users')
+    .doc(user.uid)
+    .set({
+  'familyId': code,
+  'email': user.email,
+  'updatedAt': FieldValue.serverTimestamp(),
+}, SetOptions(merge: true));
 
     if (!mounted) {
       return;
