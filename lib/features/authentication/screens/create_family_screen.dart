@@ -1,6 +1,8 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 import '../../../core/validation/form_validators.dart';
 import '../../home/screens/main_navigation_screen.dart';
@@ -19,6 +21,7 @@ class _CreateFamilyScreenState extends State<CreateFamilyScreen> {
   final _descriptionController = TextEditingController();
 
   String? _invitationCode;
+  bool _isCreatingFamily = false;
 
   @override
   void dispose() {
@@ -37,17 +40,65 @@ class _CreateFamilyScreenState extends State<CreateFamilyScreen> {
     ).join();
   }
 
-  void _createFamily() {
-    FocusScope.of(context).unfocus();
+  Future<void> _createFamily() async {
+  FocusScope.of(context).unfocus();
 
-    final isValid = _formKey.currentState?.validate() ?? false;
+  final isValid = _formKey.currentState?.validate() ?? false;
 
-    if (!isValid) {
+  if (!isValid) {
+    return;
+  }
+
+  final user = FirebaseAuth.instance.currentUser;
+
+  if (user == null) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('You must be logged in to create a family.'),
+      ),
+    );
+    return;
+  }
+
+  setState(() {
+    _isCreatingFamily = true;
+  });
+
+  try {
+    String invitationCode;
+    DocumentReference<Map<String, dynamic>> familyReference;
+
+    do {
+      invitationCode = _generateInvitationCode();
+
+      familyReference = FirebaseFirestore.instance
+          .collection('families')
+          .doc(invitationCode);
+    } while ((await familyReference.get()).exists);
+
+    await familyReference.set({
+      'name': _familyNameController.text.trim(),
+      'description': _descriptionController.text.trim(),
+      'invitationCode': invitationCode,
+      'ownerId': user.uid,
+      'members': [user.uid],
+      'createdAt': FieldValue.serverTimestamp(),
+    });
+    await FirebaseFirestore.instance
+    .collection('users')
+    .doc(user.uid)
+    .set({
+  'familyId': invitationCode,
+  'email': user.email,
+  'updatedAt': FieldValue.serverTimestamp(),
+  }, SetOptions(merge: true));
+
+    if (!mounted) {
       return;
     }
 
     setState(() {
-      _invitationCode = _generateInvitationCode();
+      _invitationCode = invitationCode;
     });
 
     ScaffoldMessenger.of(context).showSnackBar(
@@ -55,7 +106,26 @@ class _CreateFamilyScreenState extends State<CreateFamilyScreen> {
         content: Text('Family created successfully.'),
       ),
     );
+  } on FirebaseException catch (_) {
+    if (!mounted) {
+      return;
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text(
+          'Could not create the family. Please try again.',
+        ),
+      ),
+    );
+  } finally {
+    if (mounted) {
+      setState(() {
+        _isCreatingFamily = false;
+      });
+    }
   }
+}
 
   @override
   Widget build(BuildContext context) {
@@ -151,8 +221,10 @@ class _CreateFamilyScreenState extends State<CreateFamilyScreen> {
                 SizedBox(
                   width: double.infinity,
                   child: FilledButton(
-                    onPressed: _createFamily,
-                    child: const Text('Create Family'),
+                    onPressed: _isCreatingFamily ? null : _createFamily,
+                    child: Text(
+                      _isCreatingFamily ? 'Creating Family...' : 'Create Family',
+                    ),
                   ),
                 ),
 
