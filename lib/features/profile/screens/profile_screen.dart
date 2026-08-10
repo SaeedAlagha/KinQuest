@@ -155,28 +155,30 @@ class _StatisticsGrid extends StatelessWidget {
       builder: (context, snapshot) {
         final data = snapshot.data?.data();
         final gamesPlayed = data?['gamesPlayed'] ?? 0;
-
+final wins = data?['wins'] ?? 0;
+final currentStreak = data?['currentStreak'] ?? 0;
+final achievementsCompleted = wins >= 20 ? 1 : 0;
         final statistics = [
           _StatisticItem(
             icon: Icons.sports_esports,
             label: 'Games Played',
             value: gamesPlayed.toString(),
           ),
-          const _StatisticItem(
-            icon: Icons.emoji_events,
-            label: 'Wins',
-            value: '0',
-          ),
-          const _StatisticItem(
-            icon: Icons.local_fire_department,
-            label: 'Current Streak',
-            value: '0 days',
-          ),
-          const _StatisticItem(
-            icon: Icons.stars,
-            label: 'Achievements',
-            value: '0',
-          ),
+         _StatisticItem(
+  icon: Icons.emoji_events,
+  label: 'Wins',
+  value: wins.toString(),
+),
+          _StatisticItem(
+  icon: Icons.local_fire_department,
+  label: 'Current Streak',
+  value: '$currentStreak ${currentStreak == 1 ? 'day' : 'days'}',
+),
+          _StatisticItem(
+  icon: Icons.stars,
+  label: 'Achievements',
+  value: achievementsCompleted.toString(),
+),
         ];
 
         return GridView.builder(
@@ -347,39 +349,58 @@ class _AchievementsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const achievements = [
-      _AchievementItem(
-        icon: Icons.photo_library,
-        title: 'Memory Keeper',
-        description: 'Save 100 family memories.',
-        progress: 0,
-        progressText: '0 / 100',
-      ),
-      _AchievementItem(
-        icon: Icons.quiz,
-        title: 'Quiz Master',
-        description: 'Win 20 Family Quizzes.',
-        progress: 0,
-        progressText: '0 / 20',
-      ),
-      _AchievementItem(
-        icon: Icons.groups,
-        title: 'Team Player',
-        description: 'Complete 30 Family Missions.',
-        progress: 0,
-        progressText: '0 / 30',
-      ),
-    ];
+    final user = FirebaseAuth.instance.currentUser;
 
-    return Column(
-      children: achievements
-          .map(
-            (achievement) => Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: _AchievementCard(achievement: achievement),
-            ),
-          )
-          .toList(),
+    if (user == null) {
+      return const SizedBox.shrink();
+    }
+
+    return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+      stream: FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .snapshots(),
+      builder: (context, snapshot) {
+        final data = snapshot.data?.data();
+        final wins = data?['wins'] ?? 0;
+
+        final quizProgress = (wins / 20).clamp(0.0, 1.0);
+
+        final achievements = [
+          const _AchievementItem(
+            icon: Icons.photo_library,
+            title: 'Memory Keeper',
+            description: 'Save 100 family memories.',
+            progress: 0,
+            progressText: '0 / 100',
+          ),
+          _AchievementItem(
+            icon: Icons.quiz,
+            title: 'Quiz Master',
+            description: 'Win 20 Family Quizzes.',
+            progress: quizProgress,
+            progressText: '$wins / 20',
+          ),
+          const _AchievementItem(
+            icon: Icons.groups,
+            title: 'Team Player',
+            description: 'Complete 30 Family Missions.',
+            progress: 0,
+            progressText: '0 / 30',
+          ),
+        ];
+
+        return Column(
+          children: achievements
+              .map(
+                (achievement) => Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: _AchievementCard(achievement: achievement),
+                ),
+              )
+              .toList(),
+        );
+      },
     );
   }
 }
