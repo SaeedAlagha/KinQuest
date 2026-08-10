@@ -5,7 +5,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../games/screens/games_screen.dart';
 
 class CompetitionsScreen extends StatelessWidget {
-  const CompetitionsScreen({super.key});
+  const CompetitionsScreen({super.key, this.developerPreview = false});
+
+  final bool developerPreview;
 
   static const List<_CompetitionItem> _competitions = [
     _CompetitionItem(
@@ -67,7 +69,10 @@ class CompetitionsScreen extends StatelessWidget {
                 onTap: () {
                   if (competition.title == 'Friendly Match') {
                     Navigator.of(context).push(
-                      MaterialPageRoute(builder: (_) => const GamesScreen()),
+                      MaterialPageRoute(
+                        builder: (_) =>
+                            GamesScreen(developerPreview: developerPreview),
+                      ),
                     );
                     return;
                   }
@@ -84,7 +89,7 @@ class CompetitionsScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 8),
-          const _FamilyLeaderboard(),
+          _FamilyLeaderboard(developerPreview: developerPreview),
           const SizedBox(height: 16),
           const _SectionPlaceholder(
             icon: Icons.military_tech,
@@ -185,10 +190,16 @@ class _CompetitionCard extends StatelessWidget {
 }
 
 class _FamilyLeaderboard extends StatelessWidget {
-  const _FamilyLeaderboard();
+  const _FamilyLeaderboard({required this.developerPreview});
+
+  final bool developerPreview;
 
   @override
   Widget build(BuildContext context) {
+    if (developerPreview) {
+      return const _DeveloperFamilyLeaderboard();
+    }
+
     final user = FirebaseAuth.instance.currentUser;
 
     if (user == null) {
@@ -291,6 +302,55 @@ class _FamilyLeaderboard extends StatelessWidget {
           },
         );
       },
+    );
+  }
+}
+
+class _DeveloperFamilyLeaderboard extends StatelessWidget {
+  const _DeveloperFamilyLeaderboard();
+
+  static const _members = [
+    ('Amal', 480),
+    ('Omar', 415),
+    ('Mariam', 360),
+    ('Zayed', 290),
+    ('Noor', 245),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: EdgeInsets.zero,
+      child: Padding(
+        padding: const EdgeInsets.all(18),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Developer Family Leaderboard',
+              style: Theme.of(
+                context,
+              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 12),
+            ...List.generate(_members.length, (index) {
+              final member = _members[index];
+
+              return ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: CircleAvatar(child: Text('${index + 1}')),
+                title: Text(member.$1),
+                trailing: Text(
+                  '${member.$2} tokens',
+                  style: Theme.of(
+                    context,
+                  ).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.bold),
+                ),
+              );
+            }),
+          ],
+        ),
+      ),
     );
   }
 }

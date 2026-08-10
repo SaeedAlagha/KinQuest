@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "com.example" "\0"
-            VALUE "FileDescription", "kinquest" "\0"
+            VALUE "FileDescription", "Sila" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
             VALUE "InternalName", "kinquest" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2026 com.example. All rights reserved." "\0"
             VALUE "OriginalFilename", "kinquest.exe" "\0"
-            VALUE "ProductName", "kinquest" "\0"
+            VALUE "ProductName", "Sila" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

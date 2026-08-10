@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/branding/app_brand.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/family_year_banner.dart';
+import '../../../core/widgets/sila_brand_mark.dart';
 import 'login_screen.dart';
 import 'signup_screen.dart';
 
@@ -103,30 +106,74 @@ class _WelcomeHero extends StatelessWidget {
           ? CrossAxisAlignment.start
           : CrossAxisAlignment.center,
       children: [
-        const _BrandMark(),
-        SizedBox(height: isWide ? 30 : 22),
-        Text(
-          'KinQuest',
-          textAlign: isWide ? TextAlign.start : TextAlign.center,
-          style: textTheme.displaySmall?.copyWith(
-            fontSize: isWide ? 58 : 46,
-            letterSpacing: -1.8,
+        Align(
+          alignment: isWide ? Alignment.centerLeft : Alignment.center,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 380),
+            child: FamilyYearBanner(compact: !isWide),
           ),
+        ),
+        SizedBox(height: isWide ? 26 : 22),
+        const SilaBrandMark(),
+        SizedBox(height: isWide ? 30 : 22),
+        Wrap(
+          alignment: isWide ? WrapAlignment.start : WrapAlignment.center,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          spacing: 14,
+          runSpacing: 8,
+          children: [
+            Text(
+              AppBrand.name,
+              style: textTheme.displaySmall?.copyWith(
+                fontSize: isWide ? 62 : 50,
+                letterSpacing: -1.8,
+                color: AppTheme.primaryDark,
+              ),
+            ),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+              decoration: BoxDecoration(
+                color: AppTheme.uaeRed.withValues(alpha: 0.075),
+                borderRadius: BorderRadius.circular(99),
+                border: Border.all(
+                  color: AppTheme.uaeRed.withValues(alpha: 0.18),
+                ),
+              ),
+              child: Text(
+                AppBrand.arabicName,
+                textDirection: TextDirection.rtl,
+                style: textTheme.titleLarge?.copyWith(
+                  color: AppTheme.primaryDark,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          ],
         ),
         const SizedBox(height: 14),
         Text(
-          'Play Together. Learn Together. Grow Together.',
+          AppBrand.tagline,
           textAlign: isWide ? TextAlign.start : TextAlign.center,
           style: textTheme.headlineSmall?.copyWith(
-            color: AppTheme.primaryDark,
+            color: AppTheme.primaryColor,
             height: 1.35,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          AppBrand.arabicTagline,
+          textAlign: isWide ? TextAlign.start : TextAlign.center,
+          textDirection: TextDirection.rtl,
+          style: textTheme.titleMedium?.copyWith(
+            color: AppTheme.tealColor,
+            fontWeight: FontWeight.w700,
           ),
         ),
         const SizedBox(height: 16),
         ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 620),
           child: Text(
-            'Turn everyday family time into stories, laughter, and friendly challenges made for everyone.',
+            'A private family space for shared stories, playful challenges, and the moments that keep everyone connected.',
             textAlign: isWide ? TextAlign.start : TextAlign.center,
             style: textTheme.bodyLarge?.copyWith(
               color: AppTheme.secondaryTextColor,
@@ -141,12 +188,19 @@ class _WelcomeHero extends StatelessWidget {
           runSpacing: 10,
           children: const [
             _WelcomePill(
-              icon: Icons.groups_2_outlined,
-              label: 'Made for every generation',
+              icon: Icons.park_outlined,
+              label: 'Roots • الجذور',
+              accent: AppTheme.uaeBlack,
             ),
             _WelcomePill(
-              icon: Icons.auto_awesome_outlined,
-              label: 'Fresh activities with AI',
+              icon: Icons.join_inner_rounded,
+              label: 'Bonds • الروابط',
+              accent: AppTheme.uaeRed,
+            ),
+            _WelcomePill(
+              icon: Icons.eco_outlined,
+              label: 'Growth • النمو',
+              accent: AppTheme.uaeGreen,
             ),
           ],
         ),
@@ -155,42 +209,16 @@ class _WelcomeHero extends StatelessWidget {
   }
 }
 
-class _BrandMark extends StatelessWidget {
-  const _BrandMark();
-
-  @override
-  Widget build(BuildContext context) {
-    return Semantics(
-      label: 'KinQuest family logo',
-      child: Container(
-        width: 112,
-        height: 112,
-        decoration: BoxDecoration(
-          gradient: AppTheme.brandGradient,
-          borderRadius: BorderRadius.circular(34),
-          boxShadow: [
-            BoxShadow(
-              color: AppTheme.primaryColor.withValues(alpha: 0.24),
-              blurRadius: 30,
-              offset: const Offset(0, 14),
-            ),
-          ],
-        ),
-        child: const Icon(
-          Icons.family_restroom_rounded,
-          size: 58,
-          color: Colors.white,
-        ),
-      ),
-    );
-  }
-}
-
 class _WelcomePill extends StatelessWidget {
-  const _WelcomePill({required this.icon, required this.label});
+  const _WelcomePill({
+    required this.icon,
+    required this.label,
+    required this.accent,
+  });
 
   final IconData icon;
   final String label;
+  final Color accent;
 
   @override
   Widget build(BuildContext context) {
@@ -199,12 +227,12 @@ class _WelcomePill extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppTheme.surfaceColor.withValues(alpha: 0.86),
         borderRadius: BorderRadius.circular(99),
-        border: Border.all(color: AppTheme.outlineColor),
+        border: Border.all(color: accent.withValues(alpha: 0.18)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 18, color: AppTheme.primaryColor),
+          Icon(icon, size: 18, color: accent),
           const SizedBox(width: 8),
           Text(
             label,
@@ -246,26 +274,31 @@ class _WelcomeActions extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          const UaeColorRibbon(height: 5),
+          const SizedBox(height: 20),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
             decoration: BoxDecoration(
-              color: AppTheme.goldColor.withValues(alpha: 0.18),
+              color: AppTheme.uaeGreen.withValues(alpha: 0.09),
               borderRadius: BorderRadius.circular(99),
             ),
             child: Text(
-              'YOUR FAMILY ADVENTURE',
+              'UAE YEAR OF FAMILY 2026',
               style: textTheme.labelSmall?.copyWith(
-                color: const Color(0xFF9A5A00),
+                color: AppTheme.primaryColor,
                 fontWeight: FontWeight.w800,
                 letterSpacing: 0.8,
               ),
             ),
           ),
           const SizedBox(height: 18),
-          Text('Bring everyone closer', style: textTheme.headlineSmall),
+          Text(
+            'Every bond helps a family grow',
+            style: textTheme.headlineSmall,
+          ),
           const SizedBox(height: 10),
           Text(
-            'Sign in to continue your family journey, or create a space for your family in minutes.',
+            'Sila turns everyday moments into stronger roots, closer bonds, and shared growth.',
             style: textTheme.bodyLarge?.copyWith(
               color: AppTheme.secondaryTextColor,
             ),
@@ -299,7 +332,7 @@ class _WelcomeActions extends StatelessWidget {
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  'A private place for your family moments.',
+                  'Your family moments stay with your family.',
                   style: textTheme.bodySmall?.copyWith(
                     color: AppTheme.secondaryTextColor,
                   ),
@@ -324,9 +357,9 @@ class _WelcomeBackground extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Color(0xFFF1ECFF),
+            Color(0xFFE4F2E9),
             AppTheme.backgroundColor,
-            Color(0xFFFFF1E8),
+            Color(0xFFFBE9E9),
           ],
           stops: [0, 0.56, 1],
         ),
@@ -336,18 +369,12 @@ class _WelcomeBackground extends StatelessWidget {
           Positioned(
             top: -90,
             right: -70,
-            child: _GlowCircle(
-              size: 280,
-              color: AppTheme.coralColor.withValues(alpha: 0.12),
-            ),
+            child: _ConnectionRings(size: 290, color: AppTheme.uaeRed),
           ),
           Positioned(
             bottom: -130,
             left: -100,
-            child: _GlowCircle(
-              size: 340,
-              color: AppTheme.primaryColor.withValues(alpha: 0.12),
-            ),
+            child: _ConnectionRings(size: 350, color: AppTheme.uaeGreen),
           ),
         ],
       ),
@@ -355,8 +382,37 @@ class _WelcomeBackground extends StatelessWidget {
   }
 }
 
-class _GlowCircle extends StatelessWidget {
-  const _GlowCircle({required this.size, required this.color});
+class _ConnectionRings extends StatelessWidget {
+  const _ConnectionRings({required this.size, required this.color});
+
+  final double size;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: size,
+      height: size,
+      child: Stack(
+        children: [
+          Positioned(
+            left: 0,
+            top: size * 0.12,
+            child: _Ring(size: size * 0.68, color: color),
+          ),
+          Positioned(
+            right: 0,
+            bottom: size * 0.08,
+            child: _Ring(size: size * 0.68, color: color),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _Ring extends StatelessWidget {
+  const _Ring({required this.size, required this.color});
 
   final double size;
   final Color color;
@@ -366,7 +422,11 @@ class _GlowCircle extends StatelessWidget {
     return Container(
       width: size,
       height: size,
-      decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: color.withValues(alpha: 0.035),
+        border: Border.all(color: color.withValues(alpha: 0.12), width: 2),
+      ),
     );
   }
 }

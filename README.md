@@ -1,4 +1,8 @@
-# kinquest
+# Sila | صِلَة
+
+Sila is a private family space for games, stories, challenges, and shared
+memories. The Flutter package and existing backend configuration retain the
+internal `kinquest` identifier for compatibility.
 
 A new Flutter project.
 
@@ -18,7 +22,7 @@ samples, guidance on mobile development, and a full API reference.
 
 ## AI backend URL
 
-KinQuest uses the local backend on port `3000` by default:
+Sila uses the local backend on port `3000` by default:
 
 - Web, iOS simulator, macOS, Windows, and Linux use `http://localhost:3000`.
 - The Android emulator uses `http://10.0.2.2:3000`.

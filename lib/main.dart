@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'core/branding/app_brand.dart';
 import 'firebase_options.dart';
 import 'core/theme/app_theme.dart';
 import 'features/authentication/screens/welcome_screen.dart';
@@ -9,16 +10,16 @@ Future<void> main() async {
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-  runApp(const KinQuestApp());
+  runApp(const SilaApp());
 }
 
-class KinQuestApp extends StatelessWidget {
-  const KinQuestApp({super.key});
+class SilaApp extends StatelessWidget {
+  const SilaApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'KinQuest',
+      title: AppBrand.fullName,
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       home: const WelcomeScreen(),

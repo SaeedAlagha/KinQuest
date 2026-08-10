@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/family_year_banner.dart';
 import 'charades_screen.dart';
 import 'emoji_guess_screen.dart';
 import 'family_quiz_screen.dart';
@@ -10,7 +11,9 @@ import 'truth_or_dare_screen.dart';
 import 'would_you_rather_screen.dart';
 
 class GamesScreen extends StatelessWidget {
-  const GamesScreen({super.key});
+  const GamesScreen({super.key, this.developerPreview = false});
+
+  final bool developerPreview;
 
   static const List<_GameItem> _games = [
     _GameItem(
@@ -35,7 +38,7 @@ class GamesScreen extends StatelessWidget {
       title: 'Memory Challenge',
       description:
           'Play AI-generated challenges inspired by your family memories.',
-      eyebrow: 'KINQUEST SIGNATURE',
+      eyebrow: 'SILA SIGNATURE',
       isSignatureFeature: true,
     ),
     _GameItem(
@@ -69,7 +72,7 @@ class GamesScreen extends StatelessWidget {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) => switch (game.title) {
-          'Family Quiz' => const FamilyQuizScreen(),
+          'Family Quiz' => FamilyQuizScreen(developerPreview: developerPreview),
           'Party Games' => const PartyGamesScreen(),
           _ => GamePlaceholderScreen(gameTitle: game.title),
         },
@@ -144,51 +147,58 @@ class _GamesHeader extends StatelessWidget {
         borderRadius: BorderRadius.circular(28),
         border: Border.all(color: AppTheme.outlineColor),
       ),
-      child: Wrap(
-        spacing: 28,
-        runSpacing: 22,
-        crossAxisAlignment: WrapCrossAlignment.center,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: 66,
-            height: 66,
-            decoration: BoxDecoration(
-              gradient: AppTheme.brandGradient,
-              borderRadius: BorderRadius.circular(22),
-            ),
-            child: const Icon(
-              Icons.sports_esports_rounded,
-              color: Colors.white,
-              size: 34,
-            ),
-          ),
-          ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 620),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'PLAY TOGETHER',
-                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: AppTheme.primaryColor,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 1.1,
-                  ),
+          const UaeColorRibbon(height: 5),
+          const SizedBox(height: 22),
+          Wrap(
+            spacing: 28,
+            runSpacing: 22,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              Container(
+                width: 66,
+                height: 66,
+                decoration: BoxDecoration(
+                  gradient: AppTheme.brandGradient,
+                  borderRadius: BorderRadius.circular(22),
                 ),
-                const SizedBox(height: 6),
-                Text(
-                  'Find your next family favorite',
-                  style: Theme.of(context).textTheme.headlineMedium,
+                child: const Icon(
+                  Icons.sports_esports_rounded,
+                  color: Colors.white,
+                  size: 34,
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  'Choose a quick laugh, a thoughtful question, or a challenge everyone can enjoy.',
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: AppTheme.secondaryTextColor,
-                  ),
+              ),
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 620),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'FAMILY YEAR • BONDS THROUGH PLAY',
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: AppTheme.primaryColor,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 1.1,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      'Find your next family favorite',
+                      style: Theme.of(context).textTheme.headlineMedium,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Share a quick laugh, a thoughtful question, or a challenge that brings every generation closer.',
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        color: AppTheme.secondaryTextColor,
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ],
       ),

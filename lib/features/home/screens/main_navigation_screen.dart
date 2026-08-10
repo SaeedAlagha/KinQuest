@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/branding/app_brand.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/family_year_banner.dart';
+import '../../../core/widgets/sila_brand_mark.dart';
 import '../../competitions/screens/competitions_screen.dart';
 import '../../games/screens/games_screen.dart';
 import '../../memories/screens/memories_screen.dart';
@@ -8,20 +11,16 @@ import '../../profile/screens/profile_screen.dart';
 import 'home_screen.dart';
 
 class MainNavigationScreen extends StatefulWidget {
-  const MainNavigationScreen({super.key});
+  const MainNavigationScreen({super.key, this.developerPreview = false});
+
+  final bool developerPreview;
 
   @override
   State<MainNavigationScreen> createState() => _MainNavigationScreenState();
 }
 
 class _MainNavigationScreenState extends State<MainNavigationScreen> {
-  static const List<Widget> _screens = [
-    HomeScreen(),
-    GamesScreen(),
-    MemoriesScreen(),
-    CompetitionsScreen(),
-    ProfileScreen(),
-  ];
+  late final List<Widget> _screens;
 
   static const List<NavigationDestination> _mobileDestinations = [
     NavigationDestination(
@@ -81,10 +80,63 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
 
   int _selectedIndex = 0;
 
+  @override
+  void initState() {
+    super.initState();
+
+    _screens = widget.developerPreview
+        ? const [
+            HomeDashboard(
+              name: 'Sila Developer',
+              familyName: 'Developer Family',
+              memberCount: 5,
+              tokens: '480',
+              developerPreview: true,
+            ),
+            GamesScreen(developerPreview: true),
+            MemoriesScreen(developerPreview: true),
+            CompetitionsScreen(developerPreview: true),
+            ProfileScreen(developerPreview: true),
+          ]
+        : const [
+            HomeScreen(),
+            GamesScreen(),
+            MemoriesScreen(),
+            CompetitionsScreen(),
+            ProfileScreen(),
+          ];
+  }
+
   void _selectScreen(int index) {
     setState(() {
       _selectedIndex = index;
     });
+  }
+
+  Widget _buildScreenStack(BuildContext context) {
+    final screenStack = IndexedStack(index: _selectedIndex, children: _screens);
+
+    if (!widget.developerPreview) {
+      return screenStack;
+    }
+
+    return Column(
+      children: [
+        SafeArea(
+          bottom: false,
+          child: _DeveloperPreviewBanner(
+            onExit: () => Navigator.maybePop(context),
+          ),
+        ),
+        Expanded(
+          child: MediaQuery.removePadding(
+            context: context,
+            removeTop: true,
+            child: screenStack,
+          ),
+        ),
+      ],
+    );
   }
 
   @override
@@ -112,19 +164,14 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                   ),
                 ),
                 const VerticalDivider(),
-                Expanded(
-                  child: IndexedStack(
-                    index: _selectedIndex,
-                    children: _screens,
-                  ),
-                ),
+                Expanded(child: _buildScreenStack(context)),
               ],
             ),
           );
         }
 
         return Scaffold(
-          body: IndexedStack(index: _selectedIndex, children: _screens),
+          body: _buildScreenStack(context),
           bottomNavigationBar: NavigationBar(
             selectedIndex: _selectedIndex,
             onDestinationSelected: _selectScreen,
@@ -136,6 +183,42 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   }
 }
 
+class _DeveloperPreviewBanner extends StatelessWidget {
+  const _DeveloperPreviewBanner({required this.onExit});
+
+  final VoidCallback onExit;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Container(
+      width: double.infinity,
+      color: colorScheme.primaryContainer,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Row(
+        children: [
+          Icon(
+            Icons.developer_mode_rounded,
+            color: colorScheme.onPrimaryContainer,
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              'Developer Family preview • Demo data only',
+              style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                color: colorScheme.onPrimaryContainer,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+          TextButton(onPressed: onExit, child: const Text('Exit')),
+        ],
+      ),
+    );
+  }
+}
+
 class _NavigationBrand extends StatelessWidget {
   const _NavigationBrand();
 
@@ -143,26 +226,29 @@ class _NavigationBrand extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Container(
-          width: 42,
-          height: 42,
-          decoration: BoxDecoration(
-            gradient: AppTheme.brandGradient,
-            borderRadius: BorderRadius.circular(14),
-          ),
-          child: const Icon(
-            Icons.family_restroom_rounded,
-            color: Colors.white,
-            size: 24,
-          ),
-        ),
+        const SilaBrandMark(size: 42, showShadow: false),
         const SizedBox(width: 12),
-        Text(
-          'KinQuest',
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-            color: AppTheme.primaryDark,
-            fontWeight: FontWeight.w800,
-          ),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              AppBrand.name,
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                color: AppTheme.primaryDark,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            Text(
+              AppBrand.arabicName,
+              textDirection: TextDirection.rtl,
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                color: AppTheme.tealColor,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: 4),
+            const SizedBox(width: 56, child: UaeColorRibbon(height: 3)),
+          ],
         ),
       ],
     );

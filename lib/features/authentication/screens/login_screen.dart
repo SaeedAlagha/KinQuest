@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 
+import '../../../core/widgets/sila_brand_mark.dart';
 import '../../../core/validation/form_validators.dart';
 import 'signup_screen.dart';
 import '../../home/screens/main_navigation_screen.dart';
@@ -107,6 +109,16 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
+  void _openDeveloperPreview() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) =>
+            const MainNavigationScreen(developerPreview: true),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -124,15 +136,19 @@ class _LoginScreenState extends State<LoginScreen> {
                   children: [
                     const SizedBox(height: 20),
 
+                    const SilaBrandMark(size: 68, showShadow: false),
+
+                    const SizedBox(height: 24),
+
                     Text(
-                      'Welcome back',
+                      'Welcome back to Sila',
                       style: Theme.of(context).textTheme.headlineMedium,
                     ),
 
                     const SizedBox(height: 8),
 
                     Text(
-                      'Log in to continue your family journey.',
+                      'Reconnect with your family circle and continue where you left off.',
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
 
@@ -204,6 +220,28 @@ class _LoginScreenState extends State<LoginScreen> {
                         child: Text(_isLoggingIn ? 'Logging In...' : 'Log In'),
                       ),
                     ),
+
+                    if (kDebugMode) ...[
+                      const SizedBox(height: 12),
+                      SizedBox(
+                        width: double.infinity,
+                        child: OutlinedButton.icon(
+                          onPressed: _isLoggingIn
+                              ? null
+                              : _openDeveloperPreview,
+                          icon: const Icon(Icons.developer_mode_rounded),
+                          label: const Text('Enter Developer Family'),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Center(
+                        child: Text(
+                          'Debug preview only • Uses read-only demo data',
+                          textAlign: TextAlign.center,
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                      ),
+                    ],
 
                     const SizedBox(height: 24),
 

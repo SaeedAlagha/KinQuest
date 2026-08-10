@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../../core/widgets/sila_brand_mark.dart';
 import '../../../core/validation/form_validators.dart';
 import 'login_screen.dart';
 import 'family_choice_screen.dart';
@@ -204,15 +205,21 @@ class _SignupScreenState extends State<SignupScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    const SizedBox(height: 12),
+
+                    const SilaBrandMark(size: 68, showShadow: false),
+
+                    const SizedBox(height: 24),
+
                     Text(
-                      'Join KinQuest',
+                      'Join Sila',
                       style: Theme.of(context).textTheme.headlineMedium,
                     ),
 
                     const SizedBox(height: 8),
 
                     Text(
-                      'Create your account and begin your family journey.',
+                      'Create your account and bring your family circle closer.',
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
 
