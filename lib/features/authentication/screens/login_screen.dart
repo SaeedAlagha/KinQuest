@@ -28,205 +28,198 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-Future<void> _login() async {
-  FocusScope.of(context).unfocus();
+  Future<void> _login() async {
+    FocusScope.of(context).unfocus();
 
-  final isValid = _formKey.currentState?.validate() ?? false;
+    final isValid = _formKey.currentState?.validate() ?? false;
 
-  if (!isValid) {
-    return;
-  }
-
-  setState(() {
-    _isLoggingIn = true;
-  });
-
-  try {
-    await FirebaseAuth.instance.signInWithEmailAndPassword(
-      email: _emailController.text.trim(),
-      password: _passwordController.text,
-    );
-
-    if (!mounted) {
+    if (!isValid) {
       return;
     }
 
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const MainNavigationScreen(),
-      ),
-      (route) => false,
-    );
-  } on FirebaseAuthException catch (error) {
-    if (!mounted) {
-      return;
-    }
+    setState(() {
+      _isLoggingIn = true;
+    });
 
-    String message;
+    try {
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: _emailController.text.trim(),
+        password: _passwordController.text,
+      );
 
-    switch (error.code) {
-      case 'invalid-credential':
-        message = 'Incorrect email or password.';
-        break;
+      if (!mounted) {
+        return;
+      }
 
-      case 'user-disabled':
-        message = 'This account has been disabled.';
-        break;
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => const MainNavigationScreen()),
+        (route) => false,
+      );
+    } on FirebaseAuthException catch (error) {
+      if (!mounted) {
+        return;
+      }
 
-      case 'invalid-email':
-        message = 'Please enter a valid email address.';
-        break;
+      String message;
 
-      case 'too-many-requests':
-        message = 'Too many attempts. Please try again later.';
-        break;
+      switch (error.code) {
+        case 'invalid-credential':
+          message = 'Incorrect email or password.';
+          break;
 
-      case 'network-request-failed':
-        message = 'No internet connection. Please try again.';
-        break;
+        case 'user-disabled':
+          message = 'This account has been disabled.';
+          break;
 
-      default:
-        message = 'Could not log in. Please try again.';
-    }
+        case 'invalid-email':
+          message = 'Please enter a valid email address.';
+          break;
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-      ),
-    );
-  } finally {
-    if (mounted) {
-      setState(() {
-        _isLoggingIn = false;
-      });
+        case 'too-many-requests':
+          message = 'Too many attempts. Please try again later.';
+          break;
+
+        case 'network-request-failed':
+          message = 'No internet connection. Please try again.';
+          break;
+
+        default:
+          message = 'Could not log in. Please try again.';
+      }
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(message)));
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoggingIn = false;
+        });
+      }
     }
   }
-}
-
-
 
   void _openSignup() {
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(
-        builder: (context) => const SignupScreen(),
-      ),
+      MaterialPageRoute(builder: (context) => const SignupScreen()),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Log In'),
-      ),
+      appBar: AppBar(title: const Text('Log In')),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: 20),
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 560),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 20),
 
-                Text(
-                  'Welcome back',
-                  style: Theme.of(context).textTheme.headlineMedium,
-                ),
+                    Text(
+                      'Welcome back',
+                      style: Theme.of(context).textTheme.headlineMedium,
+                    ),
 
-                const SizedBox(height: 8),
+                    const SizedBox(height: 8),
 
-                Text(
-                  'Log in to continue your family journey.',
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
+                    Text(
+                      'Log in to continue your family journey.',
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
 
-                const SizedBox(height: 36),
+                    const SizedBox(height: 36),
 
-                TextFormField(
-                  controller: _emailController,
-                  keyboardType: TextInputType.emailAddress,
-                  textInputAction: TextInputAction.next,
-                  autocorrect: false,
-                  validator: FormValidators.validateEmail,
-                  decoration: const InputDecoration(
-                    labelText: 'Email address',
-                    hintText: 'name@example.com',
-                    prefixIcon: Icon(Icons.email_outlined),
-                  ),
-                ),
-
-                const SizedBox(height: 18),
-
-                TextFormField(
-                  controller: _passwordController,
-                  obscureText: _hidePassword,
-                  textInputAction: TextInputAction.done,
-                  validator: FormValidators.validatePassword,
-                  onFieldSubmitted: (_) => _login(),
-                  decoration: InputDecoration(
-                    labelText: 'Password',
-                    prefixIcon: const Icon(Icons.lock_outline),
-                    suffixIcon: IconButton(
-                      onPressed: () {
-                        setState(() {
-                          _hidePassword = !_hidePassword;
-                        });
-                      },
-                      icon: Icon(
-                        _hidePassword
-                            ? Icons.visibility_outlined
-                            : Icons.visibility_off_outlined,
+                    TextFormField(
+                      controller: _emailController,
+                      keyboardType: TextInputType.emailAddress,
+                      textInputAction: TextInputAction.next,
+                      autocorrect: false,
+                      validator: FormValidators.validateEmail,
+                      decoration: const InputDecoration(
+                        labelText: 'Email address',
+                        hintText: 'name@example.com',
+                        prefixIcon: Icon(Icons.email_outlined),
                       ),
                     ),
-                  ),
-                ),
 
-                const SizedBox(height: 8),
+                    const SizedBox(height: 18),
 
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: TextButton(
-                    onPressed: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text(
-                            'Password recovery will be added with Firebase.',
+                    TextFormField(
+                      controller: _passwordController,
+                      obscureText: _hidePassword,
+                      textInputAction: TextInputAction.done,
+                      validator: FormValidators.validatePassword,
+                      onFieldSubmitted: (_) => _login(),
+                      decoration: InputDecoration(
+                        labelText: 'Password',
+                        prefixIcon: const Icon(Icons.lock_outline),
+                        suffixIcon: IconButton(
+                          onPressed: () {
+                            setState(() {
+                              _hidePassword = !_hidePassword;
+                            });
+                          },
+                          icon: Icon(
+                            _hidePassword
+                                ? Icons.visibility_outlined
+                                : Icons.visibility_off_outlined,
                           ),
                         ),
-                      );
-                    },
-                    child: const Text('Forgot password?'),
-                  ),
-                ),
-
-                const SizedBox(height: 20),
-
-                SizedBox(
-                  width: double.infinity,
-                  child: FilledButton(
-                    onPressed: _isLoggingIn ? null : _login,
-                    child: Text(
-                      _isLoggingIn ? 'Logging In...' : 'Log In',
+                      ),
                     ),
-                  ),
-                ),
 
-                const SizedBox(height: 24),
+                    const SizedBox(height: 8),
 
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text("Don't have an account?"),
-                    TextButton(
-                      onPressed: _openSignup,
-                      child: const Text('Create one'),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton(
+                        onPressed: () {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                'Password recovery will be added with Firebase.',
+                              ),
+                            ),
+                          );
+                        },
+                        child: const Text('Forgot password?'),
+                      ),
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    SizedBox(
+                      width: double.infinity,
+                      child: FilledButton(
+                        onPressed: _isLoggingIn ? null : _login,
+                        child: Text(_isLoggingIn ? 'Logging In...' : 'Log In'),
+                      ),
+                    ),
+
+                    const SizedBox(height: 24),
+
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Text("Don't have an account?"),
+                        TextButton(
+                          onPressed: _openSignup,
+                          child: const Text('Create one'),
+                        ),
+                      ],
                     ),
                   ],
                 ),
-              ],
+              ),
             ),
           ),
         ),
