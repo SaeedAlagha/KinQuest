@@ -115,7 +115,7 @@ final memoryId = memories[index].id;
                     final title = data['title'] as String? ?? 'Memory';
                     final description = data['description'] as String? ?? '';
                     final location = data['location'] as String? ?? '';
-
+final imageUrl = data['imageUrl'] as String?;
                     final timestamp = data['date'] as Timestamp?;
                     final date = timestamp?.toDate();
 
@@ -139,9 +139,28 @@ final memoryId = memories[index].id;
         ),
       );
     },
-    leading: const CircleAvatar(
-      child: Icon(Icons.photo_outlined),
-    ),
+leading: ClipRRect(
+  borderRadius: BorderRadius.circular(10),
+  child: SizedBox(
+    width: 56,
+    height: 56,
+    child: imageUrl != null && imageUrl.isNotEmpty
+        ? Image.network(
+            imageUrl,
+            fit: BoxFit.cover,
+            errorBuilder: (context, error, stackTrace) {
+              return Container(
+                color: Theme.of(context).colorScheme.primaryContainer,
+                child: const Icon(Icons.broken_image_outlined),
+              );
+            },
+          )
+        : Container(
+            color: Theme.of(context).colorScheme.primaryContainer,
+            child: const Icon(Icons.photo_outlined),
+          ),
+  ),
+),
     title: Text(title),
     subtitle: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
