@@ -703,6 +703,178 @@ Return ONLY valid JSON in this structure:
     });
   }
 });
+app.post("/api/memory-challenge", async (req, res) => {
+  try {
+    const {
+      imageUrl,
+      title,
+      description,
+      location,
+      date,
+      count,
+    } = req.body;
+
+    if (!imageUrl) {
+      return res.status(400).json({
+        error: "Memory image is required",
+      });
+    }
+
+    const requestedCount = Number(count) || 3;
+    const questionCount = Math.min(Math.max(requestedCount, 1), 5);
+
+    const imageResponse = await fetch(imageUrl);
+
+    if (!imageResponse.ok) {
+      throw new Error("Could not download memory image");
+    }
+
+    const imageArrayBuffer = await imageResponse.arrayBuffer();
+
+    const base64Image = Buffer.from(imageArrayBuffer).toString("base64");
+
+    const contentType =
+      imageResponse.headers.get("content-type") || "image/jpeg";
+
+    const prompt = `
+Create exactly ${questionCount} multiple-choice questions for a family memory game.
+
+Memory information:
+
+Title: ${title || "Not provided"}
+Story: ${description || "Not provided"}
+Location: ${location || "Not provided"}
+Date: ${date || "Not provided"}
+
+You are also given the actual family photo.
+
+This game is called Memory Challenge.
+
+The purpose is to help family members remember real shared moments.
+
+Generate a mixture of these question styles:
+
+1. VISUAL
+Ask about a clearly visible detail in the photo.
+
+Examples:
+- What color is the object shown?
+- What activity appears to be happening?
+- Which item can be seen in the photo?
+
+2. STORY
+Ask something directly supported by the written memory story.
+
+3. PLACE
+Ask about the saved location only when a useful location was provided.
+
+4. MEMORY
+Connect information visible in the photo with information from the written story.
+
+Important rules:
+
+- Every answer MUST be supported by either the photo or the supplied memory information.
+- Never invent names, relationships, locations, events, emotions, or facts.
+- Do not identify or guess the identity of a person from their face.
+- Do not infer sensitive personal information from appearance.
+- If a detail is uncertain, do not ask about it.
+- Questions must be family friendly.
+- Appropriate for children and adults.
+- Avoid embarrassing questions.
+- Avoid medical, political, sexual, hateful, violent, or otherwise sensitive topics.
+- Each question must have exactly 4 answer options.
+- Exactly one option must be correct.
+- Wrong options should be believable but clearly incorrect.
+- Keep questions concise.
+- Do not repeat questions.
+
+Return ONLY valid JSON.
+`;
+
+    const response = await ai.models.generateContent({
+      model: "gemini-3.5-flash",
+      contents: [
+        {
+          inlineData: {
+            mimeType: contentType,
+            data: base64Image,
+          },
+        },
+        {
+          text: prompt,
+        },
+      ],
+      config: {
+        responseMimeType: "application/json",
+        responseJsonSchema: {
+          type: "object",
+          properties: {
+            questions: {
+              type: "array",
+              minItems: questionCount,
+              maxItems: questionCount,
+              items: {
+                type: "object",
+                properties: {
+                  question: {
+                    type: "string",
+                  },
+                  options: {
+                    type: "array",
+                    minItems: 4,
+                    maxItems: 4,
+                    items: {
+                      type: "string",
+                    },
+                  },
+                  correctIndex: {
+                    type: "integer",
+                    minimum: 0,
+                    maximum: 3,
+                  },
+                  type: {
+                    type: "string",
+                    enum: [
+                      "visual",
+                      "story",
+                      "place",
+                      "memory",
+                    ],
+                  },
+                },
+                required: [
+                  "question",
+                  "options",
+                  "correctIndex",
+                  "type",
+                ],
+              },
+            },
+          },
+          required: ["questions"],
+        },
+      },
+    });
+
+    const result = JSON.parse(response.text);
+
+    if (!Array.isArray(result.questions)) {
+      throw new Error(
+        "Gemini returned an invalid Memory Challenge response",
+      );
+    }
+
+    res.json({
+      questions: result.questions,
+    });
+  } catch (error) {
+    console.error("Memory Challenge generation error:", error);
+
+    res.status(500).json({
+      error: "Failed to generate Memory Challenge questions",
+    });
+  }
+});
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
