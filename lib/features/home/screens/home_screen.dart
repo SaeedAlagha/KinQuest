@@ -3,6 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/family_year_banner.dart';
+import '../../../core/widgets/sila_brand_mark.dart';
 import '../../games/screens/games_screen.dart';
 import '../../memories/screens/add_memory_screen.dart';
 
@@ -28,7 +30,7 @@ class HomeScreen extends StatelessWidget {
           .snapshots(),
       builder: (context, userSnapshot) {
         final userData = userSnapshot.data?.data();
-        final name = userData?['name'] as String? ?? 'KinQuest User';
+        final name = userData?['name'] as String? ?? 'Sila Member';
         final tokens = userData?['tokens'] ?? 0;
         final familyId = userData?['familyId'] as String?;
 
@@ -73,12 +75,22 @@ class HomeDashboard extends StatelessWidget {
     required this.familyName,
     required this.memberCount,
     required this.tokens,
+    this.developerPreview = false,
   });
 
   final String name;
   final String familyName;
   final int memberCount;
   final String tokens;
+  final bool developerPreview;
+
+  void _showPreviewNotice(BuildContext context) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Developer preview is read-only. No memory was added.'),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -98,7 +110,9 @@ class HomeDashboard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       _HomeHeader(name: name, familyName: familyName),
-                      const SizedBox(height: 28),
+                      const SizedBox(height: 18),
+                      FamilyYearBanner(compact: constraints.maxWidth < 480),
+                      const SizedBox(height: 22),
                       if (isWide)
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -137,10 +151,10 @@ class HomeDashboard extends StatelessWidget {
                       ],
                       const SizedBox(height: 34),
                       const _SectionHeading(
-                        eyebrow: 'MAKE A MOMENT',
-                        title: 'Quick family actions',
+                        eyebrow: 'GROWING IN UNITY',
+                        title: 'Small moments, stronger bonds',
                         subtitle:
-                            'Small activities that turn an ordinary day into a shared memory.',
+                            'Create a memory or play together—simple ways to stay close every day.',
                       ),
                       const SizedBox(height: 16),
                       if (isWide)
@@ -153,12 +167,15 @@ class HomeDashboard extends StatelessWidget {
                                 title: 'Add a Memory',
                                 subtitle:
                                     'Save a photo, video, or story from today.',
-                                onTap: () => Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => const AddMemoryScreen(),
-                                  ),
-                                ),
+                                onTap: developerPreview
+                                    ? () => _showPreviewNotice(context)
+                                    : () => Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) =>
+                                              const AddMemoryScreen(),
+                                        ),
+                                      ),
                               ),
                             ),
                             const SizedBox(width: 16),
@@ -172,7 +189,9 @@ class HomeDashboard extends StatelessWidget {
                                 onTap: () => Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (_) => const GamesScreen(),
+                                    builder: (_) => GamesScreen(
+                                      developerPreview: developerPreview,
+                                    ),
                                   ),
                                 ),
                               ),
@@ -185,12 +204,14 @@ class HomeDashboard extends StatelessWidget {
                           accent: AppTheme.coralColor,
                           title: 'Add a Memory',
                           subtitle: 'Save a photo, video, or story from today.',
-                          onTap: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const AddMemoryScreen(),
-                            ),
-                          ),
+                          onTap: developerPreview
+                              ? () => _showPreviewNotice(context)
+                              : () => Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => const AddMemoryScreen(),
+                                  ),
+                                ),
                         ),
                         const SizedBox(height: 12),
                         _QuickActionCard(
@@ -201,7 +222,9 @@ class HomeDashboard extends StatelessWidget {
                           onTap: () => Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (_) => const GamesScreen(),
+                              builder: (_) => GamesScreen(
+                                developerPreview: developerPreview,
+                              ),
                             ),
                           ),
                         ),
@@ -249,6 +272,16 @@ class _HomeHeader extends StatelessWidget {
                   ),
                 ],
               ),
+              const SizedBox(height: 4),
+              Text(
+                'SILA FAMILY SPACE  •  صِلَة',
+                textDirection: TextDirection.ltr,
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: AppTheme.tealColor,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 0.75,
+                ),
+              ),
               const SizedBox(height: 6),
               Text(
                 familyName,
@@ -260,23 +293,7 @@ class _HomeHeader extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 16),
-        Semantics(
-          button: true,
-          label: 'Open family profile',
-          child: Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              color: AppTheme.surfaceColor,
-              shape: BoxShape.circle,
-              border: Border.all(color: AppTheme.outlineColor),
-            ),
-            child: const Icon(
-              Icons.family_restroom_rounded,
-              color: AppTheme.primaryColor,
-            ),
-          ),
-        ),
+        const SilaBrandMark(size: 48, showShadow: false),
       ],
     );
   }
@@ -321,6 +338,15 @@ class _FamilyOverviewCard extends StatelessWidget {
             bottom: -70,
             child: _DecorativeOrb(size: 150, opacity: 0.07),
           ),
+          const Positioned(
+            left: -38,
+            bottom: -52,
+            child: _DecorativeOrb(
+              size: 132,
+              opacity: 0.15,
+              color: AppTheme.uaeRed,
+            ),
+          ),
           Padding(
             padding: const EdgeInsets.all(28),
             child: Column(
@@ -336,28 +362,35 @@ class _FamilyOverviewCard extends StatelessWidget {
                         borderRadius: BorderRadius.circular(17),
                       ),
                       child: const Icon(
-                        Icons.family_restroom_rounded,
+                        Icons.join_inner_rounded,
                         color: Colors.white,
-                        size: 27,
+                        size: 28,
                       ),
                     ),
-                    const Spacer(),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 7,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.16),
-                        borderRadius: BorderRadius.circular(99),
-                      ),
-                      child: const Text(
-                        'FAMILY OVERVIEW',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: 0.9,
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Align(
+                        alignment: Alignment.centerRight,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 7,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.16),
+                            borderRadius: BorderRadius.circular(99),
+                          ),
+                          child: const Text(
+                            'ROOTS • BONDS • GROWTH',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 0.9,
+                            ),
+                          ),
                         ),
                       ),
                     ),
@@ -372,7 +405,7 @@ class _FamilyOverviewCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 10),
                 Text(
-                  '$memberCount ${memberCount == 1 ? 'family member' : 'family members'} connected and ready to make new memories.',
+                  '$memberCount ${memberCount == 1 ? 'family member' : 'family members'} connected through stories, play, and moments together.',
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                     color: Colors.white.withValues(alpha: 0.86),
                   ),
@@ -397,10 +430,15 @@ class _FamilyOverviewCard extends StatelessWidget {
 }
 
 class _DecorativeOrb extends StatelessWidget {
-  const _DecorativeOrb({required this.size, required this.opacity});
+  const _DecorativeOrb({
+    required this.size,
+    required this.opacity,
+    this.color = Colors.white,
+  });
 
   final double size;
   final double opacity;
+  final Color color;
 
   @override
   Widget build(BuildContext context) {
@@ -408,7 +446,7 @@ class _DecorativeOrb extends StatelessWidget {
       width: size,
       height: size,
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: opacity),
+        color: color.withValues(alpha: opacity),
         shape: BoxShape.circle,
       ),
     );

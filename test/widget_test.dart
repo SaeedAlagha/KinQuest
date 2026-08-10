@@ -1,17 +1,114 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:kinquest/core/theme/app_theme.dart';
+import 'package:kinquest/core/widgets/sila_brand_mark.dart';
+import 'package:kinquest/features/authentication/screens/login_screen.dart';
+import 'package:kinquest/features/home/screens/main_navigation_screen.dart';
 import 'package:kinquest/main.dart';
 
 void main() {
-  testWidgets('shows the KinQuest welcome screen', (tester) async {
-    await tester.pumpWidget(const KinQuestApp());
+  testWidgets('shows the Sila welcome screen', (tester) async {
+    await tester.pumpWidget(const SilaApp());
 
-    expect(find.text('KinQuest'), findsOneWidget);
-    expect(
-      find.text('Play Together. Learn Together. Grow Together.'),
-      findsOneWidget,
-    );
+    expect(find.text('Sila'), findsOneWidget);
+    expect(find.text('صِلَة'), findsOneWidget);
+    expect(find.text('Closer, one moment at a time.'), findsOneWidget);
     expect(find.text('Log In'), findsOneWidget);
     expect(find.text('Create Account'), findsOneWidget);
+  });
+
+  testWidgets('authentication pages keep the logo without the family banner', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(theme: AppTheme.lightTheme, home: const LoginScreen()),
+    );
+
+    expect(find.byType(SilaBrandMark), findsOneWidget);
+    expect(find.text('عام الأسرة 2026'), findsNothing);
+
+    await tester.ensureVisible(find.text('Create one'));
+    await tester.tap(find.text('Create one'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Join Sila'), findsOneWidget);
+    expect(find.byType(SilaBrandMark), findsOneWidget);
+    expect(find.text('عام الأسرة 2026'), findsNothing);
+  });
+
+  testWidgets('developer family preview bypasses login with demo data', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(theme: AppTheme.lightTheme, home: const LoginScreen()),
+    );
+
+    final previewButton = find.text('Enter Developer Family');
+    await tester.ensureVisible(previewButton);
+    await tester.tap(previewButton);
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text('Developer Family preview • Demo data only'),
+      findsOneWidget,
+    );
+    expect(find.text('Welcome, Sila Developer'), findsOneWidget);
+
+    await tester.tap(find.text('Exit'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Welcome back to Sila'), findsOneWidget);
+  });
+
+  testWidgets('developer preview navigation works on a narrow screen', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.lightTheme,
+        home: const MainNavigationScreen(developerPreview: true),
+      ),
+    );
+
+    final navigationBar = find.byType(NavigationBar);
+
+    await tester.tap(
+      find.descendant(of: navigationBar, matching: find.text('Memories')),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Developer Family memories'), findsOneWidget);
+    expect(
+      find.text('Developer Family preview • Demo data only'),
+      findsOneWidget,
+    );
+    expect(tester.takeException(), isNull);
+
+    await tester.tap(
+      find.descendant(of: navigationBar, matching: find.text('Compete')),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.scrollUntilVisible(
+      find.text('Developer Family Leaderboard'),
+      350,
+      scrollable: find.byType(Scrollable).last,
+    );
+    expect(find.text('Developer Family Leaderboard'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+
+    await tester.tap(
+      find.descendant(of: navigationBar, matching: find.text('Profile')),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('preview@sila.local'), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 }

@@ -3,21 +3,26 @@ import 'package:flutter/material.dart';
 class AppTheme {
   AppTheme._();
 
-  static const Color primaryColor = Color(0xFF6C4CF1);
-  static const Color primaryDark = Color(0xFF4E32C4);
-  static const Color coralColor = Color(0xFFFF7867);
-  static const Color goldColor = Color(0xFFFFB84D);
-  static const Color tealColor = Color(0xFF2FB7A8);
-  static const Color backgroundColor = Color(0xFFFAF8F5);
-  static const Color surfaceColor = Color(0xFFFFFDFC);
-  static const Color textColor = Color(0xFF211A35);
-  static const Color secondaryTextColor = Color(0xFF6D667B);
-  static const Color outlineColor = Color(0xFFE5E0EA);
+  static const Color primaryColor = Color(0xFF006B49);
+  static const Color primaryDark = Color(0xFF0C2B24);
+  static const Color coralColor = Color(0xFFD71920);
+  static const Color goldColor = Color(0xFFB88A37);
+  static const Color tealColor = Color(0xFF00843D);
+  static const Color backgroundColor = Color(0xFFF6F7F3);
+  static const Color surfaceColor = Color(0xFFFFFFFF);
+  static const Color textColor = Color(0xFF171C19);
+  static const Color secondaryTextColor = Color(0xFF5D6762);
+  static const Color outlineColor = Color(0xFFDDE3DF);
+  static const Color uaeRed = Color(0xFFFF0000);
+  static const Color uaeGreen = Color(0xFF00843D);
+  static const Color uaeWhiteAccent = Color(0xFFE9EEEB);
+  static const Color uaeBlack = Color(0xFF101820);
 
   static const LinearGradient brandGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [primaryColor, Color(0xFF9178FF)],
+    colors: [primaryDark, primaryColor, Color(0xFF0B9256)],
+    stops: [0, 0.54, 1],
   );
 
   static ThemeData get lightTheme {
@@ -29,7 +34,13 @@ class AppTheme {
           primary: primaryColor,
           onPrimary: Colors.white,
           secondary: coralColor,
-          tertiary: tealColor,
+          tertiary: goldColor,
+          primaryContainer: const Color(0xFFDDEFE5),
+          onPrimaryContainer: primaryDark,
+          secondaryContainer: const Color(0xFFFCE3E4),
+          onSecondaryContainer: const Color(0xFF641014),
+          tertiaryContainer: const Color(0xFFF4E8CC),
+          onTertiaryContainer: const Color(0xFF51390E),
           surface: surfaceColor,
           onSurface: textColor,
           onSurfaceVariant: secondaryTextColor,
@@ -48,21 +59,21 @@ class AppTheme {
         displaySmall: const TextStyle(
           fontSize: 44,
           height: 1.08,
-          fontWeight: FontWeight.w800,
+          fontWeight: FontWeight.w700,
           letterSpacing: -1.4,
           color: textColor,
         ),
         headlineLarge: const TextStyle(
           fontSize: 36,
           height: 1.12,
-          fontWeight: FontWeight.w800,
+          fontWeight: FontWeight.w700,
           letterSpacing: -1,
           color: textColor,
         ),
         headlineMedium: const TextStyle(
           fontSize: 30,
           height: 1.16,
-          fontWeight: FontWeight.w800,
+          fontWeight: FontWeight.w700,
           letterSpacing: -0.7,
           color: textColor,
         ),
