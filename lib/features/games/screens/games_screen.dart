@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'family_missions_screen.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/family_year_banner.dart';
 import 'charades_screen.dart';
@@ -9,6 +9,7 @@ import 'never_have_i_ever_screen.dart';
 import 'trivia_screen.dart';
 import 'truth_or_dare_screen.dart';
 import 'would_you_rather_screen.dart';
+import 'memory_challenge_screen.dart';
 
 class GamesScreen extends StatelessWidget {
   const GamesScreen({super.key, this.developerPreview = false});
@@ -39,6 +40,7 @@ class GamesScreen extends StatelessWidget {
       description:
           'Play AI-generated challenges inspired by your family memories.',
       eyebrow: 'SILA SIGNATURE',
+      isAvailable: true,
       isSignatureFeature: true,
     ),
     _GameItem(
@@ -55,7 +57,8 @@ class GamesScreen extends StatelessWidget {
       title: 'Family Missions',
       description:
           'Complete real-life activities together and earn family rewards.',
-      eyebrow: 'COMING SOON',
+      eyebrow: 'DAILY MISSIONS',
+      isAvailable: true,
     ),
     _GameItem(
       icon: Icons.celebration_rounded,
@@ -73,6 +76,8 @@ class GamesScreen extends StatelessWidget {
       MaterialPageRoute(
         builder: (_) => switch (game.title) {
           'Family Quiz' => FamilyQuizScreen(developerPreview: developerPreview),
+          'Memory Challenge' => const MemoryChallengeScreen(),
+          'Family Missions' => const FamilyMissionsScreen(),
           'Party Games' => const PartyGamesScreen(),
           _ => GamePlaceholderScreen(gameTitle: game.title),
         },

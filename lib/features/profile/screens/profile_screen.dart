@@ -595,6 +595,7 @@ class _AchievementsSection extends StatelessWidget {
       builder: (context, userSnapshot) {
         final userData = userSnapshot.data?.data();
         final wins = userData?['wins'] ?? 0;
+        final missionsCompleted = userData?['missionsCompleted'] ?? 0;
         final familyId = userData?['familyId'] as String?;
 
         final quizProgress = (wins / 20).clamp(0.0, 1.0);
@@ -604,6 +605,7 @@ class _AchievementsSection extends StatelessWidget {
             wins: wins,
             quizProgress: quizProgress,
             memoryCount: 0,
+            missionsCompleted: missionsCompleted,
           );
         }
 
@@ -621,6 +623,7 @@ class _AchievementsSection extends StatelessWidget {
               wins: wins,
               quizProgress: quizProgress,
               memoryCount: memoryCount,
+              missionsCompleted: missionsCompleted,
             );
           },
         );
@@ -632,9 +635,10 @@ class _AchievementsSection extends StatelessWidget {
     required int wins,
     required double quizProgress,
     required int memoryCount,
+    required int missionsCompleted,
   }) {
     final memoryProgress = (memoryCount / 100).clamp(0.0, 1.0);
-
+    final missionProgress = (missionsCompleted / 30).clamp(0.0, 1.0);
     final achievements = [
       _AchievementItem(
         icon: Icons.photo_library,
@@ -650,12 +654,12 @@ class _AchievementsSection extends StatelessWidget {
         progress: quizProgress,
         progressText: '$wins / 20',
       ),
-      const _AchievementItem(
+      _AchievementItem(
         icon: Icons.groups,
         title: 'Team Player',
         description: 'Complete 30 Family Missions.',
-        progress: 0,
-        progressText: '0 / 30',
+        progress: missionProgress,
+        progressText: '$missionsCompleted / 30',
       ),
     ];
 
