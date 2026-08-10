@@ -157,8 +157,8 @@ class _StatisticsGrid extends StatelessWidget {
         final gamesPlayed = data?['gamesPlayed'] ?? 0;
 final wins = data?['wins'] ?? 0;
 final currentStreak = data?['currentStreak'] ?? 0;
-final achievementsCompleted = wins >= 20 ? 1 : 0;
-        final statistics = [
+final achievementsCompleted =
+    (wins >= 20 ? 1 : 0);        final statistics = [
           _StatisticItem(
             icon: Icons.sports_esports,
             label: 'Games Played',
@@ -360,47 +360,82 @@ class _AchievementsSection extends StatelessWidget {
           .collection('users')
           .doc(user.uid)
           .snapshots(),
-      builder: (context, snapshot) {
-        final data = snapshot.data?.data();
-        final wins = data?['wins'] ?? 0;
+      builder: (context, userSnapshot) {
+        final userData = userSnapshot.data?.data();
+        final wins = userData?['wins'] ?? 0;
+        final familyId = userData?['familyId'] as String?;
 
         final quizProgress = (wins / 20).clamp(0.0, 1.0);
 
-        final achievements = [
-          const _AchievementItem(
-            icon: Icons.photo_library,
-            title: 'Memory Keeper',
-            description: 'Save 100 family memories.',
-            progress: 0,
-            progressText: '0 / 100',
-          ),
-          _AchievementItem(
-            icon: Icons.quiz,
-            title: 'Quiz Master',
-            description: 'Win 20 Family Quizzes.',
-            progress: quizProgress,
-            progressText: '$wins / 20',
-          ),
-          const _AchievementItem(
-            icon: Icons.groups,
-            title: 'Team Player',
-            description: 'Complete 30 Family Missions.',
-            progress: 0,
-            progressText: '0 / 30',
-          ),
-        ];
+        if (familyId == null || familyId.isEmpty) {
+          return _buildAchievements(
+            wins: wins,
+            quizProgress: quizProgress,
+            memoryCount: 0,
+          );
+        }
 
-        return Column(
-          children: achievements
-              .map(
-                (achievement) => Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: _AchievementCard(achievement: achievement),
-                ),
-              )
-              .toList(),
+        return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+          stream: FirebaseFirestore.instance
+              .collection('families')
+              .doc(familyId)
+              .collection('memories')
+              .where('createdBy', isEqualTo: user.uid)
+              .snapshots(),
+          builder: (context, memorySnapshot) {
+            final memoryCount = memorySnapshot.data?.docs.length ?? 0;
+
+            return _buildAchievements(
+              wins: wins,
+              quizProgress: quizProgress,
+              memoryCount: memoryCount,
+            );
+          },
         );
       },
+    );
+  }
+
+  Widget _buildAchievements({
+    required int wins,
+    required double quizProgress,
+    required int memoryCount,
+  }) {
+    final memoryProgress = (memoryCount / 100).clamp(0.0, 1.0);
+
+    final achievements = [
+      _AchievementItem(
+        icon: Icons.photo_library,
+        title: 'Memory Keeper',
+        description: 'Save 100 family memories.',
+        progress: memoryProgress,
+        progressText: '$memoryCount / 100',
+      ),
+      _AchievementItem(
+        icon: Icons.quiz,
+        title: 'Quiz Master',
+        description: 'Win 20 Family Quizzes.',
+        progress: quizProgress,
+        progressText: '$wins / 20',
+      ),
+      const _AchievementItem(
+        icon: Icons.groups,
+        title: 'Team Player',
+        description: 'Complete 30 Family Missions.',
+        progress: 0,
+        progressText: '0 / 30',
+      ),
+    ];
+
+    return Column(
+      children: achievements
+          .map(
+            (achievement) => Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: _AchievementCard(achievement: achievement),
+            ),
+          )
+          .toList(),
     );
   }
 }
