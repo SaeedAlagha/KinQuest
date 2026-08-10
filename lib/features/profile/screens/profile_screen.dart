@@ -152,54 +152,93 @@ class _StatisticsGrid extends StatelessWidget {
           .collection('users')
           .doc(user.uid)
           .snapshots(),
-      builder: (context, snapshot) {
-        final data = snapshot.data?.data();
-        final gamesPlayed = data?['gamesPlayed'] ?? 0;
-final wins = data?['wins'] ?? 0;
-final currentStreak = data?['currentStreak'] ?? 0;
-final achievementsCompleted =
-    (wins >= 20 ? 1 : 0);        final statistics = [
-          _StatisticItem(
-            icon: Icons.sports_esports,
-            label: 'Games Played',
-            value: gamesPlayed.toString(),
-          ),
-         _StatisticItem(
-  icon: Icons.emoji_events,
-  label: 'Wins',
-  value: wins.toString(),
-),
-          _StatisticItem(
-  icon: Icons.local_fire_department,
-  label: 'Current Streak',
-  value: '$currentStreak ${currentStreak == 1 ? 'day' : 'days'}',
-),
-          _StatisticItem(
-  icon: Icons.stars,
-  label: 'Achievements',
-  value: achievementsCompleted.toString(),
-),
-        ];
+      builder: (context, userSnapshot) {
+        final data = userSnapshot.data?.data();
 
-        return GridView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: statistics.length,
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            crossAxisSpacing: 12,
-            mainAxisSpacing: 12,
-            childAspectRatio: 1.25,
-          ),
-          itemBuilder: (context, index) {
-            return _StatisticCard(statistic: statistics[index]);
+        final gamesPlayed = data?['gamesPlayed'] ?? 0;
+        final wins = data?['wins'] ?? 0;
+        final currentStreak = data?['currentStreak'] ?? 0;
+        final familyId = data?['familyId'] as String?;
+
+        if (familyId == null || familyId.isEmpty) {
+          return _buildStatistics(
+            gamesPlayed: gamesPlayed,
+            wins: wins,
+            currentStreak: currentStreak,
+            memoryCount: 0,
+          );
+        }
+
+        return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+          stream: FirebaseFirestore.instance
+              .collection('families')
+              .doc(familyId)
+              .collection('memories')
+              .where('createdBy', isEqualTo: user.uid)
+              .snapshots(),
+          builder: (context, memorySnapshot) {
+            final memoryCount = memorySnapshot.data?.docs.length ?? 0;
+
+            return _buildStatistics(
+              gamesPlayed: gamesPlayed,
+              wins: wins,
+              currentStreak: currentStreak,
+              memoryCount: memoryCount,
+            );
           },
         );
       },
     );
   }
-}
 
+  Widget _buildStatistics({
+    required int gamesPlayed,
+    required int wins,
+    required int currentStreak,
+    required int memoryCount,
+  }) {
+    final achievementsCompleted =
+        (wins >= 20 ? 1 : 0) + (memoryCount >= 100 ? 1 : 0);
+
+    final statistics = [
+      _StatisticItem(
+        icon: Icons.sports_esports,
+        label: 'Games Played',
+        value: gamesPlayed.toString(),
+      ),
+      _StatisticItem(
+        icon: Icons.emoji_events,
+        label: 'Wins',
+        value: wins.toString(),
+      ),
+      _StatisticItem(
+        icon: Icons.local_fire_department,
+        label: 'Current Streak',
+        value: '$currentStreak ${currentStreak == 1 ? 'day' : 'days'}',
+      ),
+      _StatisticItem(
+        icon: Icons.stars,
+        label: 'Achievements',
+        value: achievementsCompleted.toString(),
+      ),
+    ];
+
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: statistics.length,
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        crossAxisSpacing: 12,
+        mainAxisSpacing: 12,
+        childAspectRatio: 1.25,
+      ),
+      itemBuilder: (context, index) {
+        return _StatisticCard(statistic: statistics[index]);
+      },
+    );
+  }
+}
 class _StatisticCard extends StatelessWidget {
   const _StatisticCard({required this.statistic});
 
