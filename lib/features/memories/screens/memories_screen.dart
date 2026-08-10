@@ -111,7 +111,7 @@ class MemoriesScreen extends StatelessWidget {
                   separatorBuilder: (_, _) => const SizedBox(height: 12),
                   itemBuilder: (context, index) {
                     final data = memories[index].data();
-
+final memoryId = memories[index].id;
                     final title = data['title'] as String? ?? 'Memory';
                     final description = data['description'] as String? ?? '';
                     final location = data['location'] as String? ?? '';
@@ -132,8 +132,10 @@ class MemoriesScreen extends StatelessWidget {
         context,
         MaterialPageRoute(
           builder: (context) => MemoryDetailsScreen(
-            memoryData: data,
-          ),
+  memoryData: data,
+  memoryId: memoryId,
+  familyId: familyId,
+),
         ),
       );
     },

@@ -2,13 +2,54 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class MemoryDetailsScreen extends StatelessWidget {
-  const MemoryDetailsScreen({
-    super.key,
-    required this.memoryData,
-  });
+ const MemoryDetailsScreen({
+  super.key,
+  required this.memoryData,
+  required this.memoryId,
+  required this.familyId,
+});
 
-  final Map<String, dynamic> memoryData;
+final Map<String, dynamic> memoryData;
+final String memoryId;
+final String familyId;
+Future<void> _deleteMemory(BuildContext context) async {
+  final shouldDelete = await showDialog<bool>(
+    context: context,
+    builder: (context) {
+      return AlertDialog(
+        title: const Text('Delete memory?'),
+        content: const Text(
+          'This memory will be permanently removed from your family memories.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Delete'),
+          ),
+        ],
+      );
+    },
+  );
 
+  if (shouldDelete != true) {
+    return;
+  }
+
+  await FirebaseFirestore.instance
+      .collection('families')
+      .doc(familyId)
+      .collection('memories')
+      .doc(memoryId)
+      .delete();
+
+  if (context.mounted) {
+    Navigator.pop(context);
+  }
+}
   @override
   Widget build(BuildContext context) {
     final title = memoryData['title'] as String? ?? 'Memory';
@@ -25,9 +66,16 @@ class MemoryDetailsScreen extends StatelessWidget {
               '${date.year}';
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Memory'),
-      ),
+     appBar: AppBar(
+  title: const Text('Memory'),
+  actions: [
+    IconButton(
+      onPressed: () => _deleteMemory(context),
+      tooltip: 'Delete memory',
+      icon: const Icon(Icons.delete_outline),
+    ),
+  ],
+),
       body: ListView(
         padding: const EdgeInsets.all(24),
         children: [
