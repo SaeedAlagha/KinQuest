@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'daily_challenge_screen.dart';
 import '../../games/screens/games_screen.dart';
+import 'weekly_championship_screen.dart';
 
 class CompetitionsScreen extends StatelessWidget {
   const CompetitionsScreen({super.key, this.developerPreview = false});
@@ -80,6 +81,16 @@ class CompetitionsScreen extends StatelessWidget {
                     Navigator.of(context).push(
                       MaterialPageRoute(
                         builder: (_) => DailyChallengeScreen(
+                          developerPreview: developerPreview,
+                        ),
+                      ),
+                    );
+                    return;
+                  }
+                  if (competition.title == 'Weekly Championship') {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => WeeklyChampionshipScreen(
                           developerPreview: developerPreview,
                         ),
                       ),
