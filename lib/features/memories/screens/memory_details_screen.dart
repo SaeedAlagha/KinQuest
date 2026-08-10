@@ -55,7 +55,7 @@ Future<void> _deleteMemory(BuildContext context) async {
     final title = memoryData['title'] as String? ?? 'Memory';
     final description = memoryData['description'] as String? ?? '';
     final location = memoryData['location'] as String? ?? '';
-
+final imageUrl = memoryData['imageUrl'] as String?;
     final timestamp = memoryData['date'] as Timestamp?;
     final date = timestamp?.toDate();
 
@@ -99,18 +99,32 @@ actions: [
       body: ListView(
         padding: const EdgeInsets.all(24),
         children: [
-          Container(
-            height: 220,
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primaryContainer,
-              borderRadius: BorderRadius.circular(24),
-            ),
-            child: Icon(
-              Icons.photo_library_outlined,
+Container(
+  height: 220,
+  width: double.infinity,
+  decoration: BoxDecoration(
+    color: Theme.of(context).colorScheme.primaryContainer,
+    borderRadius: BorderRadius.circular(24),
+  ),
+  clipBehavior: Clip.antiAlias,
+  child: imageUrl != null && imageUrl.isNotEmpty
+      ? Image.network(
+          imageUrl,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) {
+            return Icon(
+              Icons.broken_image_outlined,
               size: 90,
               color: Theme.of(context).colorScheme.onPrimaryContainer,
-            ),
-          ),
+            );
+          },
+        )
+      : Icon(
+          Icons.photo_library_outlined,
+          size: 90,
+          color: Theme.of(context).colorScheme.onPrimaryContainer,
+        ),
+),
           const SizedBox(height: 24),
 
           Text(
