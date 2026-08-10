@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-
+import 'edit_memory_screen.dart';
 class MemoryDetailsScreen extends StatelessWidget {
  const MemoryDetailsScreen({
   super.key,
@@ -68,13 +68,33 @@ Future<void> _deleteMemory(BuildContext context) async {
     return Scaffold(
      appBar: AppBar(
   title: const Text('Memory'),
-  actions: [
-    IconButton(
-      onPressed: () => _deleteMemory(context),
-      tooltip: 'Delete memory',
-      icon: const Icon(Icons.delete_outline),
-    ),
-  ],
+actions: [
+  IconButton(
+    onPressed: () async {
+      final updated = await Navigator.push<bool>(
+        context,
+        MaterialPageRoute(
+          builder: (context) => EditMemoryScreen(
+            memoryId: memoryId,
+            familyId: familyId,
+            memoryData: memoryData,
+          ),
+        ),
+      );
+
+      if (updated == true && context.mounted) {
+        Navigator.pop(context);
+      }
+    },
+    tooltip: 'Edit memory',
+    icon: const Icon(Icons.edit_outlined),
+  ),
+  IconButton(
+    onPressed: () => _deleteMemory(context),
+    tooltip: 'Delete memory',
+    icon: const Icon(Icons.delete_outline),
+  ),
+],
 ),
       body: ListView(
         padding: const EdgeInsets.all(24),
