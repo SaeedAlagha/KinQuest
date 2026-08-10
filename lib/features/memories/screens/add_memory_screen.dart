@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../core/validation/form_validators.dart';
+import 'dart:io';
 
+import 'package:image_picker/image_picker.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 class AddMemoryScreen extends StatefulWidget {
   const AddMemoryScreen({super.key});
 
@@ -19,7 +22,9 @@ class _AddMemoryScreenState extends State<AddMemoryScreen> {
   final _locationController = TextEditingController();
 
   DateTime? _selectedDate;
-
+final ImagePicker _imagePicker = ImagePicker();
+XFile? _selectedImage;
+bool _isSaving = false;
   @override
   void dispose() {
     _titleController.dispose();
@@ -63,7 +68,20 @@ class _AddMemoryScreenState extends State<AddMemoryScreen> {
 
     return null;
   }
+Future<void> _pickImage() async {
+  final image = await _imagePicker.pickImage(
+    source: ImageSource.gallery,
+    imageQuality: 80,
+  );
 
+  if (image == null) {
+    return;
+  }
+
+  setState(() {
+    _selectedImage = image;
+  });
+}
   Future<void> _saveMemory() async {
     FocusScope.of(context).unfocus();
 
@@ -103,18 +121,40 @@ class _AddMemoryScreenState extends State<AddMemoryScreen> {
         return;
       }
 
-      await FirebaseFirestore.instance
-          .collection('families')
-          .doc(familyId)
-          .collection('memories')
-          .add({
-            'title': _titleController.text.trim(),
-            'description': _descriptionController.text.trim(),
-            'date': Timestamp.fromDate(_selectedDate!),
-            'location': _locationController.text.trim(),
-            'createdBy': user.uid,
-            'createdAt': FieldValue.serverTimestamp(),
-          });
+      setState(() {
+  _isSaving = true;
+});
+
+String? imageUrl;
+
+if (_selectedImage != null) {
+  final fileName =
+      '${DateTime.now().millisecondsSinceEpoch}_${user.uid}.jpg';
+
+  final storageRef = FirebaseStorage.instance
+      .ref()
+      .child('families')
+      .child(familyId)
+      .child('memories')
+      .child(fileName);
+
+  await storageRef.putFile(File(_selectedImage!.path));
+  imageUrl = await storageRef.getDownloadURL();
+}
+
+await FirebaseFirestore.instance
+    .collection('families')
+    .doc(familyId)
+    .collection('memories')
+    .add({
+      'title': _titleController.text.trim(),
+      'description': _descriptionController.text.trim(),
+      'date': Timestamp.fromDate(_selectedDate!),
+      'location': _locationController.text.trim(),
+      'createdBy': user.uid,
+      'imageUrl': imageUrl,
+      'createdAt': FieldValue.serverTimestamp(),
+    });
 
       if (!mounted) return;
 
@@ -157,33 +197,36 @@ class _AddMemoryScreenState extends State<AddMemoryScreen> {
                 ),
                 const SizedBox(height: 28),
                 Container(
-                  width: double.infinity,
-                  height: 170,
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primaryContainer,
-                    borderRadius: BorderRadius.circular(18),
-                  ),
-                  child: InkWell(
-                    onTap: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text(
-                            'Photo and video selection will be added later.',
-                          ),
-                        ),
-                      );
-                    },
-                    borderRadius: BorderRadius.circular(18),
-                    child: const Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.add_photo_alternate_outlined, size: 52),
-                        SizedBox(height: 10),
-                        Text('Add Photos or Videos'),
-                      ],
-                    ),
-                  ),
-                ),
+  width: double.infinity,
+  height: 170,
+  decoration: BoxDecoration(
+    color: Theme.of(context).colorScheme.primaryContainer,
+    borderRadius: BorderRadius.circular(18),
+  ),
+  child: InkWell(
+    onTap: _pickImage,
+    borderRadius: BorderRadius.circular(18),
+    child: _selectedImage == null
+        ? const Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.add_photo_alternate_outlined, size: 52),
+              SizedBox(height: 10),
+              Text('Add Photo'),
+            ],
+          )
+        : ClipRRect(
+            borderRadius: BorderRadius.circular(18),
+            child: Image.file(
+              File(_selectedImage!.path),
+              width: double.infinity,
+              height: 170,
+              fit: BoxFit.cover,
+            ),
+          ),
+  ),
+),
+                  
                 const SizedBox(height: 24),
                 TextFormField(
                   controller: _titleController,
@@ -237,9 +280,17 @@ class _AddMemoryScreenState extends State<AddMemoryScreen> {
                 SizedBox(
                   width: double.infinity,
                   child: FilledButton(
-                    onPressed: _saveMemory,
-                    child: const Text('Save Memory'),
-                  ),
+  onPressed: _isSaving ? null : _saveMemory,
+  child: _isSaving
+      ? const SizedBox(
+          width: 20,
+          height: 20,
+          child: CircularProgressIndicator(
+            strokeWidth: 2,
+          ),
+        )
+      : const Text('Save Memory'),
+),
                 ),
               ],
             ),

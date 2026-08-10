@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'add_memory_screen.dart';
-
+import 'memory_details_screen.dart';
 class MemoriesScreen extends StatelessWidget {
   const MemoriesScreen({super.key});
 
@@ -111,11 +111,11 @@ class MemoriesScreen extends StatelessWidget {
                   separatorBuilder: (_, _) => const SizedBox(height: 12),
                   itemBuilder: (context, index) {
                     final data = memories[index].data();
-
+final memoryId = memories[index].id;
                     final title = data['title'] as String? ?? 'Memory';
                     final description = data['description'] as String? ?? '';
                     final location = data['location'] as String? ?? '';
-
+final imageUrl = data['imageUrl'] as String?;
                     final timestamp = data['date'] as Timestamp?;
                     final date = timestamp?.toDate();
 
@@ -125,22 +125,53 @@ class MemoriesScreen extends StatelessWidget {
                               '${date.month.toString().padLeft(2, '0')}/'
                               '${date.year}';
 
-                    return Card(
-                      child: ListTile(
-                        leading: const CircleAvatar(
-                          child: Icon(Icons.photo_outlined),
-                        ),
-                        title: Text(title),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            if (description.isNotEmpty) Text(description),
-                            if (formattedDate.isNotEmpty) Text(formattedDate),
-                            if (location.isNotEmpty) Text(location),
-                          ],
-                        ),
-                      ),
-                    );
+                   return Card(
+  child: ListTile(
+    onTap: () {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => MemoryDetailsScreen(
+  memoryData: data,
+  memoryId: memoryId,
+  familyId: familyId,
+),
+        ),
+      );
+    },
+leading: ClipRRect(
+  borderRadius: BorderRadius.circular(10),
+  child: SizedBox(
+    width: 56,
+    height: 56,
+    child: imageUrl != null && imageUrl.isNotEmpty
+        ? Image.network(
+            imageUrl,
+            fit: BoxFit.cover,
+            errorBuilder: (context, error, stackTrace) {
+              return Container(
+                color: Theme.of(context).colorScheme.primaryContainer,
+                child: const Icon(Icons.broken_image_outlined),
+              );
+            },
+          )
+        : Container(
+            color: Theme.of(context).colorScheme.primaryContainer,
+            child: const Icon(Icons.photo_outlined),
+          ),
+  ),
+),
+    title: Text(title),
+    subtitle: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (description.isNotEmpty) Text(description),
+        if (formattedDate.isNotEmpty) Text(formattedDate),
+        if (location.isNotEmpty) Text(location),
+      ],
+    ),
+  ),
+);
                   },
                 );
               },

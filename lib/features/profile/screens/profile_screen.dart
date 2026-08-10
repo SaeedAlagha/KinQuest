@@ -118,15 +118,34 @@ class _ProfileHeader extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 4),
-                Text(
-                  familyId == null
-                      ? 'No family joined yet'
-                      : 'Family: $familyId',
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: colorScheme.primary,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
+               if (familyId == null || familyId.isEmpty)
+  Text(
+    'No family joined yet',
+    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+      color: colorScheme.primary,
+      fontWeight: FontWeight.w600,
+    ),
+  )
+else
+  StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+    stream: FirebaseFirestore.instance
+        .collection('families')
+        .doc(familyId)
+        .snapshots(),
+    builder: (context, familySnapshot) {
+      final familyData = familySnapshot.data?.data();
+      final familyName =
+          familyData?['name'] as String? ?? 'Your Family';
+
+      return Text(
+        'Family: $familyName',
+        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+          color: colorScheme.primary,
+          fontWeight: FontWeight.w600,
+        ),
+      );
+    },
+  ),
               ],
             ),
           ),
@@ -141,19 +160,86 @@ class _StatisticsGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const statistics = [
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user == null) {
+      return const SizedBox.shrink();
+    }
+
+    return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+      stream: FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .snapshots(),
+      builder: (context, userSnapshot) {
+        final data = userSnapshot.data?.data();
+
+        final gamesPlayed = data?['gamesPlayed'] ?? 0;
+        final wins = data?['wins'] ?? 0;
+        final currentStreak = data?['currentStreak'] ?? 0;
+        final familyId = data?['familyId'] as String?;
+
+        if (familyId == null || familyId.isEmpty) {
+          return _buildStatistics(
+            gamesPlayed: gamesPlayed,
+            wins: wins,
+            currentStreak: currentStreak,
+            memoryCount: 0,
+          );
+        }
+
+        return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+          stream: FirebaseFirestore.instance
+              .collection('families')
+              .doc(familyId)
+              .collection('memories')
+              .where('createdBy', isEqualTo: user.uid)
+              .snapshots(),
+          builder: (context, memorySnapshot) {
+            final memoryCount = memorySnapshot.data?.docs.length ?? 0;
+
+            return _buildStatistics(
+              gamesPlayed: gamesPlayed,
+              wins: wins,
+              currentStreak: currentStreak,
+              memoryCount: memoryCount,
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildStatistics({
+    required int gamesPlayed,
+    required int wins,
+    required int currentStreak,
+    required int memoryCount,
+  }) {
+    final achievementsCompleted =
+        (wins >= 20 ? 1 : 0) + (memoryCount >= 100 ? 1 : 0);
+
+    final statistics = [
       _StatisticItem(
         icon: Icons.sports_esports,
         label: 'Games Played',
-        value: '0',
+        value: gamesPlayed.toString(),
       ),
-      _StatisticItem(icon: Icons.emoji_events, label: 'Wins', value: '0'),
+      _StatisticItem(
+        icon: Icons.emoji_events,
+        label: 'Wins',
+        value: wins.toString(),
+      ),
       _StatisticItem(
         icon: Icons.local_fire_department,
         label: 'Current Streak',
-        value: '0 days',
+        value: '$currentStreak ${currentStreak == 1 ? 'day' : 'days'}',
       ),
-      _StatisticItem(icon: Icons.stars, label: 'Achievements', value: '0'),
+      _StatisticItem(
+        icon: Icons.stars,
+        label: 'Achievements',
+        value: achievementsCompleted.toString(),
+      ),
     ];
 
     return GridView.builder(
@@ -167,14 +253,11 @@ class _StatisticsGrid extends StatelessWidget {
         childAspectRatio: 1.25,
       ),
       itemBuilder: (context, index) {
-        final statistic = statistics[index];
-
-        return _StatisticCard(statistic: statistic);
+        return _StatisticCard(statistic: statistics[index]);
       },
     );
   }
 }
-
 class _StatisticCard extends StatelessWidget {
   const _StatisticCard({required this.statistic});
 
@@ -324,22 +407,76 @@ class _AchievementsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const achievements = [
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user == null) {
+      return const SizedBox.shrink();
+    }
+
+    return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+      stream: FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .snapshots(),
+      builder: (context, userSnapshot) {
+        final userData = userSnapshot.data?.data();
+        final wins = userData?['wins'] ?? 0;
+        final familyId = userData?['familyId'] as String?;
+
+        final quizProgress = (wins / 20).clamp(0.0, 1.0);
+
+        if (familyId == null || familyId.isEmpty) {
+          return _buildAchievements(
+            wins: wins,
+            quizProgress: quizProgress,
+            memoryCount: 0,
+          );
+        }
+
+        return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+          stream: FirebaseFirestore.instance
+              .collection('families')
+              .doc(familyId)
+              .collection('memories')
+              .where('createdBy', isEqualTo: user.uid)
+              .snapshots(),
+          builder: (context, memorySnapshot) {
+            final memoryCount = memorySnapshot.data?.docs.length ?? 0;
+
+            return _buildAchievements(
+              wins: wins,
+              quizProgress: quizProgress,
+              memoryCount: memoryCount,
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildAchievements({
+    required int wins,
+    required double quizProgress,
+    required int memoryCount,
+  }) {
+    final memoryProgress = (memoryCount / 100).clamp(0.0, 1.0);
+
+    final achievements = [
       _AchievementItem(
         icon: Icons.photo_library,
         title: 'Memory Keeper',
         description: 'Save 100 family memories.',
-        progress: 0,
-        progressText: '0 / 100',
+        progress: memoryProgress,
+        progressText: '$memoryCount / 100',
       ),
       _AchievementItem(
         icon: Icons.quiz,
         title: 'Quiz Master',
         description: 'Win 20 Family Quizzes.',
-        progress: 0,
-        progressText: '0 / 20',
+        progress: quizProgress,
+        progressText: '$wins / 20',
       ),
-      _AchievementItem(
+      const _AchievementItem(
         icon: Icons.groups,
         title: 'Team Player',
         description: 'Complete 30 Family Missions.',
