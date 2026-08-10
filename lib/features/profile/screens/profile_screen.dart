@@ -118,15 +118,34 @@ class _ProfileHeader extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 4),
-                Text(
-                  familyId == null
-                      ? 'No family joined yet'
-                      : 'Family: $familyId',
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: colorScheme.primary,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
+               if (familyId == null || familyId.isEmpty)
+  Text(
+    'No family joined yet',
+    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+      color: colorScheme.primary,
+      fontWeight: FontWeight.w600,
+    ),
+  )
+else
+  StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+    stream: FirebaseFirestore.instance
+        .collection('families')
+        .doc(familyId)
+        .snapshots(),
+    builder: (context, familySnapshot) {
+      final familyData = familySnapshot.data?.data();
+      final familyName =
+          familyData?['name'] as String? ?? 'Your Family';
+
+      return Text(
+        'Family: $familyName',
+        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+          color: colorScheme.primary,
+          fontWeight: FontWeight.w600,
+        ),
+      );
+    },
+  ),
               ],
             ),
           ),
