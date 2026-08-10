@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-
+import 'daily_challenge_screen.dart';
 import '../../games/screens/games_screen.dart';
 
 class CompetitionsScreen extends StatelessWidget {
@@ -72,6 +72,16 @@ class CompetitionsScreen extends StatelessWidget {
                       MaterialPageRoute(
                         builder: (_) =>
                             GamesScreen(developerPreview: developerPreview),
+                      ),
+                    );
+                    return;
+                  }
+                  if (competition.title == 'Daily Challenge') {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => DailyChallengeScreen(
+                          developerPreview: developerPreview,
+                        ),
                       ),
                     );
                     return;

@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-
+import '../../competitions/screens/daily_challenge_screen.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/family_year_banner.dart';
 import '../../../core/widgets/sila_brand_mark.dart';
@@ -150,6 +150,22 @@ class HomeDashboard extends StatelessWidget {
                         ),
                       ],
                       const SizedBox(height: 34),
+                      _QuickActionCard(
+                        icon: Icons.today_rounded,
+                        accent: AppTheme.goldColor,
+                        title: 'Today\'s Daily Challenge',
+                        subtitle:
+                            'Complete today\'s family challenge and earn bonus tokens.',
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => DailyChallengeScreen(
+                              developerPreview: developerPreview,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 24),
                       const _SectionHeading(
                         eyebrow: 'GROWING IN UNITY',
                         title: 'Small moments, stronger bonds',
