@@ -141,35 +141,58 @@ class _StatisticsGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const statistics = [
-      _StatisticItem(
-        icon: Icons.sports_esports,
-        label: 'Games Played',
-        value: '0',
-      ),
-      _StatisticItem(icon: Icons.emoji_events, label: 'Wins', value: '0'),
-      _StatisticItem(
-        icon: Icons.local_fire_department,
-        label: 'Current Streak',
-        value: '0 days',
-      ),
-      _StatisticItem(icon: Icons.stars, label: 'Achievements', value: '0'),
-    ];
+    final user = FirebaseAuth.instance.currentUser;
 
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: statistics.length,
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        crossAxisSpacing: 12,
-        mainAxisSpacing: 12,
-        childAspectRatio: 1.25,
-      ),
-      itemBuilder: (context, index) {
-        final statistic = statistics[index];
+    if (user == null) {
+      return const SizedBox.shrink();
+    }
 
-        return _StatisticCard(statistic: statistic);
+    return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+      stream: FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .snapshots(),
+      builder: (context, snapshot) {
+        final data = snapshot.data?.data();
+        final gamesPlayed = data?['gamesPlayed'] ?? 0;
+
+        final statistics = [
+          _StatisticItem(
+            icon: Icons.sports_esports,
+            label: 'Games Played',
+            value: gamesPlayed.toString(),
+          ),
+          const _StatisticItem(
+            icon: Icons.emoji_events,
+            label: 'Wins',
+            value: '0',
+          ),
+          const _StatisticItem(
+            icon: Icons.local_fire_department,
+            label: 'Current Streak',
+            value: '0 days',
+          ),
+          const _StatisticItem(
+            icon: Icons.stars,
+            label: 'Achievements',
+            value: '0',
+          ),
+        ];
+
+        return GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: statistics.length,
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            crossAxisSpacing: 12,
+            mainAxisSpacing: 12,
+            childAspectRatio: 1.25,
+          ),
+          itemBuilder: (context, index) {
+            return _StatisticCard(statistic: statistics[index]);
+          },
+        );
       },
     );
   }

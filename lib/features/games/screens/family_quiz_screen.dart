@@ -1122,6 +1122,7 @@ class _FamilyQuizScreenState extends State<FamilyQuizScreen> {
 
       await userRef.update({
         'tokens': FieldValue.increment(amount),
+        'gamesPlayed': FieldValue.increment(1),
         'updatedAt': FieldValue.serverTimestamp(),
       });
     } catch (error) {
