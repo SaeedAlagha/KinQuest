@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'add_memory_screen.dart';
-
+import 'memory_details_screen.dart';
 class MemoriesScreen extends StatelessWidget {
   const MemoriesScreen({super.key});
 
@@ -125,22 +125,32 @@ class MemoriesScreen extends StatelessWidget {
                               '${date.month.toString().padLeft(2, '0')}/'
                               '${date.year}';
 
-                    return Card(
-                      child: ListTile(
-                        leading: const CircleAvatar(
-                          child: Icon(Icons.photo_outlined),
-                        ),
-                        title: Text(title),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            if (description.isNotEmpty) Text(description),
-                            if (formattedDate.isNotEmpty) Text(formattedDate),
-                            if (location.isNotEmpty) Text(location),
-                          ],
-                        ),
-                      ),
-                    );
+                   return Card(
+  child: ListTile(
+    onTap: () {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => MemoryDetailsScreen(
+            memoryData: data,
+          ),
+        ),
+      );
+    },
+    leading: const CircleAvatar(
+      child: Icon(Icons.photo_outlined),
+    ),
+    title: Text(title),
+    subtitle: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (description.isNotEmpty) Text(description),
+        if (formattedDate.isNotEmpty) Text(formattedDate),
+        if (location.isNotEmpty) Text(location),
+      ],
+    ),
+  ),
+);
                   },
                 );
               },
