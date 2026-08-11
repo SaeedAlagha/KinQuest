@@ -11,31 +11,31 @@ class CompetitionsScreen extends StatelessWidget {
 
   static const List<_CompetitionItem> _competitions = [
     _CompetitionItem(
-      icon: Icons.sports_kabaddi,
-      title: 'Friendly Match',
+      icon: Icons.flash_on,
+      title: 'Quick Play',
       description:
-          'Challenge one family member in Family Quiz, Match My Answer, or Memory Challenge.',
-      reward: 'Tokens',
+          'Choose any game and play together on one phone. No Tokens or official ranking.',
+      reward: 'Just for fun • No Tokens',
     ),
     _CompetitionItem(
       icon: Icons.today,
       title: 'Daily Challenge',
       description:
-          'Play one AI-selected family game every day and maintain your family streak.',
-      reward: 'Daily Tokens',
+          'Compete in today\'s selected game. The winner earns Tokens.',
+      reward: 'Winner Tokens',
     ),
     _CompetitionItem(
       icon: Icons.emoji_events,
       title: 'Weekly Championship',
       description:
-          'Compete through several rounds to become this week\'s Family Champion.',
+          'Compete across several game rounds and become this week\'s Family Champion.',
       reward: 'Family Wish',
     ),
     _CompetitionItem(
       icon: Icons.workspace_premium,
       title: 'Monthly Cup',
       description:
-          'The biggest monthly competition. Winners enter the Family Trophy Cabinet.',
+          'The family\'s biggest monthly competition. Win a trophy and bonus Tokens.',
       reward: 'Trophy and Bonus Tokens',
     ),
   ];
@@ -43,19 +43,19 @@ class CompetitionsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Competitions'), centerTitle: true),
+      appBar: AppBar(title: const Text('play'), centerTitle: true),
       body: ListView(
         padding: const EdgeInsets.all(20),
         children: [
           Text(
-            'Compete Together',
+            'play Together',
             style: Theme.of(
               context,
             ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
           Text(
-            'Competitions organize who plays, when they play, and which games are included.',
+            'Gather around, choose how you want to play, then pick a game.',
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
               color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
@@ -67,7 +67,7 @@ class CompetitionsScreen extends StatelessWidget {
               child: _CompetitionCard(
                 competition: competition,
                 onTap: () {
-                  if (competition.title == 'Friendly Match') {
+                  if (competition.title == 'Quick Play') {
                     Navigator.of(context).push(
                       MaterialPageRoute(
                         builder: (_) =>
@@ -176,7 +176,9 @@ class _CompetitionCard extends StatelessWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'Reward: ${competition.reward}',
+                    competition.title == 'Quick Play'
+                      ? competition.reward
+                      : 'Reward: ${competition.reward}',
                     style: Theme.of(context).textTheme.labelLarge?.copyWith(
                       color: colorScheme.primary,
                       fontWeight: FontWeight.bold,
