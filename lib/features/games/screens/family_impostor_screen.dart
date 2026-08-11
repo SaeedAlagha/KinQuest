@@ -1,6 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'dart:math';
+import '../services/family_impostor_ai_service.dart';
+
+enum _GamePhase {
+  setup,
+  passDevice,
+  revealRole,
+}
 
 class FamilyImpostorScreen extends StatefulWidget {
   const FamilyImpostorScreen({super.key});
@@ -15,6 +23,19 @@ class _FamilyImpostorScreenState extends State<FamilyImpostorScreen> {
 
   final List<_FamilyPlayer> _familyMembers = [];
   final Set<String> _selectedPlayerIds = {};
+  final _aiService = const FamilyImpostorAiService();
+
+  bool _isStartingGame = false;
+
+  List<_FamilyPlayer> _players = [];
+  List<FamilyImpostorRound> _rounds = [];
+
+  int _currentRoundIndex = 0;
+  int _currentRevealPlayerIndex = 0;
+
+  String? _impostorPlayerId;
+
+  _GamePhase _phase = _GamePhase.setup;
 
   @override
   void initState() {
@@ -107,34 +128,76 @@ class _FamilyImpostorScreenState extends State<FamilyImpostorScreen> {
     });
   }
 
-  void _startGame() {
-    if (_selectedPlayerIds.length < 3) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Family Impostor needs at least 3 players.',
-          ),
+  Future<void> _startGame() async {
+  if (_selectedPlayerIds.length < 3) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text(
+          'Family Impostor needs at least 3 players.',
         ),
-      );
-      return;
-    }
+      ),
+    );
+    return;
+  }
 
+  setState(() {
+    _isStartingGame = true;
+  });
+
+  try {
     final selectedPlayers = _familyMembers
         .where(
           (player) => _selectedPlayerIds.contains(player.id),
         )
         .toList();
 
+    final rounds = await _aiService.generateRounds(
+      count: 5,
+    );
+
+    if (rounds.isEmpty) {
+      throw Exception('No rounds generated');
+    }
+
+    final random = Random.secure();
+
+    final impostor =
+        selectedPlayers[random.nextInt(selectedPlayers.length)];
+
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {
+      _players = selectedPlayers;
+      _rounds = rounds;
+
+      _currentRoundIndex = 0;
+      _currentRevealPlayerIndex = 0;
+
+      _impostorPlayerId = impostor.id;
+
+      _phase = _GamePhase.passDevice;
+      _isStartingGame = false;
+    });
+  } catch (_) {
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {
+      _isStartingGame = false;
+    });
+
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
+      const SnackBar(
         content: Text(
-          'Ready to play with ${selectedPlayers.length} family members.',
+          'Could not start Family Impostor. Make sure the AI server is running.',
         ),
       ),
     );
-
-    // Step 2 will start the real game here.
   }
+}
 
   @override
   Widget build(BuildContext context) {
@@ -149,6 +212,13 @@ class _FamilyImpostorScreenState extends State<FamilyImpostorScreen> {
   }
 
   Widget _buildBody() {
+     if (_phase == _GamePhase.passDevice) {
+      return _buildPassDeviceScreen();
+    }
+
+    if (_phase == _GamePhase.revealRole) {
+      return _buildRoleRevealScreen();
+    }
     if (_isLoading) {
       return const Center(
         child: CircularProgressIndicator(),
@@ -262,16 +332,213 @@ class _FamilyImpostorScreenState extends State<FamilyImpostorScreen> {
 
           const SizedBox(height: 12),
 
-          FilledButton.icon(
+                    FilledButton.icon(
             onPressed:
-                _selectedPlayerIds.length >= 3 ? _startGame : null,
-            icon: const Icon(Icons.play_arrow),
-            label: const Text('Start Game'),
+                _selectedPlayerIds.length >= 3 && !_isStartingGame
+                    ? _startGame
+                    : null,
+            icon: _isStartingGame
+                ? const SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                    ),
+                  )
+                : const Icon(Icons.play_arrow),
+            label: Text(
+              _isStartingGame
+                  ? 'Preparing Game...'
+                  : 'Start Game',
+            ),
           ),
         ],
       ),
     );
   }
+  Widget _buildPassDeviceScreen() {
+  final player = _players[_currentRevealPlayerIndex];
+
+  return Center(
+    child: Padding(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(
+            Icons.lock_outline,
+            size: 72,
+          ),
+          const SizedBox(height: 24),
+
+          Text(
+            'Pass the phone to ${player.name}',
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+
+          const SizedBox(height: 12),
+
+          const Text(
+            'Everyone else should look away.',
+            textAlign: TextAlign.center,
+          ),
+
+          const SizedBox(height: 32),
+
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton(
+              onPressed: () {
+                setState(() {
+                  _phase = _GamePhase.revealRole;
+                });
+              },
+              child: Text(
+                'I\'m ${player.name}',
+              ),
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+Widget _buildRoleRevealScreen() {
+  final player = _players[_currentRevealPlayerIndex];
+  final round = _rounds[_currentRoundIndex];
+
+  final isImpostor = player.id == _impostorPlayerId;
+
+  return Center(
+    child: Padding(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            'Round ${_currentRoundIndex + 1}',
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+
+          const SizedBox(height: 24),
+
+          if (isImpostor) ...[
+            const Icon(
+              Icons.visibility_off_outlined,
+              size: 72,
+            ),
+
+            const SizedBox(height: 20),
+
+            Text(
+              'You are the IMPOSTOR',
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+            ),
+
+            const SizedBox(height: 14),
+
+            Text(
+              'Category: ${round.category}',
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+
+            const SizedBox(height: 10),
+
+            const Text(
+              'You do not know the secret word.\nBlend in and avoid getting caught.',
+              textAlign: TextAlign.center,
+            ),
+          ] else ...[
+            const Icon(
+              Icons.key_outlined,
+              size: 72,
+            ),
+
+            const SizedBox(height: 20),
+
+            Text(
+              'Category',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+
+            const SizedBox(height: 6),
+
+            Text(
+              round.category,
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+            ),
+
+            const SizedBox(height: 24),
+
+            const Text(
+              'Secret word',
+            ),
+
+            const SizedBox(height: 6),
+
+            Text(
+              round.word,
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+            ),
+
+            const SizedBox(height: 14),
+
+            const Text(
+              'Remember it. Do not show anyone else.',
+              textAlign: TextAlign.center,
+            ),
+          ],
+
+          const SizedBox(height: 36),
+
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton(
+              onPressed: _finishRoleReveal,
+              child: const Text('Hide My Role'),
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+void _finishRoleReveal() {
+  final isLastPlayer =
+      _currentRevealPlayerIndex == _players.length - 1;
+
+  if (isLastPlayer) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text(
+          'Everyone has seen their role. Clue round is next.',
+        ),
+      ),
+    );
+
+    // We will replace this with the clue round next.
+    return;
+  }
+
+  setState(() {
+    _currentRevealPlayerIndex++;
+    _phase = _GamePhase.passDevice;
+  });
+}
 }
 
 class _FamilyPlayer {

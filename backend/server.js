@@ -875,6 +875,100 @@ Return ONLY valid JSON.
     });
   }
 });
+app.post("/api/family-impostor", async (req, res) => {
+  try {
+    const { rounds } = req.body;
+
+    const requestedRounds = Number(rounds) || 5;
+    const roundCount = Math.min(Math.max(requestedRounds, 1), 10);
+
+    const prompt = `
+Generate exactly ${roundCount} Family Impostor rounds.
+
+This is for KinQuest, a family bonding game played by children and adults together.
+
+For each round, generate:
+- one simple category
+- one secret word that belongs to that category
+
+Good categories include:
+- Food
+- Places
+- Animals
+- Objects
+- Activities
+- Movies
+- Sports
+- Travel
+- Nature
+- School
+- Home
+
+Rules:
+- Family friendly
+- Easy enough for different age groups
+- The secret word should be recognizable
+- Avoid very obscure words
+- No politics
+- No sexual content
+- No drugs or alcohol
+- No graphic violence
+- No hateful content
+- No duplicate secret words
+- Keep category and word concise
+
+Return ONLY valid JSON in this exact structure:
+
+{
+  "rounds": [
+    {
+      "category": "Places",
+      "word": "Beach"
+    }
+  ]
+}
+`;
+
+    const response = await ai.models.generateContent({
+      model: "gemini-3.5-flash",
+      contents: prompt,
+      config: {
+        responseMimeType: "application/json",
+        responseJsonSchema: {
+          type: "object",
+          properties: {
+            rounds: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  category: {
+                    type: "string",
+                  },
+                  word: {
+                    type: "string",
+                  },
+                },
+                required: ["category", "word"],
+              },
+            },
+          },
+          required: ["rounds"],
+        },
+      },
+    });
+
+    const result = JSON.parse(response.text);
+
+    res.json(result);
+  } catch (error) {
+    console.error("Family Impostor generation error:", error);
+
+    res.status(500).json({
+      error: "Failed to generate Family Impostor rounds",
+    });
+  }
+});
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
