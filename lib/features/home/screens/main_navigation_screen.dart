@@ -6,6 +6,7 @@ import '../../../core/widgets/family_year_banner.dart';
 import '../../../core/widgets/sila_brand_mark.dart';
 import '../../competitions/screens/competitions_screen.dart';
 import '../../games/screens/games_screen.dart';
+import '../../games/screens/family_missions_screen.dart';
 import '../../memories/screens/memories_screen.dart';
 import '../../profile/screens/profile_screen.dart';
 import 'home_screen.dart';
@@ -29,19 +30,19 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       label: 'Home',
     ),
     NavigationDestination(
-      icon: Icon(Icons.sports_esports_outlined),
-      selectedIcon: Icon(Icons.sports_esports_rounded),
-      label: 'Games',
-    ),
-    NavigationDestination(
       icon: Icon(Icons.photo_library_outlined),
       selectedIcon: Icon(Icons.photo_library_rounded),
       label: 'Memories',
     ),
     NavigationDestination(
-      icon: Icon(Icons.emoji_events_outlined),
-      selectedIcon: Icon(Icons.emoji_events_rounded),
-      label: 'Compete',
+      icon: Icon(Icons.sports_esports_outlined),
+      selectedIcon: Icon(Icons.sports_esports_rounded),
+      label: 'Play',
+    ),
+    NavigationDestination(
+      icon: Icon(Icons.groups_outlined),
+      selectedIcon: Icon(Icons.groups_rounded),
+      label: 'Missions',
     ),
     NavigationDestination(
       icon: Icon(Icons.person_outline_rounded),
@@ -57,19 +58,19 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       label: Text('Home'),
     ),
     NavigationRailDestination(
-      icon: Icon(Icons.sports_esports_outlined),
-      selectedIcon: Icon(Icons.sports_esports_rounded),
-      label: Text('Games'),
-    ),
-    NavigationRailDestination(
       icon: Icon(Icons.photo_library_outlined),
       selectedIcon: Icon(Icons.photo_library_rounded),
       label: Text('Memories'),
     ),
     NavigationRailDestination(
-      icon: Icon(Icons.emoji_events_outlined),
-      selectedIcon: Icon(Icons.emoji_events_rounded),
-      label: Text('Competitions'),
+      icon: Icon(Icons.sports_esports_outlined),
+      selectedIcon: Icon(Icons.sports_esports_rounded),
+      label: Text('Play'),
+    ),
+    NavigationRailDestination(
+      icon: Icon(Icons.groups_outlined),
+      selectedIcon: Icon(Icons.groups_rounded),
+      label: Text('Missions'),
     ),
     NavigationRailDestination(
       icon: Icon(Icons.person_outline_rounded),
@@ -93,16 +94,16 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
               tokens: '480',
               developerPreview: true,
             ),
-            GamesScreen(developerPreview: true),
             MemoriesScreen(developerPreview: true),
             CompetitionsScreen(developerPreview: true),
+            FamilyMissionsScreen(),
             ProfileScreen(developerPreview: true),
           ]
         : const [
             HomeScreen(),
-            GamesScreen(),
             MemoriesScreen(),
             CompetitionsScreen(),
+            FamilyMissionsScreen(),
             ProfileScreen(),
           ];
   }
