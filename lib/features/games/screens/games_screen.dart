@@ -10,6 +10,7 @@ import 'trivia_screen.dart';
 import 'truth_or_dare_screen.dart';
 import 'would_you_rather_screen.dart';
 import 'memory_challenge_screen.dart';
+import 'family_impostor_screen.dart';
 
 class GamesScreen extends StatelessWidget {
   const GamesScreen({super.key, this.developerPreview = false});
@@ -69,6 +70,15 @@ class GamesScreen extends StatelessWidget {
       eyebrow: '6 GAMES INSIDE',
       isAvailable: true,
     ),
+    _GameItem(
+      icon: Icons.person_search_rounded,
+      accent: AppTheme.coralColor,
+      title: 'Family Impostor',
+      description:
+          'Find the hidden impostor through clues, discussion, and family voting.',
+      eyebrow: 'SOCIAL DEDUCTION',
+      isAvailable: true,
+),
   ];
 
   void _openGame(BuildContext context, _GameItem game) {
@@ -78,6 +88,7 @@ class GamesScreen extends StatelessWidget {
           'Family Quiz' => FamilyQuizScreen(developerPreview: developerPreview),
           'Memory Challenge' => const MemoryChallengeScreen(),
           'Family Missions' => const FamilyMissionsScreen(),
+          'Family Impostor' => const FamilyImpostorScreen(),
           'Party Games' => const PartyGamesScreen(),
           _ => GamePlaceholderScreen(gameTitle: game.title),
         },
