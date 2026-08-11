@@ -47,7 +47,6 @@ class _FamilyImpostorScreenState extends State<FamilyImpostorScreen> {
 
   final Map<String, int> _scores = {};
 
-  String? _votedPlayerId;
   bool? _impostorWonRound;
   String _roundResultMessage = '';
 
@@ -853,7 +852,7 @@ Widget _buildVoteResultsScreen() {
   for (final votedPlayerId in _votes.values) {
     voteCounts.update(
       votedPlayerId,
-      (count) => count + 1,
+      (currentcount) => currentcount + 1,
       ifAbsent: () => 1,
     );
   }
@@ -943,7 +942,7 @@ void _revealVotedPlayer(_FamilyPlayer player) {
   final isActuallyImpostor =
       player.id == _impostorPlayerId;
 
-  _votedPlayerId = player.id;
+
 
   if (isActuallyImpostor) {
     _impostorGuessController.clear();
@@ -1185,7 +1184,7 @@ void _continueAfterRound() {
 
     _votes.clear();
 
-    _votedPlayerId = null;
+    
     _impostorWonRound = null;
     _roundResultMessage = '';
 
