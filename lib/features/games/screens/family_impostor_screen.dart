@@ -8,6 +8,8 @@ enum _GamePhase {
   setup,
   passDevice,
   revealRole,
+  clueRound,
+  clueDecision,
 }
 
 class FamilyImpostorScreen extends StatefulWidget {
@@ -32,6 +34,7 @@ class _FamilyImpostorScreenState extends State<FamilyImpostorScreen> {
 
   int _currentRoundIndex = 0;
   int _currentRevealPlayerIndex = 0;
+  int _clueRoundNumber = 1;
 
   String? _impostorPlayerId;
 
@@ -218,6 +221,13 @@ class _FamilyImpostorScreenState extends State<FamilyImpostorScreen> {
 
     if (_phase == _GamePhase.revealRole) {
       return _buildRoleRevealScreen();
+    }
+    if (_phase == _GamePhase.clueRound) {
+      return _buildClueRoundScreen();
+    }
+
+    if (_phase == _GamePhase.clueDecision) {
+      return _buildClueDecisionScreen();
     }
     if (_isLoading) {
       return const Center(
@@ -522,15 +532,11 @@ void _finishRoleReveal() {
       _currentRevealPlayerIndex == _players.length - 1;
 
   if (isLastPlayer) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text(
-          'Everyone has seen their role. Clue round is next.',
-        ),
-      ),
-    );
+    setState(() {
+      _clueRoundNumber = 1;
+      _phase = _GamePhase.clueRound;
+    });
 
-    // We will replace this with the clue round next.
     return;
   }
 
@@ -538,6 +544,147 @@ void _finishRoleReveal() {
     _currentRevealPlayerIndex++;
     _phase = _GamePhase.passDevice;
   });
+}
+
+Widget _buildClueRoundScreen() {
+  final round = _rounds[_currentRoundIndex];
+
+  return Center(
+    child: Padding(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(
+            Icons.record_voice_over_outlined,
+            size: 72,
+          ),
+          const SizedBox(height: 20),
+
+          Text(
+            'Clue Round $_clueRoundNumber',
+            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+
+          const SizedBox(height: 12),
+
+          Text(
+            'Category: ${round.category}',
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+
+          const SizedBox(height: 24),
+
+          const Text(
+            'Take turns giving one clue aloud.',
+            textAlign: TextAlign.center,
+          ),
+
+          const SizedBox(height: 10),
+
+          const Text(
+            'Do not say the secret word.\nDo not make your clue too obvious.',
+            textAlign: TextAlign.center,
+          ),
+
+          const SizedBox(height: 10),
+
+          const Text(
+            'The Impostor must bluff and try to blend in.',
+            textAlign: TextAlign.center,
+          ),
+
+          const SizedBox(height: 32),
+
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton(
+              onPressed: () {
+                setState(() {
+                  _phase = _GamePhase.clueDecision;
+                });
+              },
+              child: const Text('Everyone Gave a Clue'),
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+Widget _buildClueDecisionScreen() {
+  final canContinue = _clueRoundNumber < 3;
+
+  return Center(
+    child: Padding(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(
+            Icons.psychology_alt_outlined,
+            size: 72,
+          ),
+          const SizedBox(height: 20),
+
+          Text(
+            'Do you know who the Impostor is?',
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+
+          const SizedBox(height: 12),
+
+          Text(
+            'Clue round $_clueRoundNumber is complete.',
+            textAlign: TextAlign.center,
+          ),
+
+          const SizedBox(height: 32),
+
+          if (canContinue) ...[
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: () {
+                  setState(() {
+                    _clueRoundNumber++;
+                    _phase = _GamePhase.clueRound;
+                  });
+                },
+                icon: const Icon(Icons.refresh),
+                label: const Text('Another Clue Round'),
+              ),
+            ),
+
+            const SizedBox(height: 12),
+          ],
+
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton.icon(
+              onPressed: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text(
+                      'Voting is next.',
+                    ),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.how_to_vote_outlined),
+              label: const Text('Start Voting'),
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
 }
 }
 
