@@ -95,7 +95,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
             ),
             MemoriesScreen(developerPreview: true),
             CompetitionsScreen(developerPreview: true),
-            FamilyMissionsScreen(),
+            FamilyMissionsScreen(developerPreview: true),
             ProfileScreen(developerPreview: true),
           ]
         : const [
