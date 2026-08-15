@@ -11,6 +11,7 @@ import 'truth_or_dare_screen.dart';
 import 'would_you_rather_screen.dart';
 import 'memory_challenge_screen.dart';
 import 'family_impostor_screen.dart';
+import 'draw_and_guess_screen.dart';
 
 class GamesScreen extends StatelessWidget {
   const GamesScreen({super.key, this.developerPreview = false});
@@ -79,6 +80,15 @@ class GamesScreen extends StatelessWidget {
       eyebrow: 'SOCIAL DEDUCTION',
       isAvailable: true,
 ),
+      _GameItem(
+    icon: Icons.draw_outlined,
+  accent: AppTheme.coralColor,
+    title: 'Draw & Guess',
+    description:
+        'Draw AI-generated prompts while your family guesses aloud.',
+    eyebrow: 'CREATIVE PLAY',
+    isAvailable: true,
+  ),
   ];
 
   void _openGame(BuildContext context, _GameItem game) {
@@ -89,6 +99,7 @@ class GamesScreen extends StatelessWidget {
           'Memory Challenge' => const MemoryChallengeScreen(),
           'Family Missions' => const FamilyMissionsScreen(),
           'Family Impostor' => const FamilyImpostorScreen(),
+          'Draw & Guess' => const DrawAndGuessScreen(),
           'Party Games' => const PartyGamesScreen(),
           _ => GamePlaceholderScreen(gameTitle: game.title),
         },
