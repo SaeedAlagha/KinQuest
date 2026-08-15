@@ -13,6 +13,7 @@ import 'memory_challenge_screen.dart';
 import 'family_impostor_screen.dart';
 import 'secret_mission_screen.dart';
 import 'caption_battle_screen.dart';
+import 'pass_the_bomb_screen.dart';
 
 class GamesScreen extends StatelessWidget {
   const GamesScreen({super.key, this.developerPreview = false});
@@ -99,6 +100,15 @@ class GamesScreen extends StatelessWidget {
       eyebrow: 'PHOTO PARTY',
       isAvailable: true,
     ),
+    _GameItem(
+      icon: Icons.timer_rounded,
+      accent: AppTheme.goldColor,
+      title: 'Pass the Bomb',
+      description:
+          'Answer quickly, pass the phone, and avoid being caught when the hidden timer explodes.',
+      eyebrow: 'FAST FAMILY FUN',
+      isAvailable: true,
+    ),
   ];
 
   void _openGame(BuildContext context, _GameItem game) {
@@ -111,6 +121,7 @@ class GamesScreen extends StatelessWidget {
           'Family Impostor' => const FamilyImpostorScreen(),
           'Secret Mission' => const SecretMissionScreen(),
           'Caption Battle' => const CaptionBattleScreen(),
+          'Pass the Bomb' => const PassTheBombScreen(),
           'Party Games' => const PartyGamesScreen(),
           _ => GamePlaceholderScreen(gameTitle: game.title),
         },

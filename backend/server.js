@@ -1230,63 +1230,66 @@ Return ONLY valid JSON:
       error: "Failed to generate Caption Battle modes",
     });
   }
-});app.post("/api/caption-battle/modes", async (req, res) => {
+});
+app.post("/api/pass-the-bomb", async (req, res) => {
   try {
-    const { count, language } = req.body;
+    const { count } = req.body;
 
-    const requestedCount = Number(count) || 3;
-    const modeCount = Math.min(Math.max(requestedCount, 1), 5);
-
-    const outputLanguage =
-      language === "ar" ? "Arabic" : "English";
+    const requestedCount = Number(count) || 5;
+    const categoryCount = Math.min(
+      Math.max(requestedCount, 1),
+      10,
+    );
 
     const prompt = `
-You create round themes for a family party game called Caption Battle.
+Generate exactly ${categoryCount} categories for a family game called Pass the Bomb.
 
-During each round:
-- The family sees one real family photo.
-- Every player secretly writes a caption.
-- Captions are shown anonymously.
-- Everyone votes for their favorite caption.
-- Players cannot vote for their own caption.
+KinQuest is a family bonding app played together on one shared phone.
 
-Generate exactly ${modeCount} DIFFERENT round themes.
+During each round, players take turns naming something that matches the category.
+They cannot repeat an answer.
+A hidden random timer is running while the phone is passed around.
 
-Write every theme in ${outputLanguage}.
+The categories should create quick, funny, easy conversation.
 
-The theme must be short and instantly understandable.
+Good examples:
 
-Examples of the STYLE:
-- Funny Caption
-- Breaking News
-- Movie Title
-- Wrong Answers Only
-- Future Historian
-- Family Documentary
-- Social Media Post
-- What Happened Next?
-
-Do not simply copy the examples every time.
+- Things you find in a kitchen
+- Animals that live in water
+- Things you bring on holiday
+- Things people do before school
+- Foods you eat with your hands
+- Excuses for being late
+- Things Grandma might say
+- Things you should not bring camping
+- Things found in a family living room
+- Things people forget at home
+- Reasons someone might laugh
+- Things you might see at the beach
 
 Rules:
-- Family friendly
-- Suitable for all ages
-- Encourage creativity and humor
-- Maximum about 5 words per theme
-- No duplicate themes
-- No sexual content
-- No hateful content
-- No graphic violence
-- No bullying
-- No politics
 
-Return ONLY valid JSON:
+- Family friendly
+- Suitable for children and adults
+- Easy enough that many answers are possible
+- Each category should allow at least 10 reasonable answers
+- Mix normal categories with funny creative categories
+- No politics
+- No sexual content
+- No drugs or alcohol
+- No graphic violence
+- No hateful content
+- No duplicate categories
+- Keep each category short
+- Do not include answers
+- Do not number the category text
+
+Return ONLY valid JSON in this exact structure:
 
 {
-  "modes": [
-    "Funny Caption",
-    "Breaking News",
-    "Movie Title"
+  "categories": [
+    "Things you find in a kitchen",
+    "Animals that live in water"
   ]
 }
 `;
@@ -1299,44 +1302,145 @@ Return ONLY valid JSON:
         responseJsonSchema: {
           type: "object",
           properties: {
-            modes: {
+            categories: {
               type: "array",
               items: {
                 type: "string",
               },
+              minItems: categoryCount,
+              maxItems: categoryCount,
             },
           },
-          required: ["modes"],
+          required: ["categories"],
         },
       },
     });
 
     const result = JSON.parse(response.text);
 
-    if (
-      !Array.isArray(result.modes) ||
-      result.modes.length !== modeCount
-    ) {
-      throw new Error("Gemini returned an invalid Caption Battle mode count");
-    }
-
-    const cleanedModes = result.modes
-      .filter((mode) => typeof mode === "string")
-      .map((mode) => mode.trim())
-      .filter((mode) => mode.length > 0);
-
-    if (cleanedModes.length !== modeCount) {
-      throw new Error("Gemini returned invalid Caption Battle modes");
-    }
-
-    res.json({
-      modes: cleanedModes,
-    });
+    res.json(result);
   } catch (error) {
-    console.error("Caption Battle mode generation error:", error);
+    console.error(
+      "Pass the Bomb generation error:",
+      error,
+    );
 
     res.status(500).json({
-      error: "Failed to generate Caption Battle modes",
+      error: "Failed to generate Pass the Bomb categories",
+    });
+  }
+});
+app.post("/api/pass-the-bomb/validate", async (req, res) => {
+  try {
+    const { category, answer } = req.body;
+
+    if (
+      typeof category !== "string" ||
+      category.trim().length === 0 ||
+      typeof answer !== "string" ||
+      answer.trim().length === 0
+    ) {
+      return res.status(400).json({
+        valid: false,
+        reason: "Missing category or answer.",
+      });
+    }
+
+    const prompt = `
+You are the answer judge for a fast family party game called Pass the Bomb.
+
+CATEGORY:
+"${category.trim()}"
+
+PLAYER ANSWER:
+"${answer.trim()}"
+
+Decide whether the player's answer reasonably belongs in the category.
+
+Judge like a normal, friendly family playing together.
+
+ACCEPT:
+- Clearly correct answers
+- Common synonyms
+- Singular/plural differences
+- Minor spelling mistakes when the intended word is obvious
+- Informal wording
+- Creative answers that reasonably fit the category
+
+REJECT:
+- Completely unrelated answers
+- Random words
+- Gibberish
+- Nonsense
+- Answers that clearly contradict the category
+
+IMPORTANT:
+Be forgiving.
+Do not reject a reasonable answer just because it is unusual.
+
+Examples:
+
+Category: Animals that live in water
+Answer: Shark
+Valid: true
+
+Category: Animals that live in water
+Answer: Microwave
+Valid: false
+
+Category: Things found in a kitchen
+Answer: Fridge
+Valid: true
+
+Category: Things found in a kitchen
+Answer: Cloud
+Valid: false
+
+Return ONLY valid JSON:
+
+{
+  "valid": true,
+  "reason": "Short explanation"
+}
+`;
+
+    const response = await ai.models.generateContent({
+      model: "gemini-3.5-flash",
+      contents: prompt,
+      config: {
+        responseMimeType: "application/json",
+        responseJsonSchema: {
+          type: "object",
+          properties: {
+            valid: {
+              type: "boolean",
+            },
+            reason: {
+              type: "string",
+            },
+          },
+          required: ["valid", "reason"],
+        },
+      },
+    });
+
+    const result = JSON.parse(response.text);
+
+    res.json({
+      valid: result.valid === true,
+      reason:
+        typeof result.reason === "string"
+          ? result.reason
+          : "",
+    });
+  } catch (error) {
+    console.error(
+      "Pass the Bomb answer validation error:",
+      error,
+    );
+
+    res.status(500).json({
+      error: "Failed to validate Pass the Bomb answer",
     });
   }
 });
