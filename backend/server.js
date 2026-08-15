@@ -968,9 +968,220 @@ Return ONLY valid JSON in this exact structure:
       error: "Failed to generate Family Impostor rounds",
     });
   }
+});app.post("/api/pass-the-bomb", async (req, res) => {
+  try {
+    const { count } = req.body;
+
+    const requestedCount = Number(count) || 5;
+    const categoryCount = Math.min(
+      Math.max(requestedCount, 1),
+      10,
+    );
+
+    const prompt = `
+Generate exactly ${categoryCount} categories for a family game called Pass the Bomb.
+
+KinQuest is a family bonding app played together on one shared phone.
+
+During each round, players take turns naming something that matches the category.
+They cannot repeat an answer.
+A hidden random timer is running while the phone is passed around.
+
+The categories should create quick, funny, easy conversation.
+
+Good examples:
+
+- Things you find in a kitchen
+- Animals that live in water
+- Things you bring on holiday
+- Things people do before school
+- Foods you eat with your hands
+- Excuses for being late
+- Things Grandma might say
+- Things you should not bring camping
+- Things found in a family living room
+- Things people forget at home
+- Reasons someone might laugh
+- Things you might see at the beach
+
+Rules:
+
+- Family friendly
+- Suitable for children and adults
+- Easy enough that many answers are possible
+- Each category should allow at least 10 reasonable answers
+- Mix normal categories with funny creative categories
+- No politics
+- No sexual content
+- No drugs or alcohol
+- No graphic violence
+- No hateful content
+- No duplicate categories
+- Keep each category short
+- Do not include answers
+- Do not number the category text
+
+Return ONLY valid JSON in this exact structure:
+
+{
+  "categories": [
+    "Things you find in a kitchen",
+    "Animals that live in water"
+  ]
+}
+`;
+
+    const response = await ai.models.generateContent({
+      model: "gemini-3.5-flash",
+      contents: prompt,
+      config: {
+        responseMimeType: "application/json",
+        responseJsonSchema: {
+          type: "object",
+          properties: {
+            categories: {
+              type: "array",
+              items: {
+                type: "string",
+              },
+              minItems: categoryCount,
+              maxItems: categoryCount,
+            },
+          },
+          required: ["categories"],
+        },
+      },
+    });
+
+    const result = JSON.parse(response.text);
+
+    res.json(result);
+  } catch (error) {
+    console.error(
+      "Pass the Bomb generation error:",
+      error,
+    );
+
+    res.status(500).json({
+      error: "Failed to generate Pass the Bomb categories",
+    });
+  }
 });
 const PORT = process.env.PORT || 3000;
+app.post("/api/pass-the-bomb/validate", async (req, res) => {
+  try {
+    const { category, answer } = req.body;
 
+    if (
+      typeof category !== "string" ||
+      category.trim().length === 0 ||
+      typeof answer !== "string" ||
+      answer.trim().length === 0
+    ) {
+      return res.status(400).json({
+        valid: false,
+        reason: "Missing category or answer.",
+      });
+    }
+
+    const prompt = `
+You are the answer judge for a fast family party game called Pass the Bomb.
+
+CATEGORY:
+"${category.trim()}"
+
+PLAYER ANSWER:
+"${answer.trim()}"
+
+Decide whether the player's answer reasonably belongs in the category.
+
+Judge like a normal, friendly family playing together.
+
+ACCEPT:
+- Clearly correct answers
+- Common synonyms
+- Singular/plural differences
+- Minor spelling mistakes when the intended word is obvious
+- Informal wording
+- Creative answers that reasonably fit the category
+
+REJECT:
+- Completely unrelated answers
+- Random words
+- Gibberish
+- Nonsense
+- Answers that clearly contradict the category
+
+IMPORTANT:
+Be forgiving.
+Do not reject a reasonable answer just because it is unusual.
+
+Examples:
+
+Category: Animals that live in water
+Answer: Shark
+Valid: true
+
+Category: Animals that live in water
+Answer: Microwave
+Valid: false
+
+Category: Things found in a kitchen
+Answer: Fridge
+Valid: true
+
+Category: Things found in a kitchen
+Answer: Cloud
+Valid: false
+
+Return ONLY valid JSON:
+
+{
+  "valid": true,
+  "reason": "Short explanation"
+}
+`;
+
+    const response = await ai.models.generateContent({
+      model: "gemini-3.5-flash",
+      contents: prompt,
+      config: {
+        responseMimeType: "application/json",
+        responseJsonSchema: {
+          type: "object",
+          properties: {
+            valid: {
+              type: "boolean",
+            },
+            reason: {
+              type: "string",
+            },
+          },
+          required: ["valid", "reason"],
+        },
+      },
+    });
+
+    const result = JSON.parse(response.text);
+
+    res.json({
+      valid: result.valid === true,
+      reason:
+        typeof result.reason === "string"
+          ? result.reason
+          : "",
+    });
+  } catch (error) {
+    console.error(
+      "Pass the Bomb answer validation error:",
+      error,
+    );
+
+    res.status(500).json({
+      error: "Failed to validate Pass the Bomb answer",
+    });
+  }
+});
 app.listen(PORT, () => {
   console.log(`KinQuest Gemini server running on port ${PORT}`);
 });
