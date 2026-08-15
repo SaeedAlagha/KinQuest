@@ -12,6 +12,7 @@ import 'would_you_rather_screen.dart';
 import 'memory_challenge_screen.dart';
 import 'family_impostor_screen.dart';
 import 'secret_mission_screen.dart';
+import 'caption_battle_screen.dart';
 
 class GamesScreen extends StatelessWidget {
   const GamesScreen({super.key, this.developerPreview = false});
@@ -89,6 +90,15 @@ class GamesScreen extends StatelessWidget {
       eyebrow: 'SECRET CHALLENGE',
       isAvailable: true,
     ),
+    _GameItem(
+      icon: Icons.add_comment_rounded,
+      accent: AppTheme.goldColor,
+      title: 'Caption Battle',
+      description:
+          'Caption real family photos, vote anonymously, and crown the funniest family member.',
+      eyebrow: 'PHOTO PARTY',
+      isAvailable: true,
+    ),
   ];
 
   void _openGame(BuildContext context, _GameItem game) {
@@ -100,6 +110,7 @@ class GamesScreen extends StatelessWidget {
           'Family Missions' => const FamilyMissionsScreen(),
           'Family Impostor' => const FamilyImpostorScreen(),
           'Secret Mission' => const SecretMissionScreen(),
+          'Caption Battle' => const CaptionBattleScreen(),
           'Party Games' => const PartyGamesScreen(),
           _ => GamePlaceholderScreen(gameTitle: game.title),
         },

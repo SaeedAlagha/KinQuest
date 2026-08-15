@@ -1121,6 +1121,224 @@ Return ONLY valid JSON:
       error: "Failed to generate Secret Mission missions",
     });
   }
+});app.post("/api/caption-battle/modes", async (req, res) => {
+  try {
+    const { count, language } = req.body;
+
+    const requestedCount = Number(count) || 3;
+    const modeCount = Math.min(Math.max(requestedCount, 1), 5);
+
+    const outputLanguage =
+      language === "ar" ? "Arabic" : "English";
+
+    const prompt = `
+You create round themes for a family party game called Caption Battle.
+
+During each round:
+- The family sees one real family photo.
+- Every player secretly writes a caption.
+- Captions are shown anonymously.
+- Everyone votes for their favorite caption.
+- Players cannot vote for their own caption.
+
+Generate exactly ${modeCount} DIFFERENT round themes.
+
+Write every theme in ${outputLanguage}.
+
+The theme must be short and instantly understandable.
+
+Examples of the STYLE:
+- Funny Caption
+- Breaking News
+- Movie Title
+- Wrong Answers Only
+- Future Historian
+- Family Documentary
+- Social Media Post
+- What Happened Next?
+
+Do not simply copy the examples every time.
+
+Rules:
+- Family friendly
+- Suitable for all ages
+- Encourage creativity and humor
+- Maximum about 5 words per theme
+- No duplicate themes
+- No sexual content
+- No hateful content
+- No graphic violence
+- No bullying
+- No politics
+
+Return ONLY valid JSON:
+
+{
+  "modes": [
+    "Funny Caption",
+    "Breaking News",
+    "Movie Title"
+  ]
+}
+`;
+
+    const response = await ai.models.generateContent({
+      model: "gemini-3.5-flash",
+      contents: prompt,
+      config: {
+        responseMimeType: "application/json",
+        responseJsonSchema: {
+          type: "object",
+          properties: {
+            modes: {
+              type: "array",
+              items: {
+                type: "string",
+              },
+            },
+          },
+          required: ["modes"],
+        },
+      },
+    });
+
+    const result = JSON.parse(response.text);
+
+    if (
+      !Array.isArray(result.modes) ||
+      result.modes.length !== modeCount
+    ) {
+      throw new Error("Gemini returned an invalid Caption Battle mode count");
+    }
+
+    const cleanedModes = result.modes
+      .filter((mode) => typeof mode === "string")
+      .map((mode) => mode.trim())
+      .filter((mode) => mode.length > 0);
+
+    if (cleanedModes.length !== modeCount) {
+      throw new Error("Gemini returned invalid Caption Battle modes");
+    }
+
+    res.json({
+      modes: cleanedModes,
+    });
+  } catch (error) {
+    console.error("Caption Battle mode generation error:", error);
+
+    res.status(500).json({
+      error: "Failed to generate Caption Battle modes",
+    });
+  }
+});app.post("/api/caption-battle/modes", async (req, res) => {
+  try {
+    const { count, language } = req.body;
+
+    const requestedCount = Number(count) || 3;
+    const modeCount = Math.min(Math.max(requestedCount, 1), 5);
+
+    const outputLanguage =
+      language === "ar" ? "Arabic" : "English";
+
+    const prompt = `
+You create round themes for a family party game called Caption Battle.
+
+During each round:
+- The family sees one real family photo.
+- Every player secretly writes a caption.
+- Captions are shown anonymously.
+- Everyone votes for their favorite caption.
+- Players cannot vote for their own caption.
+
+Generate exactly ${modeCount} DIFFERENT round themes.
+
+Write every theme in ${outputLanguage}.
+
+The theme must be short and instantly understandable.
+
+Examples of the STYLE:
+- Funny Caption
+- Breaking News
+- Movie Title
+- Wrong Answers Only
+- Future Historian
+- Family Documentary
+- Social Media Post
+- What Happened Next?
+
+Do not simply copy the examples every time.
+
+Rules:
+- Family friendly
+- Suitable for all ages
+- Encourage creativity and humor
+- Maximum about 5 words per theme
+- No duplicate themes
+- No sexual content
+- No hateful content
+- No graphic violence
+- No bullying
+- No politics
+
+Return ONLY valid JSON:
+
+{
+  "modes": [
+    "Funny Caption",
+    "Breaking News",
+    "Movie Title"
+  ]
+}
+`;
+
+    const response = await ai.models.generateContent({
+      model: "gemini-3.5-flash",
+      contents: prompt,
+      config: {
+        responseMimeType: "application/json",
+        responseJsonSchema: {
+          type: "object",
+          properties: {
+            modes: {
+              type: "array",
+              items: {
+                type: "string",
+              },
+            },
+          },
+          required: ["modes"],
+        },
+      },
+    });
+
+    const result = JSON.parse(response.text);
+
+    if (
+      !Array.isArray(result.modes) ||
+      result.modes.length !== modeCount
+    ) {
+      throw new Error("Gemini returned an invalid Caption Battle mode count");
+    }
+
+    const cleanedModes = result.modes
+      .filter((mode) => typeof mode === "string")
+      .map((mode) => mode.trim())
+      .filter((mode) => mode.length > 0);
+
+    if (cleanedModes.length !== modeCount) {
+      throw new Error("Gemini returned invalid Caption Battle modes");
+    }
+
+    res.json({
+      modes: cleanedModes,
+    });
+  } catch (error) {
+    console.error("Caption Battle mode generation error:", error);
+
+    res.status(500).json({
+      error: "Failed to generate Caption Battle modes",
+    });
+  }
 });
 const PORT = process.env.PORT || 3000;
 
