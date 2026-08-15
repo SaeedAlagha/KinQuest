@@ -9,6 +9,9 @@ enum _DrawGamePhase {
   passToArtist,
   revealPrompt,
   drawing,
+  chooseGuesser,
+  roundResult,
+  finalLeaderboard
 
 }
 class DrawAndGuessScreen extends StatefulWidget {
@@ -25,6 +28,10 @@ class _DrawAndGuessScreenState extends State<DrawAndGuessScreen> {
   Timer? _drawingTimer;
   int _secondsRemaining = 60; 
   final _aiService = const DrawAndGuessAiService();
+
+final Map<String, int> _scores = {};
+
+String _roundResultMessage = '';
 
   bool _isPreparingGame = false;
 
@@ -165,6 +172,11 @@ void dispose() {
           (player) => _selectedPlayerIds.contains(player.id),
         )
         .toList();
+    _scores.clear();
+
+for (final player in selectedPlayers) {
+  _scores[player.id] = 0;
+}
 
     final prompts = await _aiService.generatePrompts(
       count: 6,
@@ -229,6 +241,17 @@ if (_phase == _DrawGamePhase.revealPrompt) {
 }
 if (_phase == _DrawGamePhase.drawing) {
   return _buildDrawingScreen();
+}
+if (_phase == _DrawGamePhase.chooseGuesser) {
+  return _buildChooseGuesserScreen();
+}
+
+if (_phase == _DrawGamePhase.roundResult) {
+  return _buildRoundResultScreen();
+}
+
+if (_phase == _DrawGamePhase.finalLeaderboard) {
+  return _buildFinalLeaderboardScreen();
 }
     if (_isLoading) {
       return const Center(
@@ -470,15 +493,19 @@ void _startDrawing() {
         return;
       }
 
-      if (_secondsRemaining <= 1) {
-        timer.cancel();
+     if (_secondsRemaining <= 1) {
+  timer.cancel();
 
-        setState(() {
-          _secondsRemaining = 0;
-        });
+  setState(() {
+    _secondsRemaining = 0;
+    _roundResultMessage =
+        'Time\'s up!\n\n'
+        'Nobody guessed the drawing this round.';
+    _phase = _DrawGamePhase.roundResult;
+  });
 
-        return;
-      }
+  return;
+} 
 
       setState(() {
         _secondsRemaining--;
@@ -579,21 +606,247 @@ Widget _buildDrawingScreen() {
             Expanded(
               child: FilledButton.icon(
                 onPressed: _secondsRemaining > 0
-                    ? () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text(
-                              'Correct guess flow is next.',
-                            ),
-                          ),
-                        );
-                      }
-                    : null,
+                  ? _someoneGuessedIt
+                  : null,
                 icon: const Icon(Icons.check_circle_outline),
                 label: const Text('Someone Guessed It'),
               ),
             ),
           ],
+        ),
+      ],
+    ),
+  );
+}
+void _someoneGuessedIt() {
+  _drawingTimer?.cancel();
+
+  setState(() {
+    _phase = _DrawGamePhase.chooseGuesser;
+  });
+}
+Widget _buildChooseGuesserScreen() {
+  final artist = _players[_currentArtistIndex];
+
+  final possibleGuessers = _players
+      .where((player) => player.id != artist.id)
+      .toList();
+
+  return Padding(
+    padding: const EdgeInsets.all(24),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          'Who guessed it?',
+          textAlign: TextAlign.center,
+          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+        ),
+        const SizedBox(height: 12),
+        const Text(
+          'Choose the family member who guessed the drawing correctly.',
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 24),
+
+        Expanded(
+          child: ListView.separated(
+            itemCount: possibleGuessers.length,
+            separatorBuilder: (_, _) => const SizedBox(height: 10),
+            itemBuilder: (context, index) {
+              final player = possibleGuessers[index];
+
+              return FilledButton.tonal(
+                onPressed: () => _awardCorrectGuess(player),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  child: Text(player.name),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    ),
+  );
+}
+void _awardCorrectGuess(_DrawPlayer guesser) {
+  final artist = _players[_currentArtistIndex];
+
+  _scores[artist.id] = (_scores[artist.id] ?? 0) + 1;
+  _scores[guesser.id] = (_scores[guesser.id] ?? 0) + 1;
+
+  setState(() {
+    _roundResultMessage =
+        '${guesser.name} guessed correctly!\n\n'
+        '${artist.name} +1 point\n'
+        '${guesser.name} +1 point';
+
+    _phase = _DrawGamePhase.roundResult;
+  });
+}
+Widget _buildRoundResultScreen() {
+  final prompt = _prompts[_currentPromptIndex];
+
+  return Center(
+    child: Padding(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(
+            Icons.celebration_outlined,
+            size: 72,
+          ),
+          const SizedBox(height: 20),
+
+          Text(
+            'Round Complete',
+            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+
+          const SizedBox(height: 16),
+
+          Text(
+            _roundResultMessage,
+            textAlign: TextAlign.center,
+          ),
+
+          const SizedBox(height: 24),
+
+          Text(
+            'Prompt: ${prompt.text}',
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+
+          const SizedBox(height: 32),
+
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton(
+              onPressed: _continueAfterRound,
+              child: Text(
+                _currentArtistIndex == _players.length - 1
+                    ? 'View Final Leaderboard'
+                    : 'Next Artist',
+              ),
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+void _continueAfterRound() {
+  final isLastArtist =
+      _currentArtistIndex == _players.length - 1;
+
+  if (isLastArtist) {
+    setState(() {
+      _phase = _DrawGamePhase.finalLeaderboard;
+    });
+
+    return;
+  }
+
+  setState(() {
+    _currentArtistIndex++;
+
+    _currentPromptIndex =
+        (_currentPromptIndex + 1) % _prompts.length;
+
+    _points.clear();
+    _secondsRemaining = 60;
+    _roundResultMessage = '';
+
+    _phase = _DrawGamePhase.passToArtist;
+  });
+}
+Widget _buildFinalLeaderboardScreen() {
+  final leaderboard = [..._players];
+
+  leaderboard.sort(
+    (a, b) => (_scores[b.id] ?? 0).compareTo(
+      _scores[a.id] ?? 0,
+    ),
+  );
+
+  return Padding(
+    padding: const EdgeInsets.all(24),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const Icon(
+          Icons.emoji_events_outlined,
+          size: 72,
+        ),
+
+        const SizedBox(height: 16),
+
+        Text(
+          'Draw & Guess Complete!',
+          textAlign: TextAlign.center,
+          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+        ),
+
+        const SizedBox(height: 8),
+
+        const Text(
+          'Quick Play results only — no Tokens or official ranking.',
+          textAlign: TextAlign.center,
+        ),
+
+        const SizedBox(height: 28),
+
+        Expanded(
+          child: ListView.separated(
+            itemCount: leaderboard.length,
+            separatorBuilder: (_, _) =>
+                const Divider(height: 1),
+            itemBuilder: (context, index) {
+              final player = leaderboard[index];
+              final score = _scores[player.id] ?? 0;
+
+              return ListTile(
+                leading: CircleAvatar(
+                  child: Text('${index + 1}'),
+                ),
+                title: Text(
+                  player.name,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                trailing: Text(
+                  '$score pts',
+                  style: Theme.of(context)
+                      .textTheme
+                      .titleMedium
+                      ?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+              );
+            },
+          ),
+        ),
+
+        const SizedBox(height: 16),
+
+        FilledButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+          child: const Text('Back to Games'),
         ),
       ],
     ),
