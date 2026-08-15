@@ -1,7 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import '../services/draw_and_guess_ai_service.dart';
 
+enum _DrawGamePhase {
+  setup,
+  passToArtist,
+  revealPrompt,
+}
 class DrawAndGuessScreen extends StatefulWidget {
   const DrawAndGuessScreen({super.key});
 
@@ -9,9 +15,21 @@ class DrawAndGuessScreen extends StatefulWidget {
   State<DrawAndGuessScreen> createState() => _DrawAndGuessScreenState();
 }
 
+
 class _DrawAndGuessScreenState extends State<DrawAndGuessScreen> {
-  bool _isLoading = true;
-  String? _errorMessage;
+  final _aiService = const DrawAndGuessAiService();
+
+  bool _isPreparingGame = false;
+
+  List<_DrawPlayer> _players = [];
+  List<DrawAndGuessPrompt> _prompts = [];
+
+  int _currentArtistIndex = 0;
+  int _currentPromptIndex = 0;
+
+  _DrawGamePhase _phase = _DrawGamePhase.setup;
+    bool _isLoading = true;
+    String? _errorMessage;
 
   final List<_DrawPlayer> _familyMembers = [];
   final Set<String> _selectedPlayerIds = {};
@@ -113,34 +131,69 @@ class _DrawAndGuessScreenState extends State<DrawAndGuessScreen> {
     });
   }
 
-  void _continueToGame() {
-    if (_selectedPlayerIds.length < 2) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Draw & Guess needs at least 2 players.',
-          ),
+ Future<void> _continueToGame() async {
+  if (_selectedPlayerIds.length < 2) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text(
+          'Draw & Guess needs at least 2 players.',
         ),
-      );
-      return;
-    }
+      ),
+    );
+    return;
+  }
 
+  setState(() {
+    _isPreparingGame = true;
+  });
+
+  try {
     final selectedPlayers = _familyMembers
         .where(
           (player) => _selectedPlayerIds.contains(player.id),
         )
         .toList();
 
+    final prompts = await _aiService.generatePrompts(
+      count: 6,
+    );
+
+    if (prompts.isEmpty) {
+      throw Exception('No prompts generated');
+    }
+
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {
+      _players = selectedPlayers;
+      _prompts = prompts;
+
+      _currentArtistIndex = 0;
+      _currentPromptIndex = 0;
+
+      _phase = _DrawGamePhase.passToArtist;
+      _isPreparingGame = false;
+    });
+  } catch (_) {
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {
+      _isPreparingGame = false;
+    });
+
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
+      const SnackBar(
         content: Text(
-          '${selectedPlayers.length} players selected. AI prompts are next.',
+          'Could not prepare Draw & Guess. Make sure the AI server is running.',
         ),
       ),
     );
-
-    // Gemini prompt generation will replace this next.
   }
+}
 
   @override
   Widget build(BuildContext context) {
@@ -155,6 +208,13 @@ class _DrawAndGuessScreenState extends State<DrawAndGuessScreen> {
   }
 
   Widget _buildBody() {
+    if (_phase == _DrawGamePhase.passToArtist) {
+  return _buildPassToArtistScreen();
+}
+
+if (_phase == _DrawGamePhase.revealPrompt) {
+  return _buildRevealPromptScreen();
+}
     if (_isLoading) {
       return const Center(
         child: CircularProgressIndicator(),
@@ -271,16 +331,121 @@ class _DrawAndGuessScreenState extends State<DrawAndGuessScreen> {
           const SizedBox(height: 12),
 
           FilledButton.icon(
-            onPressed: _selectedPlayerIds.length >= 2
-                ? _continueToGame
-                : null,
+            onPressed: _selectedPlayerIds.length >= 2 && !_isPreparingGame
+            ? _continueToGame
+            : null,
             icon: const Icon(Icons.arrow_forward),
-            label: const Text('Continue'),
+            label: Text(
+              _isPreparingGame
+                  ? 'Preparing Game...'
+                  : 'Continue',
+),
           ),
         ],
       ),
     );
   }
+  Widget _buildPassToArtistScreen() {
+  final artist = _players[_currentArtistIndex];
+
+  return Center(
+    child: Padding(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(
+            Icons.lock_outline,
+            size: 72,
+          ),
+          const SizedBox(height: 24),
+          Text(
+            'Pass the phone to ${artist.name}',
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+          const SizedBox(height: 12),
+          const Text(
+            'Everyone else should look away.',
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 32),
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton(
+              onPressed: () {
+                setState(() {
+                  _phase = _DrawGamePhase.revealPrompt;
+                });
+              },
+              child: Text(
+                'I\'m ${artist.name}',
+              ),
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+Widget _buildRevealPromptScreen() {
+  final artist = _players[_currentArtistIndex];
+  final prompt = _prompts[_currentPromptIndex];
+
+  return Center(
+    child: Padding(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(
+            Icons.draw_outlined,
+            size: 72,
+          ),
+          const SizedBox(height: 20),
+          Text(
+            '${artist.name}, your drawing prompt is:',
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          const SizedBox(height: 20),
+          Text(
+            prompt.text,
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+          const SizedBox(height: 16),
+          const Text(
+            'Remember the prompt. Do not show it to the other players.',
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 32),
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton.icon(
+              onPressed: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text(
+                      'Drawing canvas is next.',
+                    ),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.brush_outlined),
+              label: const Text('Start Drawing'),
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+}
 }
 
 class _DrawPlayer {
