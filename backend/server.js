@@ -969,6 +969,88 @@ Return ONLY valid JSON in this exact structure:
     });
   }
 });
+app.post("/api/draw-and-guess", async (req, res) => {
+  try {
+    const { count } = req.body;
+
+    const requestedCount = Number(count) || 6;
+    const promptCount = Math.min(Math.max(requestedCount, 1), 12);
+
+    const prompt = `
+Generate exactly ${promptCount} unique drawing prompts for a family game called Draw & Guess.
+
+This game is played by children and adults together.
+
+Rules:
+- Family friendly
+- Easy to understand
+- Fun to draw
+- Fun to guess aloud
+- Avoid prompts that are too abstract
+- Avoid prompts that require writing words
+- Mix animals, objects, actions, funny situations, and imaginative combinations
+- No sexual content
+- No graphic violence
+- No drugs or alcohol
+- No politics
+- No hateful content
+- No duplicate prompts
+- Keep each prompt concise
+
+Good examples:
+- A penguin cooking dinner
+- A cat driving a bus
+- A dinosaur at the beach
+- A robot making pancakes
+
+Return ONLY valid JSON in this exact structure:
+
+{
+  "prompts": [
+    {
+      "text": "A penguin cooking dinner"
+    }
+  ]
+}
+`;
+
+    const response = await ai.models.generateContent({
+      model: "gemini-3.5-flash",
+      contents: prompt,
+      config: {
+        responseMimeType: "application/json",
+        responseJsonSchema: {
+          type: "object",
+          properties: {
+            prompts: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  text: {
+                    type: "string",
+                  },
+                },
+                required: ["text"],
+              },
+            },
+          },
+          required: ["prompts"],
+        },
+      },
+    });
+
+    const result = JSON.parse(response.text);
+
+    res.json(result);
+  } catch (error) {
+    console.error("Draw & Guess generation error:", error);
+
+    res.status(500).json({
+      error: "Failed to generate Draw & Guess prompts",
+    });
+  }
+});
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
