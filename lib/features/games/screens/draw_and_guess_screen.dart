@@ -2,11 +2,14 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../services/draw_and_guess_ai_service.dart';
+import 'dart:async';
 
 enum _DrawGamePhase {
   setup,
   passToArtist,
   revealPrompt,
+  drawing,
+
 }
 class DrawAndGuessScreen extends StatefulWidget {
   const DrawAndGuessScreen({super.key});
@@ -17,6 +20,10 @@ class DrawAndGuessScreen extends StatefulWidget {
 
 
 class _DrawAndGuessScreenState extends State<DrawAndGuessScreen> {
+  final List<Offset?> _points = [];
+
+  Timer? _drawingTimer;
+  int _secondsRemaining = 60; 
   final _aiService = const DrawAndGuessAiService();
 
   bool _isPreparingGame = false;
@@ -39,6 +46,11 @@ class _DrawAndGuessScreenState extends State<DrawAndGuessScreen> {
     super.initState();
     _loadFamilyMembers();
   }
+  @override
+void dispose() {
+  _drawingTimer?.cancel();
+  super.dispose();
+}
 
   Future<void> _loadFamilyMembers() async {
     final user = FirebaseAuth.instance.currentUser;
@@ -214,6 +226,9 @@ class _DrawAndGuessScreenState extends State<DrawAndGuessScreen> {
 
 if (_phase == _DrawGamePhase.revealPrompt) {
   return _buildRevealPromptScreen();
+}
+if (_phase == _DrawGamePhase.drawing) {
+  return _buildDrawingScreen();
 }
     if (_isLoading) {
       return const Center(
@@ -428,15 +443,7 @@ Widget _buildRevealPromptScreen() {
           SizedBox(
             width: double.infinity,
             child: FilledButton.icon(
-              onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text(
-                      'Drawing canvas is next.',
-                    ),
-                  ),
-                );
-              },
+              onPressed: _startDrawing,
               icon: const Icon(Icons.brush_outlined),
               label: const Text('Start Drawing'),
             ),
@@ -446,6 +453,185 @@ Widget _buildRevealPromptScreen() {
     ),
   );
 }
+void _startDrawing() {
+  _drawingTimer?.cancel();
+
+  setState(() {
+    _points.clear();
+    _secondsRemaining = 60;
+    _phase = _DrawGamePhase.drawing;
+  });
+
+  _drawingTimer = Timer.periodic(
+    const Duration(seconds: 1),
+    (timer) {
+      if (!mounted) {
+        timer.cancel();
+        return;
+      }
+
+      if (_secondsRemaining <= 1) {
+        timer.cancel();
+
+        setState(() {
+          _secondsRemaining = 0;
+        });
+
+        return;
+      }
+
+      setState(() {
+        _secondsRemaining--;
+      });
+    },
+  );
+}
+Widget _buildDrawingScreen() {
+  final artist = _players[_currentArtistIndex];
+
+  return Padding(
+    padding: const EdgeInsets.all(16),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                '${artist.name} is drawing',
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+              ),
+            ),
+            Text(
+              '$_secondsRemaining s',
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+            ),
+          ],
+        ),
+
+        const SizedBox(height: 12),
+
+        const Text(
+          'Everyone else: guess aloud!',
+          textAlign: TextAlign.center,
+        ),
+
+        const SizedBox(height: 16),
+
+        Expanded(
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: Theme.of(context).colorScheme.outlineVariant,
+              ),
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: GestureDetector(
+                onPanStart: (details) {
+                  setState(() {
+                    _points.add(details.localPosition);
+                  });
+                },
+                onPanUpdate: (details) {
+                  setState(() {
+                    _points.add(details.localPosition);
+                  });
+                },
+                onPanEnd: (_) {
+                  setState(() {
+                    _points.add(null);
+                  });
+                },
+                child: CustomPaint(
+                  painter: _DrawingPainter(
+                    points: _points,
+                  ),
+                  size: Size.infinite,
+                ),
+              ),
+            ),
+          ),
+        ),
+
+        const SizedBox(height: 12),
+
+        Row(
+          children: [
+            Expanded(
+              child: OutlinedButton.icon(
+                onPressed: () {
+                  setState(() {
+                    _points.clear();
+                  });
+                },
+                icon: const Icon(Icons.delete_outline),
+                label: const Text('Clear'),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: FilledButton.icon(
+                onPressed: _secondsRemaining > 0
+                    ? () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              'Correct guess flow is next.',
+                            ),
+                          ),
+                        );
+                      }
+                    : null,
+                icon: const Icon(Icons.check_circle_outline),
+                label: const Text('Someone Guessed It'),
+              ),
+            ),
+          ],
+        ),
+      ],
+    ),
+  );
+}
+}
+class _DrawingPainter extends CustomPainter {
+  const _DrawingPainter({
+    required this.points,
+  });
+
+  final List<Offset?> points;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Colors.black
+      ..strokeWidth = 4
+      ..strokeCap = StrokeCap.round;
+
+    for (int i = 0; i < points.length - 1; i++) {
+      final current = points[i];
+      final next = points[i + 1];
+
+      if (current != null && next != null) {
+        canvas.drawLine(
+          current,
+          next,
+          paint,
+        );
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _DrawingPainter oldDelegate) {
+    return true;
+  }
 }
 
 class _DrawPlayer {
