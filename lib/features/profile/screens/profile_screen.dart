@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../authentication/screens/welcome_screen.dart';
+import 'settings_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key, this.developerPreview = false});
@@ -20,7 +23,19 @@ class ProfileScreen extends StatelessWidget {
             const _DeveloperProfileHeader()
           else
             _ProfileHeader(colorScheme: colorScheme),
+
           const SizedBox(height: 24),
+
+          const _SectionTitle(title: 'Family'),
+          const SizedBox(height: 12),
+
+          if (developerPreview)
+            const _DeveloperFamilyCard()
+          else
+            const _FamilyDetailsCard(),
+
+          const SizedBox(height: 24),
+
           const _SectionTitle(title: 'Statistics'),
           const SizedBox(height: 12),
           if (developerPreview)
@@ -53,6 +68,38 @@ class ProfileScreen extends StatelessWidget {
           const _SectionTitle(title: 'Settings'),
           const SizedBox(height: 12),
           const _SettingsSection(),
+          const SizedBox(height: 28),
+
+          if (!developerPreview)
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton.icon(
+                style: FilledButton.styleFrom(
+                  backgroundColor: Colors.red,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                ),
+                onPressed: () async {
+                  await FirebaseAuth.instance.signOut();
+
+                  if (!context.mounted) {
+                    return;
+                  }
+
+                  Navigator.of(context).pushAndRemoveUntil(
+                    MaterialPageRoute(builder: (_) => const WelcomeScreen()),
+                    (route) => false,
+                  );
+                },
+                icon: const Icon(Icons.logout_rounded),
+                label: const Text(
+                  'Log Out',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ),
+            ),
+
+          const SizedBox(height: 20),
         ],
       ),
     );
@@ -835,24 +882,47 @@ class _SettingsSection extends StatelessWidget {
       margin: EdgeInsets.zero,
       elevation: 1,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      child: const Column(
+      child: Column(
         children: [
           ListTile(
-            leading: Icon(Icons.settings),
-            title: Text('Settings'),
-            trailing: Icon(Icons.chevron_right),
+            leading: const Icon(Icons.settings_rounded),
+            title: const Text('App Settings'),
+            subtitle: const Text('Language, notifications, and preferences'),
+            trailing: const Icon(Icons.chevron_right_rounded),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const SettingsScreen()),
+              );
+            },
           ),
-          Divider(height: 1),
+          const Divider(height: 1),
           ListTile(
-            leading: Icon(Icons.lock_outline),
-            title: Text('Privacy'),
-            trailing: Icon(Icons.chevron_right),
+            leading: const Icon(Icons.lock_outline_rounded),
+            title: const Text('Privacy & Security'),
+            trailing: const Icon(Icons.chevron_right_rounded),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const PrivacySecurityScreen(),
+                ),
+              );
+            },
           ),
-          Divider(height: 1),
+          const Divider(height: 1),
           ListTile(
-            leading: Icon(Icons.notifications_outlined),
-            title: Text('Notifications'),
-            trailing: Icon(Icons.chevron_right),
+            leading: const Icon(Icons.notifications_outlined),
+            title: const Text('Notifications'),
+            trailing: const Icon(Icons.chevron_right_rounded),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const NotificationSettingsScreen(),
+                ),
+              );
+            },
           ),
         ],
       ),
@@ -902,4 +972,192 @@ class _AchievementItem {
   final String description;
   final double progress;
   final String progressText;
+}
+
+class _FamilyDetailsCard extends StatelessWidget {
+  const _FamilyDetailsCard();
+
+  @override
+  Widget build(BuildContext context) {
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user == null) {
+      return const Card(
+        child: Padding(
+          padding: EdgeInsets.all(20),
+          child: Text('No user is currently signed in.'),
+        ),
+      );
+    }
+
+    return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+      stream: FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .snapshots(),
+      builder: (context, userSnapshot) {
+        if (userSnapshot.connectionState == ConnectionState.waiting) {
+          return const Card(
+            child: Padding(
+              padding: EdgeInsets.all(24),
+              child: Center(child: CircularProgressIndicator()),
+            ),
+          );
+        }
+
+        final userData = userSnapshot.data?.data();
+        final familyId = userData?['familyId'] as String?;
+
+        if (familyId == null || familyId.isEmpty) {
+          return const Card(
+            child: Padding(
+              padding: EdgeInsets.all(20),
+              child: Text('You have not joined a family yet.'),
+            ),
+          );
+        }
+
+        return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+          stream: FirebaseFirestore.instance
+              .collection('families')
+              .doc(familyId)
+              .snapshots(),
+          builder: (context, familySnapshot) {
+            if (familySnapshot.connectionState == ConnectionState.waiting) {
+              return const Card(
+                child: Padding(
+                  padding: EdgeInsets.all(24),
+                  child: Center(child: CircularProgressIndicator()),
+                ),
+              );
+            }
+
+            final familyData = familySnapshot.data?.data();
+
+            final familyName = familyData?['name'] as String? ?? 'Your Family';
+
+            final inviteCode = familyData?['inviteCode'] as String? ?? familyId;
+
+            final members =
+                familyData?['members'] as List<dynamic>? ?? const [];
+
+            return Card(
+              margin: EdgeInsets.zero,
+              elevation: 1,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        const Icon(Icons.family_restroom_rounded, size: 30),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            familyName,
+                            style: Theme.of(context).textTheme.titleLarge
+                                ?.copyWith(fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 18),
+                    Text(
+                      'Invite Code',
+                      style: Theme.of(context).textTheme.labelLarge,
+                    ),
+                    const SizedBox(height: 6),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: SelectableText(
+                            inviteCode,
+                            style: Theme.of(context).textTheme.headlineSmall
+                                ?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 2,
+                                ),
+                          ),
+                        ),
+                        IconButton.filledTonal(
+                          tooltip: 'Copy invite code',
+                          onPressed: () async {
+                            await Clipboard.setData(
+                              ClipboardData(text: inviteCode),
+                            );
+
+                            if (!context.mounted) {
+                              return;
+                            }
+
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Family invite code copied.'),
+                              ),
+                            );
+                          },
+                          icon: const Icon(Icons.copy_rounded),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      '${members.length} family member${members.length == 1 ? '' : 's'}',
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      'Share this code with relatives so they can join this family.',
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+}
+
+class _DeveloperFamilyCard extends StatelessWidget {
+  const _DeveloperFamilyCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: EdgeInsets.zero,
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Developer Family',
+              style: Theme.of(
+                context,
+              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 14),
+            const Text('Invite Code'),
+            const SizedBox(height: 6),
+            Text(
+              'DEV123',
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.bold,
+                letterSpacing: 2,
+              ),
+            ),
+            const SizedBox(height: 10),
+            const Text('4 family members'),
+          ],
+        ),
+      ),
+    );
+  }
 }

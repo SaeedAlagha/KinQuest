@@ -1,11 +1,12 @@
-import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import '../../../core/validation/form_validators.dart';
-import 'dart:io';
+import 'dart:typed_data';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:firebase_storage/firebase_storage.dart';
+
+import '../../../core/validation/form_validators.dart';
+
 class AddMemoryScreen extends StatefulWidget {
   const AddMemoryScreen({super.key});
 
@@ -14,6 +15,8 @@ class AddMemoryScreen extends StatefulWidget {
 }
 
 class _AddMemoryScreenState extends State<AddMemoryScreen> {
+  static const int _maxImageBytes = 700 * 1024;
+
   final _formKey = GlobalKey<FormState>();
 
   final _titleController = TextEditingController();
@@ -21,10 +24,13 @@ class _AddMemoryScreenState extends State<AddMemoryScreen> {
   final _dateController = TextEditingController();
   final _locationController = TextEditingController();
 
+  final ImagePicker _imagePicker = ImagePicker();
+
   DateTime? _selectedDate;
-final ImagePicker _imagePicker = ImagePicker();
-XFile? _selectedImage;
-bool _isSaving = false;
+Uint8List? _selectedImageBytes;
+
+  bool _isSaving = false;
+
   @override
   void dispose() {
     _titleController.dispose();
@@ -68,20 +74,39 @@ bool _isSaving = false;
 
     return null;
   }
-Future<void> _pickImage() async {
-  final image = await _imagePicker.pickImage(
-    source: ImageSource.gallery,
-    imageQuality: 80,
-  );
 
-  if (image == null) {
-    return;
+  Future<void> _pickImage() async {
+    final image = await _imagePicker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 45,
+      maxWidth: 720,
+      maxHeight: 720,
+    );
+
+    if (image == null) {
+      return;
+    }
+
+    final bytes = await image.readAsBytes();
+
+    if (!mounted) return;
+
+    if (bytes.lengthInBytes > _maxImageBytes) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'That photo is still too large. Please choose another photo.',
+          ),
+        ),
+      );
+      return;
+    }
+
+setState(() {
+  _selectedImageBytes = bytes;
+});
   }
 
-  setState(() {
-    _selectedImage = image;
-  });
-}
   Future<void> _saveMemory() async {
     FocusScope.of(context).unfocus();
 
@@ -102,6 +127,10 @@ Future<void> _pickImage() async {
       return;
     }
 
+    setState(() {
+      _isSaving = true;
+    });
+
     try {
       final userDoc = await FirebaseFirestore.instance
           .collection('users')
@@ -113,6 +142,10 @@ Future<void> _pickImage() async {
       if (familyId == null || familyId.isEmpty) {
         if (!mounted) return;
 
+        setState(() {
+          _isSaving = false;
+        });
+
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Join or create a family before adding memories.'),
@@ -121,40 +154,22 @@ Future<void> _pickImage() async {
         return;
       }
 
-      setState(() {
-  _isSaving = true;
-});
-
-String? imageUrl;
-
-if (_selectedImage != null) {
-  final fileName =
-      '${DateTime.now().millisecondsSinceEpoch}_${user.uid}.jpg';
-
-  final storageRef = FirebaseStorage.instance
-      .ref()
-      .child('families')
-      .child(familyId)
-      .child('memories')
-      .child(fileName);
-
-  await storageRef.putFile(File(_selectedImage!.path));
-  imageUrl = await storageRef.getDownloadURL();
-}
-
-await FirebaseFirestore.instance
-    .collection('families')
-    .doc(familyId)
-    .collection('memories')
-    .add({
-      'title': _titleController.text.trim(),
-      'description': _descriptionController.text.trim(),
-      'date': Timestamp.fromDate(_selectedDate!),
-      'location': _locationController.text.trim(),
-      'createdBy': user.uid,
-      'imageUrl': imageUrl,
-      'createdAt': FieldValue.serverTimestamp(),
-    });
+      await FirebaseFirestore.instance
+          .collection('families')
+          .doc(familyId)
+          .collection('memories')
+          .add({
+            'title': _titleController.text.trim(),
+            'description': _descriptionController.text.trim(),
+            'date': Timestamp.fromDate(_selectedDate!),
+            'location': _locationController.text.trim(),
+            'createdBy': user.uid,
+            'imageData': _selectedImageBytes == null
+                ? null
+                : Blob(_selectedImageBytes!),
+            'imageUrl': null,
+            'createdAt': FieldValue.serverTimestamp(),
+          });
 
       if (!mounted) return;
 
@@ -163,12 +178,20 @@ await FirebaseFirestore.instance
       );
 
       Navigator.pop(context);
-    } catch (error) {
+    } catch (error, stackTrace) {
+      debugPrint('ADD MEMORY ERROR: $error');
+      debugPrintStack(label: 'ADD MEMORY STACK TRACE', stackTrace: stackTrace);
+
       if (!mounted) return;
 
+      setState(() {
+        _isSaving = false;
+      });
+
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Could not save the memory. Please try again.'),
+        SnackBar(
+          content: Text('Could not save the memory: $error'),
+          duration: const Duration(seconds: 8),
         ),
       );
     }
@@ -192,41 +215,40 @@ await FirebaseFirestore.instance
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Add details now. Photos and videos will be connected later.',
+                  'Add a photo and save a moment your family can revisit together.',
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
                 const SizedBox(height: 28),
                 Container(
-  width: double.infinity,
-  height: 170,
-  decoration: BoxDecoration(
-    color: Theme.of(context).colorScheme.primaryContainer,
-    borderRadius: BorderRadius.circular(18),
-  ),
-  child: InkWell(
-    onTap: _pickImage,
-    borderRadius: BorderRadius.circular(18),
-    child: _selectedImage == null
-        ? const Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.add_photo_alternate_outlined, size: 52),
-              SizedBox(height: 10),
-              Text('Add Photo'),
-            ],
-          )
-        : ClipRRect(
-            borderRadius: BorderRadius.circular(18),
-            child: Image.file(
-              File(_selectedImage!.path),
-              width: double.infinity,
-              height: 170,
-              fit: BoxFit.cover,
-            ),
-          ),
-  ),
-),
-                  
+                  width: double.infinity,
+                  height: 190,
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.primaryContainer,
+                    borderRadius: BorderRadius.circular(18),
+                  ),
+                  clipBehavior: Clip.antiAlias,
+                  child: InkWell(
+                    onTap: _isSaving ? null : _pickImage,
+                    child: _selectedImageBytes == null
+                        ? const Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.add_photo_alternate_outlined,
+                                size: 52,
+                              ),
+                              SizedBox(height: 10),
+                              Text('Add Photo'),
+                            ],
+                          )
+                        : Image.memory(
+                            _selectedImageBytes!,
+                            width: double.infinity,
+                            height: 190,
+                            fit: BoxFit.cover,
+                          ),
+                  ),
+                ),
                 const SizedBox(height: 24),
                 TextFormField(
                   controller: _titleController,
@@ -280,17 +302,15 @@ await FirebaseFirestore.instance
                 SizedBox(
                   width: double.infinity,
                   child: FilledButton(
-  onPressed: _isSaving ? null : _saveMemory,
-  child: _isSaving
-      ? const SizedBox(
-          width: 20,
-          height: 20,
-          child: CircularProgressIndicator(
-            strokeWidth: 2,
-          ),
-        )
-      : const Text('Save Memory'),
-),
+                    onPressed: _isSaving ? null : _saveMemory,
+                    child: _isSaving
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Text('Save Memory'),
+                  ),
                 ),
               ],
             ),

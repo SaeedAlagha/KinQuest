@@ -1,5 +1,7 @@
-import 'package:flutter/material.dart';
+import 'dart:typed_data';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 
 import 'edit_memory_screen.dart';
 
@@ -54,6 +56,49 @@ class MemoryDetailsScreen extends StatelessWidget {
     }
   }
 
+  Widget _buildMemoryImage(BuildContext context, Map<String, dynamic> data) {
+    Uint8List? imageBytes;
+
+    final imageData = data['imageData'];
+
+    if (imageData is Blob) {
+      imageBytes = imageData.bytes;
+    }
+
+    final imageUrl = data['imageUrl'] as String?;
+
+    if (imageBytes != null && imageBytes.isNotEmpty) {
+      return Image.memory(
+        imageBytes,
+        fit: BoxFit.cover,
+        width: double.infinity,
+        height: 220,
+      );
+    }
+
+    if (imageUrl != null && imageUrl.isNotEmpty) {
+      return Image.network(
+        imageUrl,
+        fit: BoxFit.cover,
+        width: double.infinity,
+        height: 220,
+        errorBuilder: (context, error, stackTrace) {
+          return Icon(
+            Icons.broken_image_outlined,
+            size: 90,
+            color: Theme.of(context).colorScheme.onPrimaryContainer,
+          );
+        },
+      );
+    }
+
+    return Icon(
+      Icons.photo_library_outlined,
+      size: 90,
+      color: Theme.of(context).colorScheme.onPrimaryContainer,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final memoryRef = FirebaseFirestore.instance
@@ -67,20 +112,14 @@ class MemoryDetailsScreen extends StatelessWidget {
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Scaffold(
-            body: Center(
-              child: CircularProgressIndicator(),
-            ),
+            body: Center(child: CircularProgressIndicator()),
           );
         }
 
         if (!snapshot.hasData || !snapshot.data!.exists) {
           return Scaffold(
-            appBar: AppBar(
-              title: const Text('Memory'),
-            ),
-            body: const Center(
-              child: Text('Memory not found.'),
-            ),
+            appBar: AppBar(title: const Text('Memory')),
+            body: const Center(child: Text('Memory not found.')),
           );
         }
 
@@ -89,7 +128,6 @@ class MemoryDetailsScreen extends StatelessWidget {
         final title = data['title'] as String? ?? 'Memory';
         final description = data['description'] as String? ?? '';
         final location = data['location'] as String? ?? '';
-        final imageUrl = data['imageUrl'] as String?;
 
         final timestamp = data['date'] as Timestamp?;
         final date = timestamp?.toDate();
@@ -138,33 +176,14 @@ class MemoryDetailsScreen extends StatelessWidget {
                   borderRadius: BorderRadius.circular(24),
                 ),
                 clipBehavior: Clip.antiAlias,
-                child: imageUrl != null && imageUrl.isNotEmpty
-                    ? Image.network(
-                        imageUrl,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
-                          return Icon(
-                            Icons.broken_image_outlined,
-                            size: 90,
-                            color: Theme.of(context)
-                                .colorScheme
-                                .onPrimaryContainer,
-                          );
-                        },
-                      )
-                    : Icon(
-                        Icons.photo_library_outlined,
-                        size: 90,
-                        color:
-                            Theme.of(context).colorScheme.onPrimaryContainer,
-                      ),
+                child: _buildMemoryImage(context, data),
               ),
               const SizedBox(height: 24),
               Text(
                 title,
                 style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(height: 20),
               _DetailRow(
@@ -173,25 +192,22 @@ class MemoryDetailsScreen extends StatelessWidget {
               ),
               if (location.isNotEmpty) ...[
                 const SizedBox(height: 12),
-                _DetailRow(
-                  icon: Icons.location_on_outlined,
-                  text: location,
-                ),
+                _DetailRow(icon: Icons.location_on_outlined, text: location),
               ],
               if (description.isNotEmpty) ...[
                 const SizedBox(height: 28),
                 Text(
                   'Story',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 10),
                 Text(
                   description,
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        height: 1.5,
-                      ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyLarge?.copyWith(height: 1.5),
                 ),
               ],
             ],
@@ -203,10 +219,7 @@ class MemoryDetailsScreen extends StatelessWidget {
 }
 
 class _DetailRow extends StatelessWidget {
-  const _DetailRow({
-    required this.icon,
-    required this.text,
-  });
+  const _DetailRow({required this.icon, required this.text});
 
   final IconData icon;
   final String text;
@@ -215,16 +228,10 @@ class _DetailRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Icon(
-          icon,
-          color: Theme.of(context).colorScheme.primary,
-        ),
+        Icon(icon, color: Theme.of(context).colorScheme.primary),
         const SizedBox(width: 10),
         Expanded(
-          child: Text(
-            text,
-            style: Theme.of(context).textTheme.bodyLarge,
-          ),
+          child: Text(text, style: Theme.of(context).textTheme.bodyLarge),
         ),
       ],
     );

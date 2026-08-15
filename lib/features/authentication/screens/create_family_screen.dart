@@ -78,6 +78,7 @@ class _CreateFamilyScreenState extends State<CreateFamilyScreen> {
 
       await familyReference.set({
         'name': _familyNameController.text.trim(),
+        'inviteCode': invitationCode,
         'description': _descriptionController.text.trim(),
         'invitationCode': invitationCode,
         'ownerId': user.uid,

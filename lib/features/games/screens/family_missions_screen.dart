@@ -5,7 +5,9 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/app_theme.dart';
 
 class FamilyMissionsScreen extends StatefulWidget {
-  const FamilyMissionsScreen({super.key});
+  const FamilyMissionsScreen({super.key, this.developerPreview = false});
+
+  final bool developerPreview;
 
   @override
   State<FamilyMissionsScreen> createState() => _FamilyMissionsScreenState();
@@ -88,7 +90,12 @@ class _FamilyMissionsScreenState extends State<FamilyMissionsScreen> {
   @override
   void initState() {
     super.initState();
-    _loadMissions();
+
+    if (widget.developerPreview) {
+      _isLoading = false;
+    } else {
+      _loadMissions();
+    }
   }
 
   Future<void> _loadMissions() async {
