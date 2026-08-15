@@ -91,7 +91,7 @@ void main() {
     expect(tester.takeException(), isNull);
 
     await tester.tap(
-      find.descendant(of: navigationBar, matching: find.text('Compete')),
+      find.descendant(of: navigationBar, matching: find.text('Play')),
     );
     await tester.pumpAndSettle();
 
