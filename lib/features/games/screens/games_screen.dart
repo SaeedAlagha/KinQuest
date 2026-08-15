@@ -11,6 +11,7 @@ import 'truth_or_dare_screen.dart';
 import 'would_you_rather_screen.dart';
 import 'memory_challenge_screen.dart';
 import 'family_impostor_screen.dart';
+import 'secret_mission_screen.dart';
 
 class GamesScreen extends StatelessWidget {
   const GamesScreen({super.key, this.developerPreview = false});
@@ -78,7 +79,16 @@ class GamesScreen extends StatelessWidget {
           'Find the hidden impostor through clues, discussion, and family voting.',
       eyebrow: 'SOCIAL DEDUCTION',
       isAvailable: true,
-),
+    ),
+    _GameItem(
+      icon: Icons.visibility_off_rounded,
+      accent: AppTheme.tealColor,
+      title: 'Secret Mission',
+      description:
+          'Complete a hidden mission without your family figuring out what you are doing.',
+      eyebrow: 'SECRET CHALLENGE',
+      isAvailable: true,
+    ),
   ];
 
   void _openGame(BuildContext context, _GameItem game) {
@@ -89,6 +99,7 @@ class GamesScreen extends StatelessWidget {
           'Memory Challenge' => const MemoryChallengeScreen(),
           'Family Missions' => const FamilyMissionsScreen(),
           'Family Impostor' => const FamilyImpostorScreen(),
+          'Secret Mission' => const SecretMissionScreen(),
           'Party Games' => const PartyGamesScreen(),
           _ => GamePlaceholderScreen(gameTitle: game.title),
         },
@@ -100,9 +111,7 @@ class GamesScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: Navigator.of(context).canPop()
-          ? AppBar(
-              title: const Text('Games'),
-            )
+          ? AppBar(title: const Text('Games'))
           : null,
       body: SafeArea(
         child: LayoutBuilder(

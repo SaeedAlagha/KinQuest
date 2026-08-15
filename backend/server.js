@@ -968,6 +968,159 @@ Return ONLY valid JSON in this exact structure:
       error: "Failed to generate Family Impostor rounds",
     });
   }
+});app.post("/api/secret-mission", async (req, res) => {
+  try {
+    const { players, language } = req.body;
+
+    if (!Array.isArray(players) || players.length < 2) {
+      return res.status(400).json({
+        error: "At least two players are required",
+      });
+    }
+
+    const cleanedPlayers = players
+      .filter((player) => typeof player === "string")
+      .map((player) => player.trim())
+      .filter((player) => player.length > 0)
+      .slice(0, 12);
+
+    if (cleanedPlayers.length < 2) {
+      return res.status(400).json({
+        error: "At least two valid players are required",
+      });
+    }
+
+    const outputLanguage =
+      language === "ar" ? "Arabic" : "English";
+
+    const prompt = `
+You generate missions for a family party game called Secret Mission.
+
+The game is played together in person using one shared phone.
+
+Players:
+${cleanedPlayers.map((player) => `- ${player}`).join("\n")}
+
+Generate exactly one DIFFERENT secret mission for each player.
+
+Write all visible mission text in ${outputLanguage}.
+
+HOW THE GAME WORKS:
+Each player privately sees their mission.
+They then try to complete the mission naturally without the other players realizing what their mission is.
+
+GOOD EXAMPLES:
+- Get someone to say "really?"
+- Make two people laugh without telling a joke
+- Convince someone to bring you a glass of water
+- Use the word "banana" naturally three times
+- Get someone to copy one of your gestures
+- Get someone to ask what you are doing
+- Make somebody mention food
+- Get two people to agree with you about something silly
+- Get somebody to compliment something in the room
+- Make someone look behind them
+
+RULES:
+- Family friendly
+- Suitable for children and adults
+- Safe
+- Funny or social
+- Realistically achievable during a family gathering
+- Each mission must be different
+- Keep missions short
+- Nothing dangerous
+- Nothing sexual
+- Nothing hateful
+- Nothing humiliating
+- No drugs or alcohol
+- No politics
+- No physical fighting
+- Do not require spending money
+- Do not require leaving the home
+- Do not damage property
+- Do not require physical contact
+- Do not request private information
+- Do not ask someone to lie about something serious
+- Do not tell the player to reveal their mission
+- Do not explain the mission
+- Do not mention AI
+
+IMPORTANT:
+The playerName field must match one of the supplied player names EXACTLY.
+
+Return ONLY valid JSON:
+
+{
+  "missions": [
+    {
+      "playerName": "Exact player name",
+      "mission": "Secret mission"
+    }
+  ]
+}
+`;
+
+    const response = await ai.models.generateContent({
+      model: "gemini-3.5-flash",
+      contents: prompt,
+      config: {
+        responseMimeType: "application/json",
+        responseJsonSchema: {
+          type: "object",
+          properties: {
+            missions: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  playerName: {
+                    type: "string",
+                  },
+                  mission: {
+                    type: "string",
+                  },
+                },
+                required: ["playerName", "mission"],
+              },
+            },
+          },
+          required: ["missions"],
+        },
+      },
+    });
+
+    const result = JSON.parse(response.text);
+
+    if (
+      !Array.isArray(result.missions) ||
+      result.missions.length !== cleanedPlayers.length
+    ) {
+      throw new Error(
+        "Gemini returned an invalid number of missions",
+      );
+    }
+
+    for (const mission of result.missions) {
+      if (
+        typeof mission.playerName !== "string" ||
+        typeof mission.mission !== "string" ||
+        mission.mission.trim().length === 0
+      ) {
+        throw new Error("Gemini returned an invalid mission");
+      }
+    }
+
+    res.json({
+      missions: result.missions,
+    });
+  } catch (error) {
+    console.error("Secret Mission generation error:", error);
+
+    res.status(500).json({
+      error: "Failed to generate Secret Mission missions",
+    });
+  }
 });
 const PORT = process.env.PORT || 3000;
 
