@@ -14,6 +14,7 @@ import 'family_impostor_screen.dart';
 import 'secret_mission_screen.dart';
 import 'caption_battle_screen.dart';
 import 'pass_the_bomb_screen.dart';
+import 'draw_and_guess_screen.dart';
 
 class GamesScreen extends StatelessWidget {
   const GamesScreen({super.key, this.developerPreview = false});
@@ -109,6 +110,14 @@ class GamesScreen extends StatelessWidget {
       eyebrow: 'FAST FAMILY FUN',
       isAvailable: true,
     ),
+    _GameItem(
+      icon: Icons.draw_outlined,
+      accent: AppTheme.coralColor,
+      title: 'Draw & Guess',
+      description: 'Draw AI-generated prompts while your family guesses aloud.',
+      eyebrow: 'CREATIVE PLAY',
+      isAvailable: true,
+    ),
   ];
 
   void _openGame(BuildContext context, _GameItem game) {
@@ -122,6 +131,7 @@ class GamesScreen extends StatelessWidget {
           'Secret Mission' => const SecretMissionScreen(),
           'Caption Battle' => const CaptionBattleScreen(),
           'Pass the Bomb' => const PassTheBombScreen(),
+          'Draw & Guess' => const DrawAndGuessScreen(),
           'Party Games' => const PartyGamesScreen(),
           _ => GamePlaceholderScreen(gameTitle: game.title),
         },
