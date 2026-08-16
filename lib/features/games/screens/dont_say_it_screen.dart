@@ -1,7 +1,151 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-class DontSayItScreen extends StatelessWidget {
+class DontSayItScreen extends StatefulWidget {
   const DontSayItScreen({super.key});
+
+  @override
+  State<DontSayItScreen> createState() => _DontSayItScreenState();
+}
+
+class _DontSayItScreenState extends State<DontSayItScreen> {
+  bool _isLoading = true;
+  String? _errorMessage;
+
+  final List<_DontSayItPlayer> _familyMembers = [];
+  final Set<String> _selectedPlayerIds = {};
+
+  int _selectedRounds = 3;
+  int _secondsPerTurn = 45;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadFamilyMembers();
+  }
+
+  Future<void> _loadFamilyMembers() async {
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user == null) {
+      setState(() {
+        _isLoading = false;
+        _errorMessage = 'You must be logged in to play.';
+      });
+      return;
+    }
+
+    try {
+      final userDocument = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
+
+      final familyId = userDocument.data()?['familyId'] as String?;
+
+      if (familyId == null || familyId.isEmpty) {
+        if (!mounted) {
+          return;
+        }
+
+        setState(() {
+          _isLoading = false;
+          _errorMessage =
+              'Join or create a family before playing Don\'t Say It.';
+        });
+
+        return;
+      }
+
+      final membersSnapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .where('familyId', isEqualTo: familyId)
+          .get();
+
+      final members = membersSnapshot.docs.map((document) {
+        final data = document.data();
+
+        final name = data['name'] as String?;
+        final email = data['email'] as String?;
+
+        return _DontSayItPlayer(
+          id: document.id,
+          name: name?.trim().isNotEmpty == true
+              ? name!
+              : email ?? 'Family Member',
+        );
+      }).toList();
+
+      members.sort(
+        (a, b) => a.name.toLowerCase().compareTo(
+              b.name.toLowerCase(),
+            ),
+      );
+
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        _familyMembers
+          ..clear()
+          ..addAll(members);
+
+        _isLoading = false;
+      });
+    } catch (_) {
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        _isLoading = false;
+        _errorMessage = 'Could not load your family members.';
+      });
+    }
+  }
+
+  void _togglePlayer(_DontSayItPlayer player) {
+    setState(() {
+      if (_selectedPlayerIds.contains(player.id)) {
+        _selectedPlayerIds.remove(player.id);
+      } else {
+        _selectedPlayerIds.add(player.id);
+      }
+    });
+  }
+
+  void _continueToGame() {
+    if (_selectedPlayerIds.length < 2) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Don\'t Say It needs at least 2 players.',
+          ),
+        ),
+      );
+      return;
+    }
+
+    final selectedPlayers = _familyMembers
+        .where(
+          (player) => _selectedPlayerIds.contains(player.id),
+        )
+        .toList();
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          '${selectedPlayers.length} players • '
+          '$_selectedRounds rounds • '
+          '$_secondsPerTurn seconds per turn',
+        ),
+      ),
+    );
+
+    // Gemini card generation comes next.
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -9,12 +153,174 @@ class DontSayItScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Don\'t Say It'),
       ),
-      body: const Center(
-        child: Text(
-          'Don\'t Say It setup coming next.',
-          textAlign: TextAlign.center,
-        ),
+      body: SafeArea(
+        child: _buildBody(),
       ),
     );
   }
+
+  Widget _buildBody() {
+    if (_isLoading) {
+      return const Center(
+        child: CircularProgressIndicator(),
+      );
+    }
+
+    if (_errorMessage != null) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(
+                Icons.error_outline,
+                size: 64,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                _errorMessage!,
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              const SizedBox(height: 20),
+              FilledButton(
+                onPressed: () {
+                  setState(() {
+                    _isLoading = true;
+                    _errorMessage = null;
+                  });
+
+                  _loadFamilyMembers();
+                },
+                child: const Text('Try Again'),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            'Who is playing?',
+            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Choose at least 2 players, including yourself if you\'re playing.',
+            style: Theme.of(context).textTheme.bodyLarge,
+          ),
+          const SizedBox(height: 20),
+
+          ..._familyMembers.map((player) {
+            final selected =
+                _selectedPlayerIds.contains(player.id);
+
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: Card(
+                margin: EdgeInsets.zero,
+                child: CheckboxListTile(
+                  value: selected,
+                  onChanged: (_) => _togglePlayer(player),
+                  secondary: CircleAvatar(
+                    child: Text(
+                      player.name.isEmpty
+                          ? '?'
+                          : player.name[0].toUpperCase(),
+                    ),
+                  ),
+                  title: Text(
+                    player.name,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
+            );
+          }),
+
+          const SizedBox(height: 24),
+
+          Text(
+            'How many rounds?',
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+          const SizedBox(height: 12),
+
+          Wrap(
+            spacing: 10,
+            runSpacing: 10,
+            children: [3, 5, 10].map((rounds) {
+              return ChoiceChip(
+                label: Text('$rounds rounds'),
+                selected: _selectedRounds == rounds,
+                onSelected: (_) {
+                  setState(() {
+                    _selectedRounds = rounds;
+                  });
+                },
+              );
+            }).toList(),
+          ),
+
+          const SizedBox(height: 28),
+
+          Text(
+            'Time per turn',
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+          const SizedBox(height: 12),
+
+          Wrap(
+            spacing: 10,
+            runSpacing: 10,
+            children: [30, 45, 60].map((seconds) {
+              return ChoiceChip(
+                label: Text('$seconds sec'),
+                selected: _secondsPerTurn == seconds,
+                onSelected: (_) {
+                  setState(() {
+                    _secondsPerTurn = seconds;
+                  });
+                },
+              );
+            }).toList(),
+          ),
+
+          const SizedBox(height: 30),
+
+          FilledButton.icon(
+            onPressed: _selectedPlayerIds.length >= 2
+                ? _continueToGame
+                : null,
+            icon: const Icon(Icons.play_arrow),
+            label: const Text('Continue'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _DontSayItPlayer {
+  const _DontSayItPlayer({
+    required this.id,
+    required this.name,
+  });
+
+  final String id;
+  final String name;
 }
