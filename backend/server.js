@@ -8,8 +8,7 @@ dotenv.config();
 const app = express();
 
 app.use(cors());
-app.use(express.json());
-
+app.use(express.json({ limit: "2mb" }));
 const ai = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY,
 });
@@ -1523,6 +1522,190 @@ Return ONLY valid JSON in this exact structure:
 
     res.status(500).json({
       error: "Failed to generate Draw & Guess prompts",
+    });
+  }
+});
+app.post("/api/family-missions/verify", async (req, res) => {
+  try {
+    const {
+      missionId,
+      title,
+      description,
+      proofHint,
+      note,
+      mimeType,
+      imageBase64,
+    } = req.body ?? {};
+
+    if (
+      typeof missionId !== "string" ||
+      typeof title !== "string" ||
+      typeof description !== "string" ||
+      typeof imageBase64 !== "string" ||
+      imageBase64.length === 0
+    ) {
+      return res.status(400).json({
+        error: "Mission and proof image are required",
+      });
+    }
+
+    const allowedMimeTypes = new Set([
+      "image/jpeg",
+      "image/png",
+      "image/webp",
+    ]);
+
+    const normalizedMimeType =
+      typeof mimeType === "string" && allowedMimeTypes.has(mimeType)
+        ? mimeType
+        : "image/jpeg";
+
+    const cleanNote =
+      typeof note === "string" ? note.trim().slice(0, 600) : "";
+
+    const cleanProofHint =
+      typeof proofHint === "string" ? proofHint.trim().slice(0, 500) : "";
+
+    const prompt = `
+You verify evidence submitted for a family activity mission in an app.
+
+MISSION TITLE:
+${title}
+
+MISSION DESCRIPTION:
+${description}
+
+EXPECTED OR USEFUL PROOF:
+${cleanProofHint || "A relevant image reasonably connected to the activity."}
+
+USER EXPLANATION:
+${cleanNote || "No explanation provided."}
+
+You will also receive the submitted image.
+
+Your goal is NOT to prove with absolute certainty that every detail happened.
+Instead, determine whether the submitted evidence REASONABLY SUPPORTS that the
+mission was completed.
+
+Be fair to genuine users.
+
+Important rules:
+- Do not claim certainty about events that cannot be known from the image.
+- A screenshot may be valid when appropriate, such as proof of a video call.
+- A photo may be valid even if every participant is not visible.
+- The explanation can provide context, but it cannot rescue completely unrelated evidence.
+- Reject blank images, unrelated memes, obviously unrelated screenshots, or evidence that clearly does not support the mission.
+- Use "uncertain" when the evidence is relevant but insufficient or ambiguous.
+- Use "verified" when the evidence reasonably supports completion.
+- Use "rejected" only when the evidence is clearly unrelated, unusable, or contradicts the mission.
+- Do not identify people.
+- Do not infer sensitive personal traits.
+- Keep the reason brief, respectful, and useful.
+
+Return ONLY JSON.
+
+Allowed verdict values:
+- "verified"
+- "uncertain"
+- "rejected"
+
+Confidence must be a number from 0 to 1.
+`;
+
+    let response;
+    let lastError;
+
+    for (let attempt = 1; attempt <= 3; attempt += 1) {
+      try {
+        response = await ai.models.generateContent({
+          model: "gemini-3.5-flash",
+          contents: [
+            {
+              text: prompt,
+            },
+            {
+              inlineData: {
+                mimeType: normalizedMimeType,
+                data: imageBase64,
+              },
+            },
+          ],
+          config: {
+            responseMimeType: "application/json",
+            responseJsonSchema: {
+              type: "object",
+              properties: {
+                verdict: {
+                  type: "string",
+                  enum: ["verified", "uncertain", "rejected"],
+                },
+                confidence: {
+                  type: "number",
+                  minimum: 0,
+                  maximum: 1,
+                },
+                reason: {
+                  type: "string",
+                },
+              },
+              required: ["verdict", "confidence", "reason"],
+            },
+          },
+        });
+
+        break;
+      } catch (error) {
+        lastError = error;
+
+        const temporary =
+          error?.status === 429 ||
+          error?.status === 503;
+
+        if (!temporary || attempt === 3) {
+          throw error;
+        }
+
+        console.warn(
+          `Mission verification AI busy. Retry ${attempt}/3...`,
+        );
+
+        await new Promise((resolve) => {
+          setTimeout(resolve, attempt * 1500);
+        });
+      }
+    }
+
+    if (!response) {
+      throw lastError ?? new Error("AI returned no response");
+    }
+
+    const result = JSON.parse(response.text);
+
+    if (
+      !["verified", "uncertain", "rejected"].includes(result.verdict) ||
+      typeof result.confidence !== "number" ||
+      typeof result.reason !== "string"
+    ) {
+      throw new Error("Invalid mission verification response");
+    }
+
+    return res.json({
+      verdict: result.verdict,
+      confidence: Math.max(0, Math.min(1, result.confidence)),
+      reason: result.reason.trim(),
+    });
+  } catch (error) {
+    console.error("Mission verification error:", error);
+
+    if (error?.status === 429 || error?.status === 503) {
+      return res.status(503).json({
+        error:
+          "AI verification is temporarily busy. Your proof was not lost. Please try again in a moment.",
+      });
+    }
+
+    return res.status(500).json({
+      error: "Could not verify mission proof",
     });
   }
 });

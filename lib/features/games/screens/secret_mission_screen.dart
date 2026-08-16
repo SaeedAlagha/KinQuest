@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -9,6 +11,7 @@ enum _SecretMissionPhase {
   privateReveal,
   missionPhase,
   judging,
+  roundResults,
   leaderboard,
 }
 
@@ -20,6 +23,9 @@ class SecretMissionScreen extends StatefulWidget {
 }
 
 class _SecretMissionScreenState extends State<SecretMissionScreen> {
+  static const int _totalRounds = 3;
+  static const Duration _roundDuration = Duration(minutes: 10);
+
   final _aiService = const SecretMissionAiService();
 
   final List<_MissionPlayer> _familyMembers = [];
@@ -32,13 +38,18 @@ class _SecretMissionScreenState extends State<SecretMissionScreen> {
   final Map<String, int> _scores = {};
 
   bool _isLoading = true;
-  bool _isStartingGame = false;
+  bool _isGeneratingMissions = false;
   bool _missionVisible = false;
 
   String? _errorMessage;
 
+  int _currentRound = 1;
   int _currentRevealIndex = 0;
   int _currentJudgeIndex = 0;
+
+  Duration _timeRemaining = _roundDuration;
+  DateTime? _roundEndsAt;
+  Timer? _roundTimer;
 
   _SecretMissionPhase _phase = _SecretMissionPhase.setup;
 
@@ -46,6 +57,12 @@ class _SecretMissionScreenState extends State<SecretMissionScreen> {
   void initState() {
     super.initState();
     _loadFamilyMembers();
+  }
+
+  @override
+  void dispose() {
+    _roundTimer?.cancel();
+    super.dispose();
   }
 
   Future<void> _loadFamilyMembers() async {
@@ -130,6 +147,44 @@ class _SecretMissionScreenState extends State<SecretMissionScreen> {
     });
   }
 
+  Future<List<SecretMission>> _generateOrderedMissions(
+    List<_MissionPlayer> players,
+  ) async {
+    final generatedMissions = await _aiService.generateMissions(
+      playerNames: players.map((player) => player.name).toList(),
+      languageCode: 'en',
+    );
+
+    if (generatedMissions.length != players.length) {
+      throw Exception('Mission count mismatch');
+    }
+
+    final remainingMissions = List<SecretMission>.from(generatedMissions);
+    final orderedMissions = <SecretMission>[];
+
+    for (final player in players) {
+      final missionIndex = remainingMissions.indexWhere(
+        (mission) =>
+            mission.playerName.trim().toLowerCase() ==
+            player.name.trim().toLowerCase(),
+      );
+
+      if (missionIndex == -1) {
+        throw Exception('Missing mission for ${player.name}');
+      }
+
+      final mission = remainingMissions.removeAt(missionIndex);
+
+      if (mission.mission.trim().isEmpty) {
+        throw Exception('Empty mission');
+      }
+
+      orderedMissions.add(mission);
+    }
+
+    return orderedMissions;
+  }
+
   Future<void> _startGame() async {
     if (_selectedPlayerIds.length < 2) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -142,7 +197,7 @@ class _SecretMissionScreenState extends State<SecretMissionScreen> {
     }
 
     setState(() {
-      _isStartingGame = true;
+      _isGeneratingMissions = true;
     });
 
     try {
@@ -150,38 +205,7 @@ class _SecretMissionScreenState extends State<SecretMissionScreen> {
           .where((player) => _selectedPlayerIds.contains(player.id))
           .toList();
 
-      final generatedMissions = await _aiService.generateMissions(
-        playerNames: selectedPlayers.map((player) => player.name).toList(),
-        languageCode: 'en',
-      );
-
-      if (generatedMissions.length != selectedPlayers.length) {
-        throw Exception('Mission count mismatch');
-      }
-
-      final remainingMissions = List<SecretMission>.from(generatedMissions);
-
-      final orderedMissions = <SecretMission>[];
-
-      for (final player in selectedPlayers) {
-        final missionIndex = remainingMissions.indexWhere(
-          (mission) =>
-              mission.playerName.trim().toLowerCase() ==
-              player.name.trim().toLowerCase(),
-        );
-
-        if (missionIndex == -1) {
-          throw Exception('Missing mission for ${player.name}');
-        }
-
-        final mission = remainingMissions.removeAt(missionIndex);
-
-        if (mission.mission.trim().isEmpty) {
-          throw Exception('Empty mission');
-        }
-
-        orderedMissions.add(mission);
-      }
+      final orderedMissions = await _generateOrderedMissions(selectedPlayers);
 
       final scores = <String, int>{};
 
@@ -201,26 +225,72 @@ class _SecretMissionScreenState extends State<SecretMissionScreen> {
 
         _completedMissions.clear();
 
+        _currentRound = 1;
         _currentRevealIndex = 0;
         _currentJudgeIndex = 0;
 
         _missionVisible = false;
+        _timeRemaining = _roundDuration;
 
         _phase = _SecretMissionPhase.privateReveal;
-        _isStartingGame = false;
+        _isGeneratingMissions = false;
       });
     } catch (_) {
       if (!mounted) return;
 
       setState(() {
-        _isStartingGame = false;
+        _isGeneratingMissions = false;
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
-            'Could not generate Secret Missions. Make sure the AI server is running.',
+            'Could not generate Secret Missions. Please try again in a moment.',
           ),
+        ),
+      );
+    }
+  }
+
+  Future<void> _startNextRound() async {
+    if (_currentRound >= _totalRounds || _isGeneratingMissions) {
+      return;
+    }
+
+    setState(() {
+      _isGeneratingMissions = true;
+    });
+
+    try {
+      final orderedMissions = await _generateOrderedMissions(_players);
+
+      if (!mounted) return;
+
+      setState(() {
+        _currentRound++;
+
+        _missions = orderedMissions;
+        _completedMissions.clear();
+
+        _currentRevealIndex = 0;
+        _currentJudgeIndex = 0;
+
+        _missionVisible = false;
+        _timeRemaining = _roundDuration;
+
+        _phase = _SecretMissionPhase.privateReveal;
+        _isGeneratingMissions = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+
+      setState(() {
+        _isGeneratingMissions = false;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Could not generate the next round. Please try again.'),
         ),
       );
     }
@@ -239,6 +309,7 @@ class _SecretMissionScreenState extends State<SecretMissionScreen> {
         _phase = _SecretMissionPhase.missionPhase;
       });
 
+      _startRoundTimer();
       return;
     }
 
@@ -248,7 +319,90 @@ class _SecretMissionScreenState extends State<SecretMissionScreen> {
     });
   }
 
+  void _startRoundTimer() {
+    _roundTimer?.cancel();
+
+    _roundEndsAt = DateTime.now().add(_roundDuration);
+
+    setState(() {
+      _timeRemaining = _roundDuration;
+    });
+
+    _roundTimer = Timer.periodic(
+      const Duration(seconds: 1),
+      (_) => _updateRoundTimer(),
+    );
+  }
+
+  void _updateRoundTimer() {
+    final endsAt = _roundEndsAt;
+
+    if (endsAt == null || !mounted) {
+      return;
+    }
+
+    final remaining = endsAt.difference(DateTime.now());
+
+    if (remaining <= Duration.zero) {
+      _roundTimer?.cancel();
+      _roundTimer = null;
+      _roundEndsAt = null;
+
+      setState(() {
+        _timeRemaining = Duration.zero;
+      });
+
+      _startJudging();
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Time is up! Time to reveal and judge the missions.'),
+        ),
+      );
+
+      return;
+    }
+
+    setState(() {
+      _timeRemaining = remaining;
+    });
+  }
+
+  Future<void> _finishRoundEarly() async {
+    final shouldFinish = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Finish round early?'),
+          content: const Text(
+            'The timer will stop and everyone will move to mission judging.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Keep Playing'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('Finish Round'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (shouldFinish != true || !mounted) {
+      return;
+    }
+
+    _startJudging();
+  }
+
   void _startJudging() {
+    _roundTimer?.cancel();
+    _roundTimer = null;
+    _roundEndsAt = null;
+
     setState(() {
       _currentJudgeIndex = 0;
       _phase = _SecretMissionPhase.judging;
@@ -259,11 +413,16 @@ class _SecretMissionScreenState extends State<SecretMissionScreen> {
     final player = _players[_currentJudgeIndex];
 
     _completedMissions[player.id] = completed;
-    _scores[player.id] = completed ? 1 : 0;
+
+    if (completed) {
+      _scores[player.id] = (_scores[player.id] ?? 0) + 1;
+    }
 
     if (_currentJudgeIndex + 1 >= _players.length) {
       setState(() {
-        _phase = _SecretMissionPhase.leaderboard;
+        _phase = _currentRound >= _totalRounds
+            ? _SecretMissionPhase.leaderboard
+            : _SecretMissionPhase.roundResults;
       });
 
       return;
@@ -275,6 +434,10 @@ class _SecretMissionScreenState extends State<SecretMissionScreen> {
   }
 
   void _playAgain() {
+    _roundTimer?.cancel();
+    _roundTimer = null;
+    _roundEndsAt = null;
+
     setState(() {
       _phase = _SecretMissionPhase.setup;
 
@@ -286,11 +449,32 @@ class _SecretMissionScreenState extends State<SecretMissionScreen> {
 
       _selectedPlayerIds.clear();
 
+      _currentRound = 1;
       _currentRevealIndex = 0;
       _currentJudgeIndex = 0;
 
       _missionVisible = false;
+      _timeRemaining = _roundDuration;
+      _isGeneratingMissions = false;
     });
+  }
+
+  String get _formattedTime {
+    final totalSeconds = _timeRemaining.inSeconds.clamp(
+      0,
+      _roundDuration.inSeconds,
+    );
+
+    final minutes = totalSeconds ~/ 60;
+    final seconds = totalSeconds % 60;
+
+    return '${minutes.toString().padLeft(2, '0')}:'
+        '${seconds.toString().padLeft(2, '0')}';
+  }
+
+  double get _timerProgress {
+    return (_timeRemaining.inMilliseconds / _roundDuration.inMilliseconds)
+        .clamp(0.0, 1.0);
   }
 
   @override
@@ -314,6 +498,9 @@ class _SecretMissionScreenState extends State<SecretMissionScreen> {
 
       case _SecretMissionPhase.judging:
         return _buildJudgingScreen();
+
+      case _SecretMissionPhase.roundResults:
+        return _buildRoundResultsScreen();
 
       case _SecretMissionPhase.leaderboard:
         return _buildLeaderboardScreen();
@@ -387,7 +574,11 @@ class _SecretMissionScreenState extends State<SecretMissionScreen> {
           ),
           const SizedBox(height: 10),
           const Text(
-            'Each player will secretly receive a mission. Do not let anyone else see yours.',
+            '3 rounds • 10 minutes per round • 1 secret mission per player each round.',
+          ),
+          const SizedBox(height: 10),
+          const Text(
+            'Complete your mission naturally without letting the others figure it out.',
           ),
           const SizedBox(height: 24),
           Expanded(
@@ -396,7 +587,6 @@ class _SecretMissionScreenState extends State<SecretMissionScreen> {
               separatorBuilder: (_, _) => const SizedBox(height: 10),
               itemBuilder: (context, index) {
                 final player = _familyMembers[index];
-
                 final selected = _selectedPlayerIds.contains(player.id);
 
                 return Card(
@@ -418,8 +608,8 @@ class _SecretMissionScreenState extends State<SecretMissionScreen> {
           ),
           const SizedBox(height: 16),
           FilledButton.icon(
-            onPressed: _isStartingGame ? null : _startGame,
-            icon: _isStartingGame
+            onPressed: _isGeneratingMissions ? null : _startGame,
+            icon: _isGeneratingMissions
                 ? const SizedBox(
                     width: 18,
                     height: 18,
@@ -427,8 +617,8 @@ class _SecretMissionScreenState extends State<SecretMissionScreen> {
                   )
                 : const Icon(Icons.visibility_off_rounded),
             label: Text(
-              _isStartingGame
-                  ? 'Generating secret missions...'
+              _isGeneratingMissions
+                  ? 'Generating Round 1...'
                   : 'Start Secret Mission',
             ),
           ),
@@ -449,7 +639,14 @@ class _SecretMissionScreenState extends State<SecretMissionScreen> {
           child: Column(
             children: [
               Text(
-                'Mission ${_currentRevealIndex + 1} of ${_players.length}',
+                'Round $_currentRound of $_totalRounds',
+                style: Theme.of(
+                  context,
+                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Player ${_currentRevealIndex + 1} of ${_players.length}',
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               const SizedBox(height: 24),
@@ -506,7 +703,7 @@ class _SecretMissionScreenState extends State<SecretMissionScreen> {
                   icon: const Icon(Icons.phone_android_rounded),
                   label: Text(
                     _currentRevealIndex + 1 >= _players.length
-                        ? 'Hide Mission & Start'
+                        ? 'Hide Mission & Start 10-Minute Round'
                         : 'Hide Mission & Pass Phone',
                   ),
                 ),
@@ -526,6 +723,13 @@ class _SecretMissionScreenState extends State<SecretMissionScreen> {
           constraints: const BoxConstraints(maxWidth: 650),
           child: Column(
             children: [
+              Text(
+                'Round $_currentRound of $_totalRounds',
+                style: Theme.of(
+                  context,
+                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 22),
               const Icon(Icons.psychology_alt_rounded, size: 82),
               const SizedBox(height: 20),
               Text(
@@ -537,19 +741,45 @@ class _SecretMissionScreenState extends State<SecretMissionScreen> {
               ),
               const SizedBox(height: 14),
               const Text(
-                'Put the phone down and act naturally. Try to complete your mission without anyone figuring it out.',
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 12),
-              const Text(
-                'When everyone is ready, come back and reveal the missions.',
+                'Put the phone down and act naturally. Complete your mission without making it obvious.',
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 32),
-              FilledButton.icon(
-                onPressed: _startJudging,
-                icon: const Icon(Icons.fact_check_rounded),
-                label: const Text('Reveal & Judge Missions'),
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 28,
+                    vertical: 24,
+                  ),
+                  child: Column(
+                    children: [
+                      const Text('TIME REMAINING', textAlign: TextAlign.center),
+                      const SizedBox(height: 10),
+                      Text(
+                        _formattedTime,
+                        style: Theme.of(context).textTheme.displayMedium
+                            ?.copyWith(fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 18),
+                      LinearProgressIndicator(
+                        value: _timerProgress,
+                        minHeight: 10,
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
+              const Text(
+                'The round will automatically move to judging when the timer reaches 00:00.',
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 24),
+              OutlinedButton.icon(
+                onPressed: _finishRoundEarly,
+                icon: const Icon(Icons.flag_rounded),
+                label: const Text('Finish Round Early'),
               ),
             ],
           ),
@@ -570,7 +800,14 @@ class _SecretMissionScreenState extends State<SecretMissionScreen> {
           child: Column(
             children: [
               Text(
-                'Mission ${_currentJudgeIndex + 1} of ${_players.length}',
+                'Round $_currentRound of $_totalRounds',
+                style: Theme.of(
+                  context,
+                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Judge ${_currentJudgeIndex + 1} of ${_players.length}',
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               const SizedBox(height: 24),
@@ -594,7 +831,7 @@ class _SecretMissionScreenState extends State<SecretMissionScreen> {
               ),
               const SizedBox(height: 22),
               const Text(
-                'Did they successfully complete the mission?',
+                'Did they successfully complete the mission during this round?',
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 24),
@@ -612,7 +849,7 @@ class _SecretMissionScreenState extends State<SecretMissionScreen> {
                     child: FilledButton.icon(
                       onPressed: () => _judgeMission(true),
                       icon: const Icon(Icons.check_rounded),
-                      label: const Text('Completed'),
+                      label: const Text('Completed +1'),
                     ),
                   ),
                 ],
@@ -624,7 +861,7 @@ class _SecretMissionScreenState extends State<SecretMissionScreen> {
     );
   }
 
-  Widget _buildLeaderboardScreen() {
+  Widget _buildRoundResultsScreen() {
     final rankedPlayers = List<_MissionPlayer>.from(_players);
 
     rankedPlayers.sort(
@@ -635,6 +872,86 @@ class _SecretMissionScreenState extends State<SecretMissionScreen> {
       padding: const EdgeInsets.all(24),
       children: [
         Text(
+          'Round $_currentRound Complete',
+          textAlign: TextAlign.center,
+          style: Theme.of(
+            context,
+          ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          '${_totalRounds - _currentRound} round${_totalRounds - _currentRound == 1 ? '' : 's'} remaining',
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 24),
+        ...List.generate(rankedPlayers.length, (index) {
+          final player = rankedPlayers[index];
+          final score = _scores[player.id] ?? 0;
+          final completed = _completedMissions[player.id] ?? false;
+
+          return Card(
+            child: ListTile(
+              leading: CircleAvatar(
+                child: Icon(
+                  completed ? Icons.check_rounded : Icons.close_rounded,
+                ),
+              ),
+              title: Text(player.name),
+              subtitle: Text(
+                completed
+                    ? 'Mission completed this round'
+                    : 'Mission not completed this round',
+              ),
+              trailing: Text(
+                '$score pt${score == 1 ? '' : 's'}',
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+              ),
+            ),
+          );
+        }),
+        const SizedBox(height: 24),
+        FilledButton.icon(
+          onPressed: _isGeneratingMissions ? null : _startNextRound,
+          icon: _isGeneratingMissions
+              ? const SizedBox(
+                  width: 18,
+                  height: 18,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : const Icon(Icons.arrow_forward_rounded),
+          label: Text(
+            _isGeneratingMissions
+                ? 'Generating Round ${_currentRound + 1}...'
+                : 'Start Round ${_currentRound + 1}',
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildLeaderboardScreen() {
+    final rankedPlayers = List<_MissionPlayer>.from(_players);
+
+    rankedPlayers.sort(
+      (a, b) => (_scores[b.id] ?? 0).compareTo(_scores[a.id] ?? 0),
+    );
+
+    final highestScore = rankedPlayers.isEmpty
+        ? 0
+        : (_scores[rankedPlayers.first.id] ?? 0);
+
+    final winnerCount = rankedPlayers
+        .where((player) => (_scores[player.id] ?? 0) == highestScore)
+        .length;
+
+    return ListView(
+      padding: const EdgeInsets.all(24),
+      children: [
+        const Icon(Icons.emoji_events_rounded, size: 72),
+        const SizedBox(height: 16),
+        Text(
           'Secret Mission Results',
           textAlign: TextAlign.center,
           style: Theme.of(
@@ -642,8 +959,16 @@ class _SecretMissionScreenState extends State<SecretMissionScreen> {
           ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 8),
+        Text(
+          winnerCount > 1
+              ? 'It is a tie!'
+              : '${rankedPlayers.first.name} wins!',
+          textAlign: TextAlign.center,
+          style: Theme.of(context).textTheme.titleLarge,
+        ),
+        const SizedBox(height: 8),
         const Text(
-          'Quick Play session only — no Tokens or official ranking changes.',
+          '3 rounds complete • Quick Play session only • No Tokens or official ranking changes.',
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 24),
@@ -655,11 +980,9 @@ class _SecretMissionScreenState extends State<SecretMissionScreen> {
             child: ListTile(
               leading: CircleAvatar(child: Text('${index + 1}')),
               title: Text(player.name),
-              subtitle: Text(
-                score == 1 ? 'Mission completed' : 'Mission not completed',
-              ),
+              subtitle: Text('$score of $_totalRounds missions completed'),
               trailing: Text(
-                '$score pt',
+                '$score pt${score == 1 ? '' : 's'}',
                 style: Theme.of(
                   context,
                 ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
