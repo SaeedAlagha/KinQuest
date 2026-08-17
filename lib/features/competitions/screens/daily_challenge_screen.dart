@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../games/screens/family_missions_screen.dart';
 import '../../games/screens/family_quiz_screen.dart';
 import '../../games/screens/memory_challenge_screen.dart';
@@ -24,7 +25,7 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> {
   bool _openedChallenge = false;
 
   String? _familyId;
-  String? _errorMessage;
+  _DailyChallengeError? _error;
 
   String get _dateKey {
     final now = DateTime.now();
@@ -94,7 +95,7 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> {
     if (user == null) {
       setState(() {
         _isLoading = false;
-        _errorMessage = 'You must be signed in to use Daily Challenge.';
+        _error = _DailyChallengeError.signInRequired;
       });
       return;
     }
@@ -112,8 +113,7 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> {
 
         setState(() {
           _isLoading = false;
-          _errorMessage =
-              'Join or create a family before playing Daily Challenge.';
+          _error = _DailyChallengeError.familyRequired;
         });
 
         return;
@@ -140,7 +140,7 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> {
 
       setState(() {
         _isLoading = false;
-        _errorMessage = 'Could not load today\'s challenge. Please try again.';
+        _error = _DailyChallengeError.loadFailed;
       });
     }
   }
@@ -272,8 +272,8 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> {
         SnackBar(
           content: Text(
             completed
-                ? 'Daily Challenge complete! You earned 10 tokens.'
-                : 'You already claimed today\'s Daily Challenge.',
+                ? AppLocalizations.of(context)!.dailyChallengeCompleteMessage
+                : AppLocalizations.of(context)!.dailyChallengeAlreadyClaimed,
           ),
         ),
       );
@@ -285,10 +285,8 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> {
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Could not complete the Daily Challenge. Please try again.',
-          ),
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.dailyChallengeSaveError),
         ),
       );
     }
@@ -296,16 +294,21 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context)!;
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Daily Challenge')),
+      appBar: AppBar(title: Text(strings.dailyChallenge)),
       body: SafeArea(
         child: _isLoading
             ? const Center(child: CircularProgressIndicator())
-            : _errorMessage != null
+            : _error != null
             ? Center(
                 child: Padding(
                   padding: const EdgeInsets.all(24),
-                  child: Text(_errorMessage!, textAlign: TextAlign.center),
+                  child: Text(
+                    _localizedDailyChallengeError(strings, _error!),
+                    textAlign: TextAlign.center,
+                  ),
                 ),
               )
             : _buildChallenge(),
@@ -314,6 +317,8 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> {
   }
 
   Widget _buildChallenge() {
+    final strings = AppLocalizations.of(context)!;
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
       child: Center(
@@ -330,9 +335,9 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> {
                 ),
                 child: Column(
                   children: [
-                    const Text(
-                      'TODAY\'S FAMILY CHALLENGE',
-                      style: TextStyle(
+                    Text(
+                      strings.todaysFamilyChallenge,
+                      style: const TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.w800,
                         letterSpacing: 1,
@@ -354,7 +359,7 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> {
                     ),
                     const SizedBox(height: 20),
                     Text(
-                      _challenge.title,
+                      _localizedDailyChallengeTitle(strings, _challenge),
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.headlineMedium
                           ?.copyWith(
@@ -364,7 +369,7 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> {
                     ),
                     const SizedBox(height: 10),
                     Text(
-                      _challenge.description,
+                      _localizedDailyChallengeDescription(strings, _challenge),
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                         color: Colors.white.withValues(alpha: 0.88),
@@ -390,12 +395,12 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Daily reward',
+                              strings.dailyReward,
                               style: Theme.of(context).textTheme.titleMedium
                                   ?.copyWith(fontWeight: FontWeight.w800),
                             ),
                             const SizedBox(height: 3),
-                            const Text('+10 tokens and daily streak progress'),
+                            Text(strings.dailyRewardDescription),
                           ],
                         ),
                       ),
@@ -411,19 +416,15 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> {
                     color: AppTheme.tealColor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(20),
                   ),
-                  child: const Row(
+                  child: Row(
                     children: [
-                      Icon(
+                      const Icon(
                         Icons.check_circle_rounded,
                         color: AppTheme.tealColor,
                         size: 32,
                       ),
-                      SizedBox(width: 14),
-                      Expanded(
-                        child: Text(
-                          'You completed today\'s challenge. Come back tomorrow for a new one!',
-                        ),
-                      ),
+                      const SizedBox(width: 14),
+                      Expanded(child: Text(strings.dailyChallengeCompleted)),
                     ],
                   ),
                 )
@@ -431,7 +432,7 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> {
                 FilledButton.icon(
                   onPressed: _openChallenge,
                   icon: const Icon(Icons.play_arrow_rounded),
-                  label: const Text('Play Today\'s Challenge'),
+                  label: Text(strings.playTodaysChallenge),
                 ),
                 const SizedBox(height: 12),
                 OutlinedButton.icon(
@@ -446,12 +447,14 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> {
                         )
                       : const Icon(Icons.check_rounded),
                   label: Text(
-                    _isClaiming ? 'Saving completion...' : 'I Completed It',
+                    _isClaiming
+                        ? strings.savingCompletion
+                        : strings.iCompletedIt,
                   ),
                 ),
                 const SizedBox(height: 10),
                 Text(
-                  'Open today\'s challenge before claiming the reward.',
+                  strings.openChallengeBeforeClaiming,
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: AppTheme.secondaryTextColor,
@@ -473,6 +476,8 @@ enum _DailyChallengeType {
   partyGames,
 }
 
+enum _DailyChallengeError { signInRequired, familyRequired, loadFailed }
+
 class _DailyChallenge {
   const _DailyChallenge({
     required this.type,
@@ -486,3 +491,39 @@ class _DailyChallenge {
   final String title;
   final String description;
 }
+
+String _localizedDailyChallengeTitle(
+  AppLocalizations strings,
+  _DailyChallenge challenge,
+) => switch (challenge.type) {
+  _DailyChallengeType.familyQuiz => strings.familyQuizDay,
+  _DailyChallengeType.memoryChallenge => strings.memoryChallengeDay,
+  _DailyChallengeType.familyMissions => strings.familyMissionDay,
+  _DailyChallengeType.partyGames => strings.partyGameDay,
+};
+
+String _localizedDailyChallengeDescription(
+  AppLocalizations strings,
+  _DailyChallenge challenge,
+) {
+  final localizedDescription = switch (challenge.type) {
+    _DailyChallengeType.familyQuiz => strings.familyQuizDayDescription,
+    _DailyChallengeType.memoryChallenge =>
+      strings.memoryChallengeDayDescription,
+    _DailyChallengeType.familyMissions => strings.familyMissionDayDescription,
+    _DailyChallengeType.partyGames => strings.partyGameDayDescription,
+  };
+
+  return localizedDescription.isEmpty
+      ? challenge.description
+      : localizedDescription;
+}
+
+String _localizedDailyChallengeError(
+  AppLocalizations strings,
+  _DailyChallengeError error,
+) => switch (error) {
+  _DailyChallengeError.signInRequired => strings.dailyChallengeSignInRequired,
+  _DailyChallengeError.familyRequired => strings.dailyChallengeFamilyRequired,
+  _DailyChallengeError.loadFailed => strings.dailyChallengeLoadError,
+};
