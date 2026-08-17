@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'add_memory_screen.dart';
 import 'memory_details_screen.dart';
+import 'dart:typed_data';
 
 class MemoriesScreen extends StatelessWidget {
   const MemoriesScreen({super.key, this.developerPreview = false});
@@ -122,7 +123,14 @@ class MemoriesScreen extends StatelessWidget {
                     final title = data['title'] as String? ?? 'Memory';
                     final description = data['description'] as String? ?? '';
                     final location = data['location'] as String? ?? '';
+                    final imageData = data['imageData'];
                     final imageUrl = data['imageUrl'] as String?;
+
+                    Uint8List? imageBytes;
+
+                    if (imageData is Blob) {
+                      imageBytes = imageData.bytes;
+                    }
                     final timestamp = data['date'] as Timestamp?;
                     final date = timestamp?.toDate();
 
@@ -151,7 +159,24 @@ class MemoriesScreen extends StatelessWidget {
                           child: SizedBox(
                             width: 56,
                             height: 56,
-                            child: imageUrl != null && imageUrl.isNotEmpty
+                            child: imageBytes != null && imageBytes.isNotEmpty
+                                ? Image.memory(
+                                    imageBytes,
+                                    fit: BoxFit.cover,
+                                    gaplessPlayback: true,
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return Container(
+                                        color: Theme.of(
+                                          context,
+                                        ).colorScheme.primaryContainer,
+                                        alignment: Alignment.center,
+                                        child: const Icon(
+                                          Icons.broken_image_outlined,
+                                        ),
+                                      );
+                                    },
+                                  )
+                                : imageUrl != null && imageUrl.isNotEmpty
                                 ? Image.network(
                                     imageUrl,
                                     fit: BoxFit.cover,
@@ -160,6 +185,7 @@ class MemoriesScreen extends StatelessWidget {
                                         color: Theme.of(
                                           context,
                                         ).colorScheme.primaryContainer,
+                                        alignment: Alignment.center,
                                         child: const Icon(
                                           Icons.broken_image_outlined,
                                         ),
@@ -170,6 +196,7 @@ class MemoriesScreen extends StatelessWidget {
                                     color: Theme.of(
                                       context,
                                     ).colorScheme.primaryContainer,
+                                    alignment: Alignment.center,
                                     child: const Icon(Icons.photo_outlined),
                                   ),
                           ),
