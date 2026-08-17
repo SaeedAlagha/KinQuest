@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'family_missions_screen.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/family_year_banner.dart';
 import 'charades_screen.dart';
@@ -9,7 +8,6 @@ import 'never_have_i_ever_screen.dart';
 import 'trivia_screen.dart';
 import 'truth_or_dare_screen.dart';
 import 'would_you_rather_screen.dart';
-import 'memory_challenge_screen.dart';
 import 'family_impostor_screen.dart';
 import 'secret_mission_screen.dart';
 import 'caption_battle_screen.dart';
@@ -32,40 +30,8 @@ class GamesScreen extends StatelessWidget {
       eyebrow: 'CONNECTED PLAY',
       isAvailable: true,
     ),
-    _GameItem(
-      icon: Icons.compare_arrows_rounded,
-      accent: AppTheme.tealColor,
-      title: 'Match My Answer',
-      description: 'Try to match another family member\'s private answer.',
-      eyebrow: 'COMING SOON',
-    ),
-    _GameItem(
-      icon: Icons.photo_library_rounded,
-      accent: AppTheme.primaryColor,
-      title: 'Memory Challenge',
-      description:
-          'Play AI-generated challenges inspired by your family memories.',
-      eyebrow: 'SILA SIGNATURE',
-      isAvailable: true,
-      isSignatureFeature: true,
-    ),
-    _GameItem(
-      icon: Icons.psychology_rounded,
-      accent: AppTheme.goldColor,
-      title: 'AI Knowledge Challenge',
-      description:
-          'Explore science, geography, history, sports, and more together.',
-      eyebrow: 'COMING SOON',
-    ),
-    _GameItem(
-      icon: Icons.groups_rounded,
-      accent: Color(0xFF4B91F1),
-      title: 'Family Missions',
-      description:
-          'Complete real-life activities together and earn family rewards.',
-      eyebrow: 'DAILY MISSIONS',
-      isAvailable: true,
-    ),
+
+ 
     _GameItem(
       icon: Icons.celebration_rounded,
       accent: Color(0xFFE35EAB),
@@ -101,6 +67,7 @@ class GamesScreen extends StatelessWidget {
           'Caption real family photos, vote anonymously, and crown the funniest family member.',
       eyebrow: 'PHOTO PARTY',
       isAvailable: true,
+      isSignatureFeature: true,
     ),
     _GameItem(
       icon: Icons.timer_rounded,
@@ -135,8 +102,6 @@ class GamesScreen extends StatelessWidget {
       MaterialPageRoute(
         builder: (_) => switch (game.title) {
           'Family Quiz' => FamilyQuizScreen(developerPreview: developerPreview),
-          'Memory Challenge' => const MemoryChallengeScreen(),
-          'Family Missions' => const FamilyMissionsScreen(),
           'Family Impostor' => const FamilyImpostorScreen(),
           'Secret Mission' => const SecretMissionScreen(),
           'Caption Battle' => const CaptionBattleScreen(),
