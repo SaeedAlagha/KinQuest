@@ -4,6 +4,7 @@ import '../../../core/branding/app_brand.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/family_year_banner.dart';
 import '../../../core/widgets/sila_brand_mark.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../competitions/screens/competitions_screen.dart';
 import '../../games/screens/family_missions_screen.dart';
 import '../../memories/screens/memories_screen.dart';
@@ -22,59 +23,61 @@ class MainNavigationScreen extends StatefulWidget {
 class _MainNavigationScreenState extends State<MainNavigationScreen> {
   late final List<Widget> _screens;
 
-  static const List<NavigationDestination> _mobileDestinations = [
+  List<NavigationDestination> _mobileDestinations(AppLocalizations strings) => [
     NavigationDestination(
-      icon: Icon(Icons.home_outlined),
-      selectedIcon: Icon(Icons.home_rounded),
-      label: 'Home',
+      icon: const Icon(Icons.home_outlined),
+      selectedIcon: const Icon(Icons.home_rounded),
+      label: strings.navHome,
     ),
     NavigationDestination(
-      icon: Icon(Icons.photo_library_outlined),
-      selectedIcon: Icon(Icons.photo_library_rounded),
-      label: 'Memories',
+      icon: const Icon(Icons.photo_library_outlined),
+      selectedIcon: const Icon(Icons.photo_library_rounded),
+      label: strings.navMemories,
     ),
     NavigationDestination(
-      icon: Icon(Icons.sports_esports_outlined),
-      selectedIcon: Icon(Icons.sports_esports_rounded),
-      label: 'Play',
+      icon: const Icon(Icons.sports_esports_outlined),
+      selectedIcon: const Icon(Icons.sports_esports_rounded),
+      label: strings.navPlay,
     ),
     NavigationDestination(
-      icon: Icon(Icons.groups_outlined),
-      selectedIcon: Icon(Icons.groups_rounded),
-      label: 'Missions',
+      icon: const Icon(Icons.groups_outlined),
+      selectedIcon: const Icon(Icons.groups_rounded),
+      label: strings.navMissions,
     ),
     NavigationDestination(
-      icon: Icon(Icons.person_outline_rounded),
-      selectedIcon: Icon(Icons.person_rounded),
-      label: 'Profile',
+      icon: const Icon(Icons.person_outline_rounded),
+      selectedIcon: const Icon(Icons.person_rounded),
+      label: strings.navProfile,
     ),
   ];
 
-  static const List<NavigationRailDestination> _desktopDestinations = [
+  List<NavigationRailDestination> _desktopDestinations(
+    AppLocalizations strings,
+  ) => [
     NavigationRailDestination(
-      icon: Icon(Icons.home_outlined),
-      selectedIcon: Icon(Icons.home_rounded),
-      label: Text('Home'),
+      icon: const Icon(Icons.home_outlined),
+      selectedIcon: const Icon(Icons.home_rounded),
+      label: Text(strings.navHome),
     ),
     NavigationRailDestination(
-      icon: Icon(Icons.photo_library_outlined),
-      selectedIcon: Icon(Icons.photo_library_rounded),
-      label: Text('Memories'),
+      icon: const Icon(Icons.photo_library_outlined),
+      selectedIcon: const Icon(Icons.photo_library_rounded),
+      label: Text(strings.navMemories),
     ),
     NavigationRailDestination(
-      icon: Icon(Icons.sports_esports_outlined),
-      selectedIcon: Icon(Icons.sports_esports_rounded),
-      label: Text('Play'),
+      icon: const Icon(Icons.sports_esports_outlined),
+      selectedIcon: const Icon(Icons.sports_esports_rounded),
+      label: Text(strings.navPlay),
     ),
     NavigationRailDestination(
-      icon: Icon(Icons.groups_outlined),
-      selectedIcon: Icon(Icons.groups_rounded),
-      label: Text('Missions'),
+      icon: const Icon(Icons.groups_outlined),
+      selectedIcon: const Icon(Icons.groups_rounded),
+      label: Text(strings.navMissions),
     ),
     NavigationRailDestination(
-      icon: Icon(Icons.person_outline_rounded),
-      selectedIcon: Icon(Icons.person_rounded),
-      label: Text('Profile'),
+      icon: const Icon(Icons.person_outline_rounded),
+      selectedIcon: const Icon(Icons.person_rounded),
+      label: Text(strings.navProfile),
     ),
   ];
 
@@ -141,6 +144,8 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context)!;
+
     return LayoutBuilder(
       builder: (context, constraints) {
         final useDesktopNavigation = constraints.maxWidth >= 960;
@@ -160,7 +165,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                       padding: EdgeInsets.fromLTRB(20, 18, 20, 34),
                       child: _NavigationBrand(),
                     ),
-                    destinations: _desktopDestinations,
+                    destinations: _desktopDestinations(strings),
                   ),
                 ),
                 const VerticalDivider(),
@@ -175,7 +180,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
           bottomNavigationBar: NavigationBar(
             selectedIndex: _selectedIndex,
             onDestinationSelected: _selectScreen,
-            destinations: _mobileDestinations,
+            destinations: _mobileDestinations(strings),
           ),
         );
       },
@@ -191,6 +196,7 @@ class _DeveloperPreviewBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final strings = AppLocalizations.of(context)!;
 
     return Container(
       width: double.infinity,
@@ -205,14 +211,14 @@ class _DeveloperPreviewBanner extends StatelessWidget {
           const SizedBox(width: 10),
           Expanded(
             child: Text(
-              'Developer Family preview • Demo data only',
+              strings.developerFamilyPreview,
               style: Theme.of(context).textTheme.labelLarge?.copyWith(
                 color: colorScheme.onPrimaryContainer,
                 fontWeight: FontWeight.w700,
               ),
             ),
           ),
-          TextButton(onPressed: onExit, child: const Text('Exit')),
+          TextButton(onPressed: onExit, child: Text(strings.exit)),
         ],
       ),
     );

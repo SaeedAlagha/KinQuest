@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'daily_challenge_screen.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../games/screens/games_screen.dart';
 
 class CompetitionsScreen extends StatelessWidget {
@@ -42,20 +43,22 @@ class CompetitionsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context)!;
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Play'), centerTitle: true),
+      appBar: AppBar(title: Text(strings.navPlay), centerTitle: true),
       body: ListView(
         padding: const EdgeInsets.all(20),
         children: [
           Text(
-            'Play Together',
+            strings.playTogether,
             style: Theme.of(
               context,
             ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
           Text(
-            'Gather around, choose how you want to play, then pick a game.',
+            strings.playTogetherDescription,
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
               color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
@@ -101,11 +104,10 @@ class CompetitionsScreen extends StatelessWidget {
           const SizedBox(height: 8),
           _FamilyLeaderboard(developerPreview: developerPreview),
           const SizedBox(height: 16),
-          const _SectionPlaceholder(
+          _SectionPlaceholder(
             icon: Icons.military_tech,
-            title: 'Family Trophy Cabinet',
-            description:
-                'Previous weekly and monthly champions will appear here.',
+            title: strings.familyTrophyCabinet,
+            description: strings.familyTrophyCabinetDescription,
           ),
         ],
       ),
@@ -122,6 +124,7 @@ class _CompetitionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final strings = AppLocalizations.of(context)!;
 
     return Card(
       margin: EdgeInsets.zero,
@@ -153,7 +156,7 @@ class _CompetitionCard extends StatelessWidget {
                 const SizedBox(width: 14),
                 Expanded(
                   child: Text(
-                    competition.title,
+                    _localizedCompetitionTitle(strings, competition.title),
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
@@ -163,7 +166,11 @@ class _CompetitionCard extends StatelessWidget {
             ),
             const SizedBox(height: 14),
             Text(
-              competition.description,
+              _localizedCompetitionDescription(
+                strings,
+                competition.title,
+                competition.description,
+              ),
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: colorScheme.onSurfaceVariant,
                 height: 1.4,
@@ -177,8 +184,18 @@ class _CompetitionCard extends StatelessWidget {
                 Expanded(
                   child: Text(
                     competition.title == 'Quick Play'
-                        ? competition.reward
-                        : 'Reward: ${competition.reward}',
+                        ? _localizedCompetitionReward(
+                            strings,
+                            competition.title,
+                            competition.reward,
+                          )
+                        : strings.rewardLabel(
+                            _localizedCompetitionReward(
+                              strings,
+                              competition.title,
+                              competition.reward,
+                            ),
+                          ),
                     style: Theme.of(context).textTheme.labelLarge?.copyWith(
                       color: colorScheme.primary,
                       fontWeight: FontWeight.bold,
@@ -189,7 +206,7 @@ class _CompetitionCard extends StatelessWidget {
                   width: 90,
                   child: FilledButton(
                     onPressed: onTap,
-                    child: const Text('View'),
+                    child: Text(strings.view),
                   ),
                 ),
               ],
@@ -208,6 +225,8 @@ class _FamilyLeaderboard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context)!;
+
     if (developerPreview) {
       return const _DeveloperFamilyLeaderboard();
     }
@@ -215,10 +234,10 @@ class _FamilyLeaderboard extends StatelessWidget {
     final user = FirebaseAuth.instance.currentUser;
 
     if (user == null) {
-      return const _SectionPlaceholder(
+      return _SectionPlaceholder(
         icon: Icons.leaderboard,
-        title: 'Leaderboard',
-        description: 'Sign in to view your family leaderboard.',
+        title: strings.leaderboard,
+        description: strings.leaderboardSignIn,
       );
     }
 
@@ -235,10 +254,10 @@ class _FamilyLeaderboard extends StatelessWidget {
         final familyId = userSnapshot.data?.data()?['familyId'] as String?;
 
         if (familyId == null || familyId.isEmpty) {
-          return const _SectionPlaceholder(
+          return _SectionPlaceholder(
             icon: Icons.leaderboard,
-            title: 'Leaderboard',
-            description: 'Join or create a family to view the leaderboard.',
+            title: strings.leaderboard,
+            description: strings.leaderboardJoinFamily,
           );
         }
 
@@ -253,10 +272,10 @@ class _FamilyLeaderboard extends StatelessWidget {
             }
 
             if (membersSnapshot.hasError) {
-              return const _SectionPlaceholder(
+              return _SectionPlaceholder(
                 icon: Icons.leaderboard,
-                title: 'Leaderboard',
-                description: 'Could not load the family leaderboard.',
+                title: strings.leaderboard,
+                description: strings.leaderboardLoadError,
               );
             }
 
@@ -270,10 +289,10 @@ class _FamilyLeaderboard extends StatelessWidget {
             });
 
             if (members.isEmpty) {
-              return const _SectionPlaceholder(
+              return _SectionPlaceholder(
                 icon: Icons.leaderboard,
-                title: 'Leaderboard',
-                description: 'No family members found.',
+                title: strings.leaderboard,
+                description: strings.leaderboardNoMembers,
               );
             }
 
@@ -285,7 +304,7 @@ class _FamilyLeaderboard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Family Leaderboard',
+                      strings.familyLeaderboard,
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
@@ -293,7 +312,8 @@ class _FamilyLeaderboard extends StatelessWidget {
                     const SizedBox(height: 12),
                     ...List.generate(members.length, (index) {
                       final data = members[index].data();
-                      final name = data['name'] as String? ?? 'Family Member';
+                      final name =
+                          data['name'] as String? ?? strings.familyMember;
                       final tokens = data['tokens'] as num? ?? 0;
 
                       return ListTile(
@@ -301,7 +321,7 @@ class _FamilyLeaderboard extends StatelessWidget {
                         leading: CircleAvatar(child: Text('${index + 1}')),
                         title: Text(name),
                         trailing: Text(
-                          '$tokens tokens',
+                          strings.tokenCount(tokens),
                           style: Theme.of(context).textTheme.labelLarge
                               ?.copyWith(fontWeight: FontWeight.bold),
                         ),
@@ -331,6 +351,8 @@ class _DeveloperFamilyLeaderboard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context)!;
+
     return Card(
       margin: EdgeInsets.zero,
       child: Padding(
@@ -339,7 +361,7 @@ class _DeveloperFamilyLeaderboard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Developer Family Leaderboard',
+              strings.developerFamilyLeaderboard,
               style: Theme.of(
                 context,
               ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
@@ -353,7 +375,7 @@ class _DeveloperFamilyLeaderboard extends StatelessWidget {
                 leading: CircleAvatar(child: Text('${index + 1}')),
                 title: Text(member.$1),
                 trailing: Text(
-                  '${member.$2} tokens',
+                  strings.tokenCount(member.$2),
                   style: Theme.of(
                     context,
                   ).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.bold),
@@ -426,8 +448,14 @@ class CompetitionPlaceholderScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context)!;
+    final localizedTitle = _localizedCompetitionTitle(
+      strings,
+      competitionTitle,
+    );
+
     return Scaffold(
-      appBar: AppBar(title: Text(competitionTitle)),
+      appBar: AppBar(title: Text(localizedTitle)),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(24),
@@ -441,13 +469,13 @@ class CompetitionPlaceholderScreen extends StatelessWidget {
               ),
               const SizedBox(height: 20),
               Text(
-                competitionTitle,
+                localizedTitle,
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.headlineMedium,
               ),
               const SizedBox(height: 12),
               Text(
-                'Competition logic will be implemented in a future update.',
+                strings.competitionFutureUpdate,
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.bodyLarge,
               ),
@@ -472,3 +500,36 @@ class _CompetitionItem {
   final String description;
   final String reward;
 }
+
+String _localizedCompetitionTitle(AppLocalizations strings, String title) =>
+    switch (title) {
+      'Quick Play' => strings.quickPlay,
+      'Daily Challenge' => strings.dailyChallenge,
+      'Weekly Championship' => strings.weeklyChampionship,
+      'Monthly Cup' => strings.monthlyCup,
+      _ => title,
+    };
+
+String _localizedCompetitionDescription(
+  AppLocalizations strings,
+  String title,
+  String fallback,
+) => switch (title) {
+  'Quick Play' => strings.quickPlayDescription,
+  'Daily Challenge' => strings.dailyChallengeCompetitionDescription,
+  'Weekly Championship' => strings.weeklyChampionshipDescription,
+  'Monthly Cup' => strings.monthlyCupDescription,
+  _ => fallback,
+};
+
+String _localizedCompetitionReward(
+  AppLocalizations strings,
+  String title,
+  String fallback,
+) => switch (title) {
+  'Quick Play' => strings.quickPlayReward,
+  'Daily Challenge' => strings.dailyChallengeCompetitionReward,
+  'Weekly Championship' => strings.weeklyChampionshipReward,
+  'Monthly Cup' => strings.monthlyCupReward,
+  _ => fallback,
+};

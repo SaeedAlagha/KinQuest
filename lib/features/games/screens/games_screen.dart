@@ -1,20 +1,21 @@
 import 'package:flutter/material.dart';
+
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/family_year_banner.dart';
+import '../../../l10n/app_localizations.dart';
+import 'caption_battle_screen.dart';
 import 'charades_screen.dart';
+import 'dont_say_it_screen.dart';
+import 'draw_and_guess_screen.dart';
 import 'emoji_guess_screen.dart';
+import 'family_impostor_screen.dart';
 import 'family_quiz_screen.dart';
 import 'never_have_i_ever_screen.dart';
+import 'pass_the_bomb_screen.dart';
+import 'secret_mission_screen.dart';
 import 'trivia_screen.dart';
 import 'truth_or_dare_screen.dart';
 import 'would_you_rather_screen.dart';
-import 'family_impostor_screen.dart';
-import 'secret_mission_screen.dart';
-import 'caption_battle_screen.dart';
-import 'pass_the_bomb_screen.dart';
-import 'draw_and_guess_screen.dart';
-import 'dont_say_it_screen.dart';
-
 
 class GamesScreen extends StatelessWidget {
   const GamesScreen({super.key, this.developerPreview = false});
@@ -33,31 +34,29 @@ class GamesScreen extends StatelessWidget {
     ),
 
     _GameItem(
-  icon: Icons.quiz_outlined,
-  accent: AppTheme.coralColor,
-  title: 'Trivia',
-  description:
-      'Challenge your family with questions and compete for the highest score.',
-  eyebrow: 'KNOWLEDGE',
-  isAvailable: true,
-  ),
+      icon: Icons.quiz_outlined,
+      accent: AppTheme.coralColor,
+      title: 'Trivia',
+      description:
+          'Challenge your family with questions and compete for the highest score.',
+      eyebrow: 'KNOWLEDGE',
+      isAvailable: true,
+    ),
 
     _GameItem(
-  icon: Icons.emoji_emotions_outlined,
-  accent: AppTheme.coralColor,
-  title: 'Emoji Guess',
-  description:
-      'Decode emoji clues and compete to get the highest score.',
-  eyebrow: 'GUESSING GAME',
-  isAvailable: true,
-),
- 
+      icon: Icons.emoji_emotions_outlined,
+      accent: AppTheme.coralColor,
+      title: 'Emoji Guess',
+      description: 'Decode emoji clues and compete to get the highest score.',
+      eyebrow: 'GUESSING GAME',
+      isAvailable: true,
+    ),
+
     _GameItem(
       icon: Icons.celebration_rounded,
       accent: Color(0xFFE35EAB),
       title: 'Party Games',
-      description:
-          'Quick family games for laughs and fun.',
+      description: 'Quick family games for laughs and fun.',
       eyebrow: '4 GAMES INSIDE',
       isAvailable: true,
     ),
@@ -107,14 +106,14 @@ class GamesScreen extends StatelessWidget {
       isAvailable: true,
     ),
     _GameItem(
-  icon: Icons.record_voice_over_outlined,
-  accent: AppTheme.coralColor,
-  title: 'Don\'t Say It',
-  description:
-      'Describe the secret word without saying any of the forbidden words.',
-  eyebrow: 'WORD CHALLENGE',
-  isAvailable: true,
-),
+      icon: Icons.record_voice_over_outlined,
+      accent: AppTheme.coralColor,
+      title: 'Don\'t Say It',
+      description:
+          'Describe the secret word without saying any of the forbidden words.',
+      eyebrow: 'WORD CHALLENGE',
+      isAvailable: true,
+    ),
   ];
 
   void _openGame(BuildContext context, _GameItem game) {
@@ -129,7 +128,7 @@ class GamesScreen extends StatelessWidget {
           'Draw & Guess' => const DrawAndGuessScreen(),
           'Don\'t Say It' => const DontSayItScreen(),
           'Trivia' => const TriviaScreen(),
-          'Emoji Guess' => const EmojiGuessScreen(),  
+          'Emoji Guess' => const EmojiGuessScreen(),
           'Party Games' => const PartyGamesScreen(),
           _ => GamePlaceholderScreen(gameTitle: game.title),
         },
@@ -139,9 +138,11 @@ class GamesScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context)!;
+
     return Scaffold(
       appBar: Navigator.of(context).canPop()
-          ? AppBar(title: const Text('Games'))
+          ? AppBar(title: Text(strings.games))
           : null,
       body: SafeArea(
         child: LayoutBuilder(
@@ -199,6 +200,8 @@ class _GamesHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context)!;
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(28),
@@ -236,7 +239,7 @@ class _GamesHeader extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'FAMILY YEAR • BONDS THROUGH PLAY',
+                      strings.gamesEyebrow,
                       style: Theme.of(context).textTheme.labelSmall?.copyWith(
                         color: AppTheme.primaryColor,
                         fontWeight: FontWeight.w800,
@@ -245,12 +248,12 @@ class _GamesHeader extends StatelessWidget {
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      'Find your next family favorite',
+                      strings.gamesHeading,
                       style: Theme.of(context).textTheme.headlineMedium,
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Share a quick laugh, a thoughtful question, or a challenge that brings every generation closer.',
+                      strings.gamesDescription,
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                         color: AppTheme.secondaryTextColor,
                       ),
@@ -274,6 +277,7 @@ class _GameCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context)!;
     final borderColor = game.isSignatureFeature
         ? AppTheme.primaryColor.withValues(alpha: 0.5)
         : AppTheme.outlineColor;
@@ -322,7 +326,7 @@ class _GameCard extends StatelessWidget {
                       borderRadius: BorderRadius.circular(99),
                     ),
                     child: Text(
-                      game.eyebrow,
+                      _localizedGameEyebrow(strings, game.title, game.eyebrow),
                       style: Theme.of(context).textTheme.labelSmall?.copyWith(
                         color: game.isAvailable
                             ? const Color(0xFF167A70)
@@ -335,10 +339,17 @@ class _GameCard extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 20),
-              Text(game.title, style: Theme.of(context).textTheme.titleLarge),
+              Text(
+                _localizedGameTitle(strings, game.title),
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
               const SizedBox(height: 8),
               Text(
-                game.description,
+                _localizedGameDescription(
+                  strings,
+                  game.title,
+                  game.description,
+                ),
                 maxLines: 3,
                 overflow: TextOverflow.ellipsis,
                 style: Theme.of(context).textTheme.bodyMedium,
@@ -347,7 +358,7 @@ class _GameCard extends StatelessWidget {
               Row(
                 children: [
                   Text(
-                    game.isAvailable ? 'Open game' : 'Preview',
+                    game.isAvailable ? strings.openGame : strings.preview,
                     style: Theme.of(context).textTheme.labelLarge?.copyWith(
                       color: AppTheme.primaryColor,
                     ),
@@ -372,7 +383,6 @@ class PartyGamesScreen extends StatelessWidget {
   const PartyGamesScreen({super.key});
 
   static const List<_PartyGameItem> _games = [
-    
     _PartyGameItem(
       icon: Icons.compare_arrows_rounded,
       accent: AppTheme.coralColor,
@@ -385,7 +395,7 @@ class PartyGamesScreen extends StatelessWidget {
       title: 'Charades',
       description: 'Act out creative prompts for the whole family.',
     ),
-   
+
     _PartyGameItem(
       icon: Icons.sentiment_satisfied_alt_rounded,
       accent: Color(0xFF4B91F1),
@@ -414,8 +424,10 @@ class PartyGamesScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context)!;
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Party Games')),
+      appBar: AppBar(title: Text(strings.partyGames)),
       body: SafeArea(
         top: false,
         child: LayoutBuilder(
@@ -432,12 +444,12 @@ class PartyGamesScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Quick games. Big laughs.',
+                        strings.partyGamesHeading,
                         style: Theme.of(context).textTheme.headlineMedium,
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'Pick a game and pass the device around—no setup required.',
+                        strings.partyGamesSubtitle,
                         style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                           color: AppTheme.secondaryTextColor,
                         ),
@@ -481,6 +493,8 @@ class _PartyGameCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context)!;
+
     return Material(
       color: AppTheme.surfaceColor,
       shape: RoundedRectangleBorder(
@@ -510,12 +524,16 @@ class _PartyGameCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      game.title,
+                      _localizedPartyGameTitle(strings, game.title),
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
                     const SizedBox(height: 5),
                     Text(
-                      game.description,
+                      _localizedPartyGameDescription(
+                        strings,
+                        game.title,
+                        game.description,
+                      ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: Theme.of(context).textTheme.bodyMedium,
@@ -543,8 +561,11 @@ class GamePlaceholderScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context)!;
+    final localizedTitle = _localizedAnyGameTitle(strings, gameTitle);
+
     return Scaffold(
-      appBar: AppBar(title: Text(gameTitle)),
+      appBar: AppBar(title: Text(localizedTitle)),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -575,13 +596,13 @@ class GamePlaceholderScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 24),
                   Text(
-                    gameTitle,
+                    localizedTitle,
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.headlineMedium,
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    'This game will be implemented in a future update.',
+                    strings.gameFutureUpdate,
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                       color: AppTheme.secondaryTextColor,
@@ -629,4 +650,83 @@ class _PartyGameItem {
   final Color accent;
   final String title;
   final String description;
+}
+
+String _localizedGameTitle(AppLocalizations strings, String title) =>
+    switch (title) {
+      'Family Quiz' => strings.familyQuiz,
+      'Trivia' => strings.trivia,
+      'Emoji Guess' => strings.emojiGuess,
+      'Party Games' => strings.partyGames,
+      'Family Impostor' => strings.familyImpostor,
+      'Secret Mission' => strings.secretMission,
+      'Caption Battle' => strings.captionBattle,
+      'Pass the Bomb' => strings.passTheBomb,
+      'Draw & Guess' => strings.drawAndGuess,
+      'Don\'t Say It' => strings.dontSayIt,
+      _ => title,
+    };
+
+String _localizedGameDescription(
+  AppLocalizations strings,
+  String title,
+  String fallback,
+) => switch (title) {
+  'Family Quiz' => strings.familyQuizDescription,
+  'Trivia' => strings.triviaDescription,
+  'Emoji Guess' => strings.emojiGuessDescription,
+  'Party Games' => strings.partyGamesDescription,
+  'Family Impostor' => strings.familyImpostorDescription,
+  'Secret Mission' => strings.secretMissionDescription,
+  'Caption Battle' => strings.captionBattleDescription,
+  'Pass the Bomb' => strings.passTheBombDescription,
+  'Draw & Guess' => strings.drawAndGuessDescription,
+  'Don\'t Say It' => strings.dontSayItDescription,
+  _ => fallback,
+};
+
+String _localizedGameEyebrow(
+  AppLocalizations strings,
+  String title,
+  String fallback,
+) => switch (title) {
+  'Family Quiz' => strings.connectedPlay,
+  'Trivia' => strings.knowledge,
+  'Emoji Guess' => strings.guessingGame,
+  'Party Games' => strings.fourGamesInside,
+  'Family Impostor' => strings.socialDeduction,
+  'Secret Mission' => strings.secretChallenge,
+  'Caption Battle' => strings.photoParty,
+  'Pass the Bomb' => strings.fastFamilyFun,
+  'Draw & Guess' => strings.creativePlay,
+  'Don\'t Say It' => strings.wordChallenge,
+  _ => fallback,
+};
+
+String _localizedPartyGameTitle(AppLocalizations strings, String title) =>
+    switch (title) {
+      'Would You Rather' => strings.wouldYouRather,
+      'Charades' => strings.charades,
+      'Never Have I Ever' => strings.neverHaveIEver,
+      'Truth or Dare' => strings.truthOrDare,
+      _ => title,
+    };
+
+String _localizedPartyGameDescription(
+  AppLocalizations strings,
+  String title,
+  String fallback,
+) => switch (title) {
+  'Would You Rather' => strings.wouldYouRatherDescription,
+  'Charades' => strings.charadesDescription,
+  'Never Have I Ever' => strings.neverHaveIEverDescription,
+  'Truth or Dare' => strings.truthOrDareDescription,
+  _ => fallback,
+};
+
+String _localizedAnyGameTitle(AppLocalizations strings, String title) {
+  final gameTitle = _localizedGameTitle(strings, title);
+  return gameTitle == title
+      ? _localizedPartyGameTitle(strings, title)
+      : gameTitle;
 }

@@ -1,10 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import '../../competitions/screens/daily_challenge_screen.dart';
+
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/family_year_banner.dart';
 import '../../../core/widgets/sila_brand_mark.dart';
+import '../../../l10n/app_localizations.dart';
+import '../../competitions/screens/daily_challenge_screen.dart';
 import '../../games/screens/games_screen.dart';
 import '../../memories/screens/add_memory_screen.dart';
 
@@ -13,13 +15,12 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context)!;
     final user = FirebaseAuth.instance.currentUser;
 
     if (user == null) {
-      return const Scaffold(
-        body: SafeArea(
-          child: Center(child: Text('No user is currently signed in.')),
-        ),
+      return Scaffold(
+        body: SafeArea(child: Center(child: Text(strings.noUserSignedIn))),
       );
     }
 
@@ -30,14 +31,14 @@ class HomeScreen extends StatelessWidget {
           .snapshots(),
       builder: (context, userSnapshot) {
         final userData = userSnapshot.data?.data();
-        final name = userData?['name'] as String? ?? 'Sila Member';
+        final name = userData?['name'] as String? ?? strings.silaMember;
         final tokens = userData?['tokens'] ?? 0;
         final familyId = userData?['familyId'] as String?;
 
         if (familyId == null || familyId.isEmpty) {
           return HomeDashboard(
             name: name,
-            familyName: 'No family joined',
+            familyName: strings.noFamilyJoined,
             memberCount: 0,
             tokens: tokens.toString(),
           );
@@ -50,7 +51,8 @@ class HomeScreen extends StatelessWidget {
               .snapshots(),
           builder: (context, familySnapshot) {
             final familyData = familySnapshot.data?.data();
-            final familyName = familyData?['name'] as String? ?? 'Your Family';
+            final familyName =
+                familyData?['name'] as String? ?? strings.yourFamily;
             final members = List<String>.from(
               familyData?['members'] ?? const [],
             );
@@ -85,15 +87,17 @@ class HomeDashboard extends StatelessWidget {
   final bool developerPreview;
 
   void _showPreviewNotice(BuildContext context) {
+    final strings = AppLocalizations.of(context)!;
+
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Developer preview is read-only. No memory was added.'),
-      ),
+      SnackBar(content: Text(strings.developerPreviewMemoryReadOnly)),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context)!;
+
     return Scaffold(
       body: SafeArea(
         child: LayoutBuilder(
@@ -153,9 +157,8 @@ class HomeDashboard extends StatelessWidget {
                       _QuickActionCard(
                         icon: Icons.today_rounded,
                         accent: AppTheme.goldColor,
-                        title: 'Today\'s Daily Challenge',
-                        subtitle:
-                            'Complete today\'s family challenge and earn bonus tokens.',
+                        title: strings.todaysDailyChallenge,
+                        subtitle: strings.dailyChallengeHomeDescription,
                         onTap: () => Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -166,11 +169,10 @@ class HomeDashboard extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 24),
-                      const _SectionHeading(
-                        eyebrow: 'GROWING IN UNITY',
-                        title: 'Small moments, stronger bonds',
-                        subtitle:
-                            'Create a memory or play together—simple ways to stay close every day.',
+                      _SectionHeading(
+                        eyebrow: strings.growingInUnity,
+                        title: strings.smallMomentsStrongerBonds,
+                        subtitle: strings.homeBondDescription,
                       ),
                       const SizedBox(height: 16),
                       if (isWide)
@@ -180,9 +182,8 @@ class HomeDashboard extends StatelessWidget {
                               child: _QuickActionCard(
                                 icon: Icons.add_photo_alternate_outlined,
                                 accent: AppTheme.coralColor,
-                                title: 'Add a Memory',
-                                subtitle:
-                                    'Save a photo, video, or story from today.',
+                                title: strings.addMemory,
+                                subtitle: strings.addMemoryDescription,
                                 onTap: developerPreview
                                     ? () => _showPreviewNotice(context)
                                     : () => Navigator.push(
@@ -199,9 +200,8 @@ class HomeDashboard extends StatelessWidget {
                               child: _QuickActionCard(
                                 icon: Icons.sports_esports_outlined,
                                 accent: AppTheme.tealColor,
-                                title: 'Challenge the Family',
-                                subtitle:
-                                    'Start a friendly match and share a laugh.',
+                                title: strings.challengeFamily,
+                                subtitle: strings.challengeFamilyDescription,
                                 onTap: () => Navigator.push(
                                   context,
                                   MaterialPageRoute(
@@ -218,8 +218,8 @@ class HomeDashboard extends StatelessWidget {
                         _QuickActionCard(
                           icon: Icons.add_photo_alternate_outlined,
                           accent: AppTheme.coralColor,
-                          title: 'Add a Memory',
-                          subtitle: 'Save a photo, video, or story from today.',
+                          title: strings.addMemory,
+                          subtitle: strings.addMemoryDescription,
                           onTap: developerPreview
                               ? () => _showPreviewNotice(context)
                               : () => Navigator.push(
@@ -233,8 +233,8 @@ class HomeDashboard extends StatelessWidget {
                         _QuickActionCard(
                           icon: Icons.sports_esports_outlined,
                           accent: AppTheme.tealColor,
-                          title: 'Challenge the Family',
-                          subtitle: 'Start a friendly match and share a laugh.',
+                          title: strings.challengeFamily,
+                          subtitle: strings.challengeFamilyDescription,
                           onTap: () => Navigator.push(
                             context,
                             MaterialPageRoute(
@@ -265,6 +265,8 @@ class _HomeHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context)!;
+
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
@@ -276,7 +278,7 @@ class _HomeHeader extends StatelessWidget {
                 children: [
                   Flexible(
                     child: Text(
-                      'Welcome, $name',
+                      strings.welcomeName(name),
                       style: Theme.of(context).textTheme.headlineMedium,
                     ),
                   ),
@@ -290,8 +292,7 @@ class _HomeHeader extends StatelessWidget {
               ),
               const SizedBox(height: 4),
               Text(
-                'SILA FAMILY SPACE  •  صِلَة',
-                textDirection: TextDirection.ltr,
+                strings.silaFamilySpace,
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
                   color: AppTheme.tealColor,
                   fontWeight: FontWeight.w800,
@@ -328,6 +329,8 @@ class _FamilyOverviewCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context)!;
+
     return Container(
       constraints: const BoxConstraints(minHeight: 300),
       clipBehavior: Clip.antiAlias,
@@ -386,7 +389,7 @@ class _FamilyOverviewCard extends StatelessWidget {
                     const SizedBox(width: 12),
                     Expanded(
                       child: Align(
-                        alignment: Alignment.centerRight,
+                        alignment: AlignmentDirectional.centerEnd,
                         child: Container(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 12,
@@ -396,8 +399,8 @@ class _FamilyOverviewCard extends StatelessWidget {
                             color: Colors.white.withValues(alpha: 0.16),
                             borderRadius: BorderRadius.circular(99),
                           ),
-                          child: const Text(
-                            'ROOTS • BONDS • GROWTH',
+                          child: Text(
+                            strings.rootsBondsGrowth,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
@@ -421,7 +424,7 @@ class _FamilyOverviewCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 10),
                 Text(
-                  '$memberCount ${memberCount == 1 ? 'family member' : 'family members'} connected through stories, play, and moments together.',
+                  strings.familyMembersConnected(memberCount),
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                     color: Colors.white.withValues(alpha: 0.86),
                   ),
@@ -434,7 +437,7 @@ class _FamilyOverviewCard extends StatelessWidget {
                     foregroundColor: AppTheme.primaryDark,
                   ),
                   icon: const Icon(Icons.groups_2_rounded),
-                  label: const Text('Family Overview'),
+                  label: Text(strings.familyOverview),
                 ),
               ],
             ),
@@ -482,6 +485,8 @@ class _FamilyStats extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context)!;
+
     if (stacked) {
       return Column(
         children: [
@@ -489,14 +494,14 @@ class _FamilyStats extends StatelessWidget {
             icon: Icons.groups_2_rounded,
             accent: AppTheme.tealColor,
             value: memberCount.toString(),
-            label: 'Family members',
+            label: strings.familyMembers,
           ),
           const SizedBox(height: 14),
           _MetricCard(
             icon: Icons.stars_rounded,
             accent: AppTheme.goldColor,
             value: tokens,
-            label: 'Family tokens',
+            label: strings.familyTokens,
           ),
         ],
       );
@@ -509,7 +514,7 @@ class _FamilyStats extends StatelessWidget {
             icon: Icons.groups_2_rounded,
             accent: AppTheme.tealColor,
             value: memberCount.toString(),
-            label: 'Family members',
+            label: strings.familyMembers,
           ),
         ),
         const SizedBox(width: 12),
@@ -518,7 +523,7 @@ class _FamilyStats extends StatelessWidget {
             icon: Icons.stars_rounded,
             accent: AppTheme.goldColor,
             value: tokens,
-            label: 'Family tokens',
+            label: strings.familyTokens,
           ),
         ),
       ],

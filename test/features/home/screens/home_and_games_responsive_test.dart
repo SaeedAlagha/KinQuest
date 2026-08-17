@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:kinquest/core/theme/app_theme.dart';
 import 'package:kinquest/features/games/screens/games_screen.dart';
 import 'package:kinquest/features/home/screens/home_screen.dart';
+import 'package:kinquest/l10n/app_localizations.dart';
 
 void main() {
   testWidgets('Home and Games render on desktop without layout errors', (
@@ -53,7 +54,12 @@ Future<void> _setViewport(WidgetTester tester, Size size) async {
 
 Future<void> _pumpScreen(WidgetTester tester, Widget screen) async {
   await tester.pumpWidget(
-    MaterialApp(theme: AppTheme.lightTheme, home: screen),
+    MaterialApp(
+      theme: AppTheme.lightTheme,
+      supportedLocales: AppLocalizations.supportedLocales,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      home: screen,
+    ),
   );
   await tester.pumpAndSettle();
 }
