@@ -1,28 +1,23 @@
 import 'dart:math';
 
-import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
+
 import '../services/family_quiz_ai_service.dart';
 
 enum _FamilyQuizPhase {
   setup,
-  privateAnswerHandoff,
-  privateAnswer,
-  familyGuessHandoff,
-  familyGuess,
+  subjectHandoff,
+  subjectAnswer,
+  guesserHandoff,
+  guess,
   answerReveal,
+  roundSummary,
   voteHandoff,
   vote,
   voteReveal,
-  results,
-}
-
-class _VoteRoundSummary {
-  const _VoteRoundSummary({required this.question, required this.winners});
-
-  final String question;
-  final List<String> winners;
+  finalResults,
 }
 
 class FamilyQuizScreen extends StatefulWidget {
@@ -40,10 +35,6 @@ class FamilyQuizScreen extends StatefulWidget {
 }
 
 class _FamilyQuizScreenState extends State<FamilyQuizScreen> {
-  static const int _minimumRounds = 3;
-  static const int _maximumRounds = 5;
-  static const int _maximumFamilyMembers = 8;
-
   static const List<String> _categories = [
     'Family Fun',
     'Favorites',
@@ -56,15 +47,30 @@ class _FamilyQuizScreenState extends State<FamilyQuizScreen> {
     'Family Fun': [
       FamilyQuizQuestion(
         question: 'Which family activity would you choose for a free day?',
-        options: ['Game night', 'Picnic', 'Movie marathon', 'Day trip'],
+        options: [
+          'Game night',
+          'Picnic',
+          'Movie marathon',
+          'Day trip',
+        ],
       ),
       FamilyQuizQuestion(
         question: 'Which imaginary family pet would you choose?',
-        options: ['Tiny dragon', 'Talking dog', 'Flying cat', 'Friendly robot'],
+        options: [
+          'Tiny dragon',
+          'Talking dog',
+          'Flying cat',
+          'Friendly robot',
+        ],
       ),
       FamilyQuizQuestion(
         question: 'Which role would you choose in a family talent show?',
-        options: ['Singer', 'Comedian', 'Magician', 'Host'],
+        options: [
+          'Singer',
+          'Comedian',
+          'Magician',
+          'Host',
+        ],
       ),
       FamilyQuizQuestion(
         question: 'Which surprise would make you smile the most?',
@@ -77,47 +83,97 @@ class _FamilyQuizScreenState extends State<FamilyQuizScreen> {
       ),
       FamilyQuizQuestion(
         question: 'Which family challenge would you enjoy most?',
-        options: ['Bake-off', 'Treasure hunt', 'Dance contest', 'Puzzle race'],
+        options: [
+          'Bake-off',
+          'Treasure hunt',
+          'Dance contest',
+          'Puzzle race',
+        ],
       ),
     ],
     'Favorites': [
       FamilyQuizQuestion(
         question: 'Which snack would you choose for family movie night?',
-        options: ['Popcorn', 'Pizza', 'Fruit', 'Ice cream'],
+        options: [
+          'Popcorn',
+          'Pizza',
+          'Fruit',
+          'Ice cream',
+        ],
       ),
       FamilyQuizQuestion(
         question: 'Which kind of outing would you choose?',
-        options: ['Beach', 'Theme park', 'Museum', 'Nature walk'],
+        options: [
+          'Beach',
+          'Theme park',
+          'Museum',
+          'Nature walk',
+        ],
       ),
       FamilyQuizQuestion(
         question: 'Which movie type would you choose tonight?',
-        options: ['Comedy', 'Adventure', 'Animation', 'Mystery'],
+        options: [
+          'Comedy',
+          'Adventure',
+          'Animation',
+          'Mystery',
+        ],
       ),
       FamilyQuizQuestion(
         question: 'Which hobby would you most like to try?',
-        options: ['Painting', 'Cooking', 'Photography', 'Gardening'],
+        options: [
+          'Painting',
+          'Cooking',
+          'Photography',
+          'Gardening',
+        ],
       ),
       FamilyQuizQuestion(
         question: 'Which treat would you choose for dessert?',
-        options: ['Cake', 'Cookies', 'Fruit', 'Ice cream'],
+        options: [
+          'Cake',
+          'Cookies',
+          'Fruit',
+          'Ice cream',
+        ],
       ),
     ],
     'Habits': [
       FamilyQuizQuestion(
         question: 'What do you usually do first after waking up?',
-        options: ['Check the time', 'Drink water', 'Stretch', 'Stay in bed'],
+        options: [
+          'Check the time',
+          'Drink water',
+          'Stretch',
+          'Stay in bed',
+        ],
       ),
       FamilyQuizQuestion(
         question: 'How do you prefer to get ready for an event?',
-        options: ['Very early', 'With a checklist', 'With help', 'Last minute'],
+        options: [
+          'Very early',
+          'With a checklist',
+          'With help',
+          'Last minute',
+        ],
       ),
       FamilyQuizQuestion(
         question: 'Which task do you prefer to finish first?',
-        options: ['Cleaning', 'Homework', 'Messages', 'Planning'],
+        options: [
+          'Cleaning',
+          'Homework',
+          'Messages',
+          'Planning',
+        ],
       ),
       FamilyQuizQuestion(
         question: 'What helps you relax at the end of the day?',
-        options: ['Music', 'A show', 'Reading', 'Talking'],
+        options: [
+          'Music',
+          'A show',
+          'Reading',
+          'Talking',
+        ],
       ),
       FamilyQuizQuestion(
         question: 'How do you usually remember something important?',
@@ -132,23 +188,48 @@ class _FamilyQuizScreenState extends State<FamilyQuizScreen> {
     'Memories': [
       FamilyQuizQuestion(
         question: 'Which type of family memory would you most like to revisit?',
-        options: ['A trip', 'A celebration', 'A funny moment', 'A quiet day'],
+        options: [
+          'A trip',
+          'A celebration',
+          'A funny moment',
+          'A quiet day',
+        ],
       ),
       FamilyQuizQuestion(
         question: 'Which keepsake would you save from a special day?',
-        options: ['Photo', 'Ticket', 'Small gift', 'Written note'],
+        options: [
+          'Photo',
+          'Ticket',
+          'Small gift',
+          'Written note',
+        ],
       ),
       FamilyQuizQuestion(
         question: 'Which family moment do you remember most easily?',
-        options: ['A meal', 'A journey', 'A game', 'A celebration'],
+        options: [
+          'A meal',
+          'A journey',
+          'A game',
+          'A celebration',
+        ],
       ),
       FamilyQuizQuestion(
         question: 'How would you preserve a favorite family memory?',
-        options: ['Photo album', 'Video', 'Story', 'Memory box'],
+        options: [
+          'Photo album',
+          'Video',
+          'Story',
+          'Memory box',
+        ],
       ),
       FamilyQuizQuestion(
         question: 'Which tradition would you most enjoy repeating?',
-        options: ['Holiday meal', 'Annual trip', 'Game night', 'Family photo'],
+        options: [
+          'Holiday meal',
+          'Annual trip',
+          'Game night',
+          'Family photo',
+        ],
       ),
     ],
     'Most Likely To': [
@@ -175,20 +256,74 @@ class _FamilyQuizScreenState extends State<FamilyQuizScreen> {
     ],
   };
 
-  final TextEditingController _memberController = TextEditingController();
+  bool _isLoadingFamily = true;
+  bool _isPreparingGame = false;
 
-  final List<String> _familyMembers = [];
+  String? _familyError;
 
-  bool _isLoadingFamilyMembers = true;
-  String? _familyLoadError;
+  final List<_QuizPlayer> _familyMembers = [];
+  final Set<String> _selectedPlayerIds = {};
+
+  List<_QuizPlayer> _players = [];
+  List<FamilyQuizQuestion> _questions = [];
+
+  final Map<String, int> _scores = {};
+
+  String _selectedCategory = 'Family Fun';
+
+  int _selectedRounds = 3;
+  int _questionsPerRound = 3;
+
+  int _currentRound = 1;
+  int _questionInRound = 0;
+  int _globalQuestionIndex = 0;
+
+  int _currentSubjectIndex = 0;
+  int _currentGuesserIndex = 0;
+
+  int? _subjectAnswerIndex;
+
+  final Map<String, int> _currentGuesses = {};
+
+  int _currentVoterIndex = 0;
+  int? _selectedVoteIndex;
+  List<int> _currentVotes = [];
+
+  _FamilyQuizPhase _phase = _FamilyQuizPhase.setup;
+
+  bool get _isVotingMode =>
+      _selectedCategory == 'Most Likely To';
+
+  FamilyQuizQuestion get _currentQuestion =>
+      _questions[_globalQuestionIndex];
+
+  _QuizPlayer get _currentSubject =>
+      _players[_currentSubjectIndex];
+
+  List<_QuizPlayer> get _guessers => _players
+      .where(
+        (player) => player.id != _currentSubject.id,
+      )
+      .toList();
+
+  _QuizPlayer get _currentGuesser =>
+      _guessers[_currentGuesserIndex];
 
   @override
   void initState() {
     super.initState();
 
     if (widget.developerPreview) {
-      _familyMembers.addAll(const ['Amal', 'Omar', 'Mariam', 'Zayed']);
-      _isLoadingFamilyMembers = false;
+      _familyMembers.addAll(
+        const [
+          _QuizPlayer(id: '1', name: 'Amal'),
+          _QuizPlayer(id: '2', name: 'Omar'),
+          _QuizPlayer(id: '3', name: 'Mariam'),
+          _QuizPlayer(id: '4', name: 'Zayed'),
+        ],
+      );
+
+      _isLoadingFamily = false;
       return;
     }
 
@@ -196,287 +331,292 @@ class _FamilyQuizScreenState extends State<FamilyQuizScreen> {
   }
 
   Future<void> _loadFamilyMembers() async {
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user == null) {
+      setState(() {
+        _isLoadingFamily = false;
+        _familyError = 'You must be logged in to play.';
+      });
+
+      return;
+    }
+
     try {
-      final user = FirebaseAuth.instance.currentUser;
-
-      if (user == null) {
-        if (!mounted) return;
-
-        setState(() {
-          _isLoadingFamilyMembers = false;
-          _familyLoadError = 'No user is currently signed in.';
-        });
-        return;
-      }
-
-      final userDoc = await FirebaseFirestore.instance
+      final userDocument = await FirebaseFirestore.instance
           .collection('users')
           .doc(user.uid)
           .get();
 
-      final familyId = userDoc.data()?['familyId'] as String?;
+      final familyId =
+          userDocument.data()?['familyId'] as String?;
 
       if (familyId == null || familyId.isEmpty) {
-        if (!mounted) return;
+        if (!mounted) {
+          return;
+        }
 
         setState(() {
-          _isLoadingFamilyMembers = false;
-          _familyLoadError = 'You have not joined a family yet.';
+          _isLoadingFamily = false;
+          _familyError =
+              'Join or create a family before playing Family Quiz.';
         });
+
         return;
       }
 
-      final familyDoc = await FirebaseFirestore.instance
-          .collection('families')
-          .doc(familyId)
+      final membersSnapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .where('familyId', isEqualTo: familyId)
           .get();
 
-      final memberIds = List<String>.from(
-        familyDoc.data()?['members'] ?? const [],
+      final members = membersSnapshot.docs.map((document) {
+        final data = document.data();
+
+        final name = data['name'] as String?;
+        final email = data['email'] as String?;
+
+        return _QuizPlayer(
+          id: document.id,
+          name: name?.trim().isNotEmpty == true
+              ? name!
+              : email ?? 'Family Member',
+        );
+      }).toList();
+
+      members.sort(
+        (a, b) => a.name.toLowerCase().compareTo(
+              b.name.toLowerCase(),
+            ),
       );
 
-      final names = <String>[];
-
-      for (final memberId in memberIds) {
-        final memberDoc = await FirebaseFirestore.instance
-            .collection('users')
-            .doc(memberId)
-            .get();
-
-        final name = memberDoc.data()?['name'] as String?;
-
-        if (name != null && name.trim().isNotEmpty) {
-          names.add(name.trim());
-        }
+      if (!mounted) {
+        return;
       }
-
-      if (!mounted) return;
 
       setState(() {
         _familyMembers
           ..clear()
-          ..addAll(names.take(_maximumFamilyMembers));
+          ..addAll(members);
 
-        _isLoadingFamilyMembers = false;
-        _familyLoadError = null;
+        _isLoadingFamily = false;
+        _familyError = null;
       });
-    } catch (error) {
-      if (!mounted) return;
+    } catch (_) {
+      if (!mounted) {
+        return;
+      }
 
       setState(() {
-        _isLoadingFamilyMembers = false;
-        _familyLoadError = 'Could not load family members.';
+        _isLoadingFamily = false;
+        _familyError =
+            'Could not load your family members.';
       });
     }
   }
 
-  final List<_VoteRoundSummary> _voteSummaries = [];
-
-  _FamilyQuizPhase _phase = _FamilyQuizPhase.setup;
-  String _selectedCategory = 'Family Fun';
-  String? _memberError;
-  bool _isLoading = false;
-  int _selectedRounds = _minimumRounds;
-  int _currentQuestionIndex = 0;
-  int _matches = 0;
-  int? _privateAnswerIndex;
-  int? _familyGuessIndex;
-  int _currentVoterIndex = 0;
-  int? _selectedVoteIndex;
-  List<int> _currentVotes = [];
-  List<FamilyQuizQuestion> _questions = [];
-
-  bool get _isVotingMode => _selectedCategory == 'Most Likely To';
-
-  String get _featuredMember =>
-      _familyMembers[_currentQuestionIndex % _familyMembers.length];
-
-  FamilyQuizQuestion get _currentQuestion => _questions[_currentQuestionIndex];
-
-  @override
-  void dispose() {
-    _memberController.dispose();
-    super.dispose();
-  }
-
-  void _addFamilyMember() {
-    final name = _memberController.text.trim();
-
-    if (name.isEmpty) {
-      setState(() {
-        _memberError = 'Enter a family member name.';
-      });
-      return;
-    }
-
-    final alreadyAdded = _familyMembers.any(
-      (member) => member.toLowerCase() == name.toLowerCase(),
-    );
-
-    if (alreadyAdded) {
-      setState(() {
-        _memberError = '$name is already in the game.';
-      });
-      return;
-    }
-
-    if (_familyMembers.length >= _maximumFamilyMembers) {
-      setState(() {
-        _memberError = 'Use up to $_maximumFamilyMembers family members.';
-      });
-      return;
-    }
-
+  void _togglePlayer(_QuizPlayer player) {
     setState(() {
-      _familyMembers.add(name);
-      _memberError = null;
-    });
-    _memberController.clear();
-  }
-
-  void _removeFamilyMember(String member) {
-    setState(() {
-      _familyMembers.remove(member);
-      _memberError = null;
-    });
-  }
-
-  void _changeRounds(int delta) {
-    setState(() {
-      _selectedRounds = (_selectedRounds + delta).clamp(
-        _minimumRounds,
-        _maximumRounds,
-      );
+      if (_selectedPlayerIds.contains(player.id)) {
+        _selectedPlayerIds.remove(player.id);
+      } else {
+        _selectedPlayerIds.add(player.id);
+      }
     });
   }
 
   Future<void> _startGame() async {
-    FocusScope.of(context).unfocus();
-
-    if (_familyMembers.length < 2) {
-      setState(() {
-        _memberError = 'Add at least 2 family members to start.';
-      });
+    if (_selectedPlayerIds.length < 2) {
       return;
     }
 
+    final selectedPlayers = _familyMembers
+        .where(
+          (player) =>
+              _selectedPlayerIds.contains(player.id),
+        )
+        .toList();
+
+    final totalQuestions =
+        _selectedRounds * _questionsPerRound;
+
     setState(() {
-      _isLoading = true;
-      _memberError = null;
+      _isPreparingGame = true;
     });
 
     try {
-      final generated = await widget.aiService.generateQuestions(
+      final generated =
+          await widget.aiService.generateQuestions(
         category: _selectedCategory,
-        count: _selectedRounds,
-        familyMembers: _familyMembers,
+        count: totalQuestions,
+        familyMembers: selectedPlayers
+            .map((player) => player.name)
+            .toList(),
       );
 
-      if (generated.length < _selectedRounds ||
-          (!_isVotingMode &&
-              generated.any(
-                (question) =>
-                    question.options.length != 4 ||
-                    question.options.toSet().length != 4,
-              ))) {
-        throw const FormatException('Invalid Family Quiz response');
+      if (generated.length < totalQuestions) {
+        throw const FormatException(
+          'Not enough Family Quiz questions',
+        );
       }
 
-      if (!mounted) return;
+      if (!_isVotingMode &&
+          generated.any(
+            (question) =>
+                question.options.length != 4 ||
+                question.options.toSet().length != 4,
+          )) {
+        throw const FormatException(
+          'Invalid Family Quiz options',
+        );
+      }
 
-      _beginSession(generated.take(_selectedRounds).toList());
-    } catch (error) {
+      if (!mounted) {
+        return;
+      }
+
+      _beginSession(
+        players: selectedPlayers,
+        questions:
+            generated.take(totalQuestions).toList(),
+      );
+    } catch (_) {
       final fallback = List<FamilyQuizQuestion>.from(
         _fallbackQuestions[_selectedCategory]!,
       )..shuffle(Random());
 
-      if (!mounted) return;
+      if (!mounted) {
+        return;
+      }
 
-      _beginSession(fallback.take(_selectedRounds).toList());
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Could not reach AI. Using offline prompts instead.'),
-        ),
+      if (fallback.isEmpty) {
+        setState(() {
+          _isPreparingGame = false;
+        });
+
+        return;
+      }
+
+      final repeatedQuestions =
+          <FamilyQuizQuestion>[];
+
+      while (repeatedQuestions.length < totalQuestions) {
+        final copy =
+            List<FamilyQuizQuestion>.from(fallback)
+              ..shuffle(Random());
+
+        repeatedQuestions.addAll(copy);
+      }
+
+      _beginSession(
+        players: selectedPlayers,
+        questions: repeatedQuestions
+            .take(totalQuestions)
+            .toList(),
       );
     }
   }
 
-  void _beginSession(List<FamilyQuizQuestion> questions) {
+  void _beginSession({
+    required List<_QuizPlayer> players,
+    required List<FamilyQuizQuestion> questions,
+  }) {
+    _scores.clear();
+
+    for (final player in players) {
+      _scores[player.id] = 0;
+    }
+
     setState(() {
+      _players = players;
       _questions = questions;
-      _isLoading = false;
-      _currentQuestionIndex = 0;
-      _matches = 0;
-      _privateAnswerIndex = null;
-      _familyGuessIndex = null;
+
+      _currentRound = 1;
+      _questionInRound = 0;
+      _globalQuestionIndex = 0;
+
+      _currentSubjectIndex = 0;
+      _currentGuesserIndex = 0;
+
+      _subjectAnswerIndex = null;
+      _currentGuesses.clear();
+
       _currentVoterIndex = 0;
       _selectedVoteIndex = null;
-      _currentVotes = List<int>.filled(_familyMembers.length, 0);
-      _voteSummaries.clear();
+      _currentVotes =
+          List<int>.filled(players.length, 0);
+
+      _isPreparingGame = false;
+
       _phase = _isVotingMode
           ? _FamilyQuizPhase.voteHandoff
-          : _FamilyQuizPhase.privateAnswerHandoff;
+          : _FamilyQuizPhase.subjectHandoff;
     });
   }
 
-  void _choosePrivateAnswer(int index) {
+  void _chooseSubjectAnswer(int index) {
     setState(() {
-      _privateAnswerIndex = index;
-      _phase = _FamilyQuizPhase.familyGuessHandoff;
+      _subjectAnswerIndex = index;
+      _currentGuesserIndex = 0;
+      _currentGuesses.clear();
+      _phase = _FamilyQuizPhase.guesserHandoff;
     });
   }
 
-  void _chooseFamilyGuess(int index) {
-    setState(() {
-      _familyGuessIndex = index;
-      if (_familyGuessIndex == _privateAnswerIndex) {
-        _matches++;
-      }
-      _phase = _FamilyQuizPhase.answerReveal;
-    });
-  }
+  void _chooseGuess(int index) {
+    final guesser = _currentGuesser;
 
-  void _advancePrivateRound() {
-    if (_currentQuestionIndex == _questions.length - 1) {
-      _awardTokens(5, won: _matches == _questions.length);
+    _currentGuesses[guesser.id] = index;
+
+    final isLastGuesser =
+        _currentGuesserIndex == _guessers.length - 1;
+
+    if (isLastGuesser) {
+      _calculateQuestionScores();
 
       setState(() {
-        _phase = _FamilyQuizPhase.results;
+        _phase = _FamilyQuizPhase.answerReveal;
       });
+
       return;
     }
 
     setState(() {
-      _currentQuestionIndex++;
-      _privateAnswerIndex = null;
-      _familyGuessIndex = null;
-      _phase = _FamilyQuizPhase.privateAnswerHandoff;
+      _currentGuesserIndex++;
+      _phase = _FamilyQuizPhase.guesserHandoff;
     });
+  }
+
+  void _calculateQuestionScores() {
+    final answer = _subjectAnswerIndex;
+
+    if (answer == null) {
+      return;
+    }
+
+    for (final guesser in _guessers) {
+      if (_currentGuesses[guesser.id] == answer) {
+        _scores[guesser.id] =
+            (_scores[guesser.id] ?? 0) + 1;
+      }
+    }
   }
 
   void _submitVote() {
     final selectedVoteIndex = _selectedVoteIndex;
-    if (selectedVoteIndex == null) return;
 
-    final isLastVoter = _currentVoterIndex == _familyMembers.length - 1;
+    if (selectedVoteIndex == null) {
+      return;
+    }
+
+    final isLastVoter =
+        _currentVoterIndex == _players.length - 1;
 
     setState(() {
       _currentVotes[selectedVoteIndex]++;
       _selectedVoteIndex = null;
 
       if (isLastVoter) {
-        final highestVoteCount = _currentVotes.reduce(max);
-        final winners = <String>[
-          for (var index = 0; index < _familyMembers.length; index++)
-            if (_currentVotes[index] == highestVoteCount) _familyMembers[index],
-        ];
-
-        _voteSummaries.add(
-          _VoteRoundSummary(
-            question: _currentQuestion.question,
-            winners: winners,
-          ),
-        );
         _phase = _FamilyQuizPhase.voteReveal;
       } else {
         _currentVoterIndex++;
@@ -485,192 +625,328 @@ class _FamilyQuizScreenState extends State<FamilyQuizScreen> {
     });
   }
 
-  void _advanceVotingRound() {
-    if (_currentQuestionIndex == _questions.length - 1) {
-      _awardTokens(5, won: false);
+  void _continueAfterQuestion() {
+    final isLastQuestionInRound =
+        _questionInRound == _questionsPerRound - 1;
 
+    if (isLastQuestionInRound) {
       setState(() {
-        _phase = _FamilyQuizPhase.results;
+        _phase = _FamilyQuizPhase.roundSummary;
       });
+
+      return;
+    }
+
+    _prepareNextQuestion();
+  }
+
+  void _continueAfterVote() {
+    final highestVoteCount =
+        _currentVotes.reduce(max);
+
+    for (int i = 0; i < _players.length; i++) {
+      if (_currentVotes[i] == highestVoteCount) {
+        _scores[_players[i].id] =
+            (_scores[_players[i].id] ?? 0) + 1;
+      }
+    }
+
+    final isLastQuestionInRound =
+        _questionInRound == _questionsPerRound - 1;
+
+    if (isLastQuestionInRound) {
+      setState(() {
+        _phase = _FamilyQuizPhase.roundSummary;
+      });
+
+      return;
+    }
+
+    _prepareNextQuestion();
+  }
+
+  void _prepareNextQuestion() {
+    setState(() {
+      _questionInRound++;
+      _globalQuestionIndex++;
+
+      _currentSubjectIndex =
+          (_currentSubjectIndex + 1) %
+              _players.length;
+
+      _currentGuesserIndex = 0;
+
+      _subjectAnswerIndex = null;
+      _currentGuesses.clear();
+
+      _currentVoterIndex = 0;
+      _selectedVoteIndex = null;
+      _currentVotes =
+          List<int>.filled(_players.length, 0);
+
+      _phase = _isVotingMode
+          ? _FamilyQuizPhase.voteHandoff
+          : _FamilyQuizPhase.subjectHandoff;
+    });
+  }
+
+  void _continueAfterRound() {
+    final isLastRound =
+        _currentRound == _selectedRounds;
+
+    if (isLastRound) {
+      setState(() {
+        _phase = _FamilyQuizPhase.finalResults;
+      });
+
       return;
     }
 
     setState(() {
-      _currentQuestionIndex++;
+      _currentRound++;
+      _questionInRound = 0;
+      _globalQuestionIndex++;
+
+      _currentSubjectIndex =
+          (_currentSubjectIndex + 1) %
+              _players.length;
+
+      _currentGuesserIndex = 0;
+
+      _subjectAnswerIndex = null;
+      _currentGuesses.clear();
+
       _currentVoterIndex = 0;
       _selectedVoteIndex = null;
-      _currentVotes = List<int>.filled(_familyMembers.length, 0);
-      _phase = _FamilyQuizPhase.voteHandoff;
+      _currentVotes =
+          List<int>.filled(_players.length, 0);
+
+      _phase = _isVotingMode
+          ? _FamilyQuizPhase.voteHandoff
+          : _FamilyQuizPhase.subjectHandoff;
     });
   }
 
-  void _changeSettings() {
+  void _playAgain() {
     setState(() {
       _phase = _FamilyQuizPhase.setup;
-      _isLoading = false;
       _questions = [];
+      _players = [];
+
+      _currentRound = 1;
+      _questionInRound = 0;
+      _globalQuestionIndex = 0;
+
+      _currentSubjectIndex = 0;
+      _currentGuesserIndex = 0;
+
+      _subjectAnswerIndex = null;
+      _currentGuesses.clear();
+
+      _currentVoterIndex = 0;
+      _selectedVoteIndex = null;
+      _currentVotes = [];
+
+      _scores.clear();
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
     return Scaffold(
-      appBar: AppBar(title: const Text('Family Quiz')),
+      appBar: AppBar(
+        title: const Text('Family Quiz'),
+      ),
       body: SafeArea(
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            return Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 760),
-                child: AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 200),
-                  child: _buildCurrentPhase(colorScheme),
-                ),
-              ),
-            );
-          },
+        child: Center(
+          child: ConstrainedBox(
+            constraints:
+                const BoxConstraints(maxWidth: 760),
+            child: _buildBody(),
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildCurrentPhase(ColorScheme colorScheme) {
+  Widget _buildBody() {
     return switch (_phase) {
-      _FamilyQuizPhase.setup => _buildSetup(colorScheme),
-      _FamilyQuizPhase.privateAnswerHandoff => _buildHandoff(
-        key: const ValueKey(_FamilyQuizPhase.privateAnswerHandoff),
-        icon: Icons.lock_outline,
-        title: 'Pass the device to $_featuredMember',
-        message:
-            '$_featuredMember will choose a private answer. Everyone else should look away.',
-        buttonLabel: "I'm $_featuredMember",
-        onPressed: () {
-          setState(() {
-            _phase = _FamilyQuizPhase.privateAnswer;
-          });
-        },
-      ),
-      _FamilyQuizPhase.privateAnswer => _buildPrivateAnswer(colorScheme),
-      _FamilyQuizPhase.familyGuessHandoff => _buildHandoff(
-        key: const ValueKey(_FamilyQuizPhase.familyGuessHandoff),
-        icon: Icons.groups_outlined,
-        title: 'Pass the device back',
-        message:
-            'The rest of the family can now agree on what $_featuredMember chose.',
-        buttonLabel: 'Ready to Guess',
-        onPressed: () {
-          setState(() {
-            _phase = _FamilyQuizPhase.familyGuess;
-          });
-        },
-      ),
-      _FamilyQuizPhase.familyGuess => _buildFamilyGuess(colorScheme),
-      _FamilyQuizPhase.answerReveal => _buildAnswerReveal(colorScheme),
-      _FamilyQuizPhase.voteHandoff => _buildHandoff(
-        key: const ValueKey(_FamilyQuizPhase.voteHandoff),
-        icon: Icons.how_to_vote_outlined,
-        title: 'Pass the device to ${_familyMembers[_currentVoterIndex]}',
-        message:
-            'Votes are private. Other family members should look away for a moment.',
-        buttonLabel: "I'm ${_familyMembers[_currentVoterIndex]}",
-        onPressed: () {
-          setState(() {
-            _phase = _FamilyQuizPhase.vote;
-          });
-        },
-      ),
-      _FamilyQuizPhase.vote => _buildVote(colorScheme),
-      _FamilyQuizPhase.voteReveal => _buildVoteReveal(colorScheme),
-      _FamilyQuizPhase.results => _buildResults(colorScheme),
+      _FamilyQuizPhase.setup =>
+        _buildSetup(),
+
+      _FamilyQuizPhase.subjectHandoff =>
+        _buildHandoff(
+          icon: Icons.lock_outline,
+          title:
+              'Pass the phone to ${_currentSubject.name}',
+          message:
+              'Everyone else should look away while ${_currentSubject.name} chooses a private answer.',
+          buttonLabel:
+              'I\'m ${_currentSubject.name}',
+          onPressed: () {
+            setState(() {
+              _phase =
+                  _FamilyQuizPhase.subjectAnswer;
+            });
+          },
+        ),
+
+      _FamilyQuizPhase.subjectAnswer =>
+        _buildSubjectAnswer(),
+
+      _FamilyQuizPhase.guesserHandoff =>
+        _buildHandoff(
+          icon: Icons.visibility_off_outlined,
+          title:
+              'Pass the phone to ${_currentGuesser.name}',
+          message:
+              '${_currentGuesser.name} will privately guess what ${_currentSubject.name} chose.',
+          buttonLabel:
+              'I\'m ${_currentGuesser.name}',
+          onPressed: () {
+            setState(() {
+              _phase = _FamilyQuizPhase.guess;
+            });
+          },
+        ),
+
+      _FamilyQuizPhase.guess =>
+        _buildGuess(),
+
+      _FamilyQuizPhase.answerReveal =>
+        _buildAnswerReveal(),
+
+      _FamilyQuizPhase.roundSummary =>
+        _buildRoundSummary(),
+
+      _FamilyQuizPhase.voteHandoff =>
+        _buildHandoff(
+          icon: Icons.how_to_vote_outlined,
+          title:
+              'Pass the phone to ${_players[_currentVoterIndex].name}',
+          message:
+              'Votes are private. Everyone else should look away.',
+          buttonLabel:
+              'I\'m ${_players[_currentVoterIndex].name}',
+          onPressed: () {
+            setState(() {
+              _phase = _FamilyQuizPhase.vote;
+            });
+          },
+        ),
+
+      _FamilyQuizPhase.vote =>
+        _buildVote(),
+
+      _FamilyQuizPhase.voteReveal =>
+        _buildVoteReveal(),
+
+      _FamilyQuizPhase.finalResults =>
+        _buildFinalResults(),
     };
   }
 
-  Widget _buildSetup(ColorScheme colorScheme) {
-    if (_isLoadingFamilyMembers) {
-      return const Center(child: CircularProgressIndicator());
+  Widget _buildSetup() {
+    if (_isLoadingFamily) {
+      return const Center(
+        child: CircularProgressIndicator(),
+      );
     }
 
-    if (_familyLoadError != null) {
-      _familyLoadError = null;
+    if (_familyError != null) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Text(
+            _familyError!,
+            textAlign: TextAlign.center,
+          ),
+        ),
+      );
     }
+
     return SingleChildScrollView(
-      key: const ValueKey(_FamilyQuizPhase.setup),
       padding: const EdgeInsets.all(24),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+        crossAxisAlignment:
+            CrossAxisAlignment.stretch,
         children: [
           Text(
             'Who is playing?',
-            style: Theme.of(
-              context,
-            ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+            style: Theme.of(context)
+                .textTheme
+                .headlineMedium
+                ?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
           ),
+
           const SizedBox(height: 8),
-          Text(
-            'Add the real family members taking part in this game.',
-            style: Theme.of(context).textTheme.bodyLarge,
+
+          const Text(
+            'Choose at least 2 players.',
           ),
-          const SizedBox(height: 16),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: _memberController,
-                  textCapitalization: TextCapitalization.words,
-                  textInputAction: TextInputAction.done,
-                  maxLength: 24,
-                  onSubmitted: (_) => _addFamilyMember(),
-                  decoration: const InputDecoration(
-                    labelText: 'Family member name',
-                    hintText: 'Enter a name',
-                    prefixIcon: Icon(Icons.person_add_alt_1_outlined),
-                    counterText: '',
+
+          const SizedBox(height: 18),
+
+          ..._familyMembers.map((player) {
+            final selected =
+                _selectedPlayerIds.contains(
+              player.id,
+            );
+
+            return Padding(
+              padding:
+                  const EdgeInsets.only(bottom: 10),
+              child: Card(
+                margin: EdgeInsets.zero,
+                child: CheckboxListTile(
+                  value: selected,
+                  onChanged: (_) =>
+                      _togglePlayer(player),
+                  secondary: CircleAvatar(
+                    child: Text(
+                      player.name.isEmpty
+                          ? '?'
+                          : player.name[0]
+                              .toUpperCase(),
+                    ),
+                  ),
+                  title: Text(
+                    player.name,
+                    style: const TextStyle(
+                      fontWeight:
+                          FontWeight.w600,
+                    ),
                   ),
                 ),
               ),
-              const SizedBox(width: 12),
-              IconButton.filled(
-                onPressed: _addFamilyMember,
-                tooltip: 'Add family member',
-                icon: const Icon(Icons.add),
-              ),
-            ],
-          ),
-          if (_memberError != null) ...[
-            const SizedBox(height: 8),
-            Text(_memberError!, style: TextStyle(color: colorScheme.error)),
-          ],
-          if (_familyMembers.isNotEmpty) ...[
-            const SizedBox(height: 12),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: _familyMembers.map((member) {
-                return InputChip(
-                  label: Text(member),
-                  onDeleted: () => _removeFamilyMember(member),
-                );
-              }).toList(),
-            ),
-          ],
-          const SizedBox(height: 32),
+            );
+          }),
+
+          const SizedBox(height: 28),
+
           Text(
-            'Choose a category',
-            style: Theme.of(
-              context,
-            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+            'Category',
+            style: Theme.of(context)
+                .textTheme
+                .titleLarge
+                ?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
           ),
+
           const SizedBox(height: 12),
+
           Wrap(
             spacing: 10,
             runSpacing: 10,
-            children: _categories.map((category) {
+            children:
+                _categories.map((category) {
               return ChoiceChip(
                 label: Text(category),
-                selected: category == _selectedCategory,
+                selected:
+                    _selectedCategory == category,
                 onSelected: (_) {
                   setState(() {
                     _selectedCategory = category;
@@ -679,86 +955,110 @@ class _FamilyQuizScreenState extends State<FamilyQuizScreen> {
               );
             }).toList(),
           ),
-          const SizedBox(height: 20),
-          Card(
-            color: colorScheme.primaryContainer.withValues(alpha: 0.5),
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Icon(
-                    _isVotingMode
-                        ? Icons.how_to_vote_outlined
-                        : Icons.lock_outline,
-                    color: colorScheme.onPrimaryContainer,
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      _isVotingMode
-                          ? 'Everyone votes privately. The group result is revealed without a fake correct answer.'
-                          : 'One family member answers privately. Everyone else guesses that real answer.',
-                      style: TextStyle(
-                        color: colorScheme.onPrimaryContainer,
-                        height: 1.4,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(height: 24),
+
+          const SizedBox(height: 28),
+
           Text(
             'Rounds',
-            style: Theme.of(
-              context,
-            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+            style: Theme.of(context)
+                .textTheme
+                .titleLarge
+                ?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
           ),
-          const SizedBox(height: 8),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              IconButton(
-                onPressed: _selectedRounds == _minimumRounds
-                    ? null
-                    : () => _changeRounds(-1),
-                tooltip: 'Decrease rounds',
-                icon: const Icon(Icons.remove),
-              ),
-              Text(
-                '$_selectedRounds rounds',
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-              IconButton(
-                onPressed: _selectedRounds == _maximumRounds
-                    ? null
-                    : () => _changeRounds(1),
-                tooltip: 'Increase rounds',
-                icon: const Icon(Icons.add),
-              ),
-            ],
+
+          const SizedBox(height: 12),
+
+          Wrap(
+            spacing: 10,
+            runSpacing: 10,
+            children:
+                [3, 5, 10].map((rounds) {
+              return ChoiceChip(
+                label: Text('$rounds'),
+                selected:
+                    _selectedRounds == rounds,
+                onSelected: (_) {
+                  setState(() {
+                    _selectedRounds = rounds;
+                  });
+                },
+              );
+            }).toList(),
           ),
-          const SizedBox(height: 24),
+
+          const SizedBox(height: 28),
+
+          Text(
+            'Questions per round',
+            style: Theme.of(context)
+                .textTheme
+                .titleLarge
+                ?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+
+          const SizedBox(height: 12),
+
+          Wrap(
+            spacing: 10,
+            runSpacing: 10,
+            children: [3, 5, 10]
+                .map((questionCount) {
+              return ChoiceChip(
+                label: Text('$questionCount'),
+                selected:
+                    _questionsPerRound ==
+                        questionCount,
+                onSelected: (_) {
+                  setState(() {
+                    _questionsPerRound =
+                        questionCount;
+                  });
+                },
+              );
+            }).toList(),
+          ),
+
+          const SizedBox(height: 32),
+
           FilledButton(
-            onPressed: _isLoading ? null : _startGame,
+            onPressed:
+                _selectedPlayerIds.length >= 2 &&
+                        !_isPreparingGame
+                    ? _startGame
+                    : null,
             child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 14),
-              child: _isLoading
+              padding:
+                  const EdgeInsets.symmetric(
+                vertical: 14,
+              ),
+              child: _isPreparingGame
                   ? const Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisAlignment:
+                          MainAxisAlignment.center,
                       children: [
                         SizedBox(
                           width: 20,
                           height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
+                          child:
+                              CircularProgressIndicator(
+                            strokeWidth: 2,
+                          ),
                         ),
                         SizedBox(width: 12),
-                        Text('Creating the game...'),
+                        Text(
+                          'Preparing Game...',
+                        ),
                       ],
                     )
-                  : Text(_isVotingMode ? 'Start Voting' : 'Start Quiz'),
+                  : Text(
+                      _isVotingMode
+                          ? 'Start Voting'
+                          : 'Start Family Quiz',
+                    ),
             ),
           ),
         ],
@@ -767,44 +1067,49 @@ class _FamilyQuizScreenState extends State<FamilyQuizScreen> {
   }
 
   Widget _buildHandoff({
-    required Key key,
     required IconData icon,
     required String title,
     required String message,
     required String buttonLabel,
     required VoidCallback onPressed,
   }) {
-    return SingleChildScrollView(
-      key: key,
-      padding: const EdgeInsets.all(24),
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(minHeight: 520),
+    return Center(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(24),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 72),
+            Icon(
+              icon,
+              size: 72,
+            ),
+
             const SizedBox(height: 24),
+
             Text(
               title,
               textAlign: TextAlign.center,
-              style: Theme.of(
-                context,
-              ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+              style: Theme.of(context)
+                  .textTheme
+                  .headlineSmall
+                  ?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
+
             const SizedBox(height: 12),
+
             Text(
               message,
               textAlign: TextAlign.center,
-              style: Theme.of(
-                context,
-              ).textTheme.bodyLarge?.copyWith(height: 1.5),
             ),
+
             const SizedBox(height: 32),
-            FilledButton(
-              onPressed: onPressed,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 14),
+
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton(
+                onPressed: onPressed,
                 child: Text(buttonLabel),
               ),
             ),
@@ -814,440 +1119,518 @@ class _FamilyQuizScreenState extends State<FamilyQuizScreen> {
     );
   }
 
-  Widget _buildPrivateAnswer(ColorScheme colorScheme) {
-    return _buildQuestionChoices(
-      key: const ValueKey(_FamilyQuizPhase.privateAnswer),
-      colorScheme: colorScheme,
-      badge: 'Private answer: $_featuredMember',
-      title: '$_featuredMember, ${_currentQuestion.question}',
-      helper: 'Choose your real answer. The rest of the family will guess it.',
-      selectedIndex: null,
-      onSelected: _choosePrivateAnswer,
+  Widget _buildSubjectAnswer() {
+    return _buildChoices(
+      heading:
+          '${_currentSubject.name}, choose your real answer',
+      helper:
+          'Everyone else will try to predict what you chose.',
+      onSelected: _chooseSubjectAnswer,
     );
   }
 
-  Widget _buildFamilyGuess(ColorScheme colorScheme) {
-    return _buildQuestionChoices(
-      key: const ValueKey(_FamilyQuizPhase.familyGuess),
-      colorScheme: colorScheme,
-      badge: 'Family guess',
-      title: 'What did $_featuredMember choose?',
-      subtitle: _currentQuestion.question,
-      helper: 'Agree on one answer before choosing.',
-      selectedIndex: null,
-      onSelected: _chooseFamilyGuess,
+  Widget _buildGuess() {
+    return _buildChoices(
+      heading:
+          'What did ${_currentSubject.name} choose?',
+      helper:
+          '${_currentGuesser.name}, make your private guess.',
+      onSelected: _chooseGuess,
     );
   }
 
-  Widget _buildQuestionChoices({
-    required Key key,
-    required ColorScheme colorScheme,
-    required String badge,
-    required String title,
+  Widget _buildChoices({
+    required String heading,
     required String helper,
-    required int? selectedIndex,
     required ValueChanged<int> onSelected,
-    String? subtitle,
   }) {
     return ListView(
-      key: key,
       padding: const EdgeInsets.all(24),
       children: [
         _buildProgress(),
+
         const SizedBox(height: 24),
-        Align(
-          alignment: Alignment.centerLeft,
-          child: Chip(label: Text(badge)),
-        ),
-        const SizedBox(height: 12),
+
         Text(
-          title,
+          _currentQuestion.question,
           textAlign: TextAlign.center,
-          style: Theme.of(
-            context,
-          ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+          style: Theme.of(context)
+              .textTheme
+              .headlineSmall
+              ?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
         ),
-        if (subtitle != null) ...[
-          const SizedBox(height: 12),
-          Text(
-            subtitle,
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-        ],
+
         const SizedBox(height: 12),
+
+        Text(
+          heading,
+          textAlign: TextAlign.center,
+          style:
+              Theme.of(context).textTheme.titleMedium,
+        ),
+
+        const SizedBox(height: 8),
+
         Text(
           helper,
           textAlign: TextAlign.center,
-          style: Theme.of(context).textTheme.bodyMedium,
         ),
+
         const SizedBox(height: 24),
-        for (var index = 0; index < _currentQuestion.options.length; index++)
+
+        for (int i = 0;
+            i < _currentQuestion.options.length;
+            i++)
           Padding(
-            padding: const EdgeInsets.only(bottom: 12),
-            child: OutlinedButton(
-              style: OutlinedButton.styleFrom(
-                backgroundColor: selectedIndex == index
-                    ? colorScheme.primaryContainer
-                    : null,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 18,
+            padding:
+                const EdgeInsets.only(bottom: 12),
+            child: FilledButton.tonal(
+              onPressed: () => onSelected(i),
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(
+                  vertical: 14,
+                ),
+                child: Text(
+                  _currentQuestion.options[i],
                 ),
               ),
-              onPressed: () => onSelected(index),
-              child: Text(_currentQuestion.options[index]),
             ),
           ),
       ],
     );
   }
 
-  Widget _buildAnswerReveal(ColorScheme colorScheme) {
-    final matched = _privateAnswerIndex == _familyGuessIndex;
-    final privateAnswer = _currentQuestion.options[_privateAnswerIndex!];
-    final familyGuess = _currentQuestion.options[_familyGuessIndex!];
+  Widget _buildAnswerReveal() {
+    final answerIndex = _subjectAnswerIndex!;
+
+    final correctGuessers = _guessers
+        .where(
+          (player) =>
+              _currentGuesses[player.id] ==
+              answerIndex,
+        )
+        .toList();
 
     return ListView(
-      key: const ValueKey(_FamilyQuizPhase.answerReveal),
       padding: const EdgeInsets.all(24),
       children: [
         _buildProgress(),
-        const SizedBox(height: 40),
-        Icon(
-          matched ? Icons.celebration : Icons.favorite_outline,
-          size: 72,
-          color: colorScheme.primary,
-        ),
-        const SizedBox(height: 20),
-        Text(
-          matched ? 'Perfect match!' : 'Different answers!',
-          textAlign: TextAlign.center,
-          style: Theme.of(
-            context,
-          ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 12),
-        Text(
-          matched
-              ? 'Your family knows $_featuredMember well.'
-              : 'Now you learned something new about $_featuredMember.',
-          textAlign: TextAlign.center,
-          style: Theme.of(context).textTheme.bodyLarge,
-        ),
+
         const SizedBox(height: 32),
-        Card(
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              children: [
-                Text(
-                  "$_featuredMember's answer",
-                  style: Theme.of(context).textTheme.labelLarge,
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  privateAnswer,
-                  textAlign: TextAlign.center,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-                ),
-                const Divider(height: 32),
-                Text(
-                  'Family guess',
-                  style: Theme.of(context).textTheme.labelLarge,
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  familyGuess,
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-              ],
-            ),
-          ),
+
+        const Icon(
+          Icons.celebration_outlined,
+          size: 72,
         ),
-        const SizedBox(height: 24),
+
+        const SizedBox(height: 20),
+
+        Text(
+          '${_currentSubject.name} chose:',
+          textAlign: TextAlign.center,
+          style:
+              Theme.of(context).textTheme.titleLarge,
+        ),
+
+        const SizedBox(height: 10),
+
+        Text(
+          _currentQuestion.options[answerIndex],
+          textAlign: TextAlign.center,
+          style: Theme.of(context)
+              .textTheme
+              .headlineMedium
+              ?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+        ),
+
+        const SizedBox(height: 28),
+
+        Text(
+          correctGuessers.isEmpty
+              ? 'Nobody guessed correctly!'
+              : '${correctGuessers.map((player) => player.name).join(', ')} guessed correctly!',
+          textAlign: TextAlign.center,
+          style:
+              Theme.of(context).textTheme.titleMedium,
+        ),
+
+        if (correctGuessers.isNotEmpty) ...[
+          const SizedBox(height: 8),
+          const Text(
+            '+1 point each',
+            textAlign: TextAlign.center,
+          ),
+        ],
+
+        const SizedBox(height: 32),
+
         FilledButton(
-          onPressed: _advancePrivateRound,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 14),
-            child: Text(
-              _currentQuestionIndex == _questions.length - 1
-                  ? 'See Results'
-                  : 'Next Round',
-            ),
+          onPressed: _continueAfterQuestion,
+          child: Text(
+            _questionInRound ==
+                    _questionsPerRound - 1
+                ? 'Round Results'
+                : 'Next Question',
           ),
         ),
       ],
     );
   }
 
-  Widget _buildVote(ColorScheme colorScheme) {
+  Widget _buildVote() {
     return ListView(
-      key: const ValueKey(_FamilyQuizPhase.vote),
       padding: const EdgeInsets.all(24),
       children: [
         _buildProgress(),
+
         const SizedBox(height: 24),
-        Align(
-          alignment: Alignment.centerLeft,
-          child: Chip(
-            label: Text(
-              'Private vote ${_currentVoterIndex + 1} of ${_familyMembers.length}',
-            ),
-          ),
-        ),
-        const SizedBox(height: 16),
+
         Text(
           _currentQuestion.question,
           textAlign: TextAlign.center,
-          style: Theme.of(
-            context,
-          ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 12),
-        Text(
-          '${_familyMembers[_currentVoterIndex]}, choose one person. Your vote stays hidden until everyone finishes.',
-          textAlign: TextAlign.center,
-          style: Theme.of(context).textTheme.bodyMedium,
-        ),
-        const SizedBox(height: 24),
-        for (var index = 0; index < _familyMembers.length; index++)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 12),
-            child: OutlinedButton.icon(
-              style: OutlinedButton.styleFrom(
-                backgroundColor: _selectedVoteIndex == index
-                    ? colorScheme.primaryContainer
-                    : null,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 18,
-                ),
+          style: Theme.of(context)
+              .textTheme
+              .headlineSmall
+              ?.copyWith(
+                fontWeight: FontWeight.bold,
               ),
+        ),
+
+        const SizedBox(height: 12),
+
+        Text(
+          '${_players[_currentVoterIndex].name}, choose privately.',
+          textAlign: TextAlign.center,
+        ),
+
+        const SizedBox(height: 24),
+
+        for (int i = 0;
+            i < _players.length;
+            i++)
+          Padding(
+            padding:
+                const EdgeInsets.only(bottom: 12),
+            child: OutlinedButton.icon(
               onPressed: () {
                 setState(() {
-                  _selectedVoteIndex = index;
+                  _selectedVoteIndex = i;
                 });
               },
               icon: Icon(
-                _selectedVoteIndex == index
+                _selectedVoteIndex == i
                     ? Icons.radio_button_checked
                     : Icons.radio_button_unchecked,
               ),
-              label: Text(_familyMembers[index]),
+              label: Text(
+                _players[i].name,
+              ),
             ),
           ),
+
         const SizedBox(height: 12),
+
         FilledButton(
-          onPressed: _selectedVoteIndex == null ? null : _submitVote,
-          child: const Padding(
-            padding: EdgeInsets.symmetric(vertical: 14),
-            child: Text('Submit Private Vote'),
+          onPressed: _selectedVoteIndex == null
+              ? null
+              : _submitVote,
+          child: const Text(
+            'Submit Private Vote',
           ),
         ),
       ],
     );
   }
 
-  Widget _buildVoteReveal(ColorScheme colorScheme) {
-    final highestVoteCount = _currentVotes.reduce(max);
-    final winners = <String>[
-      for (var index = 0; index < _familyMembers.length; index++)
-        if (_currentVotes[index] == highestVoteCount) _familyMembers[index],
+  Widget _buildVoteReveal() {
+    final highestVoteCount =
+        _currentVotes.reduce(max);
+
+    final winners = <_QuizPlayer>[
+      for (int i = 0;
+          i < _players.length;
+          i++)
+        if (_currentVotes[i] ==
+            highestVoteCount)
+          _players[i],
     ];
 
     return ListView(
-      key: const ValueKey(_FamilyQuizPhase.voteReveal),
       padding: const EdgeInsets.all(24),
       children: [
         _buildProgress(),
+
         const SizedBox(height: 28),
-        const Icon(Icons.how_to_vote, size: 64),
-        const SizedBox(height: 16),
+
+        const Icon(
+          Icons.how_to_vote_outlined,
+          size: 72,
+        ),
+
+        const SizedBox(height: 18),
+
         Text(
           winners.length == 1
-              ? '${winners.first} received the most votes!'
-              : 'It is a tie!',
+              ? '${winners.first.name} received the most votes!'
+              : 'It\'s a tie!',
           textAlign: TextAlign.center,
-          style: Theme.of(
-            context,
-          ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+          style: Theme.of(context)
+              .textTheme
+              .headlineSmall
+              ?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
         ),
+
         const SizedBox(height: 12),
+
         Text(
           _currentQuestion.question,
           textAlign: TextAlign.center,
-          style: Theme.of(context).textTheme.titleMedium,
         ),
+
         const SizedBox(height: 28),
-        for (var index = 0; index < _familyMembers.length; index++) ...[
-          Row(
-            children: [
-              Expanded(child: Text(_familyMembers[index])),
-              Text(
-                '${_currentVotes[index]} ${_currentVotes[index] == 1 ? 'vote' : 'votes'}',
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          LinearProgressIndicator(
-            value: _currentVotes[index] / _familyMembers.length,
-            color: _currentVotes[index] == highestVoteCount
-                ? colorScheme.primary
-                : colorScheme.secondary,
-          ),
-          const SizedBox(height: 18),
-        ],
-        FilledButton(
-          onPressed: _advanceVotingRound,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 14),
-            child: Text(
-              _currentQuestionIndex == _questions.length - 1
-                  ? 'See Results'
-                  : 'Next Vote',
+
+        for (int i = 0;
+            i < _players.length;
+            i++)
+          ListTile(
+            title: Text(
+              _players[i].name,
             ),
+            trailing: Text(
+              '${_currentVotes[i]} '
+              '${_currentVotes[i] == 1 ? 'vote' : 'votes'}',
+            ),
+          ),
+
+        const SizedBox(height: 24),
+
+        FilledButton(
+          onPressed: _continueAfterVote,
+          child: Text(
+            _questionInRound ==
+                    _questionsPerRound - 1
+                ? 'Round Results'
+                : 'Next Vote',
           ),
         ),
       ],
     );
   }
 
-  Future<void> _awardTokens(int amount, {required bool won}) async {
-    if (widget.developerPreview) {
-      return;
-    }
+  Widget _buildRoundSummary() {
+    final leaderboard = [..._players];
 
-    try {
-      final user = FirebaseAuth.instance.currentUser;
+    leaderboard.sort(
+      (a, b) =>
+          (_scores[b.id] ?? 0).compareTo(
+        _scores[a.id] ?? 0,
+      ),
+    );
 
-      if (user == null) {
-        return;
-      }
+    return Padding(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        crossAxisAlignment:
+            CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            'Round $_currentRound Complete',
+            textAlign: TextAlign.center,
+            style: Theme.of(context)
+                .textTheme
+                .headlineMedium
+                ?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
 
-      final userRef = FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid);
+          const SizedBox(height: 24),
 
-      final userDoc = await userRef.get();
-      final data = userDoc.data();
+          Expanded(
+            child: ListView.separated(
+              itemCount: leaderboard.length,
+              separatorBuilder: (_, _) =>
+                  const Divider(height: 1),
+              itemBuilder: (context, index) {
+                final player =
+                    leaderboard[index];
 
-      final currentStreak = (data?['currentStreak'] ?? 0) as int;
-      final lastPlayedTimestamp = data?['lastPlayedAt'] as Timestamp?;
+                return ListTile(
+                  leading: CircleAvatar(
+                    child:
+                        Text('${index + 1}'),
+                  ),
+                  title: Text(player.name),
+                  trailing: Text(
+                    '${_scores[player.id] ?? 0} pts',
+                    style: const TextStyle(
+                      fontWeight:
+                          FontWeight.bold,
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
 
-      final now = DateTime.now();
-      final today = DateTime(now.year, now.month, now.day);
+          const SizedBox(height: 16),
 
-      var newStreak = 1;
-
-      if (lastPlayedTimestamp != null) {
-        final lastPlayed = lastPlayedTimestamp.toDate();
-        final lastPlayedDay = DateTime(
-          lastPlayed.year,
-          lastPlayed.month,
-          lastPlayed.day,
-        );
-
-        final difference = today.difference(lastPlayedDay).inDays;
-
-        if (difference == 0) {
-          newStreak = currentStreak == 0 ? 1 : currentStreak;
-        } else if (difference == 1) {
-          newStreak = currentStreak + 1;
-        }
-      }
-
-      await userRef.update({
-        'tokens': FieldValue.increment(amount),
-        'gamesPlayed': FieldValue.increment(1),
-        if (won) 'wins': FieldValue.increment(1),
-        'currentStreak': newStreak,
-        'lastPlayedAt': FieldValue.serverTimestamp(),
-        'updatedAt': FieldValue.serverTimestamp(),
-      });
-    } catch (error) {
-      // Ignore Firebase errors here so the game can still finish.
-    }
+          FilledButton(
+            onPressed: _continueAfterRound,
+            child: Text(
+              _currentRound == _selectedRounds
+                  ? 'See Final Results'
+                  : 'Start Round ${_currentRound + 1}',
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
-  Widget _buildResults(ColorScheme colorScheme) {
-    return ListView(
-      key: const ValueKey(_FamilyQuizPhase.results),
+  Widget _buildFinalResults() {
+    final leaderboard = [..._players];
+
+    leaderboard.sort(
+      (a, b) =>
+          (_scores[b.id] ?? 0).compareTo(
+        _scores[a.id] ?? 0,
+      ),
+    );
+
+    final highestScore =
+        _scores[leaderboard.first.id] ?? 0;
+
+    final winners = leaderboard
+        .where(
+          (player) =>
+              (_scores[player.id] ?? 0) ==
+              highestScore,
+        )
+        .toList();
+
+    return Padding(
       padding: const EdgeInsets.all(24),
-      children: [
-        Icon(
-          _isVotingMode ? Icons.groups : Icons.emoji_events,
-          size: 72,
-          color: colorScheme.primary,
-        ),
-        const SizedBox(height: 20),
-        Text(
-          _isVotingMode ? 'Family voting complete!' : 'Quiz complete!',
-          textAlign: TextAlign.center,
-          style: Theme.of(
-            context,
-          ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 12),
-        Text(
-          _isVotingMode
-              ? 'There are no wrong answers—these are your family results.'
-              : 'Your family matched $_matches of ${_questions.length} private answers.',
-          textAlign: TextAlign.center,
-          style: Theme.of(context).textTheme.bodyLarge,
-        ),
-        if (_isVotingMode) ...[
-          const SizedBox(height: 28),
-          for (var index = 0; index < _voteSummaries.length; index++)
-            Card(
-              child: ListTile(
-                leading: CircleAvatar(child: Text('${index + 1}')),
-                title: Text(_voteSummaries[index].question),
-                subtitle: Text(
-                  'Top vote: ${_voteSummaries[index].winners.join(' & ')}',
+      child: Column(
+        crossAxisAlignment:
+            CrossAxisAlignment.stretch,
+        children: [
+          const Icon(
+            Icons.emoji_events_outlined,
+            size: 80,
+          ),
+
+          const SizedBox(height: 16),
+
+          Text(
+            winners.length == 1
+                ? '${winners.first.name} Wins!'
+                : 'It\'s a Tie!',
+            textAlign: TextAlign.center,
+            style: Theme.of(context)
+                .textTheme
+                .headlineMedium
+                ?.copyWith(
+                  fontWeight: FontWeight.bold,
                 ),
-              ),
+          ),
+
+          const SizedBox(height: 28),
+
+          Expanded(
+            child: ListView.separated(
+              itemCount: leaderboard.length,
+              separatorBuilder: (_, _) =>
+                  const Divider(height: 1),
+              itemBuilder: (context, index) {
+                final player =
+                    leaderboard[index];
+
+                return ListTile(
+                  leading: CircleAvatar(
+                    child:
+                        Text('${index + 1}'),
+                  ),
+                  title: Text(
+                    player.name,
+                    style: const TextStyle(
+                      fontWeight:
+                          FontWeight.w600,
+                    ),
+                  ),
+                  trailing: Text(
+                    '${_scores[player.id] ?? 0} pts',
+                    style: const TextStyle(
+                      fontWeight:
+                          FontWeight.bold,
+                    ),
+                  ),
+                );
+              },
             ),
+          ),
+
+          const SizedBox(height: 16),
+
+          FilledButton(
+            onPressed: _playAgain,
+            child: const Text(
+              'Play Again',
+            ),
+          ),
+
+          const SizedBox(height: 12),
+
+          OutlinedButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: const Text(
+              'Back to Games',
+            ),
+          ),
         ],
-        const SizedBox(height: 28),
-        FilledButton(
-          onPressed: _isLoading ? null : _startGame,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 14),
-            child: _isLoading
-                ? const Text('Creating a new game...')
-                : const Text('Play Again'),
-          ),
-        ),
-        const SizedBox(height: 12),
-        OutlinedButton(
-          onPressed: _isLoading ? null : _changeSettings,
-          child: const Padding(
-            padding: EdgeInsets.symmetric(vertical: 14),
-            child: Text('Change Settings'),
-          ),
-        ),
-      ],
+      ),
     );
   }
 
   Widget _buildProgress() {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment:
+          CrossAxisAlignment.start,
       children: [
         Text(
-          'Round ${_currentQuestionIndex + 1} of ${_questions.length}',
-          style: Theme.of(context).textTheme.titleMedium,
+          'Round $_currentRound of $_selectedRounds • '
+          'Question ${_questionInRound + 1} of $_questionsPerRound',
+          style:
+              Theme.of(context).textTheme.titleMedium,
         ),
+
         const SizedBox(height: 10),
+
         LinearProgressIndicator(
-          value: (_currentQuestionIndex + 1) / _questions.length,
+          value:
+              (_questionInRound + 1) /
+                  _questionsPerRound,
         ),
       ],
     );
   }
+}
+
+class _QuizPlayer {
+  const _QuizPlayer({
+    required this.id,
+    required this.name,
+  });
+
+  final String id;
+  final String name;
 }
