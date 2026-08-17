@@ -1,8 +1,21 @@
+import 'dart:async';
 import 'dart:math';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../services/emoji_guess_ai_service.dart';
+
+enum _EmojiGuessPhase {
+  setup,
+  puzzle,
+  steal,
+  puzzleResult,
+  roundSummary,
+  tieBreaker,
+  finalResults,
+}
 
 class EmojiGuessScreen extends StatefulWidget {
   const EmojiGuessScreen({super.key});
@@ -22,242 +35,1193 @@ class _EmojiGuessScreenState extends State<EmojiGuessScreen> {
     'Mixed',
   ];
 
-  final List<EmojiGuessPuzzle> _fallbackPuzzles = const [
-    EmojiGuessPuzzle(
-      emojis: '🦁👑',
-      answer: 'The Lion King',
-      hint: 'A famous animated movie',
-    ),
-    EmojiGuessPuzzle(
-      emojis: '🍕🧀',
-      answer: 'Cheese Pizza',
-      hint: 'A popular food',
-    ),
-    EmojiGuessPuzzle(
-      emojis: '🐼🎋',
-      answer: 'Panda',
-      hint: 'An animal that loves bamboo',
-    ),
-    EmojiGuessPuzzle(
-      emojis: '🗼🇫🇷',
-      answer: 'Paris',
-      hint: 'A famous European city',
-    ),
-    EmojiGuessPuzzle(
-      emojis: '🐠🔍',
-      answer: 'Finding Nemo',
-      hint: 'An animated ocean movie',
-    ),
-  ];
+  bool _isLoadingFamily = true;
+  bool _isLoadingPuzzles = false;
+
+  String? _familyError;
+
+  final List<_EmojiPlayer> _familyMembers = [];
+  final Set<String> _selectedPlayerIds = {};
+
+  final List<_EmojiPlayer> _teamA = [];
+  final List<_EmojiPlayer> _teamB = [];
 
   String _selectedCategory = 'Movies';
 
-  bool _isLoading = false;
-  bool _isPlaying = false;
-  bool _showResults = false;
-  bool _showAnswer = false;
-
-  int _currentIndex = 0;
-  int _score = 0;
+  int _selectedRounds = 3;
+  int _puzzlesPerRound = 6;
+  int _secondsPerPuzzle = 30;
 
   List<EmojiGuessPuzzle> _puzzles = [];
 
-  Future<void> _startGame() async {
+  int _currentRound = 1;
+  int _puzzleInRound = 0;
+  int _globalPuzzleIndex = 0;
+
+  int _teamAScore = 0;
+  int _teamBScore = 0;
+
+  Timer? _timer;
+  int _secondsRemaining = 0;
+
+  String _resultMessage = '';
+
+  bool _isTieBreaker = false;
+
+  final TextEditingController _answerController =
+  TextEditingController();
+
+  bool _isCheckingAnswer = false;
+
+  _EmojiGuessPhase _phase = _EmojiGuessPhase.setup;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadFamilyMembers();
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    _answerController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _loadFamilyMembers() async {
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user == null) {
+      setState(() {
+        _isLoadingFamily = false;
+        _familyError = 'You must be logged in to play.';
+      });
+      return;
+    }
+
+    try {
+      final userDocument = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
+
+      final familyId = userDocument.data()?['familyId'] as String?;
+
+      if (familyId == null || familyId.isEmpty) {
+        if (!mounted) return;
+
+        setState(() {
+          _isLoadingFamily = false;
+          _familyError =
+              'Join or create a family before playing Emoji Guess.';
+        });
+
+        return;
+      }
+
+      final membersSnapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .where('familyId', isEqualTo: familyId)
+          .get();
+
+      final members = membersSnapshot.docs.map((document) {
+        final data = document.data();
+
+        final name = data['name'] as String?;
+        final email = data['email'] as String?;
+
+        return _EmojiPlayer(
+          id: document.id,
+          name: name?.trim().isNotEmpty == true
+              ? name!
+              : email ?? 'Family Member',
+        );
+      }).toList();
+
+      members.sort(
+        (a, b) => a.name.toLowerCase().compareTo(
+              b.name.toLowerCase(),
+            ),
+      );
+
+      if (!mounted) return;
+
+      setState(() {
+        _familyMembers
+          ..clear()
+          ..addAll(members);
+
+        _isLoadingFamily = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+
+      setState(() {
+        _isLoadingFamily = false;
+        _familyError = 'Could not load your family members.';
+      });
+    }
+  }
+
+  void _togglePlayer(_EmojiPlayer player) {
     setState(() {
-      _isLoading = true;
-      _showResults = false;
-      _score = 0;
-      _currentIndex = 0;
-      _showAnswer = false;
+      if (_selectedPlayerIds.contains(player.id)) {
+        _selectedPlayerIds.remove(player.id);
+
+        _teamA.removeWhere(
+          (member) => member.id == player.id,
+        );
+
+        _teamB.removeWhere(
+          (member) => member.id == player.id,
+        );
+      } else {
+        _selectedPlayerIds.add(player.id);
+      }
+    });
+  }
+
+  void _assignPlayerToTeam(
+    _EmojiPlayer player,
+    String team,
+  ) {
+    setState(() {
+      _teamA.removeWhere(
+        (member) => member.id == player.id,
+      );
+
+      _teamB.removeWhere(
+        (member) => member.id == player.id,
+      );
+
+      if (team == 'A') {
+        _teamA.add(player);
+      } else {
+        _teamB.add(player);
+      }
+    });
+  }
+
+  void _shuffleTeams() {
+    final selectedPlayers = _familyMembers
+        .where(
+          (player) => _selectedPlayerIds.contains(player.id),
+        )
+        .toList()
+      ..shuffle(Random());
+
+    setState(() {
+      _teamA.clear();
+      _teamB.clear();
+
+      for (int i = 0; i < selectedPlayers.length; i++) {
+        if (i.isEven) {
+          _teamA.add(selectedPlayers[i]);
+        } else {
+          _teamB.add(selectedPlayers[i]);
+        }
+      }
+    });
+  }
+
+  Future<void> _startGame() async {
+    if (_teamA.isEmpty || _teamB.isEmpty) {
+      return;
+    }
+
+    if (_teamA.length + _teamB.length !=
+        _selectedPlayerIds.length) {
+      return;
+    }
+
+    setState(() {
+      _isLoadingPuzzles = true;
     });
 
     try {
+      final totalPuzzles =
+          (_selectedRounds * _puzzlesPerRound) + 1;
+
       final generated = await _aiService.generatePuzzles(
         category: _selectedCategory,
-        count: 10,
+        count: totalPuzzles,
       );
+
+      if (generated.length < totalPuzzles) {
+        throw Exception('Not enough puzzles generated');
+      }
 
       if (!mounted) return;
 
       setState(() {
         _puzzles = generated;
-        _isPlaying = true;
-        _isLoading = false;
+
+        _currentRound = 1;
+        _puzzleInRound = 0;
+        _globalPuzzleIndex = 0;
+
+        _teamAScore = 0;
+        _teamBScore = 0;
+
+        _resultMessage = '';
+        _isTieBreaker = false;
+
+        _isLoadingPuzzles = false;
       });
+
+      _startNormalPuzzle();
     } catch (error) {
-      final fallback = List<EmojiGuessPuzzle>.from(_fallbackPuzzles)
-        ..shuffle(Random());
+      debugPrint('Emoji Guess start error: $error');
 
       if (!mounted) return;
 
       setState(() {
-        _puzzles = fallback;
-        _isPlaying = true;
-        _isLoading = false;
+        _isLoadingPuzzles = false;
       });
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Could not reach AI. Using offline puzzles instead.'),
-        ),
-      );
     }
   }
 
-  void _answer(bool correct) {
-    if (correct) {
-      _score++;
+  bool get _teamAStartsPuzzle =>
+      _globalPuzzleIndex.isEven;
+
+  String get _startingTeamName =>
+      _teamAStartsPuzzle ? 'Team A' : 'Team B';
+
+  String get _stealingTeamName =>
+      _teamAStartsPuzzle ? 'Team B' : 'Team A';
+
+  void _startNormalPuzzle() {
+    _timer?.cancel();
+
+    setState(() {
+      _answerController.clear();
+      _secondsRemaining = _secondsPerPuzzle;
+      _phase = _EmojiGuessPhase.puzzle;
+    });
+
+    _startTimer(
+      seconds: _secondsPerPuzzle,
+      onFinished: _startSteal,
+    );
+  }
+
+  void _startSteal() {
+    _timer?.cancel();
+
+    setState(() {
+       _answerController.clear();
+      _secondsRemaining = 10;
+      _phase = _EmojiGuessPhase.steal;
+    });
+
+    _startTimer(
+      seconds: 10,
+      onFinished: () {
+        final puzzle = _puzzles[_globalPuzzleIndex];
+
+        if (_isTieBreaker) {
+          setState(() {
+            if (_teamAStartsPuzzle) {
+              _teamAScore++;
+            } else {
+              _teamBScore++;
+            }
+
+            _isTieBreaker = false;
+            _phase = _EmojiGuessPhase.finalResults;
+          });
+
+          return;
+        }
+
+        setState(() {
+          _resultMessage =
+              'No steal.\n\n'
+              'Answer: ${puzzle.answer}';
+
+          _phase = _EmojiGuessPhase.puzzleResult;
+        });
+      },
+    );
+  }
+
+  void _startTimer({
+    required int seconds,
+    required VoidCallback onFinished,
+  }) {
+    _timer?.cancel();
+
+    _secondsRemaining = seconds;
+
+    _timer = Timer.periodic(
+      const Duration(seconds: 1),
+      (timer) {
+        if (!mounted) {
+          timer.cancel();
+          return;
+        }
+
+        if (_secondsRemaining <= 1) {
+          timer.cancel();
+
+          setState(() {
+            _secondsRemaining = 0;
+          });
+
+          onFinished();
+          return;
+        }
+
+        setState(() {
+          _secondsRemaining--;
+        });
+      },
+    );
+  }
+
+  void _handleCorrectNormalAnswer() {
+    _timer?.cancel();
+
+    if (_isTieBreaker) {
+      setState(() {
+        if (_teamAStartsPuzzle) {
+          _teamAScore++;
+        } else {
+          _teamBScore++;
+        }
+
+        _isTieBreaker = false;
+        _phase = _EmojiGuessPhase.finalResults;
+      });
+
+      return;
     }
 
-    if (_currentIndex < _puzzles.length - 1) {
+    setState(() {
+      if (_teamAStartsPuzzle) {
+        _teamAScore += 2;
+      } else {
+        _teamBScore += 2;
+      }
+
+      _resultMessage =
+          '$_startingTeamName guessed correctly!\n\n'
+          '+2 points';
+
+      _phase = _EmojiGuessPhase.puzzleResult;
+    });
+  }
+
+
+  void _handleCorrectSteal() {
+    _timer?.cancel();
+
+    if (_isTieBreaker) {
       setState(() {
-        _currentIndex++;
-        _showAnswer = false;
+        if (_teamAStartsPuzzle) {
+          _teamBScore++;
+        } else {
+          _teamAScore++;
+        }
+
+        _isTieBreaker = false;
+        _phase = _EmojiGuessPhase.finalResults;
       });
-    } else {
-      setState(() {
-        _isPlaying = false;
-        _showResults = true;
-      });
+
+      return;
     }
+
+    setState(() {
+      if (_teamAStartsPuzzle) {
+        _teamBScore += 1;
+      } else {
+        _teamAScore += 1;
+      }
+
+      _resultMessage =
+          '$_stealingTeamName stole the puzzle!\n\n'
+          '+1 point';
+
+      _phase = _EmojiGuessPhase.puzzleResult;
+    });
+  }
+
+  void _handleFailedSteal() {
+    _timer?.cancel();
+
+    final puzzle = _puzzles[_globalPuzzleIndex];
+
+    if (_isTieBreaker) {
+      setState(() {
+        if (_teamAStartsPuzzle) {
+          _teamAScore++;
+        } else {
+          _teamBScore++;
+        }
+
+        _isTieBreaker = false;
+        _phase = _EmojiGuessPhase.finalResults;
+      });
+
+      return;
+    }
+
+    setState(() {
+      _resultMessage =
+          'Steal missed.\n\n'
+          'Answer: ${puzzle.answer}';
+
+      _phase = _EmojiGuessPhase.puzzleResult;
+    });
+  }
+
+  void _continueAfterPuzzle() {
+    final isLastPuzzleInRound =
+        _puzzleInRound == _puzzlesPerRound - 1;
+
+    if (isLastPuzzleInRound) {
+      setState(() {
+        _phase = _EmojiGuessPhase.roundSummary;
+      });
+
+      return;
+    }
+
+    setState(() {
+      _puzzleInRound++;
+      _globalPuzzleIndex++;
+    });
+
+    _startNormalPuzzle();
+  }
+
+  void _continueAfterRound() {
+    final isLastRound =
+        _currentRound == _selectedRounds;
+
+    if (isLastRound) {
+      if (_teamAScore == _teamBScore) {
+        setState(() {
+          _globalPuzzleIndex++;
+          _isTieBreaker = true;
+          _secondsRemaining = 10;
+          _phase = _EmojiGuessPhase.tieBreaker;
+        });
+
+        _startTimer(
+          seconds: 10,
+          onFinished: _startSteal,
+        );
+
+        return;
+      }
+
+      setState(() {
+        _phase = _EmojiGuessPhase.finalResults;
+      });
+
+      return;
+    }
+
+    setState(() {
+      _currentRound++;
+      _puzzleInRound = 0;
+      _globalPuzzleIndex++;
+    });
+
+    _startNormalPuzzle();
+  }
+
+  void _playAgain() {
+    _timer?.cancel();
+
+    setState(() {
+      _phase = _EmojiGuessPhase.setup;
+      _puzzles = [];
+
+      _currentRound = 1;
+      _puzzleInRound = 0;
+      _globalPuzzleIndex = 0;
+
+      _teamAScore = 0;
+      _teamBScore = 0;
+
+      _resultMessage = '';
+      _isTieBreaker = false;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Emoji Guess')),
-      body: Padding(
-        padding: const EdgeInsets.all(24),
-        child: _showResults
-            ? _buildResults()
-            : _isPlaying
-            ? _buildGame()
-            : _buildSetup(),
+      appBar: AppBar(
+        title: const Text('Emoji Guess'),
+      ),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: _buildBody(),
+        ),
       ),
     );
   }
 
-  Widget _buildSetup() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        const Text(
-          'Choose a category',
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 24),
-        Wrap(
-          spacing: 10,
-          runSpacing: 10,
-          children: _categories.map((category) {
-            return ChoiceChip(
-              label: Text(category),
-              selected: category == _selectedCategory,
-              onSelected: (_) {
-                setState(() {
-                  _selectedCategory = category;
-                });
-              },
-            );
-          }).toList(),
-        ),
-        const SizedBox(height: 40),
-        ElevatedButton(
-          onPressed: _isLoading ? null : _startGame,
-          child: _isLoading
-              ? const Text('Generating puzzles...')
-              : const Text('Start Game'),
-        ),
-      ],
-    );
+  Widget _buildBody() {
+    return switch (_phase) {
+      _EmojiGuessPhase.setup => _buildSetup(),
+      _EmojiGuessPhase.puzzle => _buildPuzzleScreen(),
+      _EmojiGuessPhase.steal => _buildStealScreen(),
+      _EmojiGuessPhase.puzzleResult =>
+        _buildPuzzleResultScreen(),
+      _EmojiGuessPhase.roundSummary =>
+        _buildRoundSummaryScreen(),
+      _EmojiGuessPhase.tieBreaker =>
+        _buildTieBreakerScreen(),
+      _EmojiGuessPhase.finalResults =>
+        _buildFinalResultsScreen(),
+    };
   }
 
-  Widget _buildGame() {
-    final puzzle = _puzzles[_currentIndex];
+  Widget _buildSetup() {
+    if (_isLoadingFamily) {
+      return const Center(
+        child: CircularProgressIndicator(),
+      );
+    }
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Text(
-          'Puzzle ${_currentIndex + 1} of ${_puzzles.length}',
-          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-        ),
-        const SizedBox(height: 16),
-        LinearProgressIndicator(value: (_currentIndex + 1) / _puzzles.length),
-        const SizedBox(height: 40),
-        Text(
-          puzzle.emojis,
+    if (_familyError != null) {
+      return Center(
+        child: Text(
+          _familyError!,
           textAlign: TextAlign.center,
-          style: const TextStyle(fontSize: 64),
         ),
-        const SizedBox(height: 30),
-        Text(
-          'Hint: ${puzzle.hint}',
-          textAlign: TextAlign.center,
-          style: const TextStyle(fontSize: 20),
-        ),
-        const SizedBox(height: 30),
-        if (!_showAnswer)
-          ElevatedButton(
-            onPressed: () {
-              setState(() {
-                _showAnswer = true;
-              });
-            },
-            child: const Text('Show Answer'),
-          ),
-        if (_showAnswer) ...[
+      );
+    }
+
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
           Text(
-            puzzle.answer,
-            textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+            'Who is playing?',
+            style: Theme.of(context)
+                .textTheme
+                .headlineMedium
+                ?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
           ),
-          const SizedBox(height: 30),
-          ElevatedButton(
-            onPressed: () => _answer(true),
-            child: const Text('I Got It'),
+
+          const SizedBox(height: 8),
+
+          const Text(
+            'Choose at least 2 players.',
           ),
+
+          const SizedBox(height: 16),
+
+          ..._familyMembers.map((player) {
+            final selected =
+                _selectedPlayerIds.contains(player.id);
+
+            return CheckboxListTile(
+              value: selected,
+              onChanged: (_) => _togglePlayer(player),
+              title: Text(player.name),
+            );
+          }),
+
+          const SizedBox(height: 24),
+
+          Text(
+            'Choose teams',
+            style: Theme.of(context)
+                .textTheme
+                .titleLarge
+                ?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+
+          const SizedBox(height: 8),
+
+          const Text(
+            'Assign every selected player to Team A or Team B.',
+          ),
+
+          const SizedBox(height: 16),
+
+          ..._familyMembers
+              .where(
+                (player) =>
+                    _selectedPlayerIds.contains(player.id),
+              )
+              .map((player) {
+            final inTeamA = _teamA.any(
+              (member) => member.id == player.id,
+            );
+
+            final inTeamB = _teamB.any(
+              (member) => member.id == player.id,
+            );
+
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: Card(
+                margin: EdgeInsets.zero,
+                child: Padding(
+                  padding: const EdgeInsets.all(14),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          player.name,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+
+                      ChoiceChip(
+                        label: const Text('Team A'),
+                        selected: inTeamA,
+                        onSelected: (_) {
+                          _assignPlayerToTeam(
+                            player,
+                            'A',
+                          );
+                        },
+                      ),
+
+                      const SizedBox(width: 8),
+
+                      ChoiceChip(
+                        label: const Text('Team B'),
+                        selected: inTeamB,
+                        onSelected: (_) {
+                          _assignPlayerToTeam(
+                            player,
+                            'B',
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          }),
+
           const SizedBox(height: 12),
-          OutlinedButton(
-            onPressed: () => _answer(false),
-            child: const Text('I Missed It'),
+
+          OutlinedButton.icon(
+            onPressed: _selectedPlayerIds.length >= 2
+                ? _shuffleTeams
+                : null,
+            icon: const Icon(Icons.shuffle),
+            label: const Text('Shuffle Teams'),
+          ),
+
+          const SizedBox(height: 24),
+
+          Text(
+            'Category',
+            style: Theme.of(context)
+                .textTheme
+                .titleLarge
+                ?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+
+          const SizedBox(height: 12),
+
+          Wrap(
+            spacing: 10,
+            runSpacing: 10,
+            children: _categories.map((category) {
+              return ChoiceChip(
+                label: Text(category),
+                selected:
+                    category == _selectedCategory,
+                onSelected: (_) {
+                  setState(() {
+                    _selectedCategory = category;
+                  });
+                },
+              );
+            }).toList(),
+          ),
+
+          const SizedBox(height: 28),
+
+          Text(
+            'Rounds',
+            style: Theme.of(context)
+                .textTheme
+                .titleLarge
+                ?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+
+          const SizedBox(height: 12),
+
+          Wrap(
+            spacing: 10,
+            children: [3, 5, 10].map((rounds) {
+              return ChoiceChip(
+                label: Text('$rounds'),
+                selected:
+                    _selectedRounds == rounds,
+                onSelected: (_) {
+                  setState(() {
+                    _selectedRounds = rounds;
+                  });
+                },
+              );
+            }).toList(),
+          ),
+
+          const SizedBox(height: 28),
+
+          Text(
+            'Puzzles per round',
+            style: Theme.of(context)
+                .textTheme
+                .titleLarge
+                ?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+
+          const SizedBox(height: 12),
+
+          Wrap(
+            spacing: 10,
+            children:
+                [4, 6, 10].map((puzzleCount) {
+              return ChoiceChip(
+                label: Text('$puzzleCount'),
+                selected:
+                    _puzzlesPerRound == puzzleCount,
+                onSelected: (_) {
+                  setState(() {
+                    _puzzlesPerRound =
+                        puzzleCount;
+                  });
+                },
+              );
+            }).toList(),
+          ),
+
+          const SizedBox(height: 28),
+
+          Text(
+            'Time per puzzle',
+            style: Theme.of(context)
+                .textTheme
+                .titleLarge
+                ?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+
+          const SizedBox(height: 12),
+
+          Wrap(
+            spacing: 10,
+            children: [20, 30, 45].map((seconds) {
+              return ChoiceChip(
+                label: Text('$seconds sec'),
+                selected:
+                    _secondsPerPuzzle == seconds,
+                onSelected: (_) {
+                  setState(() {
+                    _secondsPerPuzzle = seconds;
+                  });
+                },
+              );
+            }).toList(),
+          ),
+
+          const SizedBox(height: 32),
+
+          FilledButton(
+            onPressed: _teamA.isNotEmpty &&
+                    _teamB.isNotEmpty &&
+                    (_teamA.length + _teamB.length ==
+                        _selectedPlayerIds.length) &&
+                    !_isLoadingPuzzles
+                ? _startGame
+                : null,
+            child: _isLoadingPuzzles
+                ? const CircularProgressIndicator()
+                : const Text('Start Emoji Guess'),
           ),
         ],
-      ],
+      ),
     );
   }
 
-  Widget _buildResults() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        const Spacer(),
-        const Icon(Icons.emoji_events, size: 72),
-        const SizedBox(height: 24),
-        const Text(
-          'Round Complete!',
-          textAlign: TextAlign.center,
-          style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 30),
-        Text(
-          'Score: $_score / ${_puzzles.length}',
-          textAlign: TextAlign.center,
-          style: const TextStyle(fontSize: 24),
-        ),
-        const Spacer(),
-        ElevatedButton(onPressed: _startGame, child: const Text('Play Again')),
-        const SizedBox(height: 12),
-        OutlinedButton(
-          onPressed: () {
-            setState(() {
-              _showResults = false;
-              _isPlaying = false;
-            });
-          },
-          child: const Text('Change Category'),
-        ),
-      ],
+  Widget _buildPuzzleScreen() {
+    final puzzle =
+        _puzzles[_globalPuzzleIndex];
+
+    return _buildPuzzleLayout(
+      heading: '$_startingTeamName\'S TURN',
+      puzzle: puzzle,
+      steal: false,
     );
   }
+
+  Widget _buildStealScreen() {
+    final puzzle =
+        _puzzles[_globalPuzzleIndex];
+
+    return _buildPuzzleLayout(
+      heading: 'STEAL — $_stealingTeamName',
+      puzzle: puzzle,
+      steal: true,
+    );
+  }
+
+  Widget _buildPuzzleLayout({
+    required String heading,
+    required EmojiGuessPuzzle puzzle,
+    required bool steal,
+  }) {
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            heading,
+            textAlign: TextAlign.center,
+            style: Theme.of(context)
+                .textTheme
+                .headlineSmall
+                ?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+
+          const SizedBox(height: 8),
+
+          Text(
+            'Round $_currentRound of $_selectedRounds • '
+            'Puzzle ${_puzzleInRound + 1} of $_puzzlesPerRound',
+            textAlign: TextAlign.center,
+          ),
+
+          const SizedBox(height: 18),
+
+          Text(
+            '$_secondsRemaining s',
+            textAlign: TextAlign.center,
+            style: Theme.of(context)
+                .textTheme
+                .headlineMedium
+                ?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+
+          const SizedBox(height: 32),
+
+          Text(
+            puzzle.emojis,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontSize: 72,
+            ),
+          ),
+
+          const SizedBox(height: 24),
+
+          Text(
+            'Hint: ${puzzle.hint}',
+            textAlign: TextAlign.center,
+            style: Theme.of(context)
+                .textTheme
+                .titleMedium,
+          ),
+
+          const SizedBox(height: 36),
+
+          TextField(
+  controller: _answerController,
+  enabled: !_isCheckingAnswer,
+  textInputAction: TextInputAction.done,
+  decoration: const InputDecoration(
+    labelText: 'Type your answer',
+    prefixIcon: Icon(Icons.edit_outlined),
+    border: OutlineInputBorder(),
+  ),
+  onSubmitted: (_) {
+    _submitTypedAnswer(steal: steal);
+  },
+),
+
+const SizedBox(height: 14),
+
+FilledButton.icon(
+  onPressed: _isCheckingAnswer
+      ? null
+      : () {
+          _submitTypedAnswer(
+            steal: steal,
+          );
+        },
+  icon: _isCheckingAnswer
+      ? const SizedBox(
+          width: 18,
+          height: 18,
+          child: CircularProgressIndicator(
+            strokeWidth: 2,
+          ),
+        )
+      : const Icon(Icons.send_rounded),
+  label: Text(
+    _isCheckingAnswer
+        ? 'Checking...'
+        : 'Submit Answer',
+  ),
+),
+
+          const SizedBox(height: 24),
+
+          Text(
+            'Team A: $_teamAScore     Team B: $_teamBScore',
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPuzzleResultScreen() {
+    final puzzle =
+        _puzzles[_globalPuzzleIndex];
+
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            'Puzzle Complete',
+            style: Theme.of(context)
+                .textTheme
+                .headlineMedium
+                ?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+
+          const SizedBox(height: 18),
+
+          Text(
+            _resultMessage,
+            textAlign: TextAlign.center,
+          ),
+
+          const SizedBox(height: 18),
+
+          Text(
+            'Answer: ${puzzle.answer}',
+            textAlign: TextAlign.center,
+            style: Theme.of(context)
+                .textTheme
+                .titleMedium
+                ?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+
+          const SizedBox(height: 28),
+
+          FilledButton(
+            onPressed: _continueAfterPuzzle,
+            child: Text(
+              _puzzleInRound ==
+                      _puzzlesPerRound - 1
+                  ? 'Round Results'
+                  : 'Next Puzzle',
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRoundSummaryScreen() {
+
+    final isLastRound =
+    _currentRound == _selectedRounds;
+
+    final isTie =
+    _teamAScore == _teamBScore;
+
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            'Round $_currentRound Complete',
+            style: Theme.of(context)
+                .textTheme
+                .headlineMedium
+                ?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+
+          const SizedBox(height: 28),
+
+          Text('Team A: $_teamAScore'),
+          const SizedBox(height: 10),
+          Text('Team B: $_teamBScore'),
+
+          const SizedBox(height: 32),
+
+          FilledButton(
+            onPressed: _continueAfterRound,
+            child: Text(
+              isLastRound
+              ? isTie
+              ? 'Start Tie-Breaker'
+              : 'See Final Results'
+          : 'Start Round ${_currentRound + 1}',
+),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTieBreakerScreen() {
+    final puzzle =
+        _puzzles[_globalPuzzleIndex];
+
+    return _buildPuzzleLayout(
+      heading: 'TIE-BREAKER — $_startingTeamName',
+      puzzle: puzzle,
+      steal: false,
+    );
+  }
+
+  Widget _buildFinalResultsScreen() {
+    final winner = _teamAScore > _teamBScore
+        ? 'Team A'
+        : 'Team B';
+
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(
+            Icons.emoji_events,
+            size: 80,
+          ),
+
+          const SizedBox(height: 20),
+
+          Text(
+            '$winner Wins!',
+            style: Theme.of(context)
+                .textTheme
+                .headlineMedium
+                ?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+
+          const SizedBox(height: 28),
+
+          Text('Team A: $_teamAScore'),
+          const SizedBox(height: 10),
+          Text('Team B: $_teamBScore'),
+
+          const SizedBox(height: 32),
+
+          FilledButton(
+            onPressed: _playAgain,
+            child: const Text('Play Again'),
+          ),
+
+          const SizedBox(height: 12),
+
+          OutlinedButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: const Text('Back to Games'),
+          ),
+        ],
+      ),
+    );
+  }
+  Future<void> _submitTypedAnswer({
+  required bool steal,
+}) async {
+  final answer =
+      _answerController.text.trim();
+
+  if (answer.isEmpty || _isCheckingAnswer) {
+    return;
+  }
+
+  _timer?.cancel();
+
+  setState(() {
+    _isCheckingAnswer = true;
+  });
+
+  final puzzle =
+      _puzzles[_globalPuzzleIndex];
+
+  bool correct = false;
+
+  try {
+    correct = await _aiService.checkAnswer(
+      expectedAnswer: puzzle.answer,
+      playerAnswer: answer,
+    );
+  } catch (_) {
+    correct = false;
+  }
+
+  if (!mounted) return;
+
+  setState(() {
+    _isCheckingAnswer = false;
+  });
+
+  if (correct) {
+    if (steal) {
+      _handleCorrectSteal();
+    } else {
+      _handleCorrectNormalAnswer();
+    }
+
+    return;
+  }
+
+  if (steal) {
+    _handleFailedSteal();
+  } else {
+    _startSteal();
+  }
+}
+
+}
+
+class _EmojiPlayer {
+  const _EmojiPlayer({
+    required this.id,
+    required this.name,
+  });
+
+  final String id;
+  final String name;
 }

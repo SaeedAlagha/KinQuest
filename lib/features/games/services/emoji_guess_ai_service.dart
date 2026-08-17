@@ -47,4 +47,65 @@ class EmojiGuessAiService {
         .map((item) => EmojiGuessPuzzle.fromJson(item as Map<String, dynamic>))
         .toList();
   }
+
+    Future<bool> checkAnswer({
+    required String expectedAnswer,
+    required String playerAnswer,
+  }) async {
+    final normalizedExpected = _normalize(expectedAnswer);
+    final normalizedPlayer = _normalize(playerAnswer);
+
+    if (normalizedExpected == normalizedPlayer) {
+      return true;
+    }
+    if (normalizedExpected.contains(normalizedPlayer) ||
+    normalizedPlayer.contains(normalizedExpected)) {
+  return true;
+  } 
+
+    final response = await http
+        .post(
+          ApiConfig.endpoint('/api/emoji-guess/check-answer'),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: jsonEncode({
+            'expectedAnswer': expectedAnswer,
+            'playerAnswer': playerAnswer,
+          }),
+        )
+        .timeout(const Duration(seconds: 10));
+
+    if (response.statusCode != 200) {
+      return false;
+    }
+
+    final data =
+        jsonDecode(response.body) as Map<String, dynamic>;
+
+    return data['match'] == true;
+  }
+
+ String _normalize(String value) {
+  final ignoredWords = {
+    'the',
+    'a',
+    'an',
+  };
+
+  final words = value
+      .toLowerCase()
+      .replaceAll(RegExp(r'[^a-z0-9 ]'), '')
+      .replaceAll(RegExp(r'\s+'), ' ')
+      .trim()
+      .split(' ')
+      .where(
+        (word) =>
+            word.isNotEmpty &&
+            !ignoredWords.contains(word),
+      )
+      .toList();
+
+  return words.join(' ');
+}
 }
