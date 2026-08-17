@@ -62,8 +62,7 @@ import 'app_localizations_en.dart';
 /// be consistent with the languages listed in the AppLocalizations.supportedLocales
 /// property.
 abstract class AppLocalizations {
-  AppLocalizations(String locale)
-    : localeName = intl.Intl.canonicalizedLocale(locale.toString());
+  AppLocalizations(String locale) : localeName = intl.Intl.canonicalizedLocale(locale.toString());
 
   final String localeName;
 
@@ -71,8 +70,7 @@ abstract class AppLocalizations {
     return Localizations.of<AppLocalizations>(context, AppLocalizations);
   }
 
-  static const LocalizationsDelegate<AppLocalizations> delegate =
-      _AppLocalizationsDelegate();
+  static const LocalizationsDelegate<AppLocalizations> delegate = _AppLocalizationsDelegate();
 
   /// A list of this localizations delegate along with the default localizations
   /// delegates.
@@ -84,18 +82,17 @@ abstract class AppLocalizations {
   /// Additional delegates can be added by appending to this list in
   /// MaterialApp. This list does not have to be used at all if a custom list
   /// of delegates is preferred or required.
-  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates =
-      <LocalizationsDelegate<dynamic>>[
-        delegate,
-        GlobalMaterialLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-      ];
+  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates = <LocalizationsDelegate<dynamic>>[
+    delegate,
+    GlobalMaterialLocalizations.delegate,
+    GlobalCupertinoLocalizations.delegate,
+    GlobalWidgetsLocalizations.delegate,
+  ];
 
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = <Locale>[
     Locale('ar'),
-    Locale('en'),
+    Locale('en')
   ];
 
   /// No description provided for @appName.
@@ -2101,10 +2098,879 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Share this code with relatives so they can join this family.'**
   String get shareFamilyInviteCode;
+
+  /// No description provided for @missionsSignInRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'You must be signed in to view missions.'**
+  String get missionsSignInRequired;
+
+  /// No description provided for @missionsFamilyRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Join or create a family before completing missions.'**
+  String get missionsFamilyRequired;
+
+  /// No description provided for @missionsLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load Family Missions. Please try again.'**
+  String get missionsLoadError;
+
+  /// No description provided for @missionGeneric.
+  ///
+  /// In en, this message translates to:
+  /// **'Mission'**
+  String get missionGeneric;
+
+  /// No description provided for @you.
+  ///
+  /// In en, this message translates to:
+  /// **'You'**
+  String get you;
+
+  /// No description provided for @whoParticipated.
+  ///
+  /// In en, this message translates to:
+  /// **'Who participated?'**
+  String get whoParticipated;
+
+  /// No description provided for @participantSelectionDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the family members who actually took part. Family missions require at least 2 participants.'**
+  String get participantSelectionDescription;
+
+  /// No description provided for @continueLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get continueLabel;
+
+  /// No description provided for @takePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Take Photo'**
+  String get takePhoto;
+
+  /// No description provided for @useCameraAsProof.
+  ///
+  /// In en, this message translates to:
+  /// **'Use the camera as proof'**
+  String get useCameraAsProof;
+
+  /// No description provided for @choosePhotoOrScreenshot.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose Photo or Screenshot'**
+  String get choosePhotoOrScreenshot;
+
+  /// No description provided for @chooseExistingImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose an existing image from your device'**
+  String get chooseExistingImage;
+
+  /// No description provided for @missionImageTooLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'That image is too large. Please choose a smaller image.'**
+  String get missionImageTooLarge;
+
+  /// No description provided for @reviewYourProof.
+  ///
+  /// In en, this message translates to:
+  /// **'Review Your Proof'**
+  String get reviewYourProof;
+
+  /// No description provided for @participantsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Participants: {names}'**
+  String participantsLabel(String names);
+
+  /// No description provided for @explanationOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Explanation (optional)'**
+  String get explanationOptional;
+
+  /// No description provided for @missionExplanationHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Add useful context that the image may not show clearly.'**
+  String get missionExplanationHint;
+
+  /// No description provided for @verifyProof.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify Proof'**
+  String get verifyProof;
+
+  /// No description provided for @aiCheckingMissionProof.
+  ///
+  /// In en, this message translates to:
+  /// **'AI is checking your mission proof...'**
+  String get aiCheckingMissionProof;
+
+  /// No description provided for @couldNotVerifyMissionProof.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not verify the mission proof. Please try again.'**
+  String get couldNotVerifyMissionProof;
+
+  /// No description provided for @needClearerProof.
+  ///
+  /// In en, this message translates to:
+  /// **'We Need Clearer Proof'**
+  String get needClearerProof;
+
+  /// No description provided for @proofNotVerified.
+  ///
+  /// In en, this message translates to:
+  /// **'Proof Not Verified'**
+  String get proofNotVerified;
+
+  /// No description provided for @verificationFailureDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'{reason}\n\nYou can submit another image or add a clearer explanation.'**
+  String verificationFailureDescription(String reason);
+
+  /// No description provided for @tryAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Try Again'**
+  String get tryAgain;
+
+  /// No description provided for @missionAlreadyRewarded.
+  ///
+  /// In en, this message translates to:
+  /// **'This mission has already been rewarded.'**
+  String get missionAlreadyRewarded;
+
+  /// No description provided for @missionRewardSaveError.
+  ///
+  /// In en, this message translates to:
+  /// **'The proof was verified, but the reward could not be saved. Please try again.'**
+  String get missionRewardSaveError;
+
+  /// No description provided for @familyMissionMinimumParticipants.
+  ///
+  /// In en, this message translates to:
+  /// **'A family mission needs at least 2 participants.'**
+  String get familyMissionMinimumParticipants;
+
+  /// No description provided for @missionVerified.
+  ///
+  /// In en, this message translates to:
+  /// **'Mission Verified!'**
+  String get missionVerified;
+
+  /// No description provided for @familyMissionRewardSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'{tokens} tokens were awarded to each participant.\n\n{participants}\n\nA new shared family mission has been added.'**
+  String familyMissionRewardSuccess(int tokens, String participants);
+
+  /// No description provided for @personalMissionRewardSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'You earned {tokens} tokens.\n\nA new personal mission has been added.'**
+  String personalMissionRewardSuccess(int tokens);
+
+  /// No description provided for @nice.
+  ///
+  /// In en, this message translates to:
+  /// **'Nice!'**
+  String get nice;
+
+  /// No description provided for @difficultyEasy.
+  ///
+  /// In en, this message translates to:
+  /// **'Easy'**
+  String get difficultyEasy;
+
+  /// No description provided for @difficultyMedium.
+  ///
+  /// In en, this message translates to:
+  /// **'Medium'**
+  String get difficultyMedium;
+
+  /// No description provided for @difficultyChallenge.
+  ///
+  /// In en, this message translates to:
+  /// **'Challenge'**
+  String get difficultyChallenge;
+
+  /// No description provided for @yourMissions.
+  ///
+  /// In en, this message translates to:
+  /// **'Your Missions'**
+  String get yourMissions;
+
+  /// No description provided for @personalMissionsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} personal missions just for you'**
+  String personalMissionsSubtitle(int count);
+
+  /// No description provided for @sharedMissionsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} shared missions — complete each once as a family'**
+  String sharedMissionsSubtitle(int count);
+
+  /// No description provided for @recentlyCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Recently Completed'**
+  String get recentlyCompleted;
+
+  /// No description provided for @doMoreTogether.
+  ///
+  /// In en, this message translates to:
+  /// **'Do More Together'**
+  String get doMoreTogether;
+
+  /// No description provided for @missionsHeaderDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} active missions, AI-verified proof, fair rewards, and new challenges as you progress.'**
+  String missionsHeaderDescription(int count);
+
+  /// No description provided for @missionsCompletedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 completed} other{{count} completed}}'**
+  String missionsCompletedCount(int count);
+
+  /// No description provided for @missionTokensEarnedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 mission token earned} other{{count} mission tokens earned}}'**
+  String missionTokensEarnedCount(int count);
+
+  /// No description provided for @aiProofRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'AI proof required'**
+  String get aiProofRequired;
+
+  /// No description provided for @personalLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal'**
+  String get personalLabel;
+
+  /// No description provided for @missionCategoryOutdoor.
+  ///
+  /// In en, this message translates to:
+  /// **'Outdoor'**
+  String get missionCategoryOutdoor;
+
+  /// No description provided for @missionCategoryTogetherTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Together Time'**
+  String get missionCategoryTogetherTime;
+
+  /// No description provided for @missionCategoryMemories.
+  ///
+  /// In en, this message translates to:
+  /// **'Memories'**
+  String get missionCategoryMemories;
+
+  /// No description provided for @missionCategoryKindness.
+  ///
+  /// In en, this message translates to:
+  /// **'Kindness'**
+  String get missionCategoryKindness;
+
+  /// No description provided for @missionCategoryConnection.
+  ///
+  /// In en, this message translates to:
+  /// **'Connection'**
+  String get missionCategoryConnection;
+
+  /// No description provided for @missionCategoryFun.
+  ///
+  /// In en, this message translates to:
+  /// **'Fun'**
+  String get missionCategoryFun;
+
+  /// No description provided for @missionCategoryTeamwork.
+  ///
+  /// In en, this message translates to:
+  /// **'Teamwork'**
+  String get missionCategoryTeamwork;
+
+  /// No description provided for @missionTokenReward.
+  ///
+  /// In en, this message translates to:
+  /// **'+{count} tokens'**
+  String missionTokenReward(int count);
+
+  /// No description provided for @aiProofFamilyReward.
+  ///
+  /// In en, this message translates to:
+  /// **'AI proof • reward for each participant'**
+  String get aiProofFamilyReward;
+
+  /// No description provided for @aiProofPersonalReward.
+  ///
+  /// In en, this message translates to:
+  /// **'AI proof • reward for you'**
+  String get aiProofPersonalReward;
+
+  /// No description provided for @completedOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed {date}'**
+  String completedOn(String date);
+
+  /// No description provided for @familyMissionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Family Mission'**
+  String get familyMissionLabel;
+
+  /// No description provided for @personalMissionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal Mission'**
+  String get personalMissionLabel;
+
+  /// No description provided for @familyMissionDetailsReward.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose who participated. The mission can be claimed once by the family, and each participant earns {tokens} tokens.'**
+  String familyMissionDetailsReward(int tokens);
+
+  /// No description provided for @personalMissionDetailsReward.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete this yourself and earn {tokens} tokens.'**
+  String personalMissionDetailsReward(int tokens);
+
+  /// No description provided for @proofGuidance.
+  ///
+  /// In en, this message translates to:
+  /// **'Proof guidance'**
+  String get proofGuidance;
+
+  /// No description provided for @cooldown.
+  ///
+  /// In en, this message translates to:
+  /// **'Cooldown'**
+  String get cooldown;
+
+  /// No description provided for @missionCooldownDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'After completion, this mission cannot return for {count} days.'**
+  String missionCooldownDescription(int count);
+
+  /// No description provided for @submitProof.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit Proof'**
+  String get submitProof;
+
+  /// No description provided for @notYet.
+  ///
+  /// In en, this message translates to:
+  /// **'Not Yet'**
+  String get notYet;
+
+  /// No description provided for @missionPersonalAppreciationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Show Some Appreciation'**
+  String get missionPersonalAppreciationTitle;
+
+  /// No description provided for @missionPersonalAppreciationDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Tell one family member something specific that you genuinely appreciate about them.'**
+  String get missionPersonalAppreciationDescription;
+
+  /// No description provided for @missionPersonalAppreciationProofHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit a relevant photo or screenshot and briefly explain what you said or did.'**
+  String get missionPersonalAppreciationProofHint;
+
+  /// No description provided for @missionPersonalHelpTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Help Without Being Asked'**
+  String get missionPersonalHelpTitle;
+
+  /// No description provided for @missionPersonalHelpDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Do one genuinely helpful thing for a family member before they ask you.'**
+  String get missionPersonalHelpDescription;
+
+  /// No description provided for @missionPersonalHelpProofHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit a relevant or before-and-after photo and explain what you helped with.'**
+  String get missionPersonalHelpProofHint;
+
+  /// No description provided for @missionPersonalCallRelativeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Call Someone You Love'**
+  String get missionPersonalCallRelativeTitle;
+
+  /// No description provided for @missionPersonalCallRelativeDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Call or video chat with a relative you have not spoken to recently.'**
+  String get missionPersonalCallRelativeDescription;
+
+  /// No description provided for @missionPersonalCallRelativeProofHint.
+  ///
+  /// In en, this message translates to:
+  /// **'A call screenshot is ideal. Avoid exposing private phone numbers when possible.'**
+  String get missionPersonalCallRelativeProofHint;
+
+  /// No description provided for @missionPersonalFamilyStoryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Discover a Family Story'**
+  String get missionPersonalFamilyStoryTitle;
+
+  /// No description provided for @missionPersonalFamilyStoryDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask a family member to tell you a funny, meaningful, or memorable story from their past.'**
+  String get missionPersonalFamilyStoryDescription;
+
+  /// No description provided for @missionPersonalFamilyStoryProofHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit a relevant photo and briefly explain what story you learned.'**
+  String get missionPersonalFamilyStoryProofHint;
+
+  /// No description provided for @missionPersonalMakeDrinkTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Make Something for Someone'**
+  String get missionPersonalMakeDrinkTitle;
+
+  /// No description provided for @missionPersonalMakeDrinkDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Prepare a drink, snack, or small treat for a family member.'**
+  String get missionPersonalMakeDrinkDescription;
+
+  /// No description provided for @missionPersonalMakeDrinkProofHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit a photo of what you prepared.'**
+  String get missionPersonalMakeDrinkProofHint;
+
+  /// No description provided for @missionPersonalMemoryQuestionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask About an Old Memory'**
+  String get missionPersonalMemoryQuestionTitle;
+
+  /// No description provided for @missionPersonalMemoryQuestionDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask an older family member about a memorable moment from their childhood.'**
+  String get missionPersonalMemoryQuestionDescription;
+
+  /// No description provided for @missionPersonalMemoryQuestionProofHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit a relevant photo and use the explanation box to briefly describe what you learned.'**
+  String get missionPersonalMemoryQuestionProofHint;
+
+  /// No description provided for @missionPersonalSmallCleanupTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Fix One Messy Spot'**
+  String get missionPersonalSmallCleanupTitle;
+
+  /// No description provided for @missionPersonalSmallCleanupDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose one small messy area at home and organize it properly.'**
+  String get missionPersonalSmallCleanupDescription;
+
+  /// No description provided for @missionPersonalSmallCleanupProofHint.
+  ///
+  /// In en, this message translates to:
+  /// **'A before-and-after photo is the strongest proof.'**
+  String get missionPersonalSmallCleanupProofHint;
+
+  /// No description provided for @missionPersonalKindMessageTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Send a Kind Message'**
+  String get missionPersonalKindMessageTitle;
+
+  /// No description provided for @missionPersonalKindMessageDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Send a thoughtful message to a family member just to make their day better.'**
+  String get missionPersonalKindMessageDescription;
+
+  /// No description provided for @missionPersonalKindMessageProofHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit a screenshot with private or sensitive details hidden if necessary.'**
+  String get missionPersonalKindMessageProofHint;
+
+  /// No description provided for @missionPersonalLearnRecipeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Learn a Family Recipe'**
+  String get missionPersonalLearnRecipeTitle;
+
+  /// No description provided for @missionPersonalLearnRecipeDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask a relative how to make a family recipe and learn something about where it came from.'**
+  String get missionPersonalLearnRecipeDescription;
+
+  /// No description provided for @missionPersonalLearnRecipeProofHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit a photo of the recipe, ingredients, preparation, or finished food.'**
+  String get missionPersonalLearnRecipeProofHint;
+
+  /// No description provided for @missionPersonalMemorySaveTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Save a Family Memory'**
+  String get missionPersonalMemorySaveTitle;
+
+  /// No description provided for @missionPersonalMemorySaveDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose one meaningful family photo and add it to your memories with a useful description.'**
+  String get missionPersonalMemorySaveDescription;
+
+  /// No description provided for @missionPersonalMemorySaveProofHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit the family photo or a screenshot showing the memory you saved.'**
+  String get missionPersonalMemorySaveProofHint;
+
+  /// No description provided for @missionPersonalLongHelpTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Take Over a Chore'**
+  String get missionPersonalLongHelpTitle;
+
+  /// No description provided for @missionPersonalLongHelpDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Take over a useful household chore for a family member and complete it properly.'**
+  String get missionPersonalLongHelpDescription;
+
+  /// No description provided for @missionPersonalLongHelpProofHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit a relevant before, during, or after photo.'**
+  String get missionPersonalLongHelpProofHint;
+
+  /// No description provided for @missionPersonalSurpriseTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan a Small Surprise'**
+  String get missionPersonalSurpriseTitle;
+
+  /// No description provided for @missionPersonalSurpriseDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Do something thoughtful and unexpected for someone in your family.'**
+  String get missionPersonalSurpriseDescription;
+
+  /// No description provided for @missionPersonalSurpriseProofHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit reasonable proof and explain what the surprise was.'**
+  String get missionPersonalSurpriseProofHint;
+
+  /// No description provided for @missionFamilyWalkTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Take a Family Walk'**
+  String get missionFamilyWalkTitle;
+
+  /// No description provided for @missionFamilyWalkDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Spend at least 20 minutes walking together and enjoy the time without rushing.'**
+  String get missionFamilyWalkDescription;
+
+  /// No description provided for @missionFamilyWalkProofHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit a photo from the walk showing the activity or location.'**
+  String get missionFamilyWalkProofHint;
+
+  /// No description provided for @missionFamilyMealTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Share a Meal Together'**
+  String get missionFamilyMealTitle;
+
+  /// No description provided for @missionFamilyMealDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Sit together for a proper meal and keep phones away while you eat.'**
+  String get missionFamilyMealDescription;
+
+  /// No description provided for @missionFamilyMealProofHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit a photo showing the meal, table, or family activity.'**
+  String get missionFamilyMealProofHint;
+
+  /// No description provided for @missionFamilyPhotoTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Capture Today'**
+  String get missionFamilyPhotoTitle;
+
+  /// No description provided for @missionFamilyPhotoDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Take a new family photo together and turn an ordinary day into a memory.'**
+  String get missionFamilyPhotoDescription;
+
+  /// No description provided for @missionFamilyPhotoProofHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit the new family photo created for this mission.'**
+  String get missionFamilyPhotoProofHint;
+
+  /// No description provided for @missionFamilyPlayTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Play Together'**
+  String get missionFamilyPlayTitle;
+
+  /// No description provided for @missionFamilyPlayDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Spend at least 30 minutes playing a game together.'**
+  String get missionFamilyPlayDescription;
+
+  /// No description provided for @missionFamilyPlayProofHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit a photo showing the game setup or family activity.'**
+  String get missionFamilyPlayProofHint;
+
+  /// No description provided for @missionFamilyCookTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cook Something Together'**
+  String get missionFamilyCookTitle;
+
+  /// No description provided for @missionFamilyCookDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Prepare a meal, dessert, or snack together instead of leaving all the work to one person.'**
+  String get missionFamilyCookDescription;
+
+  /// No description provided for @missionFamilyCookProofHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit a photo of the preparation or finished food.'**
+  String get missionFamilyCookProofHint;
+
+  /// No description provided for @missionFamilyGameNightTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Family Game Night'**
+  String get missionFamilyGameNightTitle;
+
+  /// No description provided for @missionFamilyGameNightDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Set aside at least 45 minutes for everyone to play games together.'**
+  String get missionFamilyGameNightDescription;
+
+  /// No description provided for @missionFamilyGameNightProofHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit a photo of the game setup or family playing together.'**
+  String get missionFamilyGameNightProofHint;
+
+  /// No description provided for @missionFamilyScreenFreeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'One Screen-Free Hour'**
+  String get missionFamilyScreenFreeTitle;
+
+  /// No description provided for @missionFamilyScreenFreeDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Spend a full hour together without phones, television, tablets, or computers.'**
+  String get missionFamilyScreenFreeDescription;
+
+  /// No description provided for @missionFamilyScreenFreeProofHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit a photo of what your family did during the screen-free time.'**
+  String get missionFamilyScreenFreeProofHint;
+
+  /// No description provided for @missionFamilyCleanupTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Team Cleanup'**
+  String get missionFamilyCleanupTitle;
+
+  /// No description provided for @missionFamilyCleanupDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose one messy area and clean or organize it together from start to finish.'**
+  String get missionFamilyCleanupDescription;
+
+  /// No description provided for @missionFamilyCleanupProofHint.
+  ///
+  /// In en, this message translates to:
+  /// **'A before-and-after photo is ideal.'**
+  String get missionFamilyCleanupProofHint;
+
+  /// No description provided for @missionFamilyOutdoorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Outdoor Family Time'**
+  String get missionFamilyOutdoorTitle;
+
+  /// No description provided for @missionFamilyOutdoorDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Spend at least 45 minutes doing an outdoor activity together.'**
+  String get missionFamilyOutdoorDescription;
+
+  /// No description provided for @missionFamilyOutdoorProofHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit a photo showing your outdoor activity or location.'**
+  String get missionFamilyOutdoorProofHint;
+
+  /// No description provided for @missionFamilyOldPhotosTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Explore Old Family Photos'**
+  String get missionFamilyOldPhotosTitle;
+
+  /// No description provided for @missionFamilyOldPhotosDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Look through older family photos together and talk about the stories behind them.'**
+  String get missionFamilyOldPhotosDescription;
+
+  /// No description provided for @missionFamilyOldPhotosProofHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit a photo showing the album, older photos, or memory activity.'**
+  String get missionFamilyOldPhotosProofHint;
+
+  /// No description provided for @missionFamilyDessertTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Make Dessert Together'**
+  String get missionFamilyDessertTitle;
+
+  /// No description provided for @missionFamilyDessertDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a dessert and make it together from preparation to the final result.'**
+  String get missionFamilyDessertDescription;
+
+  /// No description provided for @missionFamilyDessertProofHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit a preparation or finished-dessert photo.'**
+  String get missionFamilyDessertProofHint;
+
+  /// No description provided for @missionFamilyPicnicTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Have a Family Picnic'**
+  String get missionFamilyPicnicTitle;
+
+  /// No description provided for @missionFamilyPicnicDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Prepare something to eat and enjoy a picnic together away from your normal dining table.'**
+  String get missionFamilyPicnicDescription;
+
+  /// No description provided for @missionFamilyPicnicProofHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit a photo showing the picnic setup, food, or location.'**
+  String get missionFamilyPicnicProofHint;
+
+  /// No description provided for @missionFamilyVisitRelativeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Visit a Relative'**
+  String get missionFamilyVisitRelativeTitle;
+
+  /// No description provided for @missionFamilyVisitRelativeDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Spend meaningful face-to-face time visiting a relative you do not see every day.'**
+  String get missionFamilyVisitRelativeDescription;
+
+  /// No description provided for @missionFamilyVisitRelativeProofHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit respectful evidence from the visit without exposing unnecessary private information.'**
+  String get missionFamilyVisitRelativeProofHint;
+
+  /// No description provided for @missionFamilyRecreatePhotoTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Recreate an Old Family Photo'**
+  String get missionFamilyRecreatePhotoTitle;
+
+  /// No description provided for @missionFamilyRecreatePhotoDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose an older family picture and recreate its pose or scene together.'**
+  String get missionFamilyRecreatePhotoDescription;
+
+  /// No description provided for @missionFamilyRecreatePhotoProofHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit the recreated photo and explain which old photo inspired it.'**
+  String get missionFamilyRecreatePhotoProofHint;
+
+  /// No description provided for @missionFamilyKindnessProjectTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete a Kindness Project'**
+  String get missionFamilyKindnessProjectTitle;
+
+  /// No description provided for @missionFamilyKindnessProjectDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Work together on something genuinely helpful for another person without expecting a reward from them.'**
+  String get missionFamilyKindnessProjectDescription;
+
+  /// No description provided for @missionFamilyKindnessProjectProofHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit safe and respectful proof of what your family made or did.'**
+  String get missionFamilyKindnessProjectProofHint;
 }
 
-class _AppLocalizationsDelegate
-    extends LocalizationsDelegate<AppLocalizations> {
+class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
   const _AppLocalizationsDelegate();
 
   @override
@@ -2113,26 +2979,25 @@ class _AppLocalizationsDelegate
   }
 
   @override
-  bool isSupported(Locale locale) =>
-      <String>['ar', 'en'].contains(locale.languageCode);
+  bool isSupported(Locale locale) => <String>['ar', 'en'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
 }
 
 AppLocalizations lookupAppLocalizations(Locale locale) {
+
+
   // Lookup logic when only language code is specified.
   switch (locale.languageCode) {
-    case 'ar':
-      return AppLocalizationsAr();
-    case 'en':
-      return AppLocalizationsEn();
+    case 'ar': return AppLocalizationsAr();
+    case 'en': return AppLocalizationsEn();
   }
 
   throw FlutterError(
     'AppLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
     'an issue with the localizations generation tool. Please file an issue '
     'on GitHub with a reproducible sample app and the gen-l10n configuration '
-    'that was used.',
+    'that was used.'
   );
 }

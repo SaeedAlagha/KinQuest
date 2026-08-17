@@ -378,5 +378,221 @@
       "count": {"type": "int"}
     }
   },
-  "shareFamilyInviteCode": "شارك هذا الرمز مع أقاربك ليتمكنوا من الانضمام إلى هذه العائلة."
+  "shareFamilyInviteCode": "شارك هذا الرمز مع أقاربك ليتمكنوا من الانضمام إلى هذه العائلة.",
+  "missionsSignInRequired": "يجب تسجيل الدخول لعرض المهام.",
+  "missionsFamilyRequired": "انضم إلى عائلة أو أنشئ واحدة قبل إكمال المهام.",
+  "missionsLoadError": "تعذر تحميل المهام العائلية. يرجى المحاولة مجددًا.",
+  "missionGeneric": "مهمة",
+  "you": "أنت",
+  "whoParticipated": "من شارك؟",
+  "participantSelectionDescription": "اختر أفراد العائلة الذين شاركوا فعلًا. تتطلب المهام العائلية مشاركين اثنين على الأقل.",
+  "continueLabel": "متابعة",
+  "takePhoto": "التقاط صورة",
+  "useCameraAsProof": "استخدم الكاميرا لإثبات الإنجاز",
+  "choosePhotoOrScreenshot": "اختيار صورة أو لقطة شاشة",
+  "chooseExistingImage": "اختر صورة موجودة من جهازك",
+  "missionImageTooLarge": "حجم الصورة كبير جدًا. يرجى اختيار صورة أصغر.",
+  "reviewYourProof": "راجع إثباتك",
+  "participantsLabel": "المشاركون: {names}",
+  "@participantsLabel": {
+    "placeholders": {
+      "names": {"type": "String"}
+    }
+  },
+  "explanationOptional": "شرح (اختياري)",
+  "missionExplanationHint": "أضف معلومات مفيدة قد لا تظهر بوضوح في الصورة.",
+  "verifyProof": "التحقق من الإثبات",
+  "aiCheckingMissionProof": "يتحقق الذكاء الاصطناعي من إثبات المهمة...",
+  "couldNotVerifyMissionProof": "تعذر التحقق من إثبات المهمة. يرجى المحاولة مجددًا.",
+  "needClearerProof": "نحتاج إلى إثبات أوضح",
+  "proofNotVerified": "لم يتم التحقق من الإثبات",
+  "verificationFailureDescription": "{reason}\n\nيمكنك إرسال صورة أخرى أو إضافة شرح أوضح.",
+  "@verificationFailureDescription": {
+    "placeholders": {
+      "reason": {"type": "String"}
+    }
+  },
+  "tryAgain": "حاول مجددًا",
+  "missionAlreadyRewarded": "تم منح مكافأة هذه المهمة بالفعل.",
+  "missionRewardSaveError": "تم التحقق من الإثبات، لكن تعذر حفظ المكافأة. يرجى المحاولة مجددًا.",
+  "familyMissionMinimumParticipants": "تحتاج المهمة العائلية إلى مشاركين اثنين على الأقل.",
+  "missionVerified": "تم التحقق من المهمة!",
+  "familyMissionRewardSuccess": "تم منح {tokens} من الرموز لكل مشارك.\n\n{participants}\n\nتمت إضافة مهمة عائلية مشتركة جديدة.",
+  "@familyMissionRewardSuccess": {
+    "placeholders": {
+      "tokens": {"type": "int"},
+      "participants": {"type": "String"}
+    }
+  },
+  "personalMissionRewardSuccess": "ربحت {tokens} من الرموز.\n\nتمت إضافة مهمة شخصية جديدة.",
+  "@personalMissionRewardSuccess": {
+    "placeholders": {
+      "tokens": {"type": "int"}
+    }
+  },
+  "nice": "رائع!",
+  "difficultyEasy": "سهلة",
+  "difficultyMedium": "متوسطة",
+  "difficultyChallenge": "تحدٍّ",
+  "yourMissions": "مهامك",
+  "personalMissionsSubtitle": "{count} مهام شخصية لك",
+  "@personalMissionsSubtitle": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "sharedMissionsSubtitle": "{count} مهام مشتركة — أكملوا كل مهمة مرة واحدة كعائلة",
+  "@sharedMissionsSubtitle": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "recentlyCompleted": "أُنجزت مؤخرًا",
+  "doMoreTogether": "أنجزوا المزيد معًا",
+  "missionsHeaderDescription": "{count} مهام نشطة بإثبات يتحقق منه الذكاء الاصطناعي ومكافآت عادلة وتحديات جديدة مع تقدمكم.",
+  "@missionsHeaderDescription": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "missionsCompletedCount": "{count, plural, =0{لم تُنجز أي مهمة} =1{مهمة واحدة منجزة} =2{مهمتان منجزتان} few{{count} مهام منجزة} many{{count} مهمة منجزة} other{{count} مهمة منجزة}}",
+  "@missionsCompletedCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "missionTokensEarnedCount": "{count, plural, =0{لم تُكتسب رموز من المهام} =1{رمز مهمة واحد مكتسب} =2{رمزا مهمة مكتسبان} few{{count} رموز مهام مكتسبة} many{{count} رمز مهمة مكتسبًا} other{{count} رمز مهمة مكتسب}}",
+  "@missionTokensEarnedCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "aiProofRequired": "إثبات بالذكاء الاصطناعي مطلوب",
+  "personalLabel": "شخصية",
+  "missionCategoryOutdoor": "في الخارج",
+  "missionCategoryTogetherTime": "وقت معًا",
+  "missionCategoryMemories": "ذكريات",
+  "missionCategoryKindness": "لطف",
+  "missionCategoryConnection": "تواصل",
+  "missionCategoryFun": "مرح",
+  "missionCategoryTeamwork": "عمل جماعي",
+  "missionTokenReward": "+{count} رموز",
+  "@missionTokenReward": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "aiProofFamilyReward": "إثبات بالذكاء الاصطناعي • مكافأة لكل مشارك",
+  "aiProofPersonalReward": "إثبات بالذكاء الاصطناعي • مكافأة لك",
+  "completedOn": "أُنجزت في {date}",
+  "@completedOn": {
+    "placeholders": {
+      "date": {"type": "String"}
+    }
+  },
+  "familyMissionLabel": "مهمة عائلية",
+  "personalMissionLabel": "مهمة شخصية",
+  "familyMissionDetailsReward": "اختر من شارك. يمكن للعائلة الحصول على مكافأة المهمة مرة واحدة، ويحصل كل مشارك على {tokens} من الرموز.",
+  "@familyMissionDetailsReward": {
+    "placeholders": {
+      "tokens": {"type": "int"}
+    }
+  },
+  "personalMissionDetailsReward": "أكمل هذه المهمة بنفسك واربح {tokens} من الرموز.",
+  "@personalMissionDetailsReward": {
+    "placeholders": {
+      "tokens": {"type": "int"}
+    }
+  },
+  "proofGuidance": "إرشادات الإثبات",
+  "cooldown": "فترة الانتظار",
+  "missionCooldownDescription": "بعد إكمالها، لن تعود هذه المهمة لمدة {count} أيام.",
+  "@missionCooldownDescription": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "submitProof": "إرسال الإثبات",
+  "notYet": "ليس الآن",
+  "missionPersonalAppreciationTitle": "أظهر تقديرك",
+  "missionPersonalAppreciationDescription": "أخبر أحد أفراد عائلتك بشيء محدد تقدّره فيه بصدق.",
+  "missionPersonalAppreciationProofHint": "أرسل صورة أو لقطة شاشة ذات صلة واشرح بإيجاز ما قلته أو فعلته.",
+  "missionPersonalHelpTitle": "ساعد من دون أن يُطلب منك",
+  "missionPersonalHelpDescription": "قم بشيء مفيد حقًا لأحد أفراد عائلتك قبل أن يطلبه منك.",
+  "missionPersonalHelpProofHint": "أرسل صورة ذات صلة أو صورة قبل وبعد واشرح ما ساعدت فيه.",
+  "missionPersonalCallRelativeTitle": "اتصل بشخص تحبه",
+  "missionPersonalCallRelativeDescription": "اتصل أو أجرِ مكالمة فيديو مع قريب لم تتحدث معه منذ مدة.",
+  "missionPersonalCallRelativeProofHint": "لقطة شاشة للمكالمة هي الإثبات الأنسب. تجنّب إظهار أرقام الهواتف الخاصة قدر الإمكان.",
+  "missionPersonalFamilyStoryTitle": "اكتشف قصة عائلية",
+  "missionPersonalFamilyStoryDescription": "اطلب من أحد أفراد عائلتك أن يروي لك قصة طريفة أو مؤثرة أو لا تُنسى من ماضيه.",
+  "missionPersonalFamilyStoryProofHint": "أرسل صورة ذات صلة واشرح بإيجاز القصة التي تعلّمتها.",
+  "missionPersonalMakeDrinkTitle": "حضّر شيئًا لشخص تحبه",
+  "missionPersonalMakeDrinkDescription": "حضّر مشروبًا أو وجبة خفيفة أو حلوى صغيرة لأحد أفراد عائلتك.",
+  "missionPersonalMakeDrinkProofHint": "أرسل صورة لما حضّرته.",
+  "missionPersonalMemoryQuestionTitle": "اسأل عن ذكرى قديمة",
+  "missionPersonalMemoryQuestionDescription": "اسأل فردًا أكبر سنًا في العائلة عن لحظة مميزة من طفولته.",
+  "missionPersonalMemoryQuestionProofHint": "أرسل صورة ذات صلة واستخدم خانة الشرح لوصف ما تعلّمته بإيجاز.",
+  "missionPersonalSmallCleanupTitle": "رتّب مكانًا فوضويًا",
+  "missionPersonalSmallCleanupDescription": "اختر مساحة صغيرة غير مرتبة في المنزل ونظّمها جيدًا.",
+  "missionPersonalSmallCleanupProofHint": "صورة قبل الترتيب وبعده هي أقوى إثبات.",
+  "missionPersonalKindMessageTitle": "أرسل رسالة لطيفة",
+  "missionPersonalKindMessageDescription": "أرسل رسالة محبة إلى أحد أفراد عائلتك لتجعل يومه أجمل.",
+  "missionPersonalKindMessageProofHint": "أرسل لقطة شاشة بعد إخفاء التفاصيل الخاصة أو الحساسة عند الحاجة.",
+  "missionPersonalLearnRecipeTitle": "تعلّم وصفة عائلية",
+  "missionPersonalLearnRecipeDescription": "اسأل قريبًا عن طريقة إعداد وصفة عائلية وتعرّف إلى قصتها وأصلها.",
+  "missionPersonalLearnRecipeProofHint": "أرسل صورة للوصفة أو المكونات أو خطوات التحضير أو الطبق النهائي.",
+  "missionPersonalMemorySaveTitle": "احفظ ذكرى عائلية",
+  "missionPersonalMemorySaveDescription": "اختر صورة عائلية مميزة وأضفها إلى ذكرياتك مع وصف مفيد.",
+  "missionPersonalMemorySaveProofHint": "أرسل الصورة العائلية أو لقطة شاشة توضح الذكرى التي حفظتها.",
+  "missionPersonalLongHelpTitle": "تولَّ مهمة منزلية",
+  "missionPersonalLongHelpDescription": "تولَّ مهمة منزلية مفيدة بدلًا من أحد أفراد عائلتك وأكملها جيدًا.",
+  "missionPersonalLongHelpProofHint": "أرسل صورة ذات صلة قبل المهمة أو أثناءها أو بعدها.",
+  "missionPersonalSurpriseTitle": "خطط لمفاجأة صغيرة",
+  "missionPersonalSurpriseDescription": "افعل شيئًا لطيفًا وغير متوقع لشخص في عائلتك.",
+  "missionPersonalSurpriseProofHint": "أرسل إثباتًا مناسبًا واشرح ماهية المفاجأة.",
+  "missionFamilyWalkTitle": "اخرجوا في نزهة عائلية",
+  "missionFamilyWalkDescription": "امشوا معًا لمدة ٢٠ دقيقة على الأقل واستمتعوا بالوقت من دون استعجال.",
+  "missionFamilyWalkProofHint": "أرسل صورة من النزهة توضح النشاط أو المكان.",
+  "missionFamilyMealTitle": "تناولوا وجبة معًا",
+  "missionFamilyMealDescription": "اجلسوا معًا لتناول وجبة كاملة وأبعدوا الهواتف أثناء الطعام.",
+  "missionFamilyMealProofHint": "أرسل صورة توضح الوجبة أو المائدة أو النشاط العائلي.",
+  "missionFamilyPhotoTitle": "التقطوا صورة لليوم",
+  "missionFamilyPhotoDescription": "التقطوا صورة عائلية جديدة معًا وحوّلوا يومًا عاديًا إلى ذكرى.",
+  "missionFamilyPhotoProofHint": "أرسل الصورة العائلية الجديدة التي التقطتموها لهذه المهمة.",
+  "missionFamilyPlayTitle": "العبوا معًا",
+  "missionFamilyPlayDescription": "اقضوا ٣٠ دقيقة على الأقل في لعب لعبة معًا.",
+  "missionFamilyPlayProofHint": "أرسل صورة توضح تجهيز اللعبة أو النشاط العائلي.",
+  "missionFamilyCookTitle": "اطبخوا شيئًا معًا",
+  "missionFamilyCookDescription": "حضّروا وجبة أو حلوى أو وجبة خفيفة معًا بدلًا من ترك العمل كله لشخص واحد.",
+  "missionFamilyCookProofHint": "أرسل صورة من التحضير أو للطعام بعد اكتماله.",
+  "missionFamilyGameNightTitle": "ليلة ألعاب عائلية",
+  "missionFamilyGameNightDescription": "خصصوا ٤٥ دقيقة على الأقل ليلعب الجميع معًا.",
+  "missionFamilyGameNightProofHint": "أرسل صورة لتجهيز اللعبة أو للعائلة وهي تلعب معًا.",
+  "missionFamilyScreenFreeTitle": "ساعة بلا شاشات",
+  "missionFamilyScreenFreeDescription": "اقضوا ساعة كاملة معًا من دون هواتف أو تلفاز أو أجهزة لوحية أو حواسيب.",
+  "missionFamilyScreenFreeProofHint": "أرسل صورة لما فعلته عائلتك خلال الوقت الخالي من الشاشات.",
+  "missionFamilyCleanupTitle": "نظافة جماعية",
+  "missionFamilyCleanupDescription": "اختاروا مساحة غير مرتبة ونظفوها أو نظموها معًا من البداية إلى النهاية.",
+  "missionFamilyCleanupProofHint": "صورة قبل التنظيف وبعده هي الإثبات الأنسب.",
+  "missionFamilyOutdoorTitle": "وقت عائلي في الخارج",
+  "missionFamilyOutdoorDescription": "اقضوا ٤٥ دقيقة على الأقل في نشاط خارجي معًا.",
+  "missionFamilyOutdoorProofHint": "أرسل صورة توضح نشاطكم الخارجي أو مكانه.",
+  "missionFamilyOldPhotosTitle": "استكشفوا صور العائلة القديمة",
+  "missionFamilyOldPhotosDescription": "تصفحوا صور العائلة القديمة معًا وتحدثوا عن القصص التي تحملها.",
+  "missionFamilyOldPhotosProofHint": "أرسل صورة توضح الألبوم أو الصور القديمة أو نشاط استعادة الذكريات.",
+  "missionFamilyDessertTitle": "حضّروا حلوى معًا",
+  "missionFamilyDessertDescription": "اختاروا حلوى وحضّروها معًا من البداية حتى النتيجة النهائية.",
+  "missionFamilyDessertProofHint": "أرسل صورة من التحضير أو للحلوى بعد اكتمالها.",
+  "missionFamilyPicnicTitle": "أقيموا نزهة عائلية",
+  "missionFamilyPicnicDescription": "حضّروا طعامًا واستمتعوا بنزهة معًا بعيدًا عن مائدة الطعام المعتادة.",
+  "missionFamilyPicnicProofHint": "أرسل صورة توضح تجهيز النزهة أو الطعام أو المكان.",
+  "missionFamilyVisitRelativeTitle": "زوروا أحد الأقارب",
+  "missionFamilyVisitRelativeDescription": "اقضوا وقتًا هادفًا وجهًا لوجه في زيارة قريب لا ترونه كل يوم.",
+  "missionFamilyVisitRelativeProofHint": "أرسل إثباتًا محترمًا من الزيارة من دون إظهار معلومات خاصة لا داعي لها.",
+  "missionFamilyRecreatePhotoTitle": "أعيدوا تمثيل صورة عائلية قديمة",
+  "missionFamilyRecreatePhotoDescription": "اختاروا صورة عائلية قديمة وأعيدوا تمثيل وضعيتها أو مشهدها معًا.",
+  "missionFamilyRecreatePhotoProofHint": "أرسل الصورة الجديدة واشرح أي صورة قديمة ألهمتها.",
+  "missionFamilyKindnessProjectTitle": "أنجزوا مشروع عطاء",
+  "missionFamilyKindnessProjectDescription": "تعاونوا على عمل مفيد حقًا لشخص آخر من دون انتظار مكافأة منه.",
+  "missionFamilyKindnessProjectProofHint": "أرسل إثباتًا آمنًا ومحترمًا لما صنعته عائلتك أو فعلته."
 }
