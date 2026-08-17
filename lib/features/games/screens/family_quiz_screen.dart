@@ -331,18 +331,18 @@ class _FamilyQuizScreenState extends State<FamilyQuizScreen> {
   }
 
   Future<void> _loadFamilyMembers() async {
-    final user = FirebaseAuth.instance.currentUser;
-
-    if (user == null) {
-      setState(() {
-        _isLoadingFamily = false;
-        _familyError = 'You must be logged in to play.';
-      });
-
-      return;
-    }
-
     try {
+      final user = FirebaseAuth.instance.currentUser;
+
+      if (user == null) {
+        setState(() {
+          _isLoadingFamily = false;
+          _familyError = 'You must be logged in to play.';
+        });
+
+        return;
+      }
+
       final userDocument = await FirebaseFirestore.instance
           .collection('users')
           .doc(user.uid)
