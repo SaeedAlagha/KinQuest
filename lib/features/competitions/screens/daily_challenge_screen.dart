@@ -3,10 +3,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_theme.dart';
-import '../../games/screens/family_missions_screen.dart';
-import '../../games/screens/family_quiz_screen.dart';
-import '../../games/screens/memory_challenge_screen.dart';
-import '../../games/screens/games_screen.dart';
+import '../config/competition_rewards.dart';
+import '../config/official_competition_games.dart';
+import '../models/competition_game_result.dart';
+import '../models/competition_player_result.dart';
+import '../models/game_play_mode.dart';
 
 class DailyChallengeScreen extends StatefulWidget {
   const DailyChallengeScreen({super.key, this.developerPreview = false});
@@ -19,22 +20,30 @@ class DailyChallengeScreen extends StatefulWidget {
 
 class _DailyChallengeScreenState extends State<DailyChallengeScreen> {
   bool _isLoading = true;
-  bool _isClaiming = false;
+  bool _isSettling = false;
   bool _completedToday = false;
-  bool _openedChallenge = false;
+  bool _tieDetected = false;
 
   String? _familyId;
+  String? _winnerName;
   String? _errorMessage;
 
+  CompetitionGameResult? _latestResult;
+
+  DateTime get _today => DateTime.now();
+
   String get _dateKey {
-    final now = DateTime.now();
+    final now = _today;
 
     return '${now.year}-'
         '${now.month.toString().padLeft(2, '0')}-'
         '${now.day.toString().padLeft(2, '0')}';
   }
 
-  late final _DailyChallenge _challenge = _challengeForToday();
+  String get _competitionId => 'daily_$_dateKey';
+
+  late final OfficialCompetitionGame _game =
+      OfficialCompetitionGames.dailyGameFor(_today);
 
   @override
   void initState() {
@@ -42,68 +51,30 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> {
 
     if (widget.developerPreview) {
       _isLoading = false;
-    } else {
-      _loadStatus();
+      return;
     }
-  }
 
-  _DailyChallenge _challengeForToday() {
-    final now = DateTime.now();
-
-    final dayNumber =
-        DateTime(now.year, now.month, now.day).millisecondsSinceEpoch ~/
-        Duration.millisecondsPerDay;
-
-    final challenges = [
-      const _DailyChallenge(
-        type: _DailyChallengeType.familyQuiz,
-        icon: Icons.quiz_rounded,
-        title: 'Family Quiz Day',
-        description:
-            'See how well your family knows one another in today\'s Family Quiz.',
-      ),
-      const _DailyChallenge(
-        type: _DailyChallengeType.memoryChallenge,
-        icon: Icons.photo_library_rounded,
-        title: 'Memory Challenge Day',
-        description:
-            'Look back at your family moments and test how well you remember them.',
-      ),
-      const _DailyChallenge(
-        type: _DailyChallengeType.familyMissions,
-        icon: Icons.groups_rounded,
-        title: 'Family Mission Day',
-        description:
-            'Complete one meaningful activity together from Family Missions.',
-      ),
-      const _DailyChallenge(
-        type: _DailyChallengeType.partyGames,
-        icon: Icons.celebration_rounded,
-        title: 'Party Game Day',
-        description:
-            'Pick a quick family game and share a few laughs together.',
-      ),
-    ];
-
-    return challenges[dayNumber % challenges.length];
+    _loadStatus();
   }
 
   Future<void> _loadStatus() async {
     final user = FirebaseAuth.instance.currentUser;
 
     if (user == null) {
+      if (!mounted) return;
+
       setState(() {
         _isLoading = false;
         _errorMessage = 'You must be signed in to use Daily Challenge.';
       });
+
       return;
     }
 
     try {
-      final userDoc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .get();
+      final firestore = FirebaseFirestore.instance;
+
+      final userDoc = await firestore.collection('users').doc(user.uid).get();
 
       final familyId = userDoc.data()?['familyId'] as String?;
 
@@ -119,20 +90,21 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> {
         return;
       }
 
-      final completionId = '${_dateKey}_${user.uid}';
-
-      final completionDoc = await FirebaseFirestore.instance
+      final competitionDoc = await firestore
           .collection('families')
           .doc(familyId)
-          .collection('dailyChallengeCompletions')
-          .doc(completionId)
+          .collection('officialCompetitions')
+          .doc(_competitionId)
           .get();
+
+      final data = competitionDoc.data();
 
       if (!mounted) return;
 
       setState(() {
         _familyId = familyId;
-        _completedToday = completionDoc.exists;
+        _completedToday = competitionDoc.exists && data?['completed'] == true;
+        _winnerName = data?['winnerName'] as String?;
         _isLoading = false;
       });
     } catch (_) {
@@ -140,140 +112,217 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> {
 
       setState(() {
         _isLoading = false;
-        _errorMessage = 'Could not load today\'s challenge. Please try again.';
+        _errorMessage =
+            'Could not load today\'s Daily Challenge. Please try again.';
       });
     }
   }
 
-  Future<void> _openChallenge() async {
-    Widget screen;
-
-    switch (_challenge.type) {
-      case _DailyChallengeType.familyQuiz:
-        screen = const FamilyQuizScreen();
-
-      case _DailyChallengeType.memoryChallenge:
-        screen = const MemoryChallengeScreen();
-
-      case _DailyChallengeType.familyMissions:
-        screen = const FamilyMissionsScreen();
-
-      case _DailyChallengeType.partyGames:
-        screen = const PartyGamesScreen();
+  Future<void> _playChallenge() async {
+    if (_completedToday || _isSettling) {
+      return;
     }
 
-    await Navigator.push(context, MaterialPageRoute(builder: (_) => screen));
+    final result = await Navigator.of(context).push<CompetitionGameResult>(
+      MaterialPageRoute(
+        builder: (_) => _game.build(GamePlayMode.dailyChallenge),
+      ),
+    );
 
-    if (!mounted) return;
+    if (!mounted || result == null) {
+      return;
+    }
 
-    setState(() {
-      _openedChallenge = true;
-    });
+    if (!result.hasPlayers) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('The game finished without a valid player result.'),
+        ),
+      );
+
+      return;
+    }
+
+    if (result.gameId != _game.gameId) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'The returned game result does not match today\'s challenge.',
+          ),
+        ),
+      );
+
+      return;
+    }
+
+    if (result.isTie) {
+      setState(() {
+        _latestResult = result;
+        _tieDetected = true;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'The top score is tied. No Daily reward has been granted yet.',
+          ),
+        ),
+      );
+
+      return;
+    }
+
+    await _settleResult(result);
   }
 
-  Future<void> _claimCompletion() async {
-    final user = FirebaseAuth.instance.currentUser;
+  Future<void> _settleResult(CompetitionGameResult result) async {
+    if (_completedToday || _isSettling || result.isTie) {
+      return;
+    }
+
     final familyId = _familyId;
 
-    if (user == null || familyId == null) {
+    if (!widget.developerPreview && (familyId == null || familyId.isEmpty)) {
       return;
     }
 
-    if (_completedToday || _isClaiming) {
+    final rankedPlayers = List<CompetitionPlayerResult>.from(result.players);
+
+    rankedPlayers.sort((a, b) => b.gameScore.compareTo(a.gameScore));
+
+    if (rankedPlayers.isEmpty) {
       return;
     }
+
+    final winner = rankedPlayers.first;
+
+    final secondHighestScore = rankedPlayers.length > 1
+        ? rankedPlayers[1].gameScore
+        : null;
+
+    final runnersUp = secondHighestScore == null
+        ? <CompetitionPlayerResult>[]
+        : rankedPlayers
+              .skip(1)
+              .where((player) => player.gameScore == secondHighestScore)
+              .toList();
 
     setState(() {
-      _isClaiming = true;
+      _isSettling = true;
+      _tieDetected = false;
     });
+
+    if (widget.developerPreview) {
+      if (!mounted) return;
+
+      setState(() {
+        _latestResult = result;
+        _winnerName = winner.name;
+        _completedToday = true;
+        _isSettling = false;
+      });
+
+      return;
+    }
 
     try {
       final firestore = FirebaseFirestore.instance;
 
-      final completionId = '${_dateKey}_${user.uid}';
-
-      final completionRef = firestore
+      final competitionRef = firestore
           .collection('families')
-          .doc(familyId)
-          .collection('dailyChallengeCompletions')
-          .doc(completionId);
+          .doc(familyId!)
+          .collection('officialCompetitions')
+          .doc(_competitionId);
 
-      final userRef = firestore.collection('users').doc(user.uid);
+      final settled = await firestore.runTransaction<bool>((transaction) async {
+        final existingCompetition = await transaction.get(competitionRef);
 
-      final completed = await firestore.runTransaction<bool>((
-        transaction,
-      ) async {
-        final completionDoc = await transaction.get(completionRef);
-        final userDoc = await transaction.get(userRef);
-
-        if (completionDoc.exists) {
+        if (existingCompetition.exists) {
           return false;
         }
 
-        final userData = userDoc.data();
+        transaction.set(competitionRef, {
+          'id': _competitionId,
+          'familyId': familyId,
+          'type': 'daily',
+          'periodKey': _dateKey,
+          'gameId': result.gameId,
+          'gameName': result.gameName,
+          'players': rankedPlayers.map((player) => player.toMap()).toList(),
+          'winnerId': winner.userId,
+          'winnerName': winner.name,
+          'completed': true,
+          'rewardGranted': true,
+          'tokenReward': CompetitionRewards.dailyWinnerTokens,
+          'rankingPointReward': CompetitionRewards.dailyWinnerRankingPoints,
+          'completedAt': FieldValue.serverTimestamp(),
+          'createdAt': FieldValue.serverTimestamp(),
+        });
 
-        final currentStreak = (userData?['currentStreak'] ?? 0) as int;
+        for (final player in rankedPlayers) {
+          final userRef = firestore.collection('users').doc(player.userId);
 
-        final lastPlayedTimestamp = userData?['lastPlayedAt'] as Timestamp?;
+          final isWinner = player.userId == winner.userId;
 
-        final now = DateTime.now();
-        final today = DateTime(now.year, now.month, now.day);
-
-        var newStreak = 1;
-
-        if (lastPlayedTimestamp != null) {
-          final lastPlayed = lastPlayedTimestamp.toDate();
-
-          final lastPlayedDay = DateTime(
-            lastPlayed.year,
-            lastPlayed.month,
-            lastPlayed.day,
+          final isRunnerUp = runnersUp.any(
+            (runnerUp) => runnerUp.userId == player.userId,
           );
 
-          final difference = today.difference(lastPlayedDay).inDays;
-
-          if (difference == 0) {
-            newStreak = currentStreak == 0 ? 1 : currentStreak;
-          } else if (difference == 1) {
-            newStreak = currentStreak + 1;
-          }
+          transaction.set(userRef, {
+            'gamesPlayed': FieldValue.increment(1),
+            'updatedAt': FieldValue.serverTimestamp(),
+            if (isWinner) ...{
+              'tokens': FieldValue.increment(
+                CompetitionRewards.dailyWinnerTokens,
+              ),
+              'rankingPoints': FieldValue.increment(
+                CompetitionRewards.dailyWinnerRankingPoints,
+              ),
+              'officialWins': FieldValue.increment(1),
+              'dailyWins': FieldValue.increment(1),
+              'dailyChallengesCompleted': FieldValue.increment(1),
+            } else if (isRunnerUp) ...{
+              'rankingPoints': FieldValue.increment(
+                CompetitionRewards.dailyRunnerUpRankingPoints,
+              ),
+            },
+          }, SetOptions(merge: true));
         }
-
-        transaction.set(completionRef, {
-          'userId': user.uid,
-          'familyId': familyId,
-          'dateKey': _dateKey,
-          'challengeTitle': _challenge.title,
-          'challengeType': _challenge.type.name,
-          'tokenReward': 10,
-          'completedAt': FieldValue.serverTimestamp(),
-        });
-
-        transaction.update(userRef, {
-          'tokens': FieldValue.increment(10),
-          'gamesPlayed': FieldValue.increment(1),
-          'currentStreak': newStreak,
-          'lastPlayedAt': FieldValue.serverTimestamp(),
-          'dailyChallengesCompleted': FieldValue.increment(1),
-          'updatedAt': FieldValue.serverTimestamp(),
-        });
 
         return true;
       });
 
       if (!mounted) return;
 
+      if (!settled) {
+        await _loadStatus();
+
+        if (!mounted) return;
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Today\'s Daily Challenge has already been completed.',
+            ),
+          ),
+        );
+
+        return;
+      }
+
       setState(() {
-        _completedToday = completed || _completedToday;
-        _isClaiming = false;
+        _latestResult = result;
+        _winnerName = winner.name;
+        _completedToday = true;
+        _isSettling = false;
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            completed
-                ? 'Daily Challenge complete! You earned 10 tokens.'
-                : 'You already claimed today\'s Daily Challenge.',
+            '${winner.name} won today\'s Daily Challenge! '
+            '+${CompetitionRewards.dailyWinnerTokens} Tokens and '
+            '+${CompetitionRewards.dailyWinnerRankingPoints} Ranking Points.',
           ),
         ),
       );
@@ -281,13 +330,13 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> {
       if (!mounted) return;
 
       setState(() {
-        _isClaiming = false;
+        _isSettling = false;
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
-            'Could not complete the Daily Challenge. Please try again.',
+            'Could not save today\'s official result. Please try again.',
           ),
         ),
       );
@@ -331,7 +380,8 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> {
                 child: Column(
                   children: [
                     const Text(
-                      'TODAY\'S FAMILY CHALLENGE',
+                      'TODAY\'S OFFICIAL CHALLENGE',
+                      textAlign: TextAlign.center,
                       style: TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.w800,
@@ -346,15 +396,11 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> {
                         color: Colors.white.withValues(alpha: 0.16),
                         borderRadius: BorderRadius.circular(26),
                       ),
-                      child: Icon(
-                        _challenge.icon,
-                        size: 42,
-                        color: Colors.white,
-                      ),
+                      child: Icon(_game.icon, size: 42, color: Colors.white),
                     ),
                     const SizedBox(height: 20),
                     Text(
-                      _challenge.title,
+                      _game.name,
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.headlineMedium
                           ?.copyWith(
@@ -364,7 +410,7 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> {
                     ),
                     const SizedBox(height: 10),
                     Text(
-                      _challenge.description,
+                      _game.description,
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                         color: Colors.white.withValues(alpha: 0.88),
@@ -377,27 +423,48 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> {
               Card(
                 child: Padding(
                   padding: const EdgeInsets.all(20),
-                  child: Row(
+                  child: Column(
                     children: [
-                      const Icon(
-                        Icons.stars_rounded,
-                        color: AppTheme.goldColor,
-                        size: 34,
-                      ),
-                      const SizedBox(width: 14),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Daily reward',
-                              style: Theme.of(context).textTheme.titleMedium
-                                  ?.copyWith(fontWeight: FontWeight.w800),
+                      Row(
+                        children: [
+                          const Icon(
+                            Icons.stars_rounded,
+                            color: AppTheme.goldColor,
+                            size: 34,
+                          ),
+                          const SizedBox(width: 14),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Official Daily rewards',
+                                  style: Theme.of(context).textTheme.titleMedium
+                                      ?.copyWith(fontWeight: FontWeight.w800),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  'Winner: '
+                                  '+${CompetitionRewards.dailyWinnerTokens} Tokens '
+                                  '+ ${CompetitionRewards.dailyWinnerRankingPoints} Ranking Points',
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  'Runner-up: '
+                                  '+${CompetitionRewards.dailyRunnerUpRankingPoints} Ranking Points',
+                                ),
+                              ],
                             ),
-                            const SizedBox(height: 3),
-                            const Text('+10 tokens and daily streak progress'),
-                          ],
-                        ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 14),
+                      const Divider(),
+                      const SizedBox(height: 10),
+                      const Text(
+                        'One official result per family per day. '
+                        'Quick Play results do not affect these rewards.',
+                        textAlign: TextAlign.center,
                       ),
                     ],
                   ),
@@ -405,58 +472,28 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> {
               ),
               const SizedBox(height: 24),
               if (_completedToday)
-                Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: AppTheme.tealColor.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: const Row(
-                    children: [
-                      Icon(
-                        Icons.check_circle_rounded,
-                        color: AppTheme.tealColor,
-                        size: 32,
-                      ),
-                      SizedBox(width: 14),
-                      Expanded(
-                        child: Text(
-                          'You completed today\'s challenge. Come back tomorrow for a new one!',
-                        ),
-                      ),
-                    ],
-                  ),
-                )
-              else ...[
+                _buildCompletedCard()
+              else if (_tieDetected)
+                _buildTieCard()
+              else
                 FilledButton.icon(
-                  onPressed: _openChallenge,
-                  icon: const Icon(Icons.play_arrow_rounded),
-                  label: const Text('Play Today\'s Challenge'),
-                ),
-                const SizedBox(height: 12),
-                OutlinedButton.icon(
-                  onPressed: _openedChallenge || widget.developerPreview
-                      ? _claimCompletion
-                      : null,
-                  icon: _isClaiming
+                  onPressed: _isSettling ? null : _playChallenge,
+                  icon: _isSettling
                       ? const SizedBox(
                           width: 18,
                           height: 18,
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
-                      : const Icon(Icons.check_rounded),
+                      : const Icon(Icons.play_arrow_rounded),
                   label: Text(
-                    _isClaiming ? 'Saving completion...' : 'I Completed It',
+                    _isSettling
+                        ? 'Saving official result...'
+                        : 'Start Today\'s Challenge',
                   ),
                 ),
-                const SizedBox(height: 10),
-                Text(
-                  'Open today\'s challenge before claiming the reward.',
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppTheme.secondaryTextColor,
-                  ),
-                ),
+              if (_latestResult != null) ...[
+                const SizedBox(height: 24),
+                _buildLatestResult(),
               ],
             ],
           ),
@@ -464,25 +501,110 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> {
       ),
     );
   }
-}
 
-enum _DailyChallengeType {
-  familyQuiz,
-  memoryChallenge,
-  familyMissions,
-  partyGames,
-}
+  Widget _buildCompletedCard() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: AppTheme.tealColor.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Icon(
+            Icons.check_circle_rounded,
+            color: AppTheme.tealColor,
+            size: 32,
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Text(
+              _winnerName == null
+                  ? 'Your family completed today\'s official challenge.'
+                  : '${_winnerName!} won today\'s official challenge. '
+                        'Come back tomorrow for a new game.',
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
-class _DailyChallenge {
-  const _DailyChallenge({
-    required this.type,
-    required this.icon,
-    required this.title,
-    required this.description,
-  });
+  Widget _buildTieCard() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: AppTheme.goldColor.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Column(
+        children: [
+          const Icon(
+            Icons.balance_rounded,
+            size: 36,
+            color: AppTheme.goldColor,
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'Tie detected',
+            style: Theme.of(
+              context,
+            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            'No Tokens or Ranking Points have been awarded. '
+            'A winner must be decided before today\'s result can be finalized.',
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 16),
+          FilledButton.icon(
+            onPressed: _isSettling ? null : _playChallenge,
+            icon: const Icon(Icons.replay_rounded),
+            label: const Text('Play Again to Break the Tie'),
+          ),
+        ],
+      ),
+    );
+  }
 
-  final _DailyChallengeType type;
-  final IconData icon;
-  final String title;
-  final String description;
+  Widget _buildLatestResult() {
+    final result = _latestResult!;
+
+    final rankedPlayers = List<CompetitionPlayerResult>.from(result.players);
+
+    rankedPlayers.sort((a, b) => b.gameScore.compareTo(a.gameScore));
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              'Latest Result',
+              style: Theme.of(
+                context,
+              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
+            ),
+            const SizedBox(height: 14),
+            ...List.generate(rankedPlayers.length, (index) {
+              final player = rankedPlayers[index];
+
+              return ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: CircleAvatar(child: Text('${index + 1}')),
+                title: Text(player.name),
+                trailing: Text(
+                  '${player.gameScore} pts',
+                  style: const TextStyle(fontWeight: FontWeight.w700),
+                ),
+              );
+            }),
+          ],
+        ),
+      ),
+    );
+  }
 }
