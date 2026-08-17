@@ -5,84 +5,65 @@ import 'package:kinquest/features/games/services/family_quiz_ai_service.dart';
 
 void main() {
   group('FamilyQuizScreen', () {
-    testWidgets('validates the player list before starting', (tester) async {
-      final service = _FakeFamilyQuizAiService(_privateAnswerQuestions);
-      await _pumpQuiz(tester, service);
-
-      await _tapText(tester, 'Start Quiz');
-
-      expect(
-        find.text('Add at least 2 family members to start.'),
-        findsOneWidget,
-      );
-      expect(service.callCount, 0);
-
-      await _addMember(tester, 'Alex');
-      await _addMember(tester, 'Alex');
-
-      expect(find.text('Alex is already in the game.'), findsOneWidget);
-      expect(service.callCount, 0);
-    });
-
-    testWidgets('plays the private-answer flow and calculates real matches', (
+    testWidgets('requires at least two selected family members', (
       tester,
     ) async {
       final service = _FakeFamilyQuizAiService(_privateAnswerQuestions);
       await _pumpQuiz(tester, service);
-      await _addMember(tester, 'Alex');
-      await _addMember(tester, 'Sam');
 
-      await _tapText(tester, 'Start Quiz');
+      final startButton = find.widgetWithText(
+        FilledButton,
+        'Start Family Quiz',
+      );
+
+      expect(tester.widget<FilledButton>(startButton).onPressed, isNull);
+      expect(service.callCount, 0);
+
+      await _selectPlayer(tester, 'Amal');
+      expect(tester.widget<FilledButton>(startButton).onPressed, isNull);
+
+      await _selectPlayer(tester, 'Omar');
+      expect(tester.widget<FilledButton>(startButton).onPressed, isNotNull);
+      expect(service.callCount, 0);
+    });
+
+    testWidgets('starts the upgraded private-answer flow and scores a match', (
+      tester,
+    ) async {
+      final service = _FakeFamilyQuizAiService(_privateAnswerQuestions);
+      await _pumpQuiz(tester, service);
+      await _selectPlayer(tester, 'Amal');
+      await _selectPlayer(tester, 'Omar');
+
+      await _tapText(tester, 'Start Family Quiz');
 
       expect(service.callCount, 1);
       expect(service.lastCategory, 'Family Fun');
-      expect(service.lastCount, 3);
-      expect(service.lastFamilyMembers, ['Alex', 'Sam']);
+      expect(service.lastCount, 9);
+      expect(service.lastFamilyMembers, ['Amal', 'Omar']);
 
-      await _playPrivateAnswerRound(
-        tester,
-        member: 'Alex',
-        privateAnswer: 'Games',
-        familyGuess: 'Games',
-        expectedReveal: 'Perfect match!',
-        nextButton: 'Next Round',
-      );
-      await _playPrivateAnswerRound(
-        tester,
-        member: 'Sam',
-        privateAnswer: 'Beach',
-        familyGuess: 'Museum',
-        expectedReveal: 'Different answers!',
-        nextButton: 'Next Round',
-      );
-      await _playPrivateAnswerRound(
-        tester,
-        member: 'Alex',
-        privateAnswer: 'Music',
-        familyGuess: 'Music',
-        expectedReveal: 'Perfect match!',
-        nextButton: 'See Results',
-      );
+      expect(find.text('Pass the phone to Amal'), findsOneWidget);
+      await _tapText(tester, "I'm Amal");
+      await _tapText(tester, 'Games');
 
-      expect(find.text('Quiz complete!'), findsOneWidget);
-      expect(
-        find.text('Your family matched 2 of 3 private answers.'),
-        findsOneWidget,
-      );
+      expect(find.text('Pass the phone to Omar'), findsOneWidget);
+      await _tapText(tester, "I'm Omar");
+      await _tapText(tester, 'Games');
 
-      await _tapText(tester, 'Play Again');
+      expect(find.text('Omar guessed correctly!'), findsOneWidget);
+      expect(find.text('+1 point each'), findsOneWidget);
 
-      expect(service.callCount, 2);
-      expect(find.text('Pass the device to Alex'), findsOneWidget);
+      await _tapText(tester, 'Next Question');
+      expect(find.text('Pass the phone to Omar'), findsOneWidget);
     });
 
-    testWidgets('keeps votes private and reports winners and ties', (
+    testWidgets('keeps upgraded voting private and reports the winner', (
       tester,
     ) async {
       final service = _FakeFamilyQuizAiService(_votingQuestions);
       await _pumpQuiz(tester, service);
-      await _addMember(tester, 'Alex');
-      await _addMember(tester, 'Sam');
+      await _selectPlayer(tester, 'Amal');
+      await _selectPlayer(tester, 'Omar');
       await _tapChoiceChip(tester, 'Most Likely To');
 
       await _tapText(tester, 'Start Voting');
@@ -90,38 +71,21 @@ void main() {
       expect(service.callCount, 1);
       expect(service.lastCategory, 'Most Likely To');
 
-      await _playVotingRound(
-        tester,
-        alexVote: 'Alex',
-        samVote: 'Alex',
-        expectedReveal: 'Alex received the most votes!',
-        nextButton: 'Next Vote',
-      );
-      await _playVotingRound(
-        tester,
-        alexVote: 'Alex',
-        samVote: 'Sam',
-        expectedReveal: 'It is a tie!',
-        nextButton: 'Next Vote',
-      );
-      await _playVotingRound(
-        tester,
-        alexVote: 'Sam',
-        samVote: 'Sam',
-        expectedReveal: 'Sam received the most votes!',
-        nextButton: 'See Results',
-      );
+      expect(find.text('Pass the phone to Amal'), findsOneWidget);
+      await _tapText(tester, "I'm Amal");
+      await _tapOutlinedChoice(tester, 'Amal');
+      await _tapText(tester, 'Submit Private Vote');
 
-      expect(find.text('Family voting complete!'), findsOneWidget);
-      expect(find.text('Top vote: Alex'), findsOneWidget);
-      expect(find.text('Top vote: Alex & Sam'), findsOneWidget);
-      expect(find.text('Top vote: Sam'), findsOneWidget);
+      expect(find.text('Pass the phone to Omar'), findsOneWidget);
+      await _tapText(tester, "I'm Omar");
+      await _tapOutlinedChoice(tester, 'Amal');
+      await _tapText(tester, 'Submit Private Vote');
 
-      await _tapText(tester, 'Change Settings');
+      expect(find.text('Amal received the most votes!'), findsOneWidget);
+      expect(find.text('2 votes'), findsOneWidget);
 
-      expect(find.text('Who is playing?'), findsOneWidget);
-      expect(find.widgetWithText(InputChip, 'Alex'), findsOneWidget);
-      expect(find.widgetWithText(InputChip, 'Sam'), findsOneWidget);
+      await _tapText(tester, 'Next Vote');
+      expect(find.text('Pass the phone to Amal'), findsOneWidget);
     });
 
     testWidgets('uses offline prompts when the AI request fails', (
@@ -129,17 +93,29 @@ void main() {
     ) async {
       final service = _FailingFamilyQuizAiService();
       await _pumpQuiz(tester, service);
-      await _addMember(tester, 'Alex');
-      await _addMember(tester, 'Sam');
+      await _selectPlayer(tester, 'Amal');
+      await _selectPlayer(tester, 'Omar');
 
-      await _tapText(tester, 'Start Quiz');
+      await _tapText(tester, 'Start Family Quiz');
 
       expect(service.callCount, 1);
-      expect(
-        find.text('Could not reach AI. Using offline prompts instead.'),
-        findsOneWidget,
+      expect(find.text('Pass the phone to Amal'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('handles unavailable Firebase without throwing', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(useMaterial3: true),
+          home: const FamilyQuizScreen(),
+        ),
       );
-      expect(find.text('Pass the device to Alex'), findsOneWidget);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Could not load your family members.'), findsOneWidget);
+      expect(tester.takeException(), isNull);
     });
 
     testWidgets('setup remains usable on a narrow screen', (tester) async {
@@ -150,10 +126,10 @@ void main() {
 
       final service = _FakeFamilyQuizAiService(_privateAnswerQuestions);
       await _pumpQuiz(tester, service);
-      await _addMember(tester, 'Alex');
-      await _addMember(tester, 'Sam');
+      await _selectPlayer(tester, 'Amal');
+      await _selectPlayer(tester, 'Omar');
 
-      final startButton = find.text('Start Quiz');
+      final startButton = find.text('Start Family Quiz');
       await tester.ensureVisible(startButton);
       await tester.pumpAndSettle();
 
@@ -212,7 +188,7 @@ class _FakeFamilyQuizAiService extends FamilyQuizAiService {
     lastCategory = category;
     lastCount = count;
     lastFamilyMembers = List<String>.from(familyMembers);
-    return questions;
+    return List.generate(count, (index) => questions[index % questions.length]);
   }
 }
 
@@ -234,17 +210,17 @@ Future<void> _pumpQuiz(WidgetTester tester, FamilyQuizAiService service) async {
   await tester.pumpWidget(
     MaterialApp(
       theme: ThemeData(useMaterial3: true),
-      home: FamilyQuizScreen(aiService: service),
+      home: FamilyQuizScreen(aiService: service, developerPreview: true),
     ),
   );
   await tester.pumpAndSettle();
 }
 
-Future<void> _addMember(WidgetTester tester, String name) async {
-  final field = find.byType(TextField);
-  await tester.ensureVisible(field);
-  await tester.enterText(field, name);
-  await tester.tap(find.byTooltip('Add family member'));
+Future<void> _selectPlayer(WidgetTester tester, String name) async {
+  final tile = find.widgetWithText(CheckboxListTile, name);
+  expect(tile, findsOneWidget);
+  await tester.ensureVisible(tile);
+  await tester.tap(tile);
   await tester.pumpAndSettle();
 }
 
@@ -274,43 +250,4 @@ Future<void> _tapOutlinedChoice(WidgetTester tester, String label) async {
   await tester.ensureVisible(finder);
   await tester.tap(finder);
   await tester.pumpAndSettle();
-}
-
-Future<void> _playPrivateAnswerRound(
-  WidgetTester tester, {
-  required String member,
-  required String privateAnswer,
-  required String familyGuess,
-  required String expectedReveal,
-  required String nextButton,
-}) async {
-  expect(find.text('Pass the device to $member'), findsOneWidget);
-  await _tapText(tester, "I'm $member");
-  await _tapOutlinedChoice(tester, privateAnswer);
-  await _tapText(tester, 'Ready to Guess');
-  await _tapOutlinedChoice(tester, familyGuess);
-
-  expect(find.text(expectedReveal), findsOneWidget);
-  await _tapText(tester, nextButton);
-}
-
-Future<void> _playVotingRound(
-  WidgetTester tester, {
-  required String alexVote,
-  required String samVote,
-  required String expectedReveal,
-  required String nextButton,
-}) async {
-  expect(find.text('Pass the device to Alex'), findsOneWidget);
-  await _tapText(tester, "I'm Alex");
-  await _tapOutlinedChoice(tester, alexVote);
-  await _tapText(tester, 'Submit Private Vote');
-
-  expect(find.text('Pass the device to Sam'), findsOneWidget);
-  await _tapText(tester, "I'm Sam");
-  await _tapOutlinedChoice(tester, samVote);
-  await _tapText(tester, 'Submit Private Vote');
-
-  expect(find.text(expectedReveal), findsOneWidget);
-  await _tapText(tester, nextButton);
 }

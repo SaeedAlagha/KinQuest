@@ -1,9 +1,12 @@
-import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'dart:typed_data';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
+
+import '../../../l10n/app_localizations.dart';
 import 'add_memory_screen.dart';
 import 'memory_details_screen.dart';
-import 'dart:typed_data';
 
 class MemoriesScreen extends StatelessWidget {
   const MemoriesScreen({super.key, this.developerPreview = false});
@@ -23,18 +26,17 @@ class MemoriesScreen extends StatelessWidget {
       return const _DeveloperMemoriesView();
     }
 
+    final strings = AppLocalizations.of(context)!;
     final user = FirebaseAuth.instance.currentUser;
 
     if (user == null) {
-      return const Scaffold(
-        body: SafeArea(
-          child: Center(child: Text('No user is currently signed in.')),
-        ),
+      return Scaffold(
+        body: SafeArea(child: Center(child: Text(strings.noUserSignedIn))),
       );
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Memories')),
+      appBar: AppBar(title: Text(strings.memoriesTitle)),
       body: SafeArea(
         child: StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
           stream: FirebaseFirestore.instance
@@ -50,11 +52,11 @@ class MemoriesScreen extends StatelessWidget {
             final familyId = userData?['familyId'] as String?;
 
             if (familyId == null || familyId.isEmpty) {
-              return const Center(
+              return Center(
                 child: Padding(
-                  padding: EdgeInsets.all(24),
+                  padding: const EdgeInsets.all(24),
                   child: Text(
-                    'Join or create a family to view memories.',
+                    strings.memoriesFamilyRequired,
                     textAlign: TextAlign.center,
                   ),
                 ),
@@ -74,7 +76,7 @@ class MemoriesScreen extends StatelessWidget {
                 }
 
                 if (memorySnapshot.hasError) {
-                  return const Center(child: Text('Could not load memories.'));
+                  return Center(child: Text(strings.memoriesLoadError));
                 }
 
                 final memories = memorySnapshot.data?.docs ?? [];
@@ -93,19 +95,19 @@ class MemoriesScreen extends StatelessWidget {
                           ),
                           const SizedBox(height: 22),
                           Text(
-                            'No memories yet',
+                            strings.noMemoriesYet,
                             style: Theme.of(context).textTheme.headlineMedium,
                           ),
                           const SizedBox(height: 10),
-                          const Text(
-                            'Save photos, videos, and stories from your family moments.',
+                          Text(
+                            strings.memoriesEmptyDescription,
                             textAlign: TextAlign.center,
                           ),
                           const SizedBox(height: 28),
                           FilledButton.icon(
                             onPressed: () => _openAddMemory(context),
                             icon: const Icon(Icons.add),
-                            label: const Text('Add Your First Memory'),
+                            label: Text(strings.addFirstMemory),
                           ),
                         ],
                       ),
@@ -120,7 +122,8 @@ class MemoriesScreen extends StatelessWidget {
                   itemBuilder: (context, index) {
                     final data = memories[index].data();
                     final memoryId = memories[index].id;
-                    final title = data['title'] as String? ?? 'Memory';
+                    final title =
+                        data['title'] as String? ?? strings.memoryTitleGeneric;
                     final description = data['description'] as String? ?? '';
                     final location = data['location'] as String? ?? '';
                     final imageData = data['imageData'];
@@ -230,45 +233,44 @@ class MemoriesScreen extends StatelessWidget {
 class _DeveloperMemoriesView extends StatelessWidget {
   const _DeveloperMemoriesView();
 
-  static const _memories = [
-    _PreviewMemory(
-      icon: Icons.park_rounded,
-      title: 'Family picnic at Mushrif Park',
-      description: 'A sunny afternoon full of games, stories, and laughter.',
-      details: '02/08/2026 • Dubai',
-    ),
-    _PreviewMemory(
-      icon: Icons.restaurant_rounded,
-      title: 'Friday lunch together',
-      description: 'Grandma shared her favorite family recipe with everyone.',
-      details: '31/07/2026 • Home',
-    ),
-    _PreviewMemory(
-      icon: Icons.beach_access_rounded,
-      title: 'Sunset walk',
-      description: 'We watched the sunset and planned our next family day.',
-      details: '25/07/2026 • Abu Dhabi Corniche',
-    ),
-  ];
-
   void _showReadOnlyNotice(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Developer preview is read-only. No data was changed.'),
-      ),
-    );
+    final strings = AppLocalizations.of(context)!;
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(strings.developerMemoriesReadOnly)));
   }
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final strings = AppLocalizations.of(context)!;
+    final memories = [
+      _PreviewMemory(
+        icon: Icons.park_rounded,
+        title: strings.previewPicnicTitle,
+        description: strings.previewPicnicDescription,
+        details: strings.previewPicnicDetails,
+      ),
+      _PreviewMemory(
+        icon: Icons.restaurant_rounded,
+        title: strings.previewLunchTitle,
+        description: strings.previewLunchDescription,
+        details: strings.previewLunchDetails,
+      ),
+      _PreviewMemory(
+        icon: Icons.beach_access_rounded,
+        title: strings.previewSunsetTitle,
+        description: strings.previewSunsetDescription,
+        details: strings.previewSunsetDetails,
+      ),
+    ];
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Memories')),
+      appBar: AppBar(title: Text(strings.memoriesTitle)),
       body: SafeArea(
         child: ListView.separated(
           padding: const EdgeInsets.all(24),
-          itemCount: _memories.length + 1,
+          itemCount: memories.length + 1,
           separatorBuilder: (_, _) => const SizedBox(height: 12),
           itemBuilder: (context, index) {
             if (index == 0) {
@@ -278,13 +280,13 @@ class _DeveloperMemoriesView extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Developer Family memories',
+                      strings.developerMemoriesTitle,
                       style: Theme.of(context).textTheme.headlineSmall
                           ?.copyWith(fontWeight: FontWeight.w800),
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      'Sample moments for reviewing the experience. They are not stored in Firebase.',
+                      strings.developerMemoriesDescription,
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                         color: colorScheme.onSurfaceVariant,
                       ),
@@ -294,7 +296,7 @@ class _DeveloperMemoriesView extends StatelessWidget {
               );
             }
 
-            final memory = _memories[index - 1];
+            final memory = memories[index - 1];
 
             return Card(
               child: ListTile(
@@ -326,7 +328,7 @@ class _DeveloperMemoriesView extends StatelessWidget {
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _showReadOnlyNotice(context),
         icon: const Icon(Icons.add),
-        label: const Text('Add Memory'),
+        label: Text(strings.addMemoryTitle),
       ),
     );
   }

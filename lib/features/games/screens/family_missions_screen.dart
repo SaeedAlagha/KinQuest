@@ -7,7 +7,9 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../l10n/app_localizations.dart';
 import '../models/family_mission.dart';
+import '../models/family_mission_localizations.dart';
 import '../services/family_mission_ai_service.dart';
 
 class FamilyMissionsScreen extends StatefulWidget {
@@ -38,7 +40,7 @@ class _FamilyMissionsScreenState extends State<FamilyMissionsScreen> {
 
   String? _familyId;
   String? _currentUserId;
-  String? _errorMessage;
+  _MissionLoadError? _loadError;
 
   @override
   void initState() {
@@ -91,7 +93,7 @@ class _FamilyMissionsScreenState extends State<FamilyMissionsScreen> {
     if (user == null) {
       setState(() {
         _isLoading = false;
-        _errorMessage = 'You must be signed in to view missions.';
+        _loadError = _MissionLoadError.signInRequired;
       });
       return;
     }
@@ -108,7 +110,7 @@ class _FamilyMissionsScreenState extends State<FamilyMissionsScreen> {
 
         setState(() {
           _isLoading = false;
-          _errorMessage = 'Join or create a family before completing missions.';
+          _loadError = _MissionLoadError.familyRequired;
         });
 
         return;
@@ -283,14 +285,14 @@ class _FamilyMissionsScreenState extends State<FamilyMissionsScreen> {
           ..addAll(history);
 
         _isLoading = false;
-        _errorMessage = null;
+        _loadError = null;
       });
     } catch (_) {
       if (!mounted) return;
 
       setState(() {
         _isLoading = false;
-        _errorMessage = 'Could not load Family Missions. Please try again.';
+        _loadError = _MissionLoadError.loadFailed;
       });
     }
   }
@@ -527,6 +529,7 @@ class _FamilyMissionsScreenState extends State<FamilyMissionsScreen> {
 
       participants = selected;
     } else {
+      final strings = AppLocalizations.of(context)!;
       final userId = _currentUserId;
 
       if (userId == null) return;
@@ -540,13 +543,16 @@ class _FamilyMissionsScreenState extends State<FamilyMissionsScreen> {
         }
       }
 
-      participants = [currentMember ?? _FamilyMember(id: userId, name: 'You')];
+      participants = [
+        currentMember ?? _FamilyMember(id: userId, name: strings.you),
+      ];
     }
 
     await _chooseProofSource(assignment, participants);
   }
 
   Future<List<_FamilyMember>?> _selectParticipants() async {
+    final strings = AppLocalizations.of(context)!;
     final currentUserId = _currentUserId;
 
     final selectedIds = <String>{?currentUserId};
@@ -560,30 +566,32 @@ class _FamilyMissionsScreenState extends State<FamilyMissionsScreen> {
                 .toList();
 
             return AlertDialog(
-              title: const Text('Who participated?'),
+              title: Text(strings.whoParticipated),
               content: SizedBox(
                 width: 500,
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Text(
-                      'Choose the family members who actually took part. Family missions require at least 2 participants.',
-                    ),
+                    Text(strings.participantSelectionDescription),
                     const SizedBox(height: 14),
                     Flexible(
                       child: ListView(
                         shrinkWrap: true,
                         children: _familyMembers.map((member) {
                           final selected = selectedIds.contains(member.id);
+                          final memberName = _displayMemberName(
+                            member,
+                            strings,
+                          );
 
                           return CheckboxListTile(
                             value: selected,
-                            title: Text(member.name),
+                            title: Text(memberName),
                             secondary: CircleAvatar(
                               child: Text(
-                                member.name.isEmpty
+                                memberName.isEmpty
                                     ? '?'
-                                    : member.name[0].toUpperCase(),
+                                    : memberName[0].toUpperCase(),
                               ),
                             ),
                             onChanged: (value) {
@@ -605,13 +613,13 @@ class _FamilyMissionsScreenState extends State<FamilyMissionsScreen> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(dialogContext),
-                  child: const Text('Cancel'),
+                  child: Text(strings.cancel),
                 ),
                 FilledButton(
                   onPressed: selectedMembers.length < 2
                       ? null
                       : () => Navigator.pop(dialogContext, selectedMembers),
-                  child: const Text('Continue'),
+                  child: Text(strings.continueLabel),
                 ),
               ],
             );
@@ -625,6 +633,7 @@ class _FamilyMissionsScreenState extends State<FamilyMissionsScreen> {
     _MissionAssignment assignment,
     List<_FamilyMember> participants,
   ) async {
+    final strings = AppLocalizations.of(context)!;
     final source = await showModalBottomSheet<ImageSource>(
       context: context,
       builder: (sheetContext) {
@@ -636,16 +645,14 @@ class _FamilyMissionsScreenState extends State<FamilyMissionsScreen> {
               children: [
                 ListTile(
                   leading: const Icon(Icons.photo_camera_rounded),
-                  title: const Text('Take Photo'),
-                  subtitle: const Text('Use the camera as proof'),
+                  title: Text(strings.takePhoto),
+                  subtitle: Text(strings.useCameraAsProof),
                   onTap: () => Navigator.pop(sheetContext, ImageSource.camera),
                 ),
                 ListTile(
                   leading: const Icon(Icons.photo_library_rounded),
-                  title: const Text('Choose Photo or Screenshot'),
-                  subtitle: const Text(
-                    'Choose an existing image from your device',
-                  ),
+                  title: Text(strings.choosePhotoOrScreenshot),
+                  subtitle: Text(strings.chooseExistingImage),
                   onTap: () => Navigator.pop(sheetContext, ImageSource.gallery),
                 ),
               ],
@@ -675,13 +682,9 @@ class _FamilyMissionsScreenState extends State<FamilyMissionsScreen> {
     if (!mounted) return;
 
     if (bytes.length > _maxProofBytes) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'That image is too large. Please choose a smaller image.',
-          ),
-        ),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(strings.missionImageTooLarge)));
 
       return;
     }
@@ -714,13 +717,14 @@ class _FamilyMissionsScreenState extends State<FamilyMissionsScreen> {
     required Uint8List imageBytes,
     required String mimeType,
   }) async {
+    final strings = AppLocalizations.of(context)!;
     final noteController = TextEditingController();
 
     final shouldSubmit = await showDialog<bool>(
       context: context,
       builder: (dialogContext) {
         return AlertDialog(
-          title: const Text('Review Your Proof'),
+          title: Text(strings.reviewYourProof),
           content: SizedBox(
             width: 500,
             child: SingleChildScrollView(
@@ -739,9 +743,15 @@ class _FamilyMissionsScreenState extends State<FamilyMissionsScreen> {
                   if (assignment.mission.scope == MissionScope.family) ...[
                     const SizedBox(height: 16),
                     Align(
-                      alignment: Alignment.centerLeft,
+                      alignment: AlignmentDirectional.centerStart,
                       child: Text(
-                        'Participants: ${participants.map((member) => member.name).join(', ')}',
+                        strings.participantsLabel(
+                          participants
+                              .map(
+                                (member) => _displayMemberName(member, strings),
+                              )
+                              .join(', '),
+                        ),
                         style: const TextStyle(fontWeight: FontWeight.w700),
                       ),
                     ),
@@ -751,11 +761,10 @@ class _FamilyMissionsScreenState extends State<FamilyMissionsScreen> {
                     controller: noteController,
                     maxLength: 300,
                     maxLines: 4,
-                    decoration: const InputDecoration(
-                      labelText: 'Explanation (optional)',
-                      hintText:
-                          'Add useful context that the image may not show clearly.',
-                      border: OutlineInputBorder(),
+                    decoration: InputDecoration(
+                      labelText: strings.explanationOptional,
+                      hintText: strings.missionExplanationHint,
+                      border: const OutlineInputBorder(),
                     ),
                   ),
                 ],
@@ -765,12 +774,12 @@ class _FamilyMissionsScreenState extends State<FamilyMissionsScreen> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(dialogContext, false),
-              child: const Text('Cancel'),
+              child: Text(strings.cancel),
             ),
             FilledButton.icon(
               onPressed: () => Navigator.pop(dialogContext, true),
               icon: const Icon(Icons.verified_rounded),
-              label: const Text('Verify Proof'),
+              label: Text(strings.verifyProof),
             ),
           ],
         );
@@ -801,16 +810,18 @@ class _FamilyMissionsScreenState extends State<FamilyMissionsScreen> {
     required String mimeType,
     required String note,
   }) async {
+    final strings = AppLocalizations.of(context)!;
+
     showDialog<void>(
       context: context,
       barrierDismissible: false,
       builder: (_) {
-        return const AlertDialog(
+        return AlertDialog(
           content: Row(
             children: [
-              CircularProgressIndicator(),
-              SizedBox(width: 20),
-              Expanded(child: Text('AI is checking your mission proof...')),
+              const CircularProgressIndicator(),
+              const SizedBox(width: 20),
+              Expanded(child: Text(strings.aiCheckingMissionProof)),
             ],
           ),
         );
@@ -842,7 +853,10 @@ class _FamilyMissionsScreenState extends State<FamilyMissionsScreen> {
         note: note,
         verification: verification,
       );
-    } catch (error) {
+    } catch (error, stackTrace) {
+      debugPrint('Mission proof verification failed: $error');
+      debugPrintStack(stackTrace: stackTrace);
+
       if (!mounted) return;
 
       Navigator.of(context, rootNavigator: true).pop();
@@ -850,14 +864,14 @@ class _FamilyMissionsScreenState extends State<FamilyMissionsScreen> {
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(error.toString().replaceFirst('Exception: ', '')),
-        ),
+        SnackBar(content: Text(strings.couldNotVerifyMissionProof)),
       );
     }
   }
 
   Future<void> _showVerificationFailure(MissionVerificationResult result) {
+    final strings = AppLocalizations.of(context)!;
+
     return showDialog<void>(
       context: context,
       builder: (dialogContext) {
@@ -868,15 +882,15 @@ class _FamilyMissionsScreenState extends State<FamilyMissionsScreen> {
                 : Icons.error_outline_rounded,
           ),
           title: Text(
-            result.uncertain ? 'We Need Clearer Proof' : 'Proof Not Verified',
+            result.uncertain
+                ? strings.needClearerProof
+                : strings.proofNotVerified,
           ),
-          content: Text(
-            '${result.reason}\n\nYou can submit another image or add a clearer explanation.',
-          ),
+          content: Text(strings.verificationFailureDescription(result.reason)),
           actions: [
             FilledButton(
               onPressed: () => Navigator.pop(dialogContext),
-              child: const Text('Try Again'),
+              child: Text(strings.tryAgain),
             ),
           ],
         );
@@ -892,6 +906,8 @@ class _FamilyMissionsScreenState extends State<FamilyMissionsScreen> {
     required String note,
     required MissionVerificationResult verification,
   }) async {
+    final strings = AppLocalizations.of(context)!;
+
     if (widget.developerPreview) {
       if (!mounted) return;
 
@@ -959,11 +975,9 @@ class _FamilyMissionsScreenState extends State<FamilyMissionsScreen> {
         _isSaving = false;
       });
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('This mission has already been rewarded.'),
-        ),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(strings.missionAlreadyRewarded)));
 
       await _loadBoard();
     } catch (_) {
@@ -973,13 +987,9 @@ class _FamilyMissionsScreenState extends State<FamilyMissionsScreen> {
         _isSaving = false;
       });
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'The proof was verified, but the reward could not be saved. Please try again.',
-          ),
-        ),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(strings.missionRewardSaveError)));
     }
   }
 
@@ -1215,10 +1225,11 @@ class _FamilyMissionsScreenState extends State<FamilyMissionsScreen> {
     required FamilyMission mission,
     required List<_FamilyMember> participants,
   }) {
+    final strings = AppLocalizations.of(context)!;
     final familyMission = mission.scope == MissionScope.family;
 
     final participantText = participants
-        .map((member) => member.name)
+        .map((member) => _displayMemberName(member, strings))
         .join(', ');
 
     return showDialog<void>(
@@ -1230,18 +1241,21 @@ class _FamilyMissionsScreenState extends State<FamilyMissionsScreen> {
             size: 54,
             color: AppTheme.primaryColor,
           ),
-          title: const Text('Mission Verified!'),
+          title: Text(strings.missionVerified),
           content: Text(
             familyMission
-                ? '${mission.tokenReward} tokens were awarded to each participant.\n\n$participantText\n\nA new shared family mission has been added.'
-                : 'You earned ${mission.tokenReward} tokens.\n\nA new personal mission has been added.',
+                ? strings.familyMissionRewardSuccess(
+                    mission.tokenReward,
+                    participantText,
+                  )
+                : strings.personalMissionRewardSuccess(mission.tokenReward),
             textAlign: TextAlign.center,
           ),
           actionsAlignment: MainAxisAlignment.center,
           actions: [
             FilledButton(
               onPressed: () => Navigator.pop(dialogContext),
-              child: const Text('Nice!'),
+              child: Text(strings.nice),
             ),
           ],
         );
@@ -1270,29 +1284,46 @@ class _FamilyMissionsScreenState extends State<FamilyMissionsScreen> {
     }
   }
 
-  String _difficultyLabel(MissionDifficulty difficulty) {
+  String _difficultyLabel(
+    MissionDifficulty difficulty,
+    AppLocalizations strings,
+  ) {
     switch (difficulty) {
       case MissionDifficulty.easy:
-        return 'Easy';
+        return strings.difficultyEasy;
       case MissionDifficulty.medium:
-        return 'Medium';
+        return strings.difficultyMedium;
       case MissionDifficulty.hard:
-        return 'Challenge';
+        return strings.difficultyChallenge;
     }
   }
 
   String _formatDate(DateTime date) {
-    return '${date.day}/${date.month}/${date.year}';
+    return MaterialLocalizations.of(context).formatCompactDate(date);
+  }
+
+  String _displayMemberName(_FamilyMember member, AppLocalizations strings) {
+    if (member.id == _currentUserId) {
+      return strings.you;
+    }
+
+    if (member.name == 'Family Member') {
+      return strings.familyMember;
+    }
+
+    return member.name;
   }
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context)!;
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Family Missions')),
+      appBar: AppBar(title: Text(strings.familyMissions)),
       body: SafeArea(
         child: _isLoading
             ? const Center(child: CircularProgressIndicator())
-            : _errorMessage != null
+            : _loadError != null
             ? _buildError()
             : _buildContent(),
       ),
@@ -1300,6 +1331,13 @@ class _FamilyMissionsScreenState extends State<FamilyMissionsScreen> {
   }
 
   Widget _buildError() {
+    final strings = AppLocalizations.of(context)!;
+    final message = switch (_loadError!) {
+      _MissionLoadError.signInRequired => strings.missionsSignInRequired,
+      _MissionLoadError.familyRequired => strings.missionsFamilyRequired,
+      _MissionLoadError.loadFailed => strings.missionsLoadError,
+    };
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
@@ -1308,18 +1346,18 @@ class _FamilyMissionsScreenState extends State<FamilyMissionsScreen> {
           children: [
             const Icon(Icons.error_outline_rounded, size: 64),
             const SizedBox(height: 16),
-            Text(_errorMessage!, textAlign: TextAlign.center),
+            Text(message, textAlign: TextAlign.center),
             const SizedBox(height: 20),
             FilledButton(
               onPressed: () {
                 setState(() {
                   _isLoading = true;
-                  _errorMessage = null;
+                  _loadError = null;
                 });
 
                 _loadBoard();
               },
-              child: const Text('Try Again'),
+              child: Text(strings.tryAgain),
             ),
           ],
         ),
@@ -1328,6 +1366,8 @@ class _FamilyMissionsScreenState extends State<FamilyMissionsScreen> {
   }
 
   Widget _buildContent() {
+    final strings = AppLocalizations.of(context)!;
+
     return RefreshIndicator(
       onRefresh: _loadBoard,
       child: ListView(
@@ -1338,8 +1378,10 @@ class _FamilyMissionsScreenState extends State<FamilyMissionsScreen> {
 
           _SectionHeader(
             icon: Icons.person_rounded,
-            title: 'Your Missions',
-            subtitle: '6 personal missions just for you',
+            title: strings.yourMissions,
+            subtitle: strings.personalMissionsSubtitle(
+              _personalAssignments.length,
+            ),
             count: _personalAssignments.length,
           ),
           const SizedBox(height: 14),
@@ -1349,8 +1391,8 @@ class _FamilyMissionsScreenState extends State<FamilyMissionsScreen> {
 
           _SectionHeader(
             icon: Icons.groups_rounded,
-            title: 'Family Missions',
-            subtitle: '4 shared missions — complete each once as a family',
+            title: strings.familyMissions,
+            subtitle: strings.sharedMissionsSubtitle(_familyAssignments.length),
             count: _familyAssignments.length,
           ),
           const SizedBox(height: 14),
@@ -1359,7 +1401,7 @@ class _FamilyMissionsScreenState extends State<FamilyMissionsScreen> {
           if (_history.isNotEmpty) ...[
             const SizedBox(height: 30),
             Text(
-              'Recently Completed',
+              strings.recentlyCompleted,
               style: Theme.of(
                 context,
               ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800),
@@ -1375,6 +1417,7 @@ class _FamilyMissionsScreenState extends State<FamilyMissionsScreen> {
   }
 
   Widget _buildHeader() {
+    final strings = AppLocalizations.of(context)!;
     final currentUserId = _currentUserId;
 
     final userEarned = _history.fold<int>(
@@ -1406,14 +1449,16 @@ class _FamilyMissionsScreenState extends State<FamilyMissionsScreen> {
           ),
           const SizedBox(height: 14),
           Text(
-            'Do More Together',
+            strings.doMoreTogether,
             style: Theme.of(
               context,
             ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w900),
           ),
           const SizedBox(height: 8),
           Text(
-            '10 active missions, AI-verified proof, fair rewards, and new challenges as you progress.',
+            strings.missionsHeaderDescription(
+              _personalAssignments.length + _familyAssignments.length,
+            ),
             textAlign: TextAlign.center,
             style: Theme.of(
               context,
@@ -1427,15 +1472,15 @@ class _FamilyMissionsScreenState extends State<FamilyMissionsScreen> {
             children: [
               _StatChip(
                 icon: Icons.task_alt_rounded,
-                text: '$userCompleted completed',
+                text: strings.missionsCompletedCount(userCompleted),
               ),
               _StatChip(
                 icon: Icons.monetization_on_rounded,
-                text: '$userEarned mission tokens earned',
+                text: strings.missionTokensEarnedCount(userEarned),
               ),
-              const _StatChip(
+              _StatChip(
                 icon: Icons.verified_rounded,
-                text: 'AI proof required',
+                text: strings.aiProofRequired,
               ),
             ],
           ),
@@ -1449,7 +1494,9 @@ class _FamilyMissionsScreenState extends State<FamilyMissionsScreen> {
   }
 
   Widget _buildMissionCard(_MissionAssignment assignment) {
+    final strings = AppLocalizations.of(context)!;
     final mission = assignment.mission;
+    final copy = LocalizedFamilyMissionCopy.forMission(strings, mission);
 
     final familyMission = mission.scope == MissionScope.family;
 
@@ -1483,13 +1530,13 @@ class _FamilyMissionsScreenState extends State<FamilyMissionsScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        mission.title,
+                        copy.title,
                         style: Theme.of(context).textTheme.titleMedium
                             ?.copyWith(fontWeight: FontWeight.w800),
                       ),
                       const SizedBox(height: 5),
                       Text(
-                        mission.description,
+                        copy.description,
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: AppTheme.secondaryTextColor,
                         ),
@@ -1500,13 +1547,24 @@ class _FamilyMissionsScreenState extends State<FamilyMissionsScreen> {
                         runSpacing: 8,
                         children: [
                           _SmallLabel(
-                            text: familyMission ? 'Family' : 'Personal',
+                            text: familyMission
+                                ? strings.profileFamilySection
+                                : strings.personalLabel,
                           ),
-                          _SmallLabel(text: mission.category),
                           _SmallLabel(
-                            text: _difficultyLabel(mission.difficulty),
+                            text: LocalizedFamilyMissionCopy.category(
+                              strings,
+                              mission.category,
+                            ),
                           ),
-                          _SmallLabel(text: '+${mission.tokenReward} tokens'),
+                          _SmallLabel(
+                            text: _difficultyLabel(mission.difficulty, strings),
+                          ),
+                          _SmallLabel(
+                            text: strings.missionTokenReward(
+                              mission.tokenReward,
+                            ),
+                          ),
                         ],
                       ),
                       const SizedBox(height: 14),
@@ -1521,11 +1579,15 @@ class _FamilyMissionsScreenState extends State<FamilyMissionsScreen> {
                           Expanded(
                             child: Text(
                               familyMission
-                                  ? 'AI proof • reward for each participant'
-                                  : 'AI proof • reward for you',
+                                  ? strings.aiProofFamilyReward
+                                  : strings.aiProofPersonalReward,
                             ),
                           ),
-                          const Icon(Icons.chevron_right_rounded),
+                          Icon(
+                            Directionality.of(context) == TextDirection.rtl
+                                ? Icons.chevron_left_rounded
+                                : Icons.chevron_right_rounded,
+                          ),
                         ],
                       ),
                     ],
@@ -1540,12 +1602,18 @@ class _FamilyMissionsScreenState extends State<FamilyMissionsScreen> {
   }
 
   Widget _buildHistoryCard(_MissionHistoryItem item) {
+    final strings = AppLocalizations.of(context)!;
     final familyMission = item.scope == MissionScope.family;
+    final catalogMission = FamilyMissionCatalog.byId(item.missionId);
+    final title = catalogMission == null
+        ? item.title
+        : LocalizedFamilyMissionCopy.forMission(strings, catalogMission).title;
 
-    String subtitle = 'Completed ${_formatDate(item.completedAt)}';
+    String subtitle = strings.completedOn(_formatDate(item.completedAt));
 
     if (familyMission && item.participantNames.isNotEmpty) {
-      subtitle += '\nParticipants: ${item.participantNames.join(', ')}';
+      subtitle +=
+          '\n${strings.participantsLabel(item.participantNames.join(', '))}';
     }
 
     return Card(
@@ -1556,7 +1624,7 @@ class _FamilyMissionsScreenState extends State<FamilyMissionsScreen> {
             familyMission ? Icons.groups_rounded : Icons.person_rounded,
           ),
         ),
-        title: Text(item.title),
+        title: Text(title),
         subtitle: Text(subtitle),
         trailing: item.userEarnedReward
             ? Text(
@@ -1566,7 +1634,7 @@ class _FamilyMissionsScreenState extends State<FamilyMissionsScreen> {
                   color: AppTheme.primaryColor,
                 ),
               )
-            : const Text('Family'),
+            : Text(strings.profileFamilySection),
       ),
     );
   }
@@ -1583,7 +1651,9 @@ class _MissionDetailsSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context)!;
     final mission = assignment.mission;
+    final copy = LocalizedFamilyMissionCopy.forMission(strings, mission);
 
     final familyMission = mission.scope == MissionScope.family;
 
@@ -1609,7 +1679,7 @@ class _MissionDetailsSheet extends StatelessWidget {
           ),
           const SizedBox(height: 26),
           Text(
-            mission.title,
+            copy.title,
             textAlign: TextAlign.center,
             style: Theme.of(
               context,
@@ -1617,7 +1687,7 @@ class _MissionDetailsSheet extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Text(
-            mission.description,
+            copy.description,
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.bodyLarge,
           ),
@@ -1629,12 +1699,14 @@ class _MissionDetailsSheet extends StatelessWidget {
                 color: AppTheme.primaryColor,
               ),
               title: Text(
-                familyMission ? 'Family Mission' : 'Personal Mission',
+                familyMission
+                    ? strings.familyMissionLabel
+                    : strings.personalMissionLabel,
               ),
               subtitle: Text(
                 familyMission
-                    ? 'Choose who participated. The mission can be claimed once by the family, and each participant earns ${mission.tokenReward} tokens.'
-                    : 'Complete this yourself and earn ${mission.tokenReward} tokens.',
+                    ? strings.familyMissionDetailsReward(mission.tokenReward)
+                    : strings.personalMissionDetailsReward(mission.tokenReward),
               ),
             ),
           ),
@@ -1645,18 +1717,20 @@ class _MissionDetailsSheet extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Row(
+                  Row(
                     children: [
-                      Icon(Icons.camera_alt_rounded),
-                      SizedBox(width: 8),
-                      Text(
-                        'Proof guidance',
-                        style: TextStyle(fontWeight: FontWeight.bold),
+                      const Icon(Icons.camera_alt_rounded),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          strings.proofGuidance,
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
                       ),
                     ],
                   ),
                   const SizedBox(height: 10),
-                  Text(mission.proofHint),
+                  Text(copy.proofHint),
                 ],
               ),
             ),
@@ -1665,9 +1739,9 @@ class _MissionDetailsSheet extends StatelessWidget {
           Card(
             child: ListTile(
               leading: const Icon(Icons.hourglass_bottom_rounded),
-              title: const Text('Cooldown'),
+              title: Text(strings.cooldown),
               subtitle: Text(
-                'After completion, this mission cannot return for ${mission.cooldownDays} days.',
+                strings.missionCooldownDescription(mission.cooldownDays),
               ),
             ),
           ),
@@ -1675,12 +1749,12 @@ class _MissionDetailsSheet extends StatelessWidget {
           FilledButton.icon(
             onPressed: onSubmitProof,
             icon: const Icon(Icons.upload_rounded),
-            label: const Text('Submit Proof'),
+            label: Text(strings.submitProof),
           ),
           const SizedBox(height: 8),
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Not Yet'),
+            child: Text(strings.notYet),
           ),
         ],
       ),
@@ -1822,7 +1896,12 @@ class _StatChip extends StatelessWidget {
         children: [
           Icon(icon, size: 17, color: AppTheme.primaryColor),
           const SizedBox(width: 6),
-          Text(text, style: const TextStyle(fontWeight: FontWeight.w700)),
+          Flexible(
+            child: Text(
+              text,
+              style: const TextStyle(fontWeight: FontWeight.w700),
+            ),
+          ),
         ],
       ),
     );
@@ -1850,3 +1929,5 @@ class _SmallLabel extends StatelessWidget {
 class _AlreadyRewardedException implements Exception {
   const _AlreadyRewardedException();
 }
+
+enum _MissionLoadError { signInRequired, familyRequired, loadFailed }

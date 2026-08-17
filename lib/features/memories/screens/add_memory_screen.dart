@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../core/validation/form_validators.dart';
+import '../../../l10n/app_localizations.dart';
 
 class AddMemoryScreen extends StatefulWidget {
   const AddMemoryScreen({super.key});
@@ -27,7 +28,7 @@ class _AddMemoryScreenState extends State<AddMemoryScreen> {
   final ImagePicker _imagePicker = ImagePicker();
 
   DateTime? _selectedDate;
-Uint8List? _selectedImageBytes;
+  Uint8List? _selectedImageBytes;
 
   bool _isSaving = false;
 
@@ -64,12 +65,14 @@ Uint8List? _selectedImageBytes;
   }
 
   String? _validateDate(String? value) {
+    final strings = AppLocalizations.of(context)!;
+
     if (value == null || value.trim().isEmpty) {
-      return 'Memory date is required.';
+      return strings.memoryDateRequired;
     }
 
     if (_selectedDate == null) {
-      return 'Select a valid memory date.';
+      return strings.selectValidMemoryDate;
     }
 
     return null;
@@ -89,22 +92,21 @@ Uint8List? _selectedImageBytes;
 
     final bytes = await image.readAsBytes();
 
-    if (!mounted) return;
-
-    if (bytes.lengthInBytes > _maxImageBytes) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'That photo is still too large. Please choose another photo.',
-          ),
-        ),
-      );
+    if (!mounted) {
       return;
     }
 
-setState(() {
-  _selectedImageBytes = bytes;
-});
+    if (bytes.lengthInBytes > _maxImageBytes) {
+      final strings = AppLocalizations.of(context)!;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(strings.photoTooLarge)));
+      return;
+    }
+
+    setState(() {
+      _selectedImageBytes = bytes;
+    });
   }
 
   Future<void> _saveMemory() async {
@@ -119,11 +121,10 @@ setState(() {
     final user = FirebaseAuth.instance.currentUser;
 
     if (user == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('You must be signed in to save a memory.'),
-        ),
-      );
+      final strings = AppLocalizations.of(context)!;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(strings.saveMemorySignInRequired)));
       return;
     }
 
@@ -140,15 +141,19 @@ setState(() {
       final familyId = userDoc.data()?['familyId'] as String?;
 
       if (familyId == null || familyId.isEmpty) {
-        if (!mounted) return;
+        if (!mounted) {
+          return;
+        }
 
         setState(() {
           _isSaving = false;
         });
 
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Join or create a family before adding memories.'),
+          SnackBar(
+            content: Text(
+              AppLocalizations.of(context)!.addMemoryFamilyRequired,
+            ),
           ),
         );
         return;
@@ -171,10 +176,12 @@ setState(() {
             'createdAt': FieldValue.serverTimestamp(),
           });
 
-      if (!mounted) return;
+      if (!mounted) {
+        return;
+      }
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Memory saved successfully.')),
+        SnackBar(content: Text(AppLocalizations.of(context)!.memorySaved)),
       );
 
       Navigator.pop(context);
@@ -182,7 +189,9 @@ setState(() {
       debugPrint('ADD MEMORY ERROR: $error');
       debugPrintStack(label: 'ADD MEMORY STACK TRACE', stackTrace: stackTrace);
 
-      if (!mounted) return;
+      if (!mounted) {
+        return;
+      }
 
       setState(() {
         _isSaving = false;
@@ -190,7 +199,9 @@ setState(() {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Could not save the memory: $error'),
+          content: Text(
+            AppLocalizations.of(context)!.couldNotSaveMemory(error.toString()),
+          ),
           duration: const Duration(seconds: 8),
         ),
       );
@@ -199,8 +210,11 @@ setState(() {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context)!;
+    final validators = LocalizedFormValidators(strings);
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Add Memory')),
+      appBar: AppBar(title: Text(strings.addMemoryTitle)),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
@@ -210,12 +224,12 @@ setState(() {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Capture a family moment',
+                  strings.captureFamilyMoment,
                   style: Theme.of(context).textTheme.headlineMedium,
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Add a photo and save a moment your family can revisit together.',
+                  strings.addMemoryScreenDescription,
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
                 const SizedBox(height: 28),
@@ -230,15 +244,15 @@ setState(() {
                   child: InkWell(
                     onTap: _isSaving ? null : _pickImage,
                     child: _selectedImageBytes == null
-                        ? const Column(
+                        ? Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(
+                              const Icon(
                                 Icons.add_photo_alternate_outlined,
                                 size: 52,
                               ),
-                              SizedBox(height: 10),
-                              Text('Add Photo'),
+                              const SizedBox(height: 10),
+                              Text(strings.addPhoto),
                             ],
                           )
                         : Image.memory(
@@ -255,11 +269,11 @@ setState(() {
                   textCapitalization: TextCapitalization.words,
                   textInputAction: TextInputAction.next,
                   maxLength: 60,
-                  validator: FormValidators.validateMemoryTitle,
-                  decoration: const InputDecoration(
-                    labelText: 'Memory title',
-                    hintText: 'Day at the Zoo',
-                    prefixIcon: Icon(Icons.title),
+                  validator: validators.validateMemoryTitle,
+                  decoration: InputDecoration(
+                    labelText: strings.memoryTitleLabel,
+                    hintText: strings.memoryTitleHint,
+                    prefixIcon: const Icon(Icons.title),
                   ),
                 ),
                 const SizedBox(height: 18),
@@ -268,10 +282,10 @@ setState(() {
                   textCapitalization: TextCapitalization.sentences,
                   maxLength: 300,
                   maxLines: 4,
-                  decoration: const InputDecoration(
-                    labelText: 'Description',
-                    hintText: 'Tell the story behind this memory',
-                    prefixIcon: Icon(Icons.notes_outlined),
+                  decoration: InputDecoration(
+                    labelText: strings.memoryDescriptionLabel,
+                    hintText: strings.memoryDescriptionHint,
+                    prefixIcon: const Icon(Icons.notes_outlined),
                     alignLabelWithHint: true,
                   ),
                 ),
@@ -281,10 +295,10 @@ setState(() {
                   readOnly: true,
                   onTap: _selectDate,
                   validator: _validateDate,
-                  decoration: const InputDecoration(
-                    labelText: 'Date',
-                    hintText: 'DD/MM/YYYY',
-                    prefixIcon: Icon(Icons.calendar_today_outlined),
+                  decoration: InputDecoration(
+                    labelText: strings.memoryDateLabel,
+                    hintText: strings.memoryDateHint,
+                    prefixIcon: const Icon(Icons.calendar_today_outlined),
                   ),
                 ),
                 const SizedBox(height: 18),
@@ -292,10 +306,10 @@ setState(() {
                   controller: _locationController,
                   textCapitalization: TextCapitalization.words,
                   textInputAction: TextInputAction.done,
-                  decoration: const InputDecoration(
-                    labelText: 'Location (optional)',
-                    hintText: 'Al Ain Zoo',
-                    prefixIcon: Icon(Icons.location_on_outlined),
+                  decoration: InputDecoration(
+                    labelText: strings.memoryLocationOptional,
+                    hintText: strings.memoryLocationHint,
+                    prefixIcon: const Icon(Icons.location_on_outlined),
                   ),
                 ),
                 const SizedBox(height: 26),
@@ -309,7 +323,7 @@ setState(() {
                             height: 20,
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
-                        : const Text('Save Memory'),
+                        : Text(strings.saveMemory),
                   ),
                 ),
               ],

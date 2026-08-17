@@ -4,6 +4,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../../l10n/app_localizations.dart';
+
 class EditMemoryScreen extends StatefulWidget {
   const EditMemoryScreen({
     super.key,
@@ -101,13 +103,10 @@ class _EditMemoryScreenState extends State<EditMemoryScreen> {
     if (!mounted) return;
 
     if (bytes.lengthInBytes > _maxImageBytes) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'That photo is still too large. Please choose another photo.',
-          ),
-        ),
-      );
+      final strings = AppLocalizations.of(context)!;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(strings.photoTooLarge)));
       return;
     }
 
@@ -120,9 +119,10 @@ class _EditMemoryScreenState extends State<EditMemoryScreen> {
     final title = _titleController.text.trim();
 
     if (title.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Enter a title for the memory.')),
-      );
+      final strings = AppLocalizations.of(context)!;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(strings.enterMemoryTitle)));
       return;
     }
 
@@ -168,7 +168,11 @@ class _EditMemoryScreenState extends State<EditMemoryScreen> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Could not save changes: $error'),
+          content: Text(
+            AppLocalizations.of(
+              context,
+            )!.couldNotSaveMemoryChanges(error.toString()),
+          ),
           duration: const Duration(seconds: 8),
         ),
       );
@@ -210,13 +214,13 @@ class _EditMemoryScreenState extends State<EditMemoryScreen> {
       );
     }
 
-    return const Center(
+    return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.add_photo_alternate_outlined, size: 52),
-          SizedBox(height: 8),
-          Text('Add Photo'),
+          const Icon(Icons.add_photo_alternate_outlined, size: 52),
+          const SizedBox(height: 8),
+          Text(AppLocalizations.of(context)!.addPhoto),
         ],
       ),
     );
@@ -224,14 +228,15 @@ class _EditMemoryScreenState extends State<EditMemoryScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context)!;
     final formattedDate = _selectedDate == null
-        ? 'Choose date'
+        ? strings.chooseDate
         : '${_selectedDate!.day.toString().padLeft(2, '0')}/'
               '${_selectedDate!.month.toString().padLeft(2, '0')}/'
               '${_selectedDate!.year}';
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Edit Memory')),
+      appBar: AppBar(title: Text(strings.editMemory)),
       body: ListView(
         padding: const EdgeInsets.all(24),
         children: [
@@ -251,27 +256,27 @@ class _EditMemoryScreenState extends State<EditMemoryScreen> {
           const SizedBox(height: 20),
           TextField(
             controller: _titleController,
-            decoration: const InputDecoration(
-              labelText: 'Title',
-              prefixIcon: Icon(Icons.title),
+            decoration: InputDecoration(
+              labelText: strings.titleLabel,
+              prefixIcon: const Icon(Icons.title),
             ),
           ),
           const SizedBox(height: 16),
           TextField(
             controller: _descriptionController,
             maxLines: 5,
-            decoration: const InputDecoration(
-              labelText: 'Story',
-              prefixIcon: Icon(Icons.notes),
+            decoration: InputDecoration(
+              labelText: strings.storyLabel,
+              prefixIcon: const Icon(Icons.notes),
               alignLabelWithHint: true,
             ),
           ),
           const SizedBox(height: 16),
           TextField(
             controller: _locationController,
-            decoration: const InputDecoration(
-              labelText: 'Location',
-              prefixIcon: Icon(Icons.location_on_outlined),
+            decoration: InputDecoration(
+              labelText: strings.locationLabel,
+              prefixIcon: const Icon(Icons.location_on_outlined),
             ),
           ),
           const SizedBox(height: 16),
@@ -291,7 +296,7 @@ class _EditMemoryScreenState extends State<EditMemoryScreen> {
                       height: 22,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
-                  : const Text('Save Changes'),
+                  : Text(strings.saveChanges),
             ),
           ),
         ],

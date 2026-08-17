@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../l10n/app_localizations.dart';
 import '../config/competition_rewards.dart';
 import '../config/official_competition_games.dart';
 import '../models/competition_game_result.dart';
@@ -378,8 +379,10 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context)!;
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Daily Challenge')),
+      appBar: AppBar(title: Text(strings.dailyChallenge)),
       body: SafeArea(
         child: _isLoading
             ? const Center(child: CircularProgressIndicator())
@@ -396,6 +399,8 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> {
   }
 
   Widget _buildChallenge() {
+    final strings = AppLocalizations.of(context)!;
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
       child: Center(
@@ -412,10 +417,10 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> {
                 ),
                 child: Column(
                   children: [
-                    const Text(
-                      'TODAY\'S OFFICIAL CHALLENGE',
+                    Text(
+                      strings.todaysFamilyChallenge,
                       textAlign: TextAlign.center,
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.w800,
                         letterSpacing: 1,
@@ -471,7 +476,7 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'Official Daily rewards',
+                                  strings.dailyReward,
                                   style: Theme.of(context).textTheme.titleMedium
                                       ?.copyWith(fontWeight: FontWeight.w800),
                                 ),
@@ -521,7 +526,7 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> {
                   label: Text(
                     _isSettling
                         ? 'Saving official result...'
-                        : 'Start Today\'s Challenge',
+                        : strings.playTodaysChallenge,
                   ),
                 ),
               if (_latestResult != null) ...[

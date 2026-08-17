@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
+import '../../../l10n/app_localizations.dart';
 import 'edit_memory_screen.dart';
 
 class MemoryDetailsScreen extends StatelessWidget {
@@ -18,22 +19,21 @@ class MemoryDetailsScreen extends StatelessWidget {
   final String familyId;
 
   Future<void> _deleteMemory(BuildContext context) async {
+    final strings = AppLocalizations.of(context)!;
     final shouldDelete = await showDialog<bool>(
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('Delete memory?'),
-          content: const Text(
-            'This memory will be permanently removed from your family memories.',
-          ),
+          title: Text(strings.deleteMemoryQuestion),
+          content: Text(strings.deleteMemoryWarning),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: const Text('Cancel'),
+              child: Text(strings.cancel),
             ),
             FilledButton(
               onPressed: () => Navigator.pop(context, true),
-              child: const Text('Delete'),
+              child: Text(strings.delete),
             ),
           ],
         );
@@ -101,6 +101,7 @@ class MemoryDetailsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context)!;
     final memoryRef = FirebaseFirestore.instance
         .collection('families')
         .doc(familyId)
@@ -118,14 +119,14 @@ class MemoryDetailsScreen extends StatelessWidget {
 
         if (!snapshot.hasData || !snapshot.data!.exists) {
           return Scaffold(
-            appBar: AppBar(title: const Text('Memory')),
-            body: const Center(child: Text('Memory not found.')),
+            appBar: AppBar(title: Text(strings.memoryTitleGeneric)),
+            body: Center(child: Text(strings.memoryNotFound)),
           );
         }
 
         final data = snapshot.data!.data()!;
 
-        final title = data['title'] as String? ?? 'Memory';
+        final title = data['title'] as String? ?? strings.memoryTitleGeneric;
         final description = data['description'] as String? ?? '';
         final location = data['location'] as String? ?? '';
 
@@ -133,14 +134,14 @@ class MemoryDetailsScreen extends StatelessWidget {
         final date = timestamp?.toDate();
 
         final formattedDate = date == null
-            ? 'No date'
+            ? strings.noDate
             : '${date.day.toString().padLeft(2, '0')}/'
                   '${date.month.toString().padLeft(2, '0')}/'
                   '${date.year}';
 
         return Scaffold(
           appBar: AppBar(
-            title: const Text('Memory'),
+            title: Text(strings.memoryTitleGeneric),
             actions: [
               IconButton(
                 onPressed: () async {
@@ -155,12 +156,12 @@ class MemoryDetailsScreen extends StatelessWidget {
                     ),
                   );
                 },
-                tooltip: 'Edit memory',
+                tooltip: strings.editMemoryTooltip,
                 icon: const Icon(Icons.edit_outlined),
               ),
               IconButton(
                 onPressed: () => _deleteMemory(context),
-                tooltip: 'Delete memory',
+                tooltip: strings.deleteMemoryTooltip,
                 icon: const Icon(Icons.delete_outline),
               ),
             ],
@@ -197,7 +198,7 @@ class MemoryDetailsScreen extends StatelessWidget {
               if (description.isNotEmpty) ...[
                 const SizedBox(height: 28),
                 Text(
-                  'Story',
+                  strings.storyLabel,
                   style: Theme.of(
                     context,
                   ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),

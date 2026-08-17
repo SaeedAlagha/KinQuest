@@ -1,7 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+
+import '../../../l10n/app_localizations.dart';
 import '../../authentication/screens/welcome_screen.dart';
 import 'settings_screen.dart';
 
@@ -13,9 +15,10 @@ class ProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final strings = AppLocalizations.of(context)!;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Profile'), centerTitle: true),
+      appBar: AppBar(title: Text(strings.profileTitle), centerTitle: true),
       body: ListView(
         padding: const EdgeInsets.all(20),
         children: [
@@ -26,7 +29,7 @@ class ProfileScreen extends StatelessWidget {
 
           const SizedBox(height: 24),
 
-          const _SectionTitle(title: 'Family'),
+          _SectionTitle(title: strings.profileFamilySection),
           const SizedBox(height: 12),
 
           if (developerPreview)
@@ -36,36 +39,36 @@ class ProfileScreen extends StatelessWidget {
 
           const SizedBox(height: 24),
 
-          const _SectionTitle(title: 'Statistics'),
+          _SectionTitle(title: strings.statistics),
           const SizedBox(height: 12),
           if (developerPreview)
             const _DeveloperStatisticsGrid()
           else
             const _StatisticsGrid(),
           const SizedBox(height: 24),
-          const _SectionTitle(title: 'Rewards'),
+          _SectionTitle(title: strings.rewards),
           const SizedBox(height: 12),
           if (developerPreview)
             const _DeveloperRewardsSummary()
           else
             const _RewardsSummary(),
           const SizedBox(height: 24),
-          const _SectionTitle(title: 'Achievements'),
+          _SectionTitle(title: strings.achievements),
           const SizedBox(height: 12),
           if (developerPreview)
             const _DeveloperAchievementsSection()
           else
             const _AchievementsSection(),
           const SizedBox(height: 24),
-          const _SectionTitle(title: 'Family Wishes'),
+          _SectionTitle(title: strings.familyWishes),
           const SizedBox(height: 12),
           const _FamilyWishesSection(),
           const SizedBox(height: 24),
-          const _SectionTitle(title: 'Family Trophy Cabinet'),
+          _SectionTitle(title: strings.familyTrophyCabinet),
           const SizedBox(height: 12),
           const _TrophyCabinetPlaceholder(),
           const SizedBox(height: 24),
-          const _SectionTitle(title: 'Settings'),
+          _SectionTitle(title: strings.settings),
           const SizedBox(height: 12),
           const _SettingsSection(),
           const SizedBox(height: 28),
@@ -92,9 +95,9 @@ class ProfileScreen extends StatelessWidget {
                   );
                 },
                 icon: const Icon(Icons.logout_rounded),
-                label: const Text(
-                  'Log Out',
-                  style: TextStyle(fontWeight: FontWeight.bold),
+                label: Text(
+                  strings.logOut,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
               ),
             ),
@@ -112,6 +115,7 @@ class _DeveloperProfileHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final strings = AppLocalizations.of(context)!;
 
     return Card(
       margin: EdgeInsets.zero,
@@ -132,7 +136,7 @@ class _DeveloperProfileHeader extends StatelessWidget {
             ),
             const SizedBox(height: 14),
             Text(
-              'Sila Developer',
+              strings.silaDeveloper,
               style: Theme.of(
                 context,
               ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
@@ -146,7 +150,7 @@ class _DeveloperProfileHeader extends StatelessWidget {
             ),
             const SizedBox(height: 4),
             Text(
-              'Family: Developer Family',
+              strings.familyNameLabel(strings.developerFamilyName),
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                 color: colorScheme.primary,
                 fontWeight: FontWeight.w600,
@@ -162,37 +166,29 @@ class _DeveloperProfileHeader extends StatelessWidget {
 class _DeveloperStatisticsGrid extends StatelessWidget {
   const _DeveloperStatisticsGrid();
 
-  static const _statistics = [
-    _StatisticItem(
-      icon: Icons.sports_esports,
-      label: 'Games Played',
-      value: '12',
-    ),
-    _StatisticItem(icon: Icons.emoji_events, label: 'Wins', value: '7'),
-    _StatisticItem(
-      icon: Icons.local_fire_department,
-      label: 'Current Streak',
-      value: '4 days',
-    ),
-    _StatisticItem(icon: Icons.stars, label: 'Achievements', value: '2'),
-  ];
-
   @override
   Widget build(BuildContext context) {
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: _statistics.length,
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        crossAxisSpacing: 12,
-        mainAxisSpacing: 12,
-        childAspectRatio: 1.25,
+    final strings = AppLocalizations.of(context)!;
+    final statistics = [
+      _StatisticItem(
+        icon: Icons.sports_esports,
+        label: strings.gamesPlayed,
+        value: '12',
       ),
-      itemBuilder: (context, index) {
-        return _StatisticCard(statistic: _statistics[index]);
-      },
-    );
+      _StatisticItem(icon: Icons.emoji_events, label: strings.wins, value: '7'),
+      _StatisticItem(
+        icon: Icons.local_fire_department,
+        label: strings.currentStreak,
+        value: strings.profileDayCount(4),
+      ),
+      _StatisticItem(
+        icon: Icons.stars,
+        label: strings.achievements,
+        value: '2',
+      ),
+    ];
+
+    return _StatisticsCardsGrid(statistics: statistics);
   }
 }
 
@@ -201,21 +197,23 @@ class _DeveloperRewardsSummary extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Row(
+    final strings = AppLocalizations.of(context)!;
+
+    return Row(
       children: [
         Expanded(
           child: _RewardCard(
             icon: Icons.monetization_on,
             value: '480',
-            label: 'Family Tokens',
+            label: strings.familyTokens,
           ),
         ),
-        SizedBox(width: 12),
+        const SizedBox(width: 12),
         Expanded(
           child: _RewardCard(
             icon: Icons.auto_awesome,
             value: '2',
-            label: 'Family Wishes',
+            label: strings.familyWishes,
           ),
         ),
       ],
@@ -226,34 +224,35 @@ class _DeveloperRewardsSummary extends StatelessWidget {
 class _DeveloperAchievementsSection extends StatelessWidget {
   const _DeveloperAchievementsSection();
 
-  static const _achievements = [
-    _AchievementItem(
-      icon: Icons.photo_library,
-      title: 'Memory Keeper',
-      description: 'Save 100 family memories.',
-      progress: 0.18,
-      progressText: '18 / 100',
-    ),
-    _AchievementItem(
-      icon: Icons.quiz,
-      title: 'Quiz Master',
-      description: 'Win 20 Family Quizzes.',
-      progress: 0.35,
-      progressText: '7 / 20',
-    ),
-    _AchievementItem(
-      icon: Icons.groups,
-      title: 'Team Player',
-      description: 'Complete 30 Family Missions.',
-      progress: 0.4,
-      progressText: '12 / 30',
-    ),
-  ];
-
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context)!;
+    final achievements = [
+      _AchievementItem(
+        icon: Icons.photo_library,
+        title: strings.memoryKeeper,
+        description: strings.memoryKeeperDescription,
+        progress: 0.18,
+        progressText: '18 / 100',
+      ),
+      _AchievementItem(
+        icon: Icons.quiz,
+        title: strings.quizMaster,
+        description: strings.quizMasterDescription,
+        progress: 0.35,
+        progressText: '7 / 20',
+      ),
+      _AchievementItem(
+        icon: Icons.groups,
+        title: strings.teamPlayer,
+        description: strings.teamPlayerDescription,
+        progress: 0.4,
+        progressText: '12 / 30',
+      ),
+    ];
+
     return Column(
-      children: _achievements
+      children: achievements
           .map(
             (achievement) => Padding(
               padding: const EdgeInsets.only(bottom: 12),
@@ -272,13 +271,14 @@ class _ProfileHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context)!;
     final user = FirebaseAuth.instance.currentUser;
 
     if (user == null) {
-      return const Card(
+      return Card(
         child: Padding(
-          padding: EdgeInsets.all(20),
-          child: Text('No user is currently signed in.'),
+          padding: const EdgeInsets.all(20),
+          child: Text(strings.noUserSignedIn),
         ),
       );
     }
@@ -300,7 +300,7 @@ class _ProfileHeader extends StatelessWidget {
 
         final data = snapshot.data?.data();
 
-        final name = data?['name'] as String? ?? 'Sila Member';
+        final name = data?['name'] as String? ?? strings.silaMember;
         final email = data?['email'] as String? ?? user.email ?? '';
         final familyId = data?['familyId'] as String?;
 
@@ -340,7 +340,7 @@ class _ProfileHeader extends StatelessWidget {
                 const SizedBox(height: 4),
                 if (familyId == null || familyId.isEmpty)
                   Text(
-                    'No family joined yet',
+                    strings.noFamilyJoinedYet,
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                       color: colorScheme.primary,
                       fontWeight: FontWeight.w600,
@@ -355,10 +355,10 @@ class _ProfileHeader extends StatelessWidget {
                     builder: (context, familySnapshot) {
                       final familyData = familySnapshot.data?.data();
                       final familyName =
-                          familyData?['name'] as String? ?? 'Your Family';
+                          familyData?['name'] as String? ?? strings.yourFamily;
 
                       return Text(
-                        'Family: $familyName',
+                        strings.familyNameLabel(familyName),
                         style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                           color: colorScheme.primary,
                           fontWeight: FontWeight.w600,
@@ -380,6 +380,7 @@ class _StatisticsGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context)!;
     final user = FirebaseAuth.instance.currentUser;
 
     if (user == null) {
@@ -401,6 +402,7 @@ class _StatisticsGrid extends StatelessWidget {
 
         if (familyId == null || familyId.isEmpty) {
           return _buildStatistics(
+            strings: strings,
             gamesPlayed: gamesPlayed,
             wins: wins,
             currentStreak: currentStreak,
@@ -419,6 +421,7 @@ class _StatisticsGrid extends StatelessWidget {
             final memoryCount = memorySnapshot.data?.docs.length ?? 0;
 
             return _buildStatistics(
+              strings: strings,
               gamesPlayed: gamesPlayed,
               wins: wins,
               currentStreak: currentStreak,
@@ -431,6 +434,7 @@ class _StatisticsGrid extends StatelessWidget {
   }
 
   Widget _buildStatistics({
+    required AppLocalizations strings,
     required int gamesPlayed,
     required int wins,
     required int currentStreak,
@@ -442,38 +446,55 @@ class _StatisticsGrid extends StatelessWidget {
     final statistics = [
       _StatisticItem(
         icon: Icons.sports_esports,
-        label: 'Games Played',
+        label: strings.gamesPlayed,
         value: gamesPlayed.toString(),
       ),
       _StatisticItem(
         icon: Icons.emoji_events,
-        label: 'Wins',
+        label: strings.wins,
         value: wins.toString(),
       ),
       _StatisticItem(
         icon: Icons.local_fire_department,
-        label: 'Current Streak',
-        value: '$currentStreak ${currentStreak == 1 ? 'day' : 'days'}',
+        label: strings.currentStreak,
+        value: strings.profileDayCount(currentStreak),
       ),
       _StatisticItem(
         icon: Icons.stars,
-        label: 'Achievements',
+        label: strings.achievements,
         value: achievementsCompleted.toString(),
       ),
     ];
 
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: statistics.length,
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        crossAxisSpacing: 12,
-        mainAxisSpacing: 12,
-        childAspectRatio: 1.25,
-      ),
-      itemBuilder: (context, index) {
-        return _StatisticCard(statistic: statistics[index]);
+    return _StatisticsCardsGrid(statistics: statistics);
+  }
+}
+
+class _StatisticsCardsGrid extends StatelessWidget {
+  const _StatisticsCardsGrid({required this.statistics});
+
+  final List<_StatisticItem> statistics;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final childAspectRatio = constraints.maxWidth < 360 ? 0.75 : 1.25;
+
+        return GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: statistics.length,
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            crossAxisSpacing: 12,
+            mainAxisSpacing: 12,
+            childAspectRatio: childAspectRatio,
+          ),
+          itemBuilder: (context, index) {
+            return _StatisticCard(statistic: statistics[index]);
+          },
+        );
       },
     );
   }
@@ -522,24 +543,25 @@ class _RewardsSummary extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context)!;
     final user = FirebaseAuth.instance.currentUser;
 
     if (user == null) {
-      return const Row(
+      return Row(
         children: [
           Expanded(
             child: _RewardCard(
               icon: Icons.monetization_on,
               value: '0',
-              label: 'Family Tokens',
+              label: strings.familyTokens,
             ),
           ),
-          SizedBox(width: 12),
+          const SizedBox(width: 12),
           Expanded(
             child: _RewardCard(
               icon: Icons.auto_awesome,
               value: '0',
-              label: 'Family Wishes',
+              label: strings.familyWishes,
             ),
           ),
         ],
@@ -561,15 +583,15 @@ class _RewardsSummary extends StatelessWidget {
               child: _RewardCard(
                 icon: Icons.monetization_on,
                 value: tokens.toString(),
-                label: 'Family Tokens',
+                label: strings.familyTokens,
               ),
             ),
             const SizedBox(width: 12),
-            const Expanded(
+            Expanded(
               child: _RewardCard(
                 icon: Icons.auto_awesome,
                 value: '0',
-                label: 'Family Wishes',
+                label: strings.familyWishes,
               ),
             ),
           ],
@@ -628,6 +650,7 @@ class _AchievementsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context)!;
     final user = FirebaseAuth.instance.currentUser;
 
     if (user == null) {
@@ -649,6 +672,7 @@ class _AchievementsSection extends StatelessWidget {
 
         if (familyId == null || familyId.isEmpty) {
           return _buildAchievements(
+            strings: strings,
             wins: wins,
             quizProgress: quizProgress,
             memoryCount: 0,
@@ -667,6 +691,7 @@ class _AchievementsSection extends StatelessWidget {
             final memoryCount = memorySnapshot.data?.docs.length ?? 0;
 
             return _buildAchievements(
+              strings: strings,
               wins: wins,
               quizProgress: quizProgress,
               memoryCount: memoryCount,
@@ -679,6 +704,7 @@ class _AchievementsSection extends StatelessWidget {
   }
 
   Widget _buildAchievements({
+    required AppLocalizations strings,
     required int wins,
     required double quizProgress,
     required int memoryCount,
@@ -689,22 +715,22 @@ class _AchievementsSection extends StatelessWidget {
     final achievements = [
       _AchievementItem(
         icon: Icons.photo_library,
-        title: 'Memory Keeper',
-        description: 'Save 100 family memories.',
+        title: strings.memoryKeeper,
+        description: strings.memoryKeeperDescription,
         progress: memoryProgress,
         progressText: '$memoryCount / 100',
       ),
       _AchievementItem(
         icon: Icons.quiz,
-        title: 'Quiz Master',
-        description: 'Win 20 Family Quizzes.',
+        title: strings.quizMaster,
+        description: strings.quizMasterDescription,
         progress: quizProgress,
         progressText: '$wins / 20',
       ),
       _AchievementItem(
         icon: Icons.groups,
-        title: 'Team Player',
-        description: 'Complete 30 Family Missions.',
+        title: strings.teamPlayer,
+        description: strings.teamPlayerDescription,
         progress: missionProgress,
         progressText: '$missionsCompleted / 30',
       ),
@@ -786,11 +812,12 @@ class _FamilyWishesSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const _EmptyStateCard(
+    final strings = AppLocalizations.of(context)!;
+
+    return _EmptyStateCard(
       icon: Icons.auto_awesome,
-      title: 'No Family Wishes yet',
-      description:
-          'Family Wishes earned from major competitions will appear here.',
+      title: strings.noFamilyWishesYet,
+      description: strings.familyWishesEmptyDescription,
     );
   }
 }
@@ -844,6 +871,7 @@ class _TrophyCabinetPlaceholder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final strings = AppLocalizations.of(context)!;
 
     return Container(
       padding: const EdgeInsets.all(22),
@@ -856,14 +884,14 @@ class _TrophyCabinetPlaceholder extends StatelessWidget {
           Icon(Icons.emoji_events, size: 48, color: colorScheme.primary),
           const SizedBox(height: 12),
           Text(
-            'No trophies yet',
+            strings.noTrophiesYet,
             style: Theme.of(
               context,
             ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 6),
           Text(
-            'Weekly and monthly championship trophies will appear here.',
+            strings.trophiesEmptyDescription,
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.bodyMedium,
           ),
@@ -878,6 +906,8 @@ class _SettingsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context)!;
+
     return Card(
       margin: EdgeInsets.zero,
       elevation: 1,
@@ -886,8 +916,8 @@ class _SettingsSection extends StatelessWidget {
         children: [
           ListTile(
             leading: const Icon(Icons.settings_rounded),
-            title: const Text('App Settings'),
-            subtitle: const Text('Language, notifications, and preferences'),
+            title: Text(strings.appSettings),
+            subtitle: Text(strings.appSettingsDescription),
             trailing: const Icon(Icons.chevron_right_rounded),
             onTap: () {
               Navigator.push(
@@ -899,7 +929,7 @@ class _SettingsSection extends StatelessWidget {
           const Divider(height: 1),
           ListTile(
             leading: const Icon(Icons.lock_outline_rounded),
-            title: const Text('Privacy & Security'),
+            title: Text(strings.privacySecurity),
             trailing: const Icon(Icons.chevron_right_rounded),
             onTap: () {
               Navigator.push(
@@ -913,7 +943,7 @@ class _SettingsSection extends StatelessWidget {
           const Divider(height: 1),
           ListTile(
             leading: const Icon(Icons.notifications_outlined),
-            title: const Text('Notifications'),
+            title: Text(strings.notifications),
             trailing: const Icon(Icons.chevron_right_rounded),
             onTap: () {
               Navigator.push(
@@ -979,13 +1009,14 @@ class _FamilyDetailsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context)!;
     final user = FirebaseAuth.instance.currentUser;
 
     if (user == null) {
-      return const Card(
+      return Card(
         child: Padding(
-          padding: EdgeInsets.all(20),
-          child: Text('No user is currently signed in.'),
+          padding: const EdgeInsets.all(20),
+          child: Text(strings.noUserSignedIn),
         ),
       );
     }
@@ -1009,10 +1040,10 @@ class _FamilyDetailsCard extends StatelessWidget {
         final familyId = userData?['familyId'] as String?;
 
         if (familyId == null || familyId.isEmpty) {
-          return const Card(
+          return Card(
             child: Padding(
-              padding: EdgeInsets.all(20),
-              child: Text('You have not joined a family yet.'),
+              padding: const EdgeInsets.all(20),
+              child: Text(strings.youHaveNotJoinedFamily),
             ),
           );
         }
@@ -1034,7 +1065,8 @@ class _FamilyDetailsCard extends StatelessWidget {
 
             final familyData = familySnapshot.data?.data();
 
-            final familyName = familyData?['name'] as String? ?? 'Your Family';
+            final familyName =
+                familyData?['name'] as String? ?? strings.yourFamily;
 
             final inviteCode = familyData?['inviteCode'] as String? ?? familyId;
 
@@ -1067,7 +1099,7 @@ class _FamilyDetailsCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 18),
                     Text(
-                      'Invite Code',
+                      strings.inviteCodeLabel,
                       style: Theme.of(context).textTheme.labelLarge,
                     ),
                     const SizedBox(height: 6),
@@ -1076,6 +1108,7 @@ class _FamilyDetailsCard extends StatelessWidget {
                         Expanded(
                           child: SelectableText(
                             inviteCode,
+                            textDirection: TextDirection.ltr,
                             style: Theme.of(context).textTheme.headlineSmall
                                 ?.copyWith(
                                   fontWeight: FontWeight.bold,
@@ -1084,7 +1117,7 @@ class _FamilyDetailsCard extends StatelessWidget {
                           ),
                         ),
                         IconButton.filledTonal(
-                          tooltip: 'Copy invite code',
+                          tooltip: strings.copyInviteCode,
                           onPressed: () async {
                             await Clipboard.setData(
                               ClipboardData(text: inviteCode),
@@ -1095,8 +1128,8 @@ class _FamilyDetailsCard extends StatelessWidget {
                             }
 
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Family invite code copied.'),
+                              SnackBar(
+                                content: Text(strings.familyInviteCodeCopied),
                               ),
                             );
                           },
@@ -1106,12 +1139,12 @@ class _FamilyDetailsCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 12),
                     Text(
-                      '${members.length} family member${members.length == 1 ? '' : 's'}',
+                      strings.profileFamilyMemberCount(members.length),
                       style: Theme.of(context).textTheme.bodyMedium,
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      'Share this code with relatives so they can join this family.',
+                      strings.shareFamilyInviteCode,
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
                   ],
@@ -1130,6 +1163,8 @@ class _DeveloperFamilyCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context)!;
+
     return Card(
       margin: EdgeInsets.zero,
       child: Padding(
@@ -1138,23 +1173,24 @@ class _DeveloperFamilyCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Developer Family',
+              strings.developerFamilyName,
               style: Theme.of(
                 context,
               ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 14),
-            const Text('Invite Code'),
+            Text(strings.inviteCodeLabel),
             const SizedBox(height: 6),
             Text(
               'DEV123',
+              textDirection: TextDirection.ltr,
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.bold,
                 letterSpacing: 2,
               ),
             ),
             const SizedBox(height: 10),
-            const Text('4 family members'),
+            Text(strings.profileFamilyMemberCount(4)),
           ],
         ),
       ),

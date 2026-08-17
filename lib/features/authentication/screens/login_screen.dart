@@ -1,11 +1,12 @@
-import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 
-import '../../../core/widgets/sila_brand_mark.dart';
 import '../../../core/validation/form_validators.dart';
-import 'signup_screen.dart';
+import '../../../core/widgets/sila_brand_mark.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../home/screens/main_navigation_screen.dart';
+import 'signup_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -63,31 +64,32 @@ class _LoginScreenState extends State<LoginScreen> {
         return;
       }
 
+      final strings = AppLocalizations.of(context)!;
       String message;
 
       switch (error.code) {
         case 'invalid-credential':
-          message = 'Incorrect email or password.';
+          message = strings.incorrectEmailOrPassword;
           break;
 
         case 'user-disabled':
-          message = 'This account has been disabled.';
+          message = strings.accountDisabled;
           break;
 
         case 'invalid-email':
-          message = 'Please enter a valid email address.';
+          message = strings.pleaseEnterValidEmail;
           break;
 
         case 'too-many-requests':
-          message = 'Too many attempts. Please try again later.';
+          message = strings.tooManyLoginAttempts;
           break;
 
         case 'network-request-failed':
-          message = 'No internet connection. Please try again.';
+          message = strings.noInternetConnection;
           break;
 
         default:
-          message = 'Could not log in. Please try again.';
+          message = strings.couldNotLogIn;
       }
 
       ScaffoldMessenger.of(
@@ -121,8 +123,11 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context)!;
+    final validators = LocalizedFormValidators(strings);
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Log In')),
+      appBar: AppBar(title: Text(strings.logIn)),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
@@ -141,14 +146,14 @@ class _LoginScreenState extends State<LoginScreen> {
                     const SizedBox(height: 24),
 
                     Text(
-                      'Welcome back to Sila',
+                      strings.welcomeBackToSila,
                       style: Theme.of(context).textTheme.headlineMedium,
                     ),
 
                     const SizedBox(height: 8),
 
                     Text(
-                      'Reconnect with your family circle and continue where you left off.',
+                      strings.loginDescription,
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
 
@@ -159,11 +164,11 @@ class _LoginScreenState extends State<LoginScreen> {
                       keyboardType: TextInputType.emailAddress,
                       textInputAction: TextInputAction.next,
                       autocorrect: false,
-                      validator: FormValidators.validateEmail,
-                      decoration: const InputDecoration(
-                        labelText: 'Email address',
-                        hintText: 'name@example.com',
-                        prefixIcon: Icon(Icons.email_outlined),
+                      validator: validators.validateEmail,
+                      decoration: InputDecoration(
+                        labelText: strings.emailAddress,
+                        hintText: strings.emailAddressHint,
+                        prefixIcon: const Icon(Icons.email_outlined),
                       ),
                     ),
 
@@ -173,10 +178,10 @@ class _LoginScreenState extends State<LoginScreen> {
                       controller: _passwordController,
                       obscureText: _hidePassword,
                       textInputAction: TextInputAction.done,
-                      validator: FormValidators.validatePassword,
+                      validator: validators.validatePassword,
                       onFieldSubmitted: (_) => _login(),
                       decoration: InputDecoration(
-                        labelText: 'Password',
+                        labelText: strings.password,
                         prefixIcon: const Icon(Icons.lock_outline),
                         suffixIcon: IconButton(
                           onPressed: () {
@@ -196,18 +201,16 @@ class _LoginScreenState extends State<LoginScreen> {
                     const SizedBox(height: 8),
 
                     Align(
-                      alignment: Alignment.centerRight,
+                      alignment: AlignmentDirectional.centerEnd,
                       child: TextButton(
                         onPressed: () {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text(
-                                'Password recovery will be added with Firebase.',
-                              ),
+                            SnackBar(
+                              content: Text(strings.passwordRecoveryComing),
                             ),
                           );
                         },
-                        child: const Text('Forgot password?'),
+                        child: Text(strings.forgotPassword),
                       ),
                     ),
 
@@ -217,7 +220,9 @@ class _LoginScreenState extends State<LoginScreen> {
                       width: double.infinity,
                       child: FilledButton(
                         onPressed: _isLoggingIn ? null : _login,
-                        child: Text(_isLoggingIn ? 'Logging In...' : 'Log In'),
+                        child: Text(
+                          _isLoggingIn ? strings.loggingIn : strings.logIn,
+                        ),
                       ),
                     ),
 
@@ -230,13 +235,13 @@ class _LoginScreenState extends State<LoginScreen> {
                               ? null
                               : _openDeveloperPreview,
                           icon: const Icon(Icons.developer_mode_rounded),
-                          label: const Text('Enter Developer Family'),
+                          label: Text(strings.enterDeveloperFamily),
                         ),
                       ),
                       const SizedBox(height: 8),
                       Center(
                         child: Text(
-                          'Debug preview only • Uses read-only demo data',
+                          strings.debugPreviewDescription,
                           textAlign: TextAlign.center,
                           style: Theme.of(context).textTheme.bodySmall,
                         ),
@@ -245,13 +250,14 @@ class _LoginScreenState extends State<LoginScreen> {
 
                     const SizedBox(height: 24),
 
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                    Wrap(
+                      alignment: WrapAlignment.center,
+                      crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
-                        const Text("Don't have an account?"),
+                        Text(strings.noAccount),
                         TextButton(
                           onPressed: _openSignup,
-                          child: const Text('Create one'),
+                          child: Text(strings.createOne),
                         ),
                       ],
                     ),

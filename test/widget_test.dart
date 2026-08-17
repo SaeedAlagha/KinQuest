@@ -5,6 +5,7 @@ import 'package:kinquest/core/theme/app_theme.dart';
 import 'package:kinquest/core/widgets/sila_brand_mark.dart';
 import 'package:kinquest/features/authentication/screens/login_screen.dart';
 import 'package:kinquest/features/home/screens/main_navigation_screen.dart';
+import 'package:kinquest/l10n/app_localizations.dart';
 import 'package:kinquest/main.dart';
 
 void main() {
@@ -21,9 +22,7 @@ void main() {
   testWidgets('authentication pages keep the logo without the family banner', (
     tester,
   ) async {
-    await tester.pumpWidget(
-      MaterialApp(theme: AppTheme.lightTheme, home: const LoginScreen()),
-    );
+    await tester.pumpWidget(_testApp(const LoginScreen()));
 
     expect(find.byType(SilaBrandMark), findsOneWidget);
     expect(find.text('عام الأسرة 2026'), findsNothing);
@@ -40,9 +39,7 @@ void main() {
   testWidgets('developer family preview bypasses login with demo data', (
     tester,
   ) async {
-    await tester.pumpWidget(
-      MaterialApp(theme: AppTheme.lightTheme, home: const LoginScreen()),
-    );
+    await tester.pumpWidget(_testApp(const LoginScreen()));
 
     final previewButton = find.text('Enter Developer Family');
     await tester.ensureVisible(previewButton);
@@ -70,10 +67,7 @@ void main() {
     addTearDown(tester.view.resetDevicePixelRatio);
 
     await tester.pumpWidget(
-      MaterialApp(
-        theme: AppTheme.lightTheme,
-        home: const MainNavigationScreen(developerPreview: true),
-      ),
+      _testApp(const MainNavigationScreen(developerPreview: true)),
     );
 
     final navigationBar = find.byType(NavigationBar);
@@ -111,4 +105,13 @@ void main() {
     expect(find.text('preview@sila.local'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
+}
+
+Widget _testApp(Widget home) {
+  return MaterialApp(
+    theme: AppTheme.lightTheme,
+    supportedLocales: AppLocalizations.supportedLocales,
+    localizationsDelegates: AppLocalizations.localizationsDelegates,
+    home: home,
+  );
 }
