@@ -25,9 +25,11 @@ class CaptionBattleScreen extends StatefulWidget {
   const CaptionBattleScreen({
     super.key,
     this.playMode = GamePlayMode.quickPlay,
+    this.participantIds,
   });
 
   final GamePlayMode playMode;
+  final Set<String>? participantIds;
 
   @override
   State<CaptionBattleScreen> createState() => _CaptionBattleScreenState();
@@ -104,24 +106,32 @@ class _CaptionBattleScreenState extends State<CaptionBattleScreen> {
         throw Exception('Join or create a family before playing.');
       }
 
-      final memberSnapshot = await FirebaseFirestore.instance
+      final membersSnapshot = await FirebaseFirestore.instance
           .collection('users')
           .where('familyId', isEqualTo: familyId)
           .get();
 
-      final members = memberSnapshot.docs.map((doc) {
-        final data = doc.data();
+      final members = membersSnapshot.docs
+          .where(
+            (doc) =>
+                widget.participantIds == null ||
+                widget.participantIds!.contains(doc.id),
+          )
+          .map((doc) {
+            final data = doc.data();
 
-        final displayName = (data['name'] as String?)?.trim().isNotEmpty == true
-            ? (data['name'] as String).trim()
-            : (data['displayName'] as String?)?.trim().isNotEmpty == true
-            ? (data['displayName'] as String).trim()
-            : (data['email'] as String?)?.trim().isNotEmpty == true
-            ? (data['email'] as String).trim()
-            : 'Family Member';
+            final displayName =
+                (data['name'] as String?)?.trim().isNotEmpty == true
+                ? (data['name'] as String).trim()
+                : (data['displayName'] as String?)?.trim().isNotEmpty == true
+                ? (data['displayName'] as String).trim()
+                : (data['email'] as String?)?.trim().isNotEmpty == true
+                ? (data['email'] as String).trim()
+                : 'Family Member';
 
-        return _CaptionPlayer(id: doc.id, name: displayName);
-      }).toList();
+            return _CaptionPlayer(id: doc.id, name: displayName);
+          })
+          .toList();
 
       members.sort(
         (a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()),
@@ -168,14 +178,13 @@ class _CaptionBattleScreenState extends State<CaptionBattleScreen> {
       }
 
       if (!mounted) return;
-
       setState(() {
         _familyMembers = members;
         _memories = memories;
 
         _selectedPlayerIds
           ..clear()
-          ..addAll(members.map((member) => member.id));
+          ..addAll(widget.participantIds ?? members.map((member) => member.id));
 
         _isLoading = false;
       });
@@ -606,15 +615,17 @@ class _CaptionBattleScreenState extends State<CaptionBattleScreen> {
                         value: _selectedPlayerIds.contains(member.id),
                         title: Text(member.name),
                         secondary: const Icon(Icons.person_rounded),
-                        onChanged: (value) {
-                          setState(() {
-                            if (value == true) {
-                              _selectedPlayerIds.add(member.id);
-                            } else {
-                              _selectedPlayerIds.remove(member.id);
-                            }
-                          });
-                        },
+                        onChanged: widget.participantIds == null
+                            ? (value) {
+                                setState(() {
+                                  if (value == true) {
+                                    _selectedPlayerIds.add(member.id);
+                                  } else {
+                                    _selectedPlayerIds.remove(member.id);
+                                  }
+                                });
+                              }
+                            : null,
                       ),
                   ],
                 ),

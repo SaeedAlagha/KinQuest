@@ -21,9 +21,14 @@ enum _DrawGamePhase {
 }
 
 class DrawAndGuessScreen extends StatefulWidget {
-  const DrawAndGuessScreen({super.key, this.playMode = GamePlayMode.quickPlay});
+  const DrawAndGuessScreen({
+    super.key,
+    this.playMode = GamePlayMode.quickPlay,
+    this.participantIds,
+  });
 
   final GamePlayMode playMode;
+  final Set<String>? participantIds;
 
   @override
   State<DrawAndGuessScreen> createState() => _DrawAndGuessScreenState();
@@ -110,19 +115,26 @@ class _DrawAndGuessScreenState extends State<DrawAndGuessScreen> {
           .where('familyId', isEqualTo: familyId)
           .get();
 
-      final members = membersSnapshot.docs.map((document) {
-        final data = document.data();
+      final members = membersSnapshot.docs
+          .where(
+            (document) =>
+                widget.participantIds == null ||
+                widget.participantIds!.contains(document.id),
+          )
+          .map((document) {
+            final data = document.data();
 
-        final name = data['name'] as String?;
-        final email = data['email'] as String?;
+            final name = data['name'] as String?;
+            final email = data['email'] as String?;
 
-        return _DrawPlayer(
-          id: document.id,
-          name: name?.trim().isNotEmpty == true
-              ? name!
-              : email ?? 'Family Member',
-        );
-      }).toList();
+            return _DrawPlayer(
+              id: document.id,
+              name: name?.trim().isNotEmpty == true
+                  ? name!
+                  : email ?? 'Family Member',
+            );
+          })
+          .toList();
 
       members.sort(
         (a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()),
@@ -136,6 +148,10 @@ class _DrawAndGuessScreenState extends State<DrawAndGuessScreen> {
         _familyMembers
           ..clear()
           ..addAll(members);
+
+        _selectedPlayerIds
+          ..clear()
+          ..addAll(widget.participantIds ?? members.map((member) => member.id));
 
         _isLoading = false;
       });
@@ -332,7 +348,9 @@ class _DrawAndGuessScreenState extends State<DrawAndGuessScreen> {
                   margin: EdgeInsets.zero,
                   child: CheckboxListTile(
                     value: selected,
-                    onChanged: (_) => _togglePlayer(player),
+                    onChanged: widget.participantIds == null
+                        ? (_) => _togglePlayer(player)
+                        : null,
                     secondary: CircleAvatar(
                       child: Text(
                         player.name.isEmpty

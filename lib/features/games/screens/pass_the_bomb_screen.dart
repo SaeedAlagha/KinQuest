@@ -14,9 +14,14 @@ import '../services/pass_the_bomb_ai_service.dart';
 enum _BombPhase { setup, playing, roundResult, finalLeaderboard }
 
 class PassTheBombScreen extends StatefulWidget {
-  const PassTheBombScreen({super.key, this.playMode = GamePlayMode.quickPlay});
+  const PassTheBombScreen({
+    super.key,
+    this.playMode = GamePlayMode.quickPlay,
+    this.participantIds,
+  });
 
   final GamePlayMode playMode;
+  final Set<String>? participantIds;
 
   @override
   State<PassTheBombScreen> createState() => _PassTheBombScreenState();
@@ -101,19 +106,26 @@ class _PassTheBombScreenState extends State<PassTheBombScreen> {
           .where('familyId', isEqualTo: familyId)
           .get();
 
-      final members = membersSnapshot.docs.map((document) {
-        final data = document.data();
+      final members = membersSnapshot.docs
+          .where(
+            (document) =>
+                widget.participantIds == null ||
+                widget.participantIds!.contains(document.id),
+          )
+          .map((document) {
+            final data = document.data();
 
-        final name = data['name'] as String?;
-        final email = data['email'] as String?;
+            final name = data['name'] as String?;
+            final email = data['email'] as String?;
 
-        return _BombPlayer(
-          id: document.id,
-          name: name?.trim().isNotEmpty == true
-              ? name!
-              : email ?? 'Family Member',
-        );
-      }).toList();
+            return _BombPlayer(
+              id: document.id,
+              name: name?.trim().isNotEmpty == true
+                  ? name!
+                  : email ?? 'Family Member',
+            );
+          })
+          .toList();
 
       members.sort(
         (a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()),
@@ -125,6 +137,10 @@ class _PassTheBombScreenState extends State<PassTheBombScreen> {
         _familyMembers
           ..clear()
           ..addAll(members);
+
+        _selectedPlayerIds
+          ..clear()
+          ..addAll(widget.participantIds ?? members.map((member) => member.id));
 
         _isLoading = false;
       });
@@ -502,7 +518,9 @@ class _PassTheBombScreenState extends State<PassTheBombScreen> {
                 return Card(
                   child: CheckboxListTile(
                     value: selected,
-                    onChanged: (_) => _togglePlayer(player),
+                    onChanged: widget.participantIds == null
+                        ? (_) => _togglePlayer(player)
+                        : null,
                     title: Text(player.name),
                     secondary: CircleAvatar(
                       child: Text(

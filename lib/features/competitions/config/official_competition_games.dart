@@ -8,7 +8,8 @@ import '../../games/screens/secret_mission_screen.dart';
 import '../models/game_play_mode.dart';
 import 'competition_games.dart';
 
-typedef OfficialGameBuilder = Widget Function(GamePlayMode playMode);
+typedef OfficialGameBuilder =
+    Widget Function(GamePlayMode playMode, Set<String>? participantIds);
 
 class OfficialCompetitionGame {
   const OfficialCompetitionGame({
@@ -25,8 +26,8 @@ class OfficialCompetitionGame {
   final String description;
   final OfficialGameBuilder builder;
 
-  Widget build(GamePlayMode playMode) {
-    return builder(playMode);
+  Widget build(GamePlayMode playMode, {Set<String>? participantIds}) {
+    return builder(playMode, participantIds);
   }
 }
 
@@ -40,7 +41,8 @@ class OfficialCompetitionGames {
       icon: Icons.visibility_off_rounded,
       description:
           'Find the impostor, protect the secret word, and outsmart your family.',
-      builder: (playMode) => FamilyImpostorScreen(playMode: playMode),
+      builder: (playMode, participantIds) =>
+          FamilyImpostorScreen(playMode: playMode),
     ),
     OfficialCompetitionGame(
       gameId: CompetitionGameIds.passTheBomb,
@@ -48,7 +50,8 @@ class OfficialCompetitionGames {
       icon: Icons.timer_rounded,
       description:
           'Think fast, answer before time runs out, and survive every round.',
-      builder: (playMode) => PassTheBombScreen(playMode: playMode),
+      builder: (playMode, participantIds) =>
+          PassTheBombScreen(playMode: playMode, participantIds: participantIds),
     ),
     OfficialCompetitionGame(
       gameId: CompetitionGameIds.secretMission,
@@ -56,7 +59,10 @@ class OfficialCompetitionGames {
       icon: Icons.assignment_ind_rounded,
       description:
           'Complete private missions without making your family suspicious.',
-      builder: (playMode) => SecretMissionScreen(playMode: playMode),
+      builder: (playMode, participantIds) => SecretMissionScreen(
+        playMode: playMode,
+        participantIds: participantIds,
+      ),
     ),
     OfficialCompetitionGame(
       gameId: CompetitionGameIds.drawAndGuess,
@@ -64,7 +70,10 @@ class OfficialCompetitionGames {
       icon: Icons.draw_rounded,
       description:
           'Draw the prompt, help your family guess it, and collect points.',
-      builder: (playMode) => DrawAndGuessScreen(playMode: playMode),
+      builder: (playMode, participantIds) => DrawAndGuessScreen(
+        playMode: playMode,
+        participantIds: participantIds,
+      ),
     ),
     OfficialCompetitionGame(
       gameId: CompetitionGameIds.captionBattle,
@@ -72,9 +81,16 @@ class OfficialCompetitionGames {
       icon: Icons.add_reaction_rounded,
       description:
           'Write hilarious captions for family memories and vote for the best.',
-      builder: (playMode) => CaptionBattleScreen(playMode: playMode),
+      builder: (playMode, participantIds) => CaptionBattleScreen(
+        playMode: playMode,
+        participantIds: participantIds,
+      ),
     ),
   ];
+
+  static final List<OfficialCompetitionGame> monthlyPool = dailyPool
+      .where((game) => game.gameId != CompetitionGameIds.familyImpostor)
+      .toList();
 
   static OfficialCompetitionGame dailyGameFor(DateTime date) {
     final normalizedDate = DateTime.utc(date.year, date.month, date.day);
