@@ -825,4 +825,323 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get validationInvitationCodeCharacters =>
       'يمكن أن يحتوي رمز الدعوة على أحرف وأرقام فقط.';
+
+  @override
+  String get memoriesTitle => 'الذكريات';
+
+  @override
+  String get memoryTitleGeneric => 'ذكرى';
+
+  @override
+  String get memoriesFamilyRequired =>
+      'انضم إلى عائلة أو أنشئ واحدة لعرض الذكريات.';
+
+  @override
+  String get memoriesLoadError => 'تعذر تحميل الذكريات.';
+
+  @override
+  String get noMemoriesYet => 'لا توجد ذكريات بعد';
+
+  @override
+  String get memoriesEmptyDescription =>
+      'احفظوا الصور ومقاطع الفيديو والقصص من لحظاتكم العائلية.';
+
+  @override
+  String get addFirstMemory => 'أضف أول ذكرى';
+
+  @override
+  String get developerMemoriesTitle => 'ذكريات عائلة المطوّر';
+
+  @override
+  String get developerMemoriesDescription =>
+      'لحظات تجريبية لمراجعة التجربة. لا يتم حفظها في Firebase.';
+
+  @override
+  String get developerMemoriesReadOnly =>
+      'معاينة المطوّر للقراءة فقط. لم يتم تغيير أي بيانات.';
+
+  @override
+  String get previewPicnicTitle => 'نزهة عائلية في حديقة مشرف';
+
+  @override
+  String get previewPicnicDescription =>
+      'ظهيرة مشمسة مليئة بالألعاب والقصص والضحكات.';
+
+  @override
+  String get previewPicnicDetails => '٠٢/٠٨/٢٠٢٦ • دبي';
+
+  @override
+  String get previewLunchTitle => 'غداء الجمعة معًا';
+
+  @override
+  String get previewLunchDescription =>
+      'شاركتنا الجدة وصفتها العائلية المفضلة.';
+
+  @override
+  String get previewLunchDetails => '٣١/٠٧/٢٠٢٦ • المنزل';
+
+  @override
+  String get previewSunsetTitle => 'نزهة وقت الغروب';
+
+  @override
+  String get previewSunsetDescription =>
+      'شاهدنا الغروب وخططنا ليومنا العائلي القادم.';
+
+  @override
+  String get previewSunsetDetails => '٢٥/٠٧/٢٠٢٦ • كورنيش أبوظبي';
+
+  @override
+  String get addMemoryTitle => 'إضافة ذكرى';
+
+  @override
+  String get captureFamilyMoment => 'التقط لحظة عائلية';
+
+  @override
+  String get addMemoryScreenDescription =>
+      'أضف صورة واحفظ لحظة يمكن لعائلتك استعادتها معًا.';
+
+  @override
+  String get addPhoto => 'إضافة صورة';
+
+  @override
+  String get photoTooLarge =>
+      'لا يزال حجم الصورة كبيرًا جدًا. يرجى اختيار صورة أخرى.';
+
+  @override
+  String get memoryDateRequired => 'تاريخ الذكرى مطلوب.';
+
+  @override
+  String get selectValidMemoryDate => 'اختر تاريخًا صالحًا للذكرى.';
+
+  @override
+  String get saveMemorySignInRequired => 'يجب تسجيل الدخول لحفظ ذكرى.';
+
+  @override
+  String get addMemoryFamilyRequired =>
+      'انضم إلى عائلة أو أنشئ واحدة قبل إضافة الذكريات.';
+
+  @override
+  String get memorySaved => 'تم حفظ الذكرى بنجاح.';
+
+  @override
+  String couldNotSaveMemory(String error) {
+    return 'تعذر حفظ الذكرى: $error';
+  }
+
+  @override
+  String get memoryTitleLabel => 'عنوان الذكرى';
+
+  @override
+  String get memoryTitleHint => 'يوم في حديقة الحيوان';
+
+  @override
+  String get memoryDescriptionLabel => 'الوصف';
+
+  @override
+  String get memoryDescriptionHint => 'احكِ القصة وراء هذه الذكرى';
+
+  @override
+  String get memoryDateLabel => 'التاريخ';
+
+  @override
+  String get memoryDateHint => 'يوم/شهر/سنة';
+
+  @override
+  String get memoryLocationOptional => 'الموقع (اختياري)';
+
+  @override
+  String get memoryLocationHint => 'حديقة حيوانات العين';
+
+  @override
+  String get saveMemory => 'حفظ الذكرى';
+
+  @override
+  String get editMemory => 'تعديل الذكرى';
+
+  @override
+  String get enterMemoryTitle => 'أدخل عنوانًا للذكرى.';
+
+  @override
+  String couldNotSaveMemoryChanges(String error) {
+    return 'تعذر حفظ التغييرات: $error';
+  }
+
+  @override
+  String get titleLabel => 'العنوان';
+
+  @override
+  String get storyLabel => 'القصة';
+
+  @override
+  String get locationLabel => 'الموقع';
+
+  @override
+  String get chooseDate => 'اختر التاريخ';
+
+  @override
+  String get saveChanges => 'حفظ التغييرات';
+
+  @override
+  String get deleteMemoryQuestion => 'حذف الذكرى؟';
+
+  @override
+  String get deleteMemoryWarning =>
+      'ستتم إزالة هذه الذكرى نهائيًا من ذكريات عائلتك.';
+
+  @override
+  String get cancel => 'إلغاء';
+
+  @override
+  String get delete => 'حذف';
+
+  @override
+  String get memoryNotFound => 'لم يتم العثور على الذكرى.';
+
+  @override
+  String get noDate => 'لا يوجد تاريخ';
+
+  @override
+  String get editMemoryTooltip => 'تعديل الذكرى';
+
+  @override
+  String get deleteMemoryTooltip => 'حذف الذكرى';
+
+  @override
+  String get validationMemoryTitleRequired => 'عنوان الذكرى مطلوب.';
+
+  @override
+  String get validationMemoryTitleMinLength =>
+      'يجب أن يحتوي عنوان الذكرى على حرفين على الأقل.';
+
+  @override
+  String get validationMemoryTitleMaxLength =>
+      'لا يمكن أن يزيد عنوان الذكرى على ٦٠ حرفًا.';
+
+  @override
+  String get profileTitle => 'الملف الشخصي';
+
+  @override
+  String get profileFamilySection => 'العائلة';
+
+  @override
+  String get statistics => 'الإحصاءات';
+
+  @override
+  String get rewards => 'المكافآت';
+
+  @override
+  String get achievements => 'الإنجازات';
+
+  @override
+  String get familyWishes => 'أمنيات العائلة';
+
+  @override
+  String get logOut => 'تسجيل الخروج';
+
+  @override
+  String get silaDeveloper => 'مطوّر صلة';
+
+  @override
+  String get developerFamilyName => 'عائلة المطوّر';
+
+  @override
+  String familyNameLabel(String name) {
+    return 'العائلة: $name';
+  }
+
+  @override
+  String get noFamilyJoinedYet => 'لم تنضم إلى عائلة بعد';
+
+  @override
+  String get gamesPlayed => 'الألعاب التي لعبتها';
+
+  @override
+  String get wins => 'مرات الفوز';
+
+  @override
+  String get currentStreak => 'السلسلة الحالية';
+
+  @override
+  String profileDayCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count يوم',
+      many: '$count يومًا',
+      few: '$count أيام',
+      two: 'يومان',
+      one: 'يوم واحد',
+      zero: 'لا أيام',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get memoryKeeper => 'حافظ الذكريات';
+
+  @override
+  String get memoryKeeperDescription => 'احفظ ١٠٠ ذكرى عائلية.';
+
+  @override
+  String get quizMaster => 'خبير الاختبارات';
+
+  @override
+  String get quizMasterDescription => 'اربح ٢٠ اختبارًا عائليًا.';
+
+  @override
+  String get teamPlayer => 'روح الفريق';
+
+  @override
+  String get teamPlayerDescription => 'أكمل ٣٠ مهمة عائلية.';
+
+  @override
+  String get noFamilyWishesYet => 'لا توجد أمنيات عائلية بعد';
+
+  @override
+  String get familyWishesEmptyDescription =>
+      'ستظهر هنا أمنيات العائلة المكتسبة من المنافسات الكبرى.';
+
+  @override
+  String get noTrophiesYet => 'لا توجد كؤوس بعد';
+
+  @override
+  String get trophiesEmptyDescription =>
+      'ستظهر هنا كؤوس البطولات الأسبوعية والشهرية.';
+
+  @override
+  String get appSettings => 'إعدادات التطبيق';
+
+  @override
+  String get appSettingsDescription => 'اللغة والإشعارات والتفضيلات';
+
+  @override
+  String get youHaveNotJoinedFamily => 'لم تنضم إلى عائلة بعد.';
+
+  @override
+  String get inviteCodeLabel => 'رمز الدعوة';
+
+  @override
+  String get copyInviteCode => 'نسخ رمز الدعوة';
+
+  @override
+  String get familyInviteCodeCopied => 'تم نسخ رمز دعوة العائلة.';
+
+  @override
+  String profileFamilyMemberCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count فرد من العائلة',
+      many: '$count فردًا من العائلة',
+      few: '$count أفراد من العائلة',
+      two: 'فردان من العائلة',
+      one: 'فرد واحد من العائلة',
+      zero: 'لا يوجد أفراد في العائلة',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get shareFamilyInviteCode =>
+      'شارك هذا الرمز مع أقاربك ليتمكنوا من الانضمام إلى هذه العائلة.';
 }

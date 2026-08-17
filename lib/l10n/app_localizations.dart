@@ -1555,6 +1555,552 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Invitation code can only contain letters and numbers.'**
   String get validationInvitationCodeCharacters;
+
+  /// No description provided for @memoriesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Memories'**
+  String get memoriesTitle;
+
+  /// No description provided for @memoryTitleGeneric.
+  ///
+  /// In en, this message translates to:
+  /// **'Memory'**
+  String get memoryTitleGeneric;
+
+  /// No description provided for @memoriesFamilyRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Join or create a family to view memories.'**
+  String get memoriesFamilyRequired;
+
+  /// No description provided for @memoriesLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load memories.'**
+  String get memoriesLoadError;
+
+  /// No description provided for @noMemoriesYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No memories yet'**
+  String get noMemoriesYet;
+
+  /// No description provided for @memoriesEmptyDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Save photos, videos, and stories from your family moments.'**
+  String get memoriesEmptyDescription;
+
+  /// No description provided for @addFirstMemory.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Your First Memory'**
+  String get addFirstMemory;
+
+  /// No description provided for @developerMemoriesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Developer Family memories'**
+  String get developerMemoriesTitle;
+
+  /// No description provided for @developerMemoriesDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Sample moments for reviewing the experience. They are not stored in Firebase.'**
+  String get developerMemoriesDescription;
+
+  /// No description provided for @developerMemoriesReadOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Developer preview is read-only. No data was changed.'**
+  String get developerMemoriesReadOnly;
+
+  /// No description provided for @previewPicnicTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Family picnic at Mushrif Park'**
+  String get previewPicnicTitle;
+
+  /// No description provided for @previewPicnicDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'A sunny afternoon full of games, stories, and laughter.'**
+  String get previewPicnicDescription;
+
+  /// No description provided for @previewPicnicDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'02/08/2026 • Dubai'**
+  String get previewPicnicDetails;
+
+  /// No description provided for @previewLunchTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Friday lunch together'**
+  String get previewLunchTitle;
+
+  /// No description provided for @previewLunchDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Grandma shared her favorite family recipe with everyone.'**
+  String get previewLunchDescription;
+
+  /// No description provided for @previewLunchDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'31/07/2026 • Home'**
+  String get previewLunchDetails;
+
+  /// No description provided for @previewSunsetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sunset walk'**
+  String get previewSunsetTitle;
+
+  /// No description provided for @previewSunsetDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'We watched the sunset and planned our next family day.'**
+  String get previewSunsetDescription;
+
+  /// No description provided for @previewSunsetDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'25/07/2026 • Abu Dhabi Corniche'**
+  String get previewSunsetDetails;
+
+  /// No description provided for @addMemoryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Memory'**
+  String get addMemoryTitle;
+
+  /// No description provided for @captureFamilyMoment.
+  ///
+  /// In en, this message translates to:
+  /// **'Capture a family moment'**
+  String get captureFamilyMoment;
+
+  /// No description provided for @addMemoryScreenDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a photo and save a moment your family can revisit together.'**
+  String get addMemoryScreenDescription;
+
+  /// No description provided for @addPhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Photo'**
+  String get addPhoto;
+
+  /// No description provided for @photoTooLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'That photo is still too large. Please choose another photo.'**
+  String get photoTooLarge;
+
+  /// No description provided for @memoryDateRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Memory date is required.'**
+  String get memoryDateRequired;
+
+  /// No description provided for @selectValidMemoryDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a valid memory date.'**
+  String get selectValidMemoryDate;
+
+  /// No description provided for @saveMemorySignInRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'You must be signed in to save a memory.'**
+  String get saveMemorySignInRequired;
+
+  /// No description provided for @addMemoryFamilyRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Join or create a family before adding memories.'**
+  String get addMemoryFamilyRequired;
+
+  /// No description provided for @memorySaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Memory saved successfully.'**
+  String get memorySaved;
+
+  /// No description provided for @couldNotSaveMemory.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save the memory: {error}'**
+  String couldNotSaveMemory(String error);
+
+  /// No description provided for @memoryTitleLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Memory title'**
+  String get memoryTitleLabel;
+
+  /// No description provided for @memoryTitleHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Day at the Zoo'**
+  String get memoryTitleHint;
+
+  /// No description provided for @memoryDescriptionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Description'**
+  String get memoryDescriptionLabel;
+
+  /// No description provided for @memoryDescriptionHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tell the story behind this memory'**
+  String get memoryDescriptionHint;
+
+  /// No description provided for @memoryDateLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Date'**
+  String get memoryDateLabel;
+
+  /// No description provided for @memoryDateHint.
+  ///
+  /// In en, this message translates to:
+  /// **'DD/MM/YYYY'**
+  String get memoryDateHint;
+
+  /// No description provided for @memoryLocationOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Location (optional)'**
+  String get memoryLocationOptional;
+
+  /// No description provided for @memoryLocationHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Al Ain Zoo'**
+  String get memoryLocationHint;
+
+  /// No description provided for @saveMemory.
+  ///
+  /// In en, this message translates to:
+  /// **'Save Memory'**
+  String get saveMemory;
+
+  /// No description provided for @editMemory.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Memory'**
+  String get editMemory;
+
+  /// No description provided for @enterMemoryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a title for the memory.'**
+  String get enterMemoryTitle;
+
+  /// No description provided for @couldNotSaveMemoryChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save changes: {error}'**
+  String couldNotSaveMemoryChanges(String error);
+
+  /// No description provided for @titleLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get titleLabel;
+
+  /// No description provided for @storyLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Story'**
+  String get storyLabel;
+
+  /// No description provided for @locationLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Location'**
+  String get locationLabel;
+
+  /// No description provided for @chooseDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose date'**
+  String get chooseDate;
+
+  /// No description provided for @saveChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'Save Changes'**
+  String get saveChanges;
+
+  /// No description provided for @deleteMemoryQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete memory?'**
+  String get deleteMemoryQuestion;
+
+  /// No description provided for @deleteMemoryWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'This memory will be permanently removed from your family memories.'**
+  String get deleteMemoryWarning;
+
+  /// No description provided for @cancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get cancel;
+
+  /// No description provided for @delete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get delete;
+
+  /// No description provided for @memoryNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Memory not found.'**
+  String get memoryNotFound;
+
+  /// No description provided for @noDate.
+  ///
+  /// In en, this message translates to:
+  /// **'No date'**
+  String get noDate;
+
+  /// No description provided for @editMemoryTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit memory'**
+  String get editMemoryTooltip;
+
+  /// No description provided for @deleteMemoryTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete memory'**
+  String get deleteMemoryTooltip;
+
+  /// No description provided for @validationMemoryTitleRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Memory title is required.'**
+  String get validationMemoryTitleRequired;
+
+  /// No description provided for @validationMemoryTitleMinLength.
+  ///
+  /// In en, this message translates to:
+  /// **'Memory title must contain at least 2 characters.'**
+  String get validationMemoryTitleMinLength;
+
+  /// No description provided for @validationMemoryTitleMaxLength.
+  ///
+  /// In en, this message translates to:
+  /// **'Memory title cannot exceed 60 characters.'**
+  String get validationMemoryTitleMaxLength;
+
+  /// No description provided for @profileTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile'**
+  String get profileTitle;
+
+  /// No description provided for @profileFamilySection.
+  ///
+  /// In en, this message translates to:
+  /// **'Family'**
+  String get profileFamilySection;
+
+  /// No description provided for @statistics.
+  ///
+  /// In en, this message translates to:
+  /// **'Statistics'**
+  String get statistics;
+
+  /// No description provided for @rewards.
+  ///
+  /// In en, this message translates to:
+  /// **'Rewards'**
+  String get rewards;
+
+  /// No description provided for @achievements.
+  ///
+  /// In en, this message translates to:
+  /// **'Achievements'**
+  String get achievements;
+
+  /// No description provided for @familyWishes.
+  ///
+  /// In en, this message translates to:
+  /// **'Family Wishes'**
+  String get familyWishes;
+
+  /// No description provided for @logOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Log Out'**
+  String get logOut;
+
+  /// No description provided for @silaDeveloper.
+  ///
+  /// In en, this message translates to:
+  /// **'Sila Developer'**
+  String get silaDeveloper;
+
+  /// No description provided for @developerFamilyName.
+  ///
+  /// In en, this message translates to:
+  /// **'Developer Family'**
+  String get developerFamilyName;
+
+  /// No description provided for @familyNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Family: {name}'**
+  String familyNameLabel(String name);
+
+  /// No description provided for @noFamilyJoinedYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No family joined yet'**
+  String get noFamilyJoinedYet;
+
+  /// No description provided for @gamesPlayed.
+  ///
+  /// In en, this message translates to:
+  /// **'Games Played'**
+  String get gamesPlayed;
+
+  /// No description provided for @wins.
+  ///
+  /// In en, this message translates to:
+  /// **'Wins'**
+  String get wins;
+
+  /// No description provided for @currentStreak.
+  ///
+  /// In en, this message translates to:
+  /// **'Current Streak'**
+  String get currentStreak;
+
+  /// No description provided for @profileDayCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 day} other{{count} days}}'**
+  String profileDayCount(int count);
+
+  /// No description provided for @memoryKeeper.
+  ///
+  /// In en, this message translates to:
+  /// **'Memory Keeper'**
+  String get memoryKeeper;
+
+  /// No description provided for @memoryKeeperDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Save 100 family memories.'**
+  String get memoryKeeperDescription;
+
+  /// No description provided for @quizMaster.
+  ///
+  /// In en, this message translates to:
+  /// **'Quiz Master'**
+  String get quizMaster;
+
+  /// No description provided for @quizMasterDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Win 20 Family Quizzes.'**
+  String get quizMasterDescription;
+
+  /// No description provided for @teamPlayer.
+  ///
+  /// In en, this message translates to:
+  /// **'Team Player'**
+  String get teamPlayer;
+
+  /// No description provided for @teamPlayerDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete 30 Family Missions.'**
+  String get teamPlayerDescription;
+
+  /// No description provided for @noFamilyWishesYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No Family Wishes yet'**
+  String get noFamilyWishesYet;
+
+  /// No description provided for @familyWishesEmptyDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Family Wishes earned from major competitions will appear here.'**
+  String get familyWishesEmptyDescription;
+
+  /// No description provided for @noTrophiesYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No trophies yet'**
+  String get noTrophiesYet;
+
+  /// No description provided for @trophiesEmptyDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly and monthly championship trophies will appear here.'**
+  String get trophiesEmptyDescription;
+
+  /// No description provided for @appSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'App Settings'**
+  String get appSettings;
+
+  /// No description provided for @appSettingsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Language, notifications, and preferences'**
+  String get appSettingsDescription;
+
+  /// No description provided for @youHaveNotJoinedFamily.
+  ///
+  /// In en, this message translates to:
+  /// **'You have not joined a family yet.'**
+  String get youHaveNotJoinedFamily;
+
+  /// No description provided for @inviteCodeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite Code'**
+  String get inviteCodeLabel;
+
+  /// No description provided for @copyInviteCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy invite code'**
+  String get copyInviteCode;
+
+  /// No description provided for @familyInviteCodeCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Family invite code copied.'**
+  String get familyInviteCodeCopied;
+
+  /// No description provided for @profileFamilyMemberCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No family members} =1{1 family member} other{{count} family members}}'**
+  String profileFamilyMemberCount(int count);
+
+  /// No description provided for @shareFamilyInviteCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Share this code with relatives so they can join this family.'**
+  String get shareFamilyInviteCode;
 }
 
 class _AppLocalizationsDelegate

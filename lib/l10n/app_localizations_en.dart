@@ -838,4 +838,318 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get validationInvitationCodeCharacters =>
       'Invitation code can only contain letters and numbers.';
+
+  @override
+  String get memoriesTitle => 'Memories';
+
+  @override
+  String get memoryTitleGeneric => 'Memory';
+
+  @override
+  String get memoriesFamilyRequired =>
+      'Join or create a family to view memories.';
+
+  @override
+  String get memoriesLoadError => 'Could not load memories.';
+
+  @override
+  String get noMemoriesYet => 'No memories yet';
+
+  @override
+  String get memoriesEmptyDescription =>
+      'Save photos, videos, and stories from your family moments.';
+
+  @override
+  String get addFirstMemory => 'Add Your First Memory';
+
+  @override
+  String get developerMemoriesTitle => 'Developer Family memories';
+
+  @override
+  String get developerMemoriesDescription =>
+      'Sample moments for reviewing the experience. They are not stored in Firebase.';
+
+  @override
+  String get developerMemoriesReadOnly =>
+      'Developer preview is read-only. No data was changed.';
+
+  @override
+  String get previewPicnicTitle => 'Family picnic at Mushrif Park';
+
+  @override
+  String get previewPicnicDescription =>
+      'A sunny afternoon full of games, stories, and laughter.';
+
+  @override
+  String get previewPicnicDetails => '02/08/2026 • Dubai';
+
+  @override
+  String get previewLunchTitle => 'Friday lunch together';
+
+  @override
+  String get previewLunchDescription =>
+      'Grandma shared her favorite family recipe with everyone.';
+
+  @override
+  String get previewLunchDetails => '31/07/2026 • Home';
+
+  @override
+  String get previewSunsetTitle => 'Sunset walk';
+
+  @override
+  String get previewSunsetDescription =>
+      'We watched the sunset and planned our next family day.';
+
+  @override
+  String get previewSunsetDetails => '25/07/2026 • Abu Dhabi Corniche';
+
+  @override
+  String get addMemoryTitle => 'Add Memory';
+
+  @override
+  String get captureFamilyMoment => 'Capture a family moment';
+
+  @override
+  String get addMemoryScreenDescription =>
+      'Add a photo and save a moment your family can revisit together.';
+
+  @override
+  String get addPhoto => 'Add Photo';
+
+  @override
+  String get photoTooLarge =>
+      'That photo is still too large. Please choose another photo.';
+
+  @override
+  String get memoryDateRequired => 'Memory date is required.';
+
+  @override
+  String get selectValidMemoryDate => 'Select a valid memory date.';
+
+  @override
+  String get saveMemorySignInRequired =>
+      'You must be signed in to save a memory.';
+
+  @override
+  String get addMemoryFamilyRequired =>
+      'Join or create a family before adding memories.';
+
+  @override
+  String get memorySaved => 'Memory saved successfully.';
+
+  @override
+  String couldNotSaveMemory(String error) {
+    return 'Could not save the memory: $error';
+  }
+
+  @override
+  String get memoryTitleLabel => 'Memory title';
+
+  @override
+  String get memoryTitleHint => 'Day at the Zoo';
+
+  @override
+  String get memoryDescriptionLabel => 'Description';
+
+  @override
+  String get memoryDescriptionHint => 'Tell the story behind this memory';
+
+  @override
+  String get memoryDateLabel => 'Date';
+
+  @override
+  String get memoryDateHint => 'DD/MM/YYYY';
+
+  @override
+  String get memoryLocationOptional => 'Location (optional)';
+
+  @override
+  String get memoryLocationHint => 'Al Ain Zoo';
+
+  @override
+  String get saveMemory => 'Save Memory';
+
+  @override
+  String get editMemory => 'Edit Memory';
+
+  @override
+  String get enterMemoryTitle => 'Enter a title for the memory.';
+
+  @override
+  String couldNotSaveMemoryChanges(String error) {
+    return 'Could not save changes: $error';
+  }
+
+  @override
+  String get titleLabel => 'Title';
+
+  @override
+  String get storyLabel => 'Story';
+
+  @override
+  String get locationLabel => 'Location';
+
+  @override
+  String get chooseDate => 'Choose date';
+
+  @override
+  String get saveChanges => 'Save Changes';
+
+  @override
+  String get deleteMemoryQuestion => 'Delete memory?';
+
+  @override
+  String get deleteMemoryWarning =>
+      'This memory will be permanently removed from your family memories.';
+
+  @override
+  String get cancel => 'Cancel';
+
+  @override
+  String get delete => 'Delete';
+
+  @override
+  String get memoryNotFound => 'Memory not found.';
+
+  @override
+  String get noDate => 'No date';
+
+  @override
+  String get editMemoryTooltip => 'Edit memory';
+
+  @override
+  String get deleteMemoryTooltip => 'Delete memory';
+
+  @override
+  String get validationMemoryTitleRequired => 'Memory title is required.';
+
+  @override
+  String get validationMemoryTitleMinLength =>
+      'Memory title must contain at least 2 characters.';
+
+  @override
+  String get validationMemoryTitleMaxLength =>
+      'Memory title cannot exceed 60 characters.';
+
+  @override
+  String get profileTitle => 'Profile';
+
+  @override
+  String get profileFamilySection => 'Family';
+
+  @override
+  String get statistics => 'Statistics';
+
+  @override
+  String get rewards => 'Rewards';
+
+  @override
+  String get achievements => 'Achievements';
+
+  @override
+  String get familyWishes => 'Family Wishes';
+
+  @override
+  String get logOut => 'Log Out';
+
+  @override
+  String get silaDeveloper => 'Sila Developer';
+
+  @override
+  String get developerFamilyName => 'Developer Family';
+
+  @override
+  String familyNameLabel(String name) {
+    return 'Family: $name';
+  }
+
+  @override
+  String get noFamilyJoinedYet => 'No family joined yet';
+
+  @override
+  String get gamesPlayed => 'Games Played';
+
+  @override
+  String get wins => 'Wins';
+
+  @override
+  String get currentStreak => 'Current Streak';
+
+  @override
+  String profileDayCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count days',
+      one: '1 day',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get memoryKeeper => 'Memory Keeper';
+
+  @override
+  String get memoryKeeperDescription => 'Save 100 family memories.';
+
+  @override
+  String get quizMaster => 'Quiz Master';
+
+  @override
+  String get quizMasterDescription => 'Win 20 Family Quizzes.';
+
+  @override
+  String get teamPlayer => 'Team Player';
+
+  @override
+  String get teamPlayerDescription => 'Complete 30 Family Missions.';
+
+  @override
+  String get noFamilyWishesYet => 'No Family Wishes yet';
+
+  @override
+  String get familyWishesEmptyDescription =>
+      'Family Wishes earned from major competitions will appear here.';
+
+  @override
+  String get noTrophiesYet => 'No trophies yet';
+
+  @override
+  String get trophiesEmptyDescription =>
+      'Weekly and monthly championship trophies will appear here.';
+
+  @override
+  String get appSettings => 'App Settings';
+
+  @override
+  String get appSettingsDescription =>
+      'Language, notifications, and preferences';
+
+  @override
+  String get youHaveNotJoinedFamily => 'You have not joined a family yet.';
+
+  @override
+  String get inviteCodeLabel => 'Invite Code';
+
+  @override
+  String get copyInviteCode => 'Copy invite code';
+
+  @override
+  String get familyInviteCodeCopied => 'Family invite code copied.';
+
+  @override
+  String profileFamilyMemberCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count family members',
+      one: '1 family member',
+      zero: 'No family members',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get shareFamilyInviteCode =>
+      'Share this code with relatives so they can join this family.';
 }
