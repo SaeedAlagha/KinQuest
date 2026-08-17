@@ -1,5 +1,6 @@
 import 'dart:math';
-
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../services/trivia_ai_service.dart';
@@ -13,6 +14,18 @@ class TriviaScreen extends StatefulWidget {
 
 class _TriviaScreenState extends State<TriviaScreen> {
   final TriviaAiService _aiService = TriviaAiService();
+  bool _isLoadingFamily = true;
+String? _familyError;
+
+final List<_TriviaPlayer> _familyMembers = [];
+final Set<String> _selectedPlayerIds = {};
+
+final List<_TriviaPlayer> _teamA = [];
+final List<_TriviaPlayer> _teamB = [];
+
+int _selectedRounds = 3;
+int _questionsPerRound = 5;
+int _secondsPerQuestion = 30;
 
   final List<String> _categories = [
     'Science',
@@ -66,6 +79,86 @@ class _TriviaScreenState extends State<TriviaScreen> {
   int? _selectedAnswer;
 
   List<TriviaQuestion> _questions = [];
+
+  @override
+void initState() {
+  super.initState();
+  _loadFamilyMembers();
+}
+
+Future<void> _loadFamilyMembers() async {
+  final user = FirebaseAuth.instance.currentUser;
+
+  if (user == null) {
+    setState(() {
+      _isLoadingFamily = false;
+      _familyError = 'You must be logged in to play.';
+    });
+    return;
+  }
+
+  try {
+    final userDocument = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid)
+        .get();
+
+    final familyId = userDocument.data()?['familyId'] as String?;
+
+    if (familyId == null || familyId.isEmpty) {
+      if (!mounted) return;
+
+      setState(() {
+        _isLoadingFamily = false;
+        _familyError = 'Join or create a family before playing Trivia.';
+      });
+
+      return;
+    }
+
+    final membersSnapshot = await FirebaseFirestore.instance
+        .collection('users')
+        .where('familyId', isEqualTo: familyId)
+        .get();
+
+    final members = membersSnapshot.docs.map((document) {
+      final data = document.data();
+
+      final name = data['name'] as String?;
+      final email = data['email'] as String?;
+
+      return _TriviaPlayer(
+        id: document.id,
+        name: name?.trim().isNotEmpty == true
+            ? name!
+            : email ?? 'Family Member',
+      );
+    }).toList();
+
+    members.sort(
+      (a, b) => a.name.toLowerCase().compareTo(
+            b.name.toLowerCase(),
+          ),
+    );
+
+    if (!mounted) return;
+
+    setState(() {
+      _familyMembers
+        ..clear()
+        ..addAll(members);
+
+      _isLoadingFamily = false;
+    });
+  } catch (_) {
+    if (!mounted) return;
+
+    setState(() {
+      _isLoadingFamily = false;
+      _familyError = 'Could not load your family members.';
+    });
+  }
+}
 
   Future<void> _startGame() async {
     setState(() {
@@ -150,15 +243,171 @@ class _TriviaScreenState extends State<TriviaScreen> {
     );
   }
 
-  Widget _buildSetup() {
-    return Column(
+Widget _buildSetup() {
+  if (_isLoadingFamily) {
+    return const Center(
+      child: CircularProgressIndicator(),
+    );
+  }
+
+  if (_familyError != null) {
+    return Center(
+      child: Text(
+        _familyError!,
+        textAlign: TextAlign.center,
+      ),
+    );
+  }
+
+  return SingleChildScrollView(
+    child: Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const Text(
-          'Choose a category',
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+        Text(
+          'Who is playing?',
+          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
         ),
+        const SizedBox(height: 8),
+        const Text(
+          'Choose at least 2 players.',
+        ),
+        const SizedBox(height: 16),
+
+        ..._familyMembers.map((player) {
+          final selected =
+              _selectedPlayerIds.contains(player.id);
+
+          return CheckboxListTile(
+            value: selected,
+            onChanged: (_) => _togglePlayer(player),
+            title: Text(player.name),
+          );
+        }),
+
         const SizedBox(height: 24),
+
+const SizedBox(height: 24),
+
+Text(
+  'Choose teams',
+  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+        fontWeight: FontWeight.bold,
+      ),
+),
+
+const SizedBox(height: 8),
+
+const Text(
+  'Assign every selected player to Team A or Team B.',
+),
+
+const SizedBox(height: 16),
+
+..._familyMembers
+    .where(
+      (player) => _selectedPlayerIds.contains(player.id),
+    )
+    .map((player) {
+  final inTeamA = _teamA.any(
+    (member) => member.id == player.id,
+  );
+
+  final inTeamB = _teamB.any(
+    (member) => member.id == player.id,
+  );
+
+  return Padding(
+    padding: const EdgeInsets.only(bottom: 12),
+    child: Card(
+      margin: EdgeInsets.zero,
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                player.name,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+
+            ChoiceChip(
+              label: const Text('Team A'),
+              selected: inTeamA,
+              onSelected: (_) {
+                _assignPlayerToTeam(
+                  player,
+                  'A',
+                );
+              },
+            ),
+
+            const SizedBox(width: 8),
+
+            ChoiceChip(
+              label: const Text('Team B'),
+              selected: inTeamB,
+              onSelected: (_) {
+                _assignPlayerToTeam(
+                  player,
+                  'B',
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
+}),
+
+const SizedBox(height: 12),
+
+    OutlinedButton.icon(
+      onPressed: _selectedPlayerIds.length >= 2
+          ? _shuffleTeams
+          : null,
+      icon: const Icon(Icons.shuffle),
+      label: const Text('Shuffle Teams'),
+    ),
+
+    const SizedBox(height: 20),
+
+    if (_teamA.isNotEmpty || _teamB.isNotEmpty) ...[
+      Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: _buildTeamCard(
+              title: 'Team A',
+              players: _teamA,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: _buildTeamCard(
+              title: 'Team B',
+              players: _teamB,
+            ),
+          ),
+        ],
+      ),
+
+      const SizedBox(height: 28),
+    ],        
+
+        Text(
+          'Category',
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+        ),
+        const SizedBox(height: 12),
+
         Wrap(
           spacing: 10,
           runSpacing: 10,
@@ -174,27 +423,125 @@ class _TriviaScreenState extends State<TriviaScreen> {
             );
           }).toList(),
         ),
-        const SizedBox(height: 40),
-        ElevatedButton(
-          onPressed: _isLoading ? null : _startGame,
+
+        const SizedBox(height: 28),
+
+        Text(
+          'Rounds',
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+        ),
+        const SizedBox(height: 12),
+
+        Wrap(
+          spacing: 10,
+          children: [3, 5, 10].map((rounds) {
+            return ChoiceChip(
+              label: Text('$rounds'),
+              selected: _selectedRounds == rounds,
+              onSelected: (_) {
+                setState(() {
+                  _selectedRounds = rounds;
+                });
+              },
+            );
+          }).toList(),
+        ),
+
+        const SizedBox(height: 28),
+
+        Text(
+          'Questions per round',
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+        ),
+        const SizedBox(height: 12),
+
+        Wrap(
+          spacing: 10,
+          children: [3, 5, 10].map((count) {
+            return ChoiceChip(
+              label: Text('$count'),
+              selected: _questionsPerRound == count,
+              onSelected: (_) {
+                setState(() {
+                  _questionsPerRound = count;
+                });
+              },
+            );
+          }).toList(),
+        ),
+
+        const SizedBox(height: 28),
+
+        Text(
+          'Time per question',
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+        ),
+        const SizedBox(height: 12),
+
+        Wrap(
+          spacing: 10,
+          children: [20, 30, 45].map((seconds) {
+            return ChoiceChip(
+              label: Text('$seconds sec'),
+              selected: _secondsPerQuestion == seconds,
+              onSelected: (_) {
+                setState(() {
+                  _secondsPerQuestion = seconds;
+                });
+              },
+            );
+          }).toList(),
+        ),
+
+        const SizedBox(height: 32),
+
+        FilledButton(
+          onPressed: _teamA.isNotEmpty &&
+                  _teamB.isNotEmpty &&
+                  (_teamA.length + _teamB.length ==
+                      _selectedPlayerIds.length) &&
+                  !_isLoading
+              ? _startGame
+              : null,
           child: _isLoading
-              ? const Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    ),
-                    SizedBox(width: 12),
-                    Text('Generating questions...'),
-                  ],
-                )
+              ? const CircularProgressIndicator()
               : const Text('Start Trivia'),
         ),
       ],
-    );
-  }
+    ),
+  );
+}
+
+Widget _buildTeamCard({
+  required String title,
+  required List<_TriviaPlayer> players,
+}) {
+  return Card(
+    child: Padding(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        children: [
+          Text(
+            title,
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 10),
+          ...players.map(
+            (player) => Text(player.name),
+          ),
+        ],
+      ),
+    ),
+  );
+}
 
   Widget _buildGame() {
     final question = _questions[_currentIndex];
@@ -287,4 +634,62 @@ class _TriviaScreenState extends State<TriviaScreen> {
       ],
     );
   }
+  void _assignPlayerToTeam(
+  _TriviaPlayer player,
+  String team,
+) {
+  setState(() {
+    _teamA.removeWhere((member) => member.id == player.id);
+    _teamB.removeWhere((member) => member.id == player.id);
+
+    if (team == 'A') {
+      _teamA.add(player);
+    } else {
+      _teamB.add(player);
+    }
+  });
+}
+  void _togglePlayer(_TriviaPlayer player) {
+  setState(() {
+    if (_selectedPlayerIds.contains(player.id)) {
+      _selectedPlayerIds.remove(player.id);
+      _teamA.removeWhere((member) => member.id == player.id);
+      _teamB.removeWhere((member) => member.id == player.id);
+    } else {
+      _selectedPlayerIds.add(player.id);
+    }
+  });
+}
+
+void _shuffleTeams() {
+  final selectedPlayers = _familyMembers
+      .where(
+        (player) => _selectedPlayerIds.contains(player.id),
+      )
+      .toList()
+    ..shuffle(Random());
+
+  setState(() {
+    _teamA.clear();
+    _teamB.clear();
+
+    for (int i = 0; i < selectedPlayers.length; i++) {
+      if (i.isEven) {
+        _teamA.add(selectedPlayers[i]);
+      } else {
+        _teamB.add(selectedPlayers[i]);
+      }
+    }
+  });
+}
+}
+
+class _TriviaPlayer {
+  const _TriviaPlayer({
+    required this.id,
+    required this.name,
+  });
+
+  final String id;
+  final String name;
 }
