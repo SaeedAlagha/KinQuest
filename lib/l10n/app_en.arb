@@ -378,5 +378,221 @@
       "count": {"type": "int"}
     }
   },
-  "shareFamilyInviteCode": "Share this code with relatives so they can join this family."
+  "shareFamilyInviteCode": "Share this code with relatives so they can join this family.",
+  "missionsSignInRequired": "You must be signed in to view missions.",
+  "missionsFamilyRequired": "Join or create a family before completing missions.",
+  "missionsLoadError": "Could not load Family Missions. Please try again.",
+  "missionGeneric": "Mission",
+  "you": "You",
+  "whoParticipated": "Who participated?",
+  "participantSelectionDescription": "Choose the family members who actually took part. Family missions require at least 2 participants.",
+  "continueLabel": "Continue",
+  "takePhoto": "Take Photo",
+  "useCameraAsProof": "Use the camera as proof",
+  "choosePhotoOrScreenshot": "Choose Photo or Screenshot",
+  "chooseExistingImage": "Choose an existing image from your device",
+  "missionImageTooLarge": "That image is too large. Please choose a smaller image.",
+  "reviewYourProof": "Review Your Proof",
+  "participantsLabel": "Participants: {names}",
+  "@participantsLabel": {
+    "placeholders": {
+      "names": {"type": "String"}
+    }
+  },
+  "explanationOptional": "Explanation (optional)",
+  "missionExplanationHint": "Add useful context that the image may not show clearly.",
+  "verifyProof": "Verify Proof",
+  "aiCheckingMissionProof": "AI is checking your mission proof...",
+  "couldNotVerifyMissionProof": "Could not verify the mission proof. Please try again.",
+  "needClearerProof": "We Need Clearer Proof",
+  "proofNotVerified": "Proof Not Verified",
+  "verificationFailureDescription": "{reason}\n\nYou can submit another image or add a clearer explanation.",
+  "@verificationFailureDescription": {
+    "placeholders": {
+      "reason": {"type": "String"}
+    }
+  },
+  "tryAgain": "Try Again",
+  "missionAlreadyRewarded": "This mission has already been rewarded.",
+  "missionRewardSaveError": "The proof was verified, but the reward could not be saved. Please try again.",
+  "familyMissionMinimumParticipants": "A family mission needs at least 2 participants.",
+  "missionVerified": "Mission Verified!",
+  "familyMissionRewardSuccess": "{tokens} tokens were awarded to each participant.\n\n{participants}\n\nA new shared family mission has been added.",
+  "@familyMissionRewardSuccess": {
+    "placeholders": {
+      "tokens": {"type": "int"},
+      "participants": {"type": "String"}
+    }
+  },
+  "personalMissionRewardSuccess": "You earned {tokens} tokens.\n\nA new personal mission has been added.",
+  "@personalMissionRewardSuccess": {
+    "placeholders": {
+      "tokens": {"type": "int"}
+    }
+  },
+  "nice": "Nice!",
+  "difficultyEasy": "Easy",
+  "difficultyMedium": "Medium",
+  "difficultyChallenge": "Challenge",
+  "yourMissions": "Your Missions",
+  "personalMissionsSubtitle": "{count} personal missions just for you",
+  "@personalMissionsSubtitle": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "sharedMissionsSubtitle": "{count} shared missions — complete each once as a family",
+  "@sharedMissionsSubtitle": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "recentlyCompleted": "Recently Completed",
+  "doMoreTogether": "Do More Together",
+  "missionsHeaderDescription": "{count} active missions, AI-verified proof, fair rewards, and new challenges as you progress.",
+  "@missionsHeaderDescription": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "missionsCompletedCount": "{count, plural, =1{1 completed} other{{count} completed}}",
+  "@missionsCompletedCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "missionTokensEarnedCount": "{count, plural, =1{1 mission token earned} other{{count} mission tokens earned}}",
+  "@missionTokensEarnedCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "aiProofRequired": "AI proof required",
+  "personalLabel": "Personal",
+  "missionCategoryOutdoor": "Outdoor",
+  "missionCategoryTogetherTime": "Together Time",
+  "missionCategoryMemories": "Memories",
+  "missionCategoryKindness": "Kindness",
+  "missionCategoryConnection": "Connection",
+  "missionCategoryFun": "Fun",
+  "missionCategoryTeamwork": "Teamwork",
+  "missionTokenReward": "+{count} tokens",
+  "@missionTokenReward": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "aiProofFamilyReward": "AI proof • reward for each participant",
+  "aiProofPersonalReward": "AI proof • reward for you",
+  "completedOn": "Completed {date}",
+  "@completedOn": {
+    "placeholders": {
+      "date": {"type": "String"}
+    }
+  },
+  "familyMissionLabel": "Family Mission",
+  "personalMissionLabel": "Personal Mission",
+  "familyMissionDetailsReward": "Choose who participated. The mission can be claimed once by the family, and each participant earns {tokens} tokens.",
+  "@familyMissionDetailsReward": {
+    "placeholders": {
+      "tokens": {"type": "int"}
+    }
+  },
+  "personalMissionDetailsReward": "Complete this yourself and earn {tokens} tokens.",
+  "@personalMissionDetailsReward": {
+    "placeholders": {
+      "tokens": {"type": "int"}
+    }
+  },
+  "proofGuidance": "Proof guidance",
+  "cooldown": "Cooldown",
+  "missionCooldownDescription": "After completion, this mission cannot return for {count} days.",
+  "@missionCooldownDescription": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "submitProof": "Submit Proof",
+  "notYet": "Not Yet",
+  "missionPersonalAppreciationTitle": "Show Some Appreciation",
+  "missionPersonalAppreciationDescription": "Tell one family member something specific that you genuinely appreciate about them.",
+  "missionPersonalAppreciationProofHint": "Submit a relevant photo or screenshot and briefly explain what you said or did.",
+  "missionPersonalHelpTitle": "Help Without Being Asked",
+  "missionPersonalHelpDescription": "Do one genuinely helpful thing for a family member before they ask you.",
+  "missionPersonalHelpProofHint": "Submit a relevant or before-and-after photo and explain what you helped with.",
+  "missionPersonalCallRelativeTitle": "Call Someone You Love",
+  "missionPersonalCallRelativeDescription": "Call or video chat with a relative you have not spoken to recently.",
+  "missionPersonalCallRelativeProofHint": "A call screenshot is ideal. Avoid exposing private phone numbers when possible.",
+  "missionPersonalFamilyStoryTitle": "Discover a Family Story",
+  "missionPersonalFamilyStoryDescription": "Ask a family member to tell you a funny, meaningful, or memorable story from their past.",
+  "missionPersonalFamilyStoryProofHint": "Submit a relevant photo and briefly explain what story you learned.",
+  "missionPersonalMakeDrinkTitle": "Make Something for Someone",
+  "missionPersonalMakeDrinkDescription": "Prepare a drink, snack, or small treat for a family member.",
+  "missionPersonalMakeDrinkProofHint": "Submit a photo of what you prepared.",
+  "missionPersonalMemoryQuestionTitle": "Ask About an Old Memory",
+  "missionPersonalMemoryQuestionDescription": "Ask an older family member about a memorable moment from their childhood.",
+  "missionPersonalMemoryQuestionProofHint": "Submit a relevant photo and use the explanation box to briefly describe what you learned.",
+  "missionPersonalSmallCleanupTitle": "Fix One Messy Spot",
+  "missionPersonalSmallCleanupDescription": "Choose one small messy area at home and organize it properly.",
+  "missionPersonalSmallCleanupProofHint": "A before-and-after photo is the strongest proof.",
+  "missionPersonalKindMessageTitle": "Send a Kind Message",
+  "missionPersonalKindMessageDescription": "Send a thoughtful message to a family member just to make their day better.",
+  "missionPersonalKindMessageProofHint": "Submit a screenshot with private or sensitive details hidden if necessary.",
+  "missionPersonalLearnRecipeTitle": "Learn a Family Recipe",
+  "missionPersonalLearnRecipeDescription": "Ask a relative how to make a family recipe and learn something about where it came from.",
+  "missionPersonalLearnRecipeProofHint": "Submit a photo of the recipe, ingredients, preparation, or finished food.",
+  "missionPersonalMemorySaveTitle": "Save a Family Memory",
+  "missionPersonalMemorySaveDescription": "Choose one meaningful family photo and add it to your memories with a useful description.",
+  "missionPersonalMemorySaveProofHint": "Submit the family photo or a screenshot showing the memory you saved.",
+  "missionPersonalLongHelpTitle": "Take Over a Chore",
+  "missionPersonalLongHelpDescription": "Take over a useful household chore for a family member and complete it properly.",
+  "missionPersonalLongHelpProofHint": "Submit a relevant before, during, or after photo.",
+  "missionPersonalSurpriseTitle": "Plan a Small Surprise",
+  "missionPersonalSurpriseDescription": "Do something thoughtful and unexpected for someone in your family.",
+  "missionPersonalSurpriseProofHint": "Submit reasonable proof and explain what the surprise was.",
+  "missionFamilyWalkTitle": "Take a Family Walk",
+  "missionFamilyWalkDescription": "Spend at least 20 minutes walking together and enjoy the time without rushing.",
+  "missionFamilyWalkProofHint": "Submit a photo from the walk showing the activity or location.",
+  "missionFamilyMealTitle": "Share a Meal Together",
+  "missionFamilyMealDescription": "Sit together for a proper meal and keep phones away while you eat.",
+  "missionFamilyMealProofHint": "Submit a photo showing the meal, table, or family activity.",
+  "missionFamilyPhotoTitle": "Capture Today",
+  "missionFamilyPhotoDescription": "Take a new family photo together and turn an ordinary day into a memory.",
+  "missionFamilyPhotoProofHint": "Submit the new family photo created for this mission.",
+  "missionFamilyPlayTitle": "Play Together",
+  "missionFamilyPlayDescription": "Spend at least 30 minutes playing a game together.",
+  "missionFamilyPlayProofHint": "Submit a photo showing the game setup or family activity.",
+  "missionFamilyCookTitle": "Cook Something Together",
+  "missionFamilyCookDescription": "Prepare a meal, dessert, or snack together instead of leaving all the work to one person.",
+  "missionFamilyCookProofHint": "Submit a photo of the preparation or finished food.",
+  "missionFamilyGameNightTitle": "Family Game Night",
+  "missionFamilyGameNightDescription": "Set aside at least 45 minutes for everyone to play games together.",
+  "missionFamilyGameNightProofHint": "Submit a photo of the game setup or family playing together.",
+  "missionFamilyScreenFreeTitle": "One Screen-Free Hour",
+  "missionFamilyScreenFreeDescription": "Spend a full hour together without phones, television, tablets, or computers.",
+  "missionFamilyScreenFreeProofHint": "Submit a photo of what your family did during the screen-free time.",
+  "missionFamilyCleanupTitle": "Team Cleanup",
+  "missionFamilyCleanupDescription": "Choose one messy area and clean or organize it together from start to finish.",
+  "missionFamilyCleanupProofHint": "A before-and-after photo is ideal.",
+  "missionFamilyOutdoorTitle": "Outdoor Family Time",
+  "missionFamilyOutdoorDescription": "Spend at least 45 minutes doing an outdoor activity together.",
+  "missionFamilyOutdoorProofHint": "Submit a photo showing your outdoor activity or location.",
+  "missionFamilyOldPhotosTitle": "Explore Old Family Photos",
+  "missionFamilyOldPhotosDescription": "Look through older family photos together and talk about the stories behind them.",
+  "missionFamilyOldPhotosProofHint": "Submit a photo showing the album, older photos, or memory activity.",
+  "missionFamilyDessertTitle": "Make Dessert Together",
+  "missionFamilyDessertDescription": "Choose a dessert and make it together from preparation to the final result.",
+  "missionFamilyDessertProofHint": "Submit a preparation or finished-dessert photo.",
+  "missionFamilyPicnicTitle": "Have a Family Picnic",
+  "missionFamilyPicnicDescription": "Prepare something to eat and enjoy a picnic together away from your normal dining table.",
+  "missionFamilyPicnicProofHint": "Submit a photo showing the picnic setup, food, or location.",
+  "missionFamilyVisitRelativeTitle": "Visit a Relative",
+  "missionFamilyVisitRelativeDescription": "Spend meaningful face-to-face time visiting a relative you do not see every day.",
+  "missionFamilyVisitRelativeProofHint": "Submit respectful evidence from the visit without exposing unnecessary private information.",
+  "missionFamilyRecreatePhotoTitle": "Recreate an Old Family Photo",
+  "missionFamilyRecreatePhotoDescription": "Choose an older family picture and recreate its pose or scene together.",
+  "missionFamilyRecreatePhotoProofHint": "Submit the recreated photo and explain which old photo inspired it.",
+  "missionFamilyKindnessProjectTitle": "Complete a Kindness Project",
+  "missionFamilyKindnessProjectDescription": "Work together on something genuinely helpful for another person without expecting a reward from them.",
+  "missionFamilyKindnessProjectProofHint": "Submit safe and respectful proof of what your family made or did."
 }
