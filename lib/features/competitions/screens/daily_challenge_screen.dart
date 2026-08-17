@@ -8,6 +8,7 @@ import '../config/official_competition_games.dart';
 import '../models/competition_game_result.dart';
 import '../models/competition_player_result.dart';
 import '../models/game_play_mode.dart';
+import 'competition_tie_break_screen.dart';
 
 class DailyChallengeScreen extends StatefulWidget {
   const DailyChallengeScreen({super.key, this.developerPreview = false});
@@ -175,8 +176,33 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> {
     await _settleResult(result);
   }
 
-  Future<void> _settleResult(CompetitionGameResult result) async {
-    if (_completedToday || _isSettling || result.isTie) {
+  Future<void> _runTieBreak() async {
+    final result = _latestResult;
+
+    if (result == null || !result.isTie || _isSettling) {
+      return;
+    }
+
+    final winner = await Navigator.of(context).push<CompetitionPlayerResult>(
+      MaterialPageRoute(
+        builder: (_) => CompetitionTieBreakScreen(players: result.leaders),
+      ),
+    );
+
+    if (!mounted || winner == null) {
+      return;
+    }
+
+    await _settleResult(result, tieBreakWinner: winner);
+  }
+
+  Future<void> _settleResult(
+    CompetitionGameResult result, {
+    CompetitionPlayerResult? tieBreakWinner,
+  }) async {
+    if (_completedToday ||
+        _isSettling ||
+        (result.isTie && tieBreakWinner == null)) {
       return;
     }
 
@@ -194,18 +220,23 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> {
       return;
     }
 
-    final winner = rankedPlayers.first;
+    final winner = tieBreakWinner ?? rankedPlayers.first;
 
-    final secondHighestScore = rankedPlayers.length > 1
-        ? rankedPlayers[1].gameScore
-        : null;
+    final runnersUp = <CompetitionPlayerResult>[];
 
-    final runnersUp = secondHighestScore == null
-        ? <CompetitionPlayerResult>[]
-        : rankedPlayers
-              .skip(1)
-              .where((player) => player.gameScore == secondHighestScore)
-              .toList();
+    if (tieBreakWinner != null) {
+      runnersUp.addAll(
+        result.leaders.where((player) => player.userId != winner.userId),
+      );
+    } else if (rankedPlayers.length > 1) {
+      final secondHighestScore = rankedPlayers[1].gameScore;
+
+      runnersUp.addAll(
+        rankedPlayers
+            .skip(1)
+            .where((player) => player.gameScore == secondHighestScore),
+      );
+    }
 
     setState(() {
       _isSettling = true;
@@ -251,6 +282,8 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> {
           'players': rankedPlayers.map((player) => player.toMap()).toList(),
           'winnerId': winner.userId,
           'winnerName': winner.name,
+          'tieBreakUsed': tieBreakWinner != null,
+          if (tieBreakWinner != null) 'tieBreakWinnerId': tieBreakWinner.userId,
           'completed': true,
           'rewardGranted': true,
           'tokenReward': CompetitionRewards.dailyWinnerTokens,
@@ -555,14 +588,15 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> {
           const SizedBox(height: 8),
           const Text(
             'No Tokens or Ranking Points have been awarded. '
-            'A winner must be decided before today\'s result can be finalized.',
+            'Only the tied leaders advance to sudden death. '
+            'No reward is granted until one winner remains.',
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 16),
           FilledButton.icon(
-            onPressed: _isSettling ? null : _playChallenge,
-            icon: const Icon(Icons.replay_rounded),
-            label: const Text('Play Again to Break the Tie'),
+            onPressed: _isSettling ? null : _runTieBreak,
+            icon: const Icon(Icons.bolt_rounded),
+            label: const Text('Start Sudden-Death Tie-Break'),
           ),
         ],
       ),
