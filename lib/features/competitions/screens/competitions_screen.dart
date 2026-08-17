@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'daily_challenge_screen.dart';
 import '../../games/screens/games_screen.dart';
+import 'weekly_championship_screen.dart';
 
 class CompetitionsScreen extends StatelessWidget {
   const CompetitionsScreen({super.key, this.developerPreview = false});
@@ -28,8 +29,8 @@ class CompetitionsScreen extends StatelessWidget {
       icon: Icons.emoji_events,
       title: 'Weekly Championship',
       description:
-          'Compete across several game rounds and become this week\'s Family Champion.',
-      reward: 'Family Wish',
+          'Compete across four official games and become this week\'s Family Champion.',
+      reward: '+50 Tokens + Ranking Points',
     ),
     _CompetitionItem(
       icon: Icons.workspace_premium,
@@ -86,7 +87,16 @@ class CompetitionsScreen extends StatelessWidget {
                     );
                     return;
                   }
-
+                  if (competition.title == 'Weekly Championship') {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => WeeklyChampionshipScreen(
+                          developerPreview: developerPreview,
+                        ),
+                      ),
+                    );
+                    return;
+                  }
                   Navigator.of(context).push(
                     MaterialPageRoute(
                       builder: (_) => CompetitionPlaceholderScreen(
@@ -177,8 +187,8 @@ class _CompetitionCard extends StatelessWidget {
                 Expanded(
                   child: Text(
                     competition.title == 'Quick Play'
-                      ? competition.reward
-                      : 'Reward: ${competition.reward}',
+                        ? competition.reward
+                        : 'Reward: ${competition.reward}',
                     style: Theme.of(context).textTheme.labelLarge?.copyWith(
                       color: colorScheme.primary,
                       fontWeight: FontWeight.bold,
