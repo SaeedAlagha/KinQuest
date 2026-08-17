@@ -5,6 +5,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../services/secret_mission_ai_service.dart';
+import '../../competitions/config/competition_games.dart';
+import '../../competitions/models/competition_game_result.dart';
+import '../../competitions/models/competition_player_result.dart';
+import '../../competitions/models/game_play_mode.dart';
 
 enum _SecretMissionPhase {
   setup,
@@ -16,7 +20,12 @@ enum _SecretMissionPhase {
 }
 
 class SecretMissionScreen extends StatefulWidget {
-  const SecretMissionScreen({super.key});
+  const SecretMissionScreen({
+    super.key,
+    this.playMode = GamePlayMode.quickPlay,
+  });
+
+  final GamePlayMode playMode;
 
   @override
   State<SecretMissionScreen> createState() => _SecretMissionScreenState();
@@ -931,6 +940,35 @@ class _SecretMissionScreenState extends State<SecretMissionScreen> {
     );
   }
 
+  CompetitionGameResult _buildCompetitionResult() {
+    final rankedPlayers = List<_MissionPlayer>.from(_players);
+
+    rankedPlayers.sort(
+      (a, b) => (_scores[b.id] ?? 0).compareTo(_scores[a.id] ?? 0),
+    );
+
+    final results = <CompetitionPlayerResult>[];
+
+    for (var index = 0; index < rankedPlayers.length; index++) {
+      final player = rankedPlayers[index];
+
+      results.add(
+        CompetitionPlayerResult(
+          userId: player.id,
+          name: player.name,
+          gameScore: _scores[player.id] ?? 0,
+          placement: index + 1,
+        ),
+      );
+    }
+
+    return CompetitionGameResult(
+      gameId: CompetitionGameIds.secretMission,
+      gameName: 'Secret Mission',
+      players: results,
+    );
+  }
+
   Widget _buildLeaderboardScreen() {
     final rankedPlayers = List<_MissionPlayer>.from(_players);
 
@@ -945,6 +983,8 @@ class _SecretMissionScreenState extends State<SecretMissionScreen> {
     final winnerCount = rankedPlayers
         .where((player) => (_scores[player.id] ?? 0) == highestScore)
         .length;
+
+    final isOfficial = widget.playMode.isOfficial;
 
     return ListView(
       padding: const EdgeInsets.all(24),
@@ -967,8 +1007,10 @@ class _SecretMissionScreenState extends State<SecretMissionScreen> {
           style: Theme.of(context).textTheme.titleLarge,
         ),
         const SizedBox(height: 8),
-        const Text(
-          '3 rounds complete • Quick Play session only • No Tokens or official ranking changes.',
+        Text(
+          isOfficial
+              ? '${widget.playMode.displayName} results are ready.'
+              : '3 rounds complete - Quick Play session only - no Tokens or official ranking changes.',
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 24),
@@ -991,15 +1033,30 @@ class _SecretMissionScreenState extends State<SecretMissionScreen> {
           );
         }),
         const SizedBox(height: 24),
-        FilledButton.icon(
-          onPressed: _playAgain,
-          icon: const Icon(Icons.refresh_rounded),
-          label: const Text('Play Again'),
-        ),
-        const SizedBox(height: 10),
+
+        if (!isOfficial) ...[
+          FilledButton.icon(
+            onPressed: _playAgain,
+            icon: const Icon(Icons.refresh_rounded),
+            label: const Text('Play Again'),
+          ),
+          const SizedBox(height: 10),
+        ],
+
         OutlinedButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text('Back to Quick Play'),
+          onPressed: () {
+            if (isOfficial) {
+              Navigator.of(context).pop(_buildCompetitionResult());
+              return;
+            }
+
+            Navigator.of(context).pop();
+          },
+          child: Text(
+            isOfficial
+                ? 'Return to ${widget.playMode.displayName}'
+                : 'Back to Quick Play',
+          ),
         ),
       ],
     );
