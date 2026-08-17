@@ -15,6 +15,7 @@ import 'pass_the_bomb_screen.dart';
 import 'draw_and_guess_screen.dart';
 import 'dont_say_it_screen.dart';
 
+
 class GamesScreen extends StatelessWidget {
   const GamesScreen({super.key, this.developerPreview = false});
 
@@ -31,14 +32,33 @@ class GamesScreen extends StatelessWidget {
       isAvailable: true,
     ),
 
+    _GameItem(
+  icon: Icons.quiz_outlined,
+  accent: AppTheme.coralColor,
+  title: 'Trivia',
+  description:
+      'Challenge your family with questions and compete for the highest score.',
+  eyebrow: 'KNOWLEDGE',
+  isAvailable: true,
+  ),
+
+    _GameItem(
+  icon: Icons.emoji_emotions_outlined,
+  accent: AppTheme.coralColor,
+  title: 'Emoji Guess',
+  description:
+      'Decode emoji clues and compete to get the highest score.',
+  eyebrow: 'GUESSING GAME',
+  isAvailable: true,
+),
  
     _GameItem(
       icon: Icons.celebration_rounded,
       accent: Color(0xFFE35EAB),
       title: 'Party Games',
       description:
-          'Jump into Trivia, Charades, Emoji Guess, and more quick games.',
-      eyebrow: '6 GAMES INSIDE',
+          'Quick family games for laughs and fun.',
+      eyebrow: '4 GAMES INSIDE',
       isAvailable: true,
     ),
     _GameItem(
@@ -108,6 +128,8 @@ class GamesScreen extends StatelessWidget {
           'Pass the Bomb' => const PassTheBombScreen(),
           'Draw & Guess' => const DrawAndGuessScreen(),
           'Don\'t Say It' => const DontSayItScreen(),
+          'Trivia' => const TriviaScreen(),
+          'Emoji Guess' => const EmojiGuessScreen(),  
           'Party Games' => const PartyGamesScreen(),
           _ => GamePlaceholderScreen(gameTitle: game.title),
         },
@@ -350,17 +372,12 @@ class PartyGamesScreen extends StatelessWidget {
   const PartyGamesScreen({super.key});
 
   static const List<_PartyGameItem> _games = [
-    _PartyGameItem(
-      icon: Icons.quiz_rounded,
-      accent: AppTheme.primaryColor,
-      title: 'Trivia',
-      description: 'Answer AI-generated questions and test your knowledge.',
-    ),
+    
     _PartyGameItem(
       icon: Icons.compare_arrows_rounded,
       accent: AppTheme.coralColor,
       title: 'Would You Rather',
-      description: 'Choose between two playful AI-generated options.',
+      description: 'Choose between two playful options.',
     ),
     _PartyGameItem(
       icon: Icons.theater_comedy_rounded,
@@ -368,12 +385,7 @@ class PartyGamesScreen extends StatelessWidget {
       title: 'Charades',
       description: 'Act out creative prompts for the whole family.',
     ),
-    _PartyGameItem(
-      icon: Icons.emoji_emotions_rounded,
-      accent: AppTheme.goldColor,
-      title: 'Emoji Guess',
-      description: 'Solve AI-generated answers from emoji clues.',
-    ),
+   
     _PartyGameItem(
       icon: Icons.sentiment_satisfied_alt_rounded,
       accent: Color(0xFF4B91F1),
@@ -390,10 +402,8 @@ class PartyGamesScreen extends StatelessWidget {
 
   void _openGame(BuildContext context, String title) {
     final screen = switch (title) {
-      'Trivia' => const TriviaScreen(),
       'Would You Rather' => const WouldYouRatherScreen(),
       'Charades' => const CharadesScreen(),
-      'Emoji Guess' => const EmojiGuessScreen(),
       'Never Have I Ever' => const NeverHaveIEverScreen(),
       'Truth or Dare' => const TruthOrDareScreen(),
       _ => GamePlaceholderScreen(gameTitle: title),
