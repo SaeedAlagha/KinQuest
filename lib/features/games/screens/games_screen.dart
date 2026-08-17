@@ -15,6 +15,7 @@ import 'secret_mission_screen.dart';
 import 'caption_battle_screen.dart';
 import 'pass_the_bomb_screen.dart';
 import 'draw_and_guess_screen.dart';
+import 'dont_say_it_screen.dart';
 
 class GamesScreen extends StatelessWidget {
   const GamesScreen({super.key, this.developerPreview = false});
@@ -118,6 +119,15 @@ class GamesScreen extends StatelessWidget {
       eyebrow: 'CREATIVE PLAY',
       isAvailable: true,
     ),
+    _GameItem(
+  icon: Icons.record_voice_over_outlined,
+  accent: AppTheme.coralColor,
+  title: 'Don\'t Say It',
+  description:
+      'Describe the secret word without saying any of the forbidden words.',
+  eyebrow: 'WORD CHALLENGE',
+  isAvailable: true,
+),
   ];
 
   void _openGame(BuildContext context, _GameItem game) {
@@ -132,6 +142,7 @@ class GamesScreen extends StatelessWidget {
           'Caption Battle' => const CaptionBattleScreen(),
           'Pass the Bomb' => const PassTheBombScreen(),
           'Draw & Guess' => const DrawAndGuessScreen(),
+          'Don\'t Say It' => const DontSayItScreen(),
           'Party Games' => const PartyGamesScreen(),
           _ => GamePlaceholderScreen(gameTitle: game.title),
         },

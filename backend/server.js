@@ -1709,6 +1709,105 @@ Confidence must be a number from 0 to 1.
     });
   }
 });
+app.post("/api/dont-say-it", async (req, res) => {
+  try {
+    const { count } = req.body;
+
+    const requestedCount = Number(count) || 20;
+    const cardCount = Math.min(Math.max(requestedCount, 1), 100);
+
+    const prompt = `
+Generate exactly ${cardCount} unique cards for a family game called Don't Say It.
+
+For each card provide:
+- one secret word
+- exactly 4 forbidden words
+
+The player must describe the secret word without saying any forbidden word.
+
+Rules:
+- Family friendly
+- Suitable for children and adults
+- Easy to understand
+- Fun to describe
+- Avoid obscure words
+- Forbidden words should be the most obvious words someone would normally use
+- No duplicate secret words
+- No sexual content
+- No drugs or alcohol
+- No graphic violence
+- No hateful content
+- No politics
+
+Example:
+
+Secret word: Birthday
+Forbidden words:
+Cake
+Candles
+Party
+Present
+
+Return ONLY valid JSON in this exact structure:
+
+{
+  "cards": [
+    {
+      "word": "Birthday",
+      "forbiddenWords": [
+        "Cake",
+        "Candles",
+        "Party",
+        "Present"
+      ]
+    }
+  ]
+}
+`;
+
+    const response = await ai.models.generateContent({
+      model: "gemini-3.5-flash",
+      contents: prompt,
+      config: {
+        responseMimeType: "application/json",
+        responseJsonSchema: {
+          type: "object",
+          properties: {
+            cards: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  word: {
+                    type: "string",
+                  },
+                  forbiddenWords: {
+                    type: "array",
+                    items: {
+                      type: "string",
+                    },
+                  },
+                },
+                required: ["word", "forbiddenWords"],
+              },
+            },
+          },
+          required: ["cards"],
+        },
+      },
+    });
+
+    const result = JSON.parse(response.text);
+
+    res.json(result);
+  } catch (error) {
+    console.error("Don't Say It generation error:", error);
+
+    res.status(500).json({
+      error: "Failed to generate Don't Say It cards",
+    });
+  }
+});
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
