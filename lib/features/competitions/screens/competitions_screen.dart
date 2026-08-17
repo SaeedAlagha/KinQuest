@@ -43,12 +43,12 @@ class CompetitionsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('play'), centerTitle: true),
+      appBar: AppBar(title: const Text('Play'), centerTitle: true),
       body: ListView(
         padding: const EdgeInsets.all(20),
         children: [
           Text(
-            'play Together',
+            'Play Together',
             style: Theme.of(
               context,
             ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
@@ -177,8 +177,8 @@ class _CompetitionCard extends StatelessWidget {
                 Expanded(
                   child: Text(
                     competition.title == 'Quick Play'
-                      ? competition.reward
-                      : 'Reward: ${competition.reward}',
+                        ? competition.reward
+                        : 'Reward: ${competition.reward}',
                     style: Theme.of(context).textTheme.labelLarge?.copyWith(
                       color: colorScheme.primary,
                       fontWeight: FontWeight.bold,
