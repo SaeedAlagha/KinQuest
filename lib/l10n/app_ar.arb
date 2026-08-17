@@ -262,5 +262,121 @@
   "validationFamilyNameInvalid": "يحتوي اسم العائلة على أحرف غير صالحة.",
   "validationInvitationCodeRequired": "رمز الدعوة مطلوب.",
   "validationInvitationCodeLength": "يجب أن يتكوّن رمز الدعوة من ٦ أحرف بالضبط.",
-  "validationInvitationCodeCharacters": "يمكن أن يحتوي رمز الدعوة على أحرف وأرقام فقط."
+  "validationInvitationCodeCharacters": "يمكن أن يحتوي رمز الدعوة على أحرف وأرقام فقط.",
+  "memoriesTitle": "الذكريات",
+  "memoryTitleGeneric": "ذكرى",
+  "memoriesFamilyRequired": "انضم إلى عائلة أو أنشئ واحدة لعرض الذكريات.",
+  "memoriesLoadError": "تعذر تحميل الذكريات.",
+  "noMemoriesYet": "لا توجد ذكريات بعد",
+  "memoriesEmptyDescription": "احفظوا الصور ومقاطع الفيديو والقصص من لحظاتكم العائلية.",
+  "addFirstMemory": "أضف أول ذكرى",
+  "developerMemoriesTitle": "ذكريات عائلة المطوّر",
+  "developerMemoriesDescription": "لحظات تجريبية لمراجعة التجربة. لا يتم حفظها في Firebase.",
+  "developerMemoriesReadOnly": "معاينة المطوّر للقراءة فقط. لم يتم تغيير أي بيانات.",
+  "previewPicnicTitle": "نزهة عائلية في حديقة مشرف",
+  "previewPicnicDescription": "ظهيرة مشمسة مليئة بالألعاب والقصص والضحكات.",
+  "previewPicnicDetails": "٠٢/٠٨/٢٠٢٦ • دبي",
+  "previewLunchTitle": "غداء الجمعة معًا",
+  "previewLunchDescription": "شاركتنا الجدة وصفتها العائلية المفضلة.",
+  "previewLunchDetails": "٣١/٠٧/٢٠٢٦ • المنزل",
+  "previewSunsetTitle": "نزهة وقت الغروب",
+  "previewSunsetDescription": "شاهدنا الغروب وخططنا ليومنا العائلي القادم.",
+  "previewSunsetDetails": "٢٥/٠٧/٢٠٢٦ • كورنيش أبوظبي",
+  "addMemoryTitle": "إضافة ذكرى",
+  "captureFamilyMoment": "التقط لحظة عائلية",
+  "addMemoryScreenDescription": "أضف صورة واحفظ لحظة يمكن لعائلتك استعادتها معًا.",
+  "addPhoto": "إضافة صورة",
+  "photoTooLarge": "لا يزال حجم الصورة كبيرًا جدًا. يرجى اختيار صورة أخرى.",
+  "memoryDateRequired": "تاريخ الذكرى مطلوب.",
+  "selectValidMemoryDate": "اختر تاريخًا صالحًا للذكرى.",
+  "saveMemorySignInRequired": "يجب تسجيل الدخول لحفظ ذكرى.",
+  "addMemoryFamilyRequired": "انضم إلى عائلة أو أنشئ واحدة قبل إضافة الذكريات.",
+  "memorySaved": "تم حفظ الذكرى بنجاح.",
+  "couldNotSaveMemory": "تعذر حفظ الذكرى: {error}",
+  "@couldNotSaveMemory": {
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  },
+  "memoryTitleLabel": "عنوان الذكرى",
+  "memoryTitleHint": "يوم في حديقة الحيوان",
+  "memoryDescriptionLabel": "الوصف",
+  "memoryDescriptionHint": "احكِ القصة وراء هذه الذكرى",
+  "memoryDateLabel": "التاريخ",
+  "memoryDateHint": "يوم/شهر/سنة",
+  "memoryLocationOptional": "الموقع (اختياري)",
+  "memoryLocationHint": "حديقة حيوانات العين",
+  "saveMemory": "حفظ الذكرى",
+  "editMemory": "تعديل الذكرى",
+  "enterMemoryTitle": "أدخل عنوانًا للذكرى.",
+  "couldNotSaveMemoryChanges": "تعذر حفظ التغييرات: {error}",
+  "@couldNotSaveMemoryChanges": {
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  },
+  "titleLabel": "العنوان",
+  "storyLabel": "القصة",
+  "locationLabel": "الموقع",
+  "chooseDate": "اختر التاريخ",
+  "saveChanges": "حفظ التغييرات",
+  "deleteMemoryQuestion": "حذف الذكرى؟",
+  "deleteMemoryWarning": "ستتم إزالة هذه الذكرى نهائيًا من ذكريات عائلتك.",
+  "cancel": "إلغاء",
+  "delete": "حذف",
+  "memoryNotFound": "لم يتم العثور على الذكرى.",
+  "noDate": "لا يوجد تاريخ",
+  "editMemoryTooltip": "تعديل الذكرى",
+  "deleteMemoryTooltip": "حذف الذكرى",
+  "validationMemoryTitleRequired": "عنوان الذكرى مطلوب.",
+  "validationMemoryTitleMinLength": "يجب أن يحتوي عنوان الذكرى على حرفين على الأقل.",
+  "validationMemoryTitleMaxLength": "لا يمكن أن يزيد عنوان الذكرى على ٦٠ حرفًا.",
+  "profileTitle": "الملف الشخصي",
+  "profileFamilySection": "العائلة",
+  "statistics": "الإحصاءات",
+  "rewards": "المكافآت",
+  "achievements": "الإنجازات",
+  "familyWishes": "أمنيات العائلة",
+  "logOut": "تسجيل الخروج",
+  "silaDeveloper": "مطوّر صلة",
+  "developerFamilyName": "عائلة المطوّر",
+  "familyNameLabel": "العائلة: {name}",
+  "@familyNameLabel": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "noFamilyJoinedYet": "لم تنضم إلى عائلة بعد",
+  "gamesPlayed": "الألعاب التي لعبتها",
+  "wins": "مرات الفوز",
+  "currentStreak": "السلسلة الحالية",
+  "profileDayCount": "{count, plural, =0{لا أيام} =1{يوم واحد} =2{يومان} few{{count} أيام} many{{count} يومًا} other{{count} يوم}}",
+  "@profileDayCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "memoryKeeper": "حافظ الذكريات",
+  "memoryKeeperDescription": "احفظ ١٠٠ ذكرى عائلية.",
+  "quizMaster": "خبير الاختبارات",
+  "quizMasterDescription": "اربح ٢٠ اختبارًا عائليًا.",
+  "teamPlayer": "روح الفريق",
+  "teamPlayerDescription": "أكمل ٣٠ مهمة عائلية.",
+  "noFamilyWishesYet": "لا توجد أمنيات عائلية بعد",
+  "familyWishesEmptyDescription": "ستظهر هنا أمنيات العائلة المكتسبة من المنافسات الكبرى.",
+  "noTrophiesYet": "لا توجد كؤوس بعد",
+  "trophiesEmptyDescription": "ستظهر هنا كؤوس البطولات الأسبوعية والشهرية.",
+  "appSettings": "إعدادات التطبيق",
+  "appSettingsDescription": "اللغة والإشعارات والتفضيلات",
+  "youHaveNotJoinedFamily": "لم تنضم إلى عائلة بعد.",
+  "inviteCodeLabel": "رمز الدعوة",
+  "copyInviteCode": "نسخ رمز الدعوة",
+  "familyInviteCodeCopied": "تم نسخ رمز دعوة العائلة.",
+  "profileFamilyMemberCount": "{count, plural, =0{لا يوجد أفراد في العائلة} =1{فرد واحد من العائلة} =2{فردان من العائلة} few{{count} أفراد من العائلة} many{{count} فردًا من العائلة} other{{count} فرد من العائلة}}",
+  "@profileFamilyMemberCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "shareFamilyInviteCode": "شارك هذا الرمز مع أقاربك ليتمكنوا من الانضمام إلى هذه العائلة."
 }

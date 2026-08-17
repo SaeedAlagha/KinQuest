@@ -25,6 +25,9 @@ enum FormValidationError {
   invitationCodeRequired,
   invitationCodeLength,
   invitationCodeCharacters,
+  memoryTitleRequired,
+  memoryTitleMinLength,
+  memoryTitleMaxLength,
 }
 
 class FormValidators {
@@ -273,19 +276,34 @@ class FormValidators {
     return null;
   }
 
-  static String? validateMemoryTitle(String? value) {
+  static String? validateMemoryTitle(
+    String? value, {
+    FormValidationMessageResolver? messageFor,
+  }) {
     final title = value?.trim() ?? '';
 
     if (title.isEmpty) {
-      return 'Memory title is required.';
+      return _message(
+        FormValidationError.memoryTitleRequired,
+        messageFor,
+        'Memory title is required.',
+      );
     }
 
     if (title.length < 2) {
-      return 'Memory title must contain at least 2 characters.';
+      return _message(
+        FormValidationError.memoryTitleMinLength,
+        messageFor,
+        'Memory title must contain at least 2 characters.',
+      );
     }
 
     if (title.length > 60) {
-      return 'Memory title cannot exceed 60 characters.';
+      return _message(
+        FormValidationError.memoryTitleMaxLength,
+        messageFor,
+        'Memory title cannot exceed 60 characters.',
+      );
     }
 
     return null;
@@ -318,6 +336,9 @@ class LocalizedFormValidators {
 
   String? validateInvitationCode(String? value) =>
       FormValidators.validateInvitationCode(value, messageFor: _messageFor);
+
+  String? validateMemoryTitle(String? value) =>
+      FormValidators.validateMemoryTitle(value, messageFor: _messageFor);
 
   String _messageFor(FormValidationError error) => switch (error) {
     FormValidationError.fullNameRequired => strings.validationFullNameRequired,
@@ -353,5 +374,11 @@ class LocalizedFormValidators {
       strings.validationInvitationCodeLength,
     FormValidationError.invitationCodeCharacters =>
       strings.validationInvitationCodeCharacters,
+    FormValidationError.memoryTitleRequired =>
+      strings.validationMemoryTitleRequired,
+    FormValidationError.memoryTitleMinLength =>
+      strings.validationMemoryTitleMinLength,
+    FormValidationError.memoryTitleMaxLength =>
+      strings.validationMemoryTitleMaxLength,
   };
 }

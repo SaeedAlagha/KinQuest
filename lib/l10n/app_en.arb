@@ -262,5 +262,121 @@
   "validationFamilyNameInvalid": "Family name contains invalid characters.",
   "validationInvitationCodeRequired": "Invitation code is required.",
   "validationInvitationCodeLength": "Invitation code must contain exactly 6 characters.",
-  "validationInvitationCodeCharacters": "Invitation code can only contain letters and numbers."
+  "validationInvitationCodeCharacters": "Invitation code can only contain letters and numbers.",
+  "memoriesTitle": "Memories",
+  "memoryTitleGeneric": "Memory",
+  "memoriesFamilyRequired": "Join or create a family to view memories.",
+  "memoriesLoadError": "Could not load memories.",
+  "noMemoriesYet": "No memories yet",
+  "memoriesEmptyDescription": "Save photos, videos, and stories from your family moments.",
+  "addFirstMemory": "Add Your First Memory",
+  "developerMemoriesTitle": "Developer Family memories",
+  "developerMemoriesDescription": "Sample moments for reviewing the experience. They are not stored in Firebase.",
+  "developerMemoriesReadOnly": "Developer preview is read-only. No data was changed.",
+  "previewPicnicTitle": "Family picnic at Mushrif Park",
+  "previewPicnicDescription": "A sunny afternoon full of games, stories, and laughter.",
+  "previewPicnicDetails": "02/08/2026 • Dubai",
+  "previewLunchTitle": "Friday lunch together",
+  "previewLunchDescription": "Grandma shared her favorite family recipe with everyone.",
+  "previewLunchDetails": "31/07/2026 • Home",
+  "previewSunsetTitle": "Sunset walk",
+  "previewSunsetDescription": "We watched the sunset and planned our next family day.",
+  "previewSunsetDetails": "25/07/2026 • Abu Dhabi Corniche",
+  "addMemoryTitle": "Add Memory",
+  "captureFamilyMoment": "Capture a family moment",
+  "addMemoryScreenDescription": "Add a photo and save a moment your family can revisit together.",
+  "addPhoto": "Add Photo",
+  "photoTooLarge": "That photo is still too large. Please choose another photo.",
+  "memoryDateRequired": "Memory date is required.",
+  "selectValidMemoryDate": "Select a valid memory date.",
+  "saveMemorySignInRequired": "You must be signed in to save a memory.",
+  "addMemoryFamilyRequired": "Join or create a family before adding memories.",
+  "memorySaved": "Memory saved successfully.",
+  "couldNotSaveMemory": "Could not save the memory: {error}",
+  "@couldNotSaveMemory": {
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  },
+  "memoryTitleLabel": "Memory title",
+  "memoryTitleHint": "Day at the Zoo",
+  "memoryDescriptionLabel": "Description",
+  "memoryDescriptionHint": "Tell the story behind this memory",
+  "memoryDateLabel": "Date",
+  "memoryDateHint": "DD/MM/YYYY",
+  "memoryLocationOptional": "Location (optional)",
+  "memoryLocationHint": "Al Ain Zoo",
+  "saveMemory": "Save Memory",
+  "editMemory": "Edit Memory",
+  "enterMemoryTitle": "Enter a title for the memory.",
+  "couldNotSaveMemoryChanges": "Could not save changes: {error}",
+  "@couldNotSaveMemoryChanges": {
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  },
+  "titleLabel": "Title",
+  "storyLabel": "Story",
+  "locationLabel": "Location",
+  "chooseDate": "Choose date",
+  "saveChanges": "Save Changes",
+  "deleteMemoryQuestion": "Delete memory?",
+  "deleteMemoryWarning": "This memory will be permanently removed from your family memories.",
+  "cancel": "Cancel",
+  "delete": "Delete",
+  "memoryNotFound": "Memory not found.",
+  "noDate": "No date",
+  "editMemoryTooltip": "Edit memory",
+  "deleteMemoryTooltip": "Delete memory",
+  "validationMemoryTitleRequired": "Memory title is required.",
+  "validationMemoryTitleMinLength": "Memory title must contain at least 2 characters.",
+  "validationMemoryTitleMaxLength": "Memory title cannot exceed 60 characters.",
+  "profileTitle": "Profile",
+  "profileFamilySection": "Family",
+  "statistics": "Statistics",
+  "rewards": "Rewards",
+  "achievements": "Achievements",
+  "familyWishes": "Family Wishes",
+  "logOut": "Log Out",
+  "silaDeveloper": "Sila Developer",
+  "developerFamilyName": "Developer Family",
+  "familyNameLabel": "Family: {name}",
+  "@familyNameLabel": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "noFamilyJoinedYet": "No family joined yet",
+  "gamesPlayed": "Games Played",
+  "wins": "Wins",
+  "currentStreak": "Current Streak",
+  "profileDayCount": "{count, plural, =1{1 day} other{{count} days}}",
+  "@profileDayCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "memoryKeeper": "Memory Keeper",
+  "memoryKeeperDescription": "Save 100 family memories.",
+  "quizMaster": "Quiz Master",
+  "quizMasterDescription": "Win 20 Family Quizzes.",
+  "teamPlayer": "Team Player",
+  "teamPlayerDescription": "Complete 30 Family Missions.",
+  "noFamilyWishesYet": "No Family Wishes yet",
+  "familyWishesEmptyDescription": "Family Wishes earned from major competitions will appear here.",
+  "noTrophiesYet": "No trophies yet",
+  "trophiesEmptyDescription": "Weekly and monthly championship trophies will appear here.",
+  "appSettings": "App Settings",
+  "appSettingsDescription": "Language, notifications, and preferences",
+  "youHaveNotJoinedFamily": "You have not joined a family yet.",
+  "inviteCodeLabel": "Invite Code",
+  "copyInviteCode": "Copy invite code",
+  "familyInviteCodeCopied": "Family invite code copied.",
+  "profileFamilyMemberCount": "{count, plural, =0{No family members} =1{1 family member} other{{count} family members}}",
+  "@profileFamilyMemberCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "shareFamilyInviteCode": "Share this code with relatives so they can join this family."
 }
