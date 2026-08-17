@@ -1,10 +1,12 @@
-import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../../../core/widgets/sila_brand_mark.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
+
 import '../../../core/validation/form_validators.dart';
-import 'login_screen.dart';
+import '../../../core/widgets/sila_brand_mark.dart';
+import '../../../l10n/app_localizations.dart';
 import 'family_choice_screen.dart';
+import 'login_screen.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -63,16 +65,18 @@ class _SignupScreenState extends State<SignupScreen> {
   }
 
   String? _validateBirthDate(String? value) {
+    final strings = AppLocalizations.of(context)!;
+
     if (value == null || value.trim().isEmpty) {
-      return 'Date of birth is required.';
+      return strings.dateOfBirthRequired;
     }
 
     if (_selectedBirthDate == null) {
-      return 'Select a valid date of birth.';
+      return strings.selectValidDateOfBirth;
     }
 
     if (_selectedBirthDate!.isAfter(DateTime.now())) {
-      return 'Date of birth cannot be in the future.';
+      return strings.dateOfBirthFuture;
     }
 
     return null;
@@ -88,13 +92,10 @@ class _SignupScreenState extends State<SignupScreen> {
     }
 
     if (!_acceptedTerms) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'You must accept the Terms of Service and Privacy Policy.',
-          ),
-        ),
-      );
+      final strings = AppLocalizations.of(context)!;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(strings.acceptTermsRequired)));
       return;
     }
 
@@ -138,27 +139,28 @@ class _SignupScreenState extends State<SignupScreen> {
         return;
       }
 
+      final strings = AppLocalizations.of(context)!;
       String message;
 
       switch (error.code) {
         case 'email-already-in-use':
-          message = 'An account already exists with this email.';
+          message = strings.emailAlreadyInUse;
           break;
 
         case 'invalid-email':
-          message = 'Please enter a valid email address.';
+          message = strings.pleaseEnterValidEmail;
           break;
 
         case 'weak-password':
-          message = 'Your password is too weak.';
+          message = strings.weakPassword;
           break;
 
         case 'network-request-failed':
-          message = 'No internet connection. Please try again.';
+          message = strings.noInternetConnection;
           break;
 
         default:
-          message = 'Could not create your account. Please try again.';
+          message = strings.couldNotCreateAccount;
       }
 
       ScaffoldMessenger.of(
@@ -170,8 +172,8 @@ class _SignupScreenState extends State<SignupScreen> {
       }
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Something went wrong. Please try again.'),
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.somethingWentWrong),
         ),
       );
     } finally {
@@ -192,8 +194,11 @@ class _SignupScreenState extends State<SignupScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context)!;
+    final validators = LocalizedFormValidators(strings);
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Create Account')),
+      appBar: AppBar(title: Text(strings.createAccount)),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
@@ -212,14 +217,14 @@ class _SignupScreenState extends State<SignupScreen> {
                     const SizedBox(height: 24),
 
                     Text(
-                      'Join Sila',
+                      strings.joinSila,
                       style: Theme.of(context).textTheme.headlineMedium,
                     ),
 
                     const SizedBox(height: 8),
 
                     Text(
-                      'Create your account and bring your family circle closer.',
+                      strings.signupDescription,
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
 
@@ -230,10 +235,10 @@ class _SignupScreenState extends State<SignupScreen> {
                       keyboardType: TextInputType.name,
                       textCapitalization: TextCapitalization.words,
                       textInputAction: TextInputAction.next,
-                      validator: FormValidators.validateName,
-                      decoration: const InputDecoration(
-                        labelText: 'Full name',
-                        prefixIcon: Icon(Icons.person_outline),
+                      validator: validators.validateName,
+                      decoration: InputDecoration(
+                        labelText: strings.fullName,
+                        prefixIcon: const Icon(Icons.person_outline),
                       ),
                     ),
 
@@ -244,11 +249,11 @@ class _SignupScreenState extends State<SignupScreen> {
                       keyboardType: TextInputType.emailAddress,
                       textInputAction: TextInputAction.next,
                       autocorrect: false,
-                      validator: FormValidators.validateEmail,
-                      decoration: const InputDecoration(
-                        labelText: 'Email address',
-                        hintText: 'name@example.com',
-                        prefixIcon: Icon(Icons.email_outlined),
+                      validator: validators.validateEmail,
+                      decoration: InputDecoration(
+                        labelText: strings.emailAddress,
+                        hintText: strings.emailAddressHint,
+                        prefixIcon: const Icon(Icons.email_outlined),
                       ),
                     ),
 
@@ -259,11 +264,11 @@ class _SignupScreenState extends State<SignupScreen> {
                       readOnly: true,
                       onTap: _selectBirthDate,
                       validator: _validateBirthDate,
-                      decoration: const InputDecoration(
-                        labelText: 'Date of birth',
-                        hintText: 'DD/MM/YYYY',
-                        prefixIcon: Icon(Icons.cake_outlined),
-                        suffixIcon: Icon(Icons.calendar_today_outlined),
+                      decoration: InputDecoration(
+                        labelText: strings.dateOfBirth,
+                        hintText: strings.dateOfBirthHint,
+                        prefixIcon: const Icon(Icons.cake_outlined),
+                        suffixIcon: const Icon(Icons.calendar_today_outlined),
                       ),
                     ),
 
@@ -273,11 +278,10 @@ class _SignupScreenState extends State<SignupScreen> {
                       controller: _passwordController,
                       obscureText: _hidePassword,
                       textInputAction: TextInputAction.next,
-                      validator: FormValidators.validatePassword,
+                      validator: validators.validatePassword,
                       decoration: InputDecoration(
-                        labelText: 'Password',
-                        helperText:
-                            '8+ characters, uppercase, lowercase, and number',
+                        labelText: strings.password,
+                        helperText: strings.passwordRequirements,
                         prefixIcon: const Icon(Icons.lock_outline),
                         suffixIcon: IconButton(
                           onPressed: () {
@@ -301,14 +305,14 @@ class _SignupScreenState extends State<SignupScreen> {
                       obscureText: _hideConfirmPassword,
                       textInputAction: TextInputAction.done,
                       validator: (value) {
-                        return FormValidators.validateConfirmPassword(
+                        return validators.validateConfirmPassword(
                           value,
                           _passwordController.text,
                         );
                       },
                       onFieldSubmitted: (_) => _createAccount(),
                       decoration: InputDecoration(
-                        labelText: 'Confirm password',
+                        labelText: strings.confirmPassword,
                         prefixIcon: const Icon(Icons.lock_reset_outlined),
                         suffixIcon: IconButton(
                           onPressed: () {
@@ -336,9 +340,7 @@ class _SignupScreenState extends State<SignupScreen> {
                           _acceptedTerms = value ?? false;
                         });
                       },
-                      title: const Text(
-                        'I agree to the Terms of Service and Privacy Policy.',
-                      ),
+                      title: Text(strings.acceptTerms),
                     ),
 
                     const SizedBox(height: 18),
@@ -349,21 +351,22 @@ class _SignupScreenState extends State<SignupScreen> {
                         onPressed: _isCreatingAccount ? null : _createAccount,
                         child: Text(
                           _isCreatingAccount
-                              ? 'Creating Account...'
-                              : 'Create Account',
+                              ? strings.creatingAccount
+                              : strings.createAccount,
                         ),
                       ),
                     ),
 
                     const SizedBox(height: 22),
 
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                    Wrap(
+                      alignment: WrapAlignment.center,
+                      crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
-                        const Text('Already have an account?'),
+                        Text(strings.alreadyHaveAccount),
                         TextButton(
                           onPressed: _openLogin,
-                          child: const Text('Log in'),
+                          child: Text(strings.logIn),
                         ),
                       ],
                     ),

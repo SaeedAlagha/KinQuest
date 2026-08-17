@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../l10n/app_localizations.dart';
 import 'create_family_screen.dart';
 import 'join_family_screen.dart';
 
@@ -22,8 +23,10 @@ class FamilyChoiceScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context)!;
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Family Setup')),
+      appBar: AppBar(title: Text(strings.familySetup)),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(24),
@@ -43,7 +46,7 @@ class FamilyChoiceScreen extends StatelessWidget {
                   const SizedBox(height: 28),
 
                   Text(
-                    'Connect with your family',
+                    strings.connectWithFamily,
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.headlineMedium,
                   ),
@@ -51,7 +54,7 @@ class FamilyChoiceScreen extends StatelessWidget {
                   const SizedBox(height: 12),
 
                   Text(
-                    'Create a new family group or join an existing one.',
+                    strings.createOrJoinFamily,
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
@@ -63,7 +66,7 @@ class FamilyChoiceScreen extends StatelessWidget {
                     child: FilledButton.icon(
                       onPressed: () => _openCreateFamily(context),
                       icon: const Icon(Icons.add_home_outlined),
-                      label: const Text('Create a Family'),
+                      label: Text(strings.createFamily),
                     ),
                   ),
 
@@ -74,7 +77,7 @@ class FamilyChoiceScreen extends StatelessWidget {
                     child: OutlinedButton.icon(
                       onPressed: () => _openJoinFamily(context),
                       icon: const Icon(Icons.group_add_outlined),
-                      label: const Text('Join a Family'),
+                      label: Text(strings.joinFamily),
                     ),
                   ),
 

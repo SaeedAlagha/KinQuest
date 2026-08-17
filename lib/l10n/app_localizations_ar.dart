@@ -102,7 +102,8 @@ class AppLocalizationsAr extends AppLocalizations {
   String get navProfile => 'الملف الشخصي';
 
   @override
-  String get developerFamilyPreview => 'معاينة عائلة المطوّر • بيانات تجريبية فقط';
+  String get developerFamilyPreview =>
+      'معاينة عائلة المطوّر • بيانات تجريبية فقط';
 
   @override
   String get exit => 'خروج';
@@ -120,13 +121,15 @@ class AppLocalizationsAr extends AppLocalizations {
   String get yourFamily => 'عائلتك';
 
   @override
-  String get developerPreviewMemoryReadOnly => 'معاينة المطوّر للعرض فقط. لم تتم إضافة أي ذكرى.';
+  String get developerPreviewMemoryReadOnly =>
+      'معاينة المطوّر للعرض فقط. لم تتم إضافة أي ذكرى.';
 
   @override
   String get todaysDailyChallenge => 'تحدي اليوم';
 
   @override
-  String get dailyChallengeHomeDescription => 'أكملوا تحدي العائلة اليومي واكسبوا رموزًا إضافية.';
+  String get dailyChallengeHomeDescription =>
+      'أكملوا تحدي العائلة اليومي واكسبوا رموزًا إضافية.';
 
   @override
   String get growingInUnity => 'ننمو بوحدتنا';
@@ -135,7 +138,8 @@ class AppLocalizationsAr extends AppLocalizations {
   String get smallMomentsStrongerBonds => 'لحظات صغيرة، روابط أقوى';
 
   @override
-  String get homeBondDescription => 'اصنعوا ذكرى أو العبوا معًا—طرق بسيطة لتبقوا قريبين كل يوم.';
+  String get homeBondDescription =>
+      'اصنعوا ذكرى أو العبوا معًا—طرق بسيطة لتبقوا قريبين كل يوم.';
 
   @override
   String get addMemory => 'أضف ذكرى';
@@ -194,13 +198,15 @@ class AppLocalizationsAr extends AppLocalizations {
   String get gamesHeading => 'اختاروا لعبتكم العائلية المفضلة';
 
   @override
-  String get gamesDescription => 'شاركوا ضحكة سريعة أو سؤالًا عميقًا أو تحديًا يقرّب جميع الأجيال.';
+  String get gamesDescription =>
+      'شاركوا ضحكة سريعة أو سؤالًا عميقًا أو تحديًا يقرّب جميع الأجيال.';
 
   @override
   String get familyQuiz => 'اختبار العائلة';
 
   @override
-  String get familyQuizDescription => 'شاركوا إجابات حقيقية واكتشفوا مدى معرفة أفراد العائلة بعضهم ببعض.';
+  String get familyQuizDescription =>
+      'شاركوا إجابات حقيقية واكتشفوا مدى معرفة أفراد العائلة بعضهم ببعض.';
 
   @override
   String get connectedPlay => 'لعب يقوّي الروابط';
@@ -209,7 +215,8 @@ class AppLocalizationsAr extends AppLocalizations {
   String get trivia => 'معلومات عامة';
 
   @override
-  String get triviaDescription => 'تحدّوا عائلتكم بالأسئلة وتنافسوا لتحقيق أعلى نتيجة.';
+  String get triviaDescription =>
+      'تحدّوا عائلتكم بالأسئلة وتنافسوا لتحقيق أعلى نتيجة.';
 
   @override
   String get knowledge => 'معرفة';
@@ -218,7 +225,8 @@ class AppLocalizationsAr extends AppLocalizations {
   String get emojiGuess => 'خمّن الإيموجي';
 
   @override
-  String get emojiGuessDescription => 'فكّوا رموز الإيموجي وتنافسوا لتحقيق أعلى نتيجة.';
+  String get emojiGuessDescription =>
+      'فكّوا رموز الإيموجي وتنافسوا لتحقيق أعلى نتيجة.';
 
   @override
   String get guessingGame => 'لعبة تخمين';
@@ -236,7 +244,8 @@ class AppLocalizationsAr extends AppLocalizations {
   String get familyImpostor => 'الدخيل بين العائلة';
 
   @override
-  String get familyImpostorDescription => 'اكتشفوا الدخيل الخفي عبر التلميحات والنقاش وتصويت العائلة.';
+  String get familyImpostorDescription =>
+      'اكتشفوا الدخيل الخفي عبر التلميحات والنقاش وتصويت العائلة.';
 
   @override
   String get socialDeduction => 'استنتاج اجتماعي';
@@ -245,7 +254,8 @@ class AppLocalizationsAr extends AppLocalizations {
   String get secretMission => 'مهمة سرية';
 
   @override
-  String get secretMissionDescription => 'أنجز مهمة خفية من دون أن تكتشف عائلتك ما تفعله.';
+  String get secretMissionDescription =>
+      'أنجز مهمة خفية من دون أن تكتشف عائلتك ما تفعله.';
 
   @override
   String get secretChallenge => 'تحدٍّ سري';
@@ -254,7 +264,8 @@ class AppLocalizationsAr extends AppLocalizations {
   String get captionBattle => 'معركة التعليقات';
 
   @override
-  String get captionBattleDescription => 'اكتبوا تعليقات على صور العائلة وصوّتوا بسرية وتوّجوا الأكثر طرافة.';
+  String get captionBattleDescription =>
+      'اكتبوا تعليقات على صور العائلة وصوّتوا بسرية وتوّجوا الأكثر طرافة.';
 
   @override
   String get photoParty => 'مرح الصور';
@@ -263,7 +274,8 @@ class AppLocalizationsAr extends AppLocalizations {
   String get passTheBomb => 'مرّر القنبلة';
 
   @override
-  String get passTheBombDescription => 'أجب بسرعة ومرّر الهاتف وتجنّب أن تكون ممسكًا به عند انتهاء المؤقت الخفي.';
+  String get passTheBombDescription =>
+      'أجب بسرعة ومرّر الهاتف وتجنّب أن تكون ممسكًا به عند انتهاء المؤقت الخفي.';
 
   @override
   String get fastFamilyFun => 'مرح عائلي سريع';
@@ -272,7 +284,8 @@ class AppLocalizationsAr extends AppLocalizations {
   String get drawAndGuess => 'ارسم وخمّن';
 
   @override
-  String get drawAndGuessDescription => 'ارسم تلميحات يولدها الذكاء الاصطناعي بينما تحاول عائلتك التخمين.';
+  String get drawAndGuessDescription =>
+      'ارسم تلميحات يولدها الذكاء الاصطناعي بينما تحاول عائلتك التخمين.';
 
   @override
   String get creativePlay => 'لعب إبداعي';
@@ -281,7 +294,8 @@ class AppLocalizationsAr extends AppLocalizations {
   String get dontSayIt => 'لا تقلها';
 
   @override
-  String get dontSayItDescription => 'صِف الكلمة السرية من دون نطق أي من الكلمات الممنوعة.';
+  String get dontSayItDescription =>
+      'صِف الكلمة السرية من دون نطق أي من الكلمات الممنوعة.';
 
   @override
   String get wordChallenge => 'تحدي الكلمات';
@@ -302,7 +316,8 @@ class AppLocalizationsAr extends AppLocalizations {
   String get charades => 'التمثيل الصامت';
 
   @override
-  String get charadesDescription => 'مثّل تلميحات مبتكرة أمام جميع أفراد العائلة.';
+  String get charadesDescription =>
+      'مثّل تلميحات مبتكرة أمام جميع أفراد العائلة.';
 
   @override
   String get neverHaveIEver => 'لم أفعلها من قبل';
@@ -314,13 +329,15 @@ class AppLocalizationsAr extends AppLocalizations {
   String get truthOrDare => 'صراحة أم تحدٍّ';
 
   @override
-  String get truthOrDareDescription => 'اختر سؤال صراحة لطيفًا أو تحديًا ممتعًا.';
+  String get truthOrDareDescription =>
+      'اختر سؤال صراحة لطيفًا أو تحديًا ممتعًا.';
 
   @override
   String get partyGamesHeading => 'ألعاب سريعة. ضحكات كبيرة.';
 
   @override
-  String get partyGamesSubtitle => 'اختر لعبة ومرّر الجهاز بينكم—من دون إعداد مسبق.';
+  String get partyGamesSubtitle =>
+      'اختر لعبة ومرّر الجهاز بينكم—من دون إعداد مسبق.';
 
   @override
   String get gameFutureUpdate => 'سيتم تنفيذ هذه اللعبة في تحديث قادم.';
@@ -329,19 +346,22 @@ class AppLocalizationsAr extends AppLocalizations {
   String get playTogether => 'العبوا معًا';
 
   @override
-  String get playTogetherDescription => 'اجتمعوا واختاروا طريقة اللعب ثم اختاروا لعبة.';
+  String get playTogetherDescription =>
+      'اجتمعوا واختاروا طريقة اللعب ثم اختاروا لعبة.';
 
   @override
   String get quickPlay => 'لعب سريع';
 
   @override
-  String get quickPlayDescription => 'اختاروا أي لعبة والعبوا معًا على هاتف واحد، من دون رموز أو ترتيب رسمي.';
+  String get quickPlayDescription =>
+      'اختاروا أي لعبة والعبوا معًا على هاتف واحد، من دون رموز أو ترتيب رسمي.';
 
   @override
   String get quickPlayReward => 'للمرح فقط • من دون رموز';
 
   @override
-  String get dailyChallengeCompetitionDescription => 'تنافسوا في لعبة اليوم المختارة. يحصل الفائز على رموز.';
+  String get dailyChallengeCompetitionDescription =>
+      'تنافسوا في لعبة اليوم المختارة. يحصل الفائز على رموز.';
 
   @override
   String get dailyChallengeCompetitionReward => 'رموز للفائز';
@@ -350,7 +370,8 @@ class AppLocalizationsAr extends AppLocalizations {
   String get weeklyChampionship => 'البطولة الأسبوعية';
 
   @override
-  String get weeklyChampionshipDescription => 'تنافسوا عبر عدة جولات ليصبح أحدكم بطل العائلة لهذا الأسبوع.';
+  String get weeklyChampionshipDescription =>
+      'تنافسوا عبر عدة جولات ليصبح أحدكم بطل العائلة لهذا الأسبوع.';
 
   @override
   String get weeklyChampionshipReward => 'أمنية عائلية';
@@ -359,7 +380,8 @@ class AppLocalizationsAr extends AppLocalizations {
   String get monthlyCup => 'الكأس الشهري';
 
   @override
-  String get monthlyCupDescription => 'أكبر منافسة شهرية للعائلة. اربحوا كأسًا ورموزًا إضافية.';
+  String get monthlyCupDescription =>
+      'أكبر منافسة شهرية للعائلة. اربحوا كأسًا ورموزًا إضافية.';
 
   @override
   String get monthlyCupReward => 'كأس ورموز إضافية';
@@ -376,7 +398,8 @@ class AppLocalizationsAr extends AppLocalizations {
   String get familyTrophyCabinet => 'خزانة جوائز العائلة';
 
   @override
-  String get familyTrophyCabinetDescription => 'سيظهر هنا أبطال البطولات الأسبوعية والشهرية السابقة.';
+  String get familyTrophyCabinetDescription =>
+      'سيظهر هنا أبطال البطولات الأسبوعية والشهرية السابقة.';
 
   @override
   String get leaderboard => 'لوحة المتصدرين';
@@ -385,7 +408,8 @@ class AppLocalizationsAr extends AppLocalizations {
   String get leaderboardSignIn => 'سجّل الدخول لعرض لوحة متصدري عائلتك.';
 
   @override
-  String get leaderboardJoinFamily => 'انضم إلى عائلة أو أنشئ واحدة لعرض لوحة المتصدرين.';
+  String get leaderboardJoinFamily =>
+      'انضم إلى عائلة أو أنشئ واحدة لعرض لوحة المتصدرين.';
 
   @override
   String get leaderboardLoadError => 'تعذر تحميل لوحة متصدري العائلة.';
@@ -418,49 +442,60 @@ class AppLocalizationsAr extends AppLocalizations {
   String get developerFamilyLeaderboard => 'لوحة متصدري عائلة المطوّر';
 
   @override
-  String get competitionFutureUpdate => 'سيتم تنفيذ نظام هذه المنافسة في تحديث قادم.';
+  String get competitionFutureUpdate =>
+      'سيتم تنفيذ نظام هذه المنافسة في تحديث قادم.';
 
   @override
   String get familyQuizDay => 'يوم اختبار العائلة';
 
   @override
-  String get familyQuizDayDescription => 'اكتشفوا اليوم مدى معرفة أفراد عائلتكم بعضهم ببعض في اختبار العائلة.';
+  String get familyQuizDayDescription =>
+      'اكتشفوا اليوم مدى معرفة أفراد عائلتكم بعضهم ببعض في اختبار العائلة.';
 
   @override
   String get memoryChallengeDay => 'يوم تحدي الذكريات';
 
   @override
-  String get memoryChallengeDayDescription => 'عودوا إلى لحظاتكم العائلية واختبروا مدى تذكّركم لها.';
+  String get memoryChallengeDayDescription =>
+      'عودوا إلى لحظاتكم العائلية واختبروا مدى تذكّركم لها.';
 
   @override
   String get familyMissionDay => 'يوم المهمة العائلية';
 
   @override
-  String get familyMissionDayDescription => 'أنجزوا نشاطًا هادفًا معًا من المهام العائلية.';
+  String get familyMissionDayDescription =>
+      'أنجزوا نشاطًا هادفًا معًا من المهام العائلية.';
 
   @override
   String get partyGameDay => 'يوم الألعاب الجماعية';
 
   @override
-  String get partyGameDayDescription => 'اختاروا لعبة عائلية سريعة وشاركوا بعض الضحكات.';
+  String get partyGameDayDescription =>
+      'اختاروا لعبة عائلية سريعة وشاركوا بعض الضحكات.';
 
   @override
-  String get dailyChallengeSignInRequired => 'يجب تسجيل الدخول لاستخدام التحدي اليومي.';
+  String get dailyChallengeSignInRequired =>
+      'يجب تسجيل الدخول لاستخدام التحدي اليومي.';
 
   @override
-  String get dailyChallengeFamilyRequired => 'انضم إلى عائلة أو أنشئ واحدة قبل لعب التحدي اليومي.';
+  String get dailyChallengeFamilyRequired =>
+      'انضم إلى عائلة أو أنشئ واحدة قبل لعب التحدي اليومي.';
 
   @override
-  String get dailyChallengeLoadError => 'تعذر تحميل تحدي اليوم. يرجى المحاولة مجددًا.';
+  String get dailyChallengeLoadError =>
+      'تعذر تحميل تحدي اليوم. يرجى المحاولة مجددًا.';
 
   @override
-  String get dailyChallengeCompleteMessage => 'اكتمل التحدي اليومي! ربحت ١٠ رموز.';
+  String get dailyChallengeCompleteMessage =>
+      'اكتمل التحدي اليومي! ربحت ١٠ رموز.';
 
   @override
-  String get dailyChallengeAlreadyClaimed => 'لقد حصلت بالفعل على مكافأة تحدي اليوم.';
+  String get dailyChallengeAlreadyClaimed =>
+      'لقد حصلت بالفعل على مكافأة تحدي اليوم.';
 
   @override
-  String get dailyChallengeSaveError => 'تعذر إكمال التحدي اليومي. يرجى المحاولة مجددًا.';
+  String get dailyChallengeSaveError =>
+      'تعذر إكمال التحدي اليومي. يرجى المحاولة مجددًا.';
 
   @override
   String get todaysFamilyChallenge => 'تحدي العائلة اليوم';
@@ -472,7 +507,8 @@ class AppLocalizationsAr extends AppLocalizations {
   String get dailyRewardDescription => '+١٠ رموز وتقدّم في سلسلة الأيام';
 
   @override
-  String get dailyChallengeCompleted => 'أكملت تحدي اليوم. عد غدًا لتحدٍّ جديد!';
+  String get dailyChallengeCompleted =>
+      'أكملت تحدي اليوم. عد غدًا لتحدٍّ جديد!';
 
   @override
   String get playTodaysChallenge => 'العب تحدي اليوم';
@@ -485,4 +521,308 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get openChallengeBeforeClaiming => 'افتح تحدي اليوم قبل طلب المكافأة.';
+
+  @override
+  String get welcomePrivateFamilySpace =>
+      'مساحة عائلية خاصة للقصص المشتركة والتحديات الممتعة واللحظات التي تبقي الجميع على تواصل.';
+
+  @override
+  String get uaeYearOfFamily2026 => 'عام الأسرة في الإمارات ٢٠٢٦';
+
+  @override
+  String get everyBondHelpsFamilyGrow => 'كل رابطة تساعد العائلة على النمو';
+
+  @override
+  String get silaEverydayMoments =>
+      'تحوّل صلة اللحظات اليومية إلى جذور أقوى وروابط أقرب ونمو مشترك.';
+
+  @override
+  String get familyMomentsStayPrivate => 'تبقى لحظات عائلتك داخل عائلتك.';
+
+  @override
+  String get logIn => 'تسجيل الدخول';
+
+  @override
+  String get createAccount => 'إنشاء حساب';
+
+  @override
+  String get welcomeBackToSila => 'مرحبًا بعودتك إلى صلة';
+
+  @override
+  String get loginDescription => 'عُد إلى دائرتك العائلية وتابع من حيث توقفت.';
+
+  @override
+  String get emailAddress => 'البريد الإلكتروني';
+
+  @override
+  String get emailAddressHint => 'name@example.com';
+
+  @override
+  String get password => 'كلمة المرور';
+
+  @override
+  String get forgotPassword => 'نسيت كلمة المرور؟';
+
+  @override
+  String get passwordRecoveryComing =>
+      'ستتم إضافة استعادة كلمة المرور عبر Firebase.';
+
+  @override
+  String get loggingIn => 'جارٍ تسجيل الدخول...';
+
+  @override
+  String get enterDeveloperFamily => 'الدخول إلى عائلة المطوّر';
+
+  @override
+  String get debugPreviewDescription =>
+      'معاينة تجريبية فقط • تستخدم بيانات عرض للقراءة فقط';
+
+  @override
+  String get noAccount => 'ليس لديك حساب؟';
+
+  @override
+  String get createOne => 'أنشئ حسابًا';
+
+  @override
+  String get incorrectEmailOrPassword =>
+      'البريد الإلكتروني أو كلمة المرور غير صحيحة.';
+
+  @override
+  String get accountDisabled => 'تم تعطيل هذا الحساب.';
+
+  @override
+  String get pleaseEnterValidEmail => 'يرجى إدخال بريد إلكتروني صالح.';
+
+  @override
+  String get tooManyLoginAttempts =>
+      'محاولات كثيرة جدًا. يرجى المحاولة لاحقًا.';
+
+  @override
+  String get noInternetConnection =>
+      'لا يوجد اتصال بالإنترنت. يرجى المحاولة مجددًا.';
+
+  @override
+  String get couldNotLogIn => 'تعذر تسجيل الدخول. يرجى المحاولة مجددًا.';
+
+  @override
+  String get joinSila => 'انضم إلى صلة';
+
+  @override
+  String get signupDescription => 'أنشئ حسابك وقرّب دائرتك العائلية.';
+
+  @override
+  String get fullName => 'الاسم الكامل';
+
+  @override
+  String get dateOfBirth => 'تاريخ الميلاد';
+
+  @override
+  String get dateOfBirthHint => 'يوم/شهر/سنة';
+
+  @override
+  String get passwordRequirements =>
+      '٨ أحرف أو أكثر، وحرف إنجليزي كبير وصغير ورقم';
+
+  @override
+  String get confirmPassword => 'تأكيد كلمة المرور';
+
+  @override
+  String get acceptTerms => 'أوافق على شروط الخدمة وسياسة الخصوصية.';
+
+  @override
+  String get creatingAccount => 'جارٍ إنشاء الحساب...';
+
+  @override
+  String get alreadyHaveAccount => 'لديك حساب بالفعل؟';
+
+  @override
+  String get dateOfBirthRequired => 'تاريخ الميلاد مطلوب.';
+
+  @override
+  String get selectValidDateOfBirth => 'اختر تاريخ ميلاد صالحًا.';
+
+  @override
+  String get dateOfBirthFuture => 'لا يمكن أن يكون تاريخ الميلاد في المستقبل.';
+
+  @override
+  String get acceptTermsRequired =>
+      'يجب الموافقة على شروط الخدمة وسياسة الخصوصية.';
+
+  @override
+  String get emailAlreadyInUse => 'يوجد حساب مرتبط بهذا البريد الإلكتروني.';
+
+  @override
+  String get weakPassword => 'كلمة المرور ضعيفة جدًا.';
+
+  @override
+  String get couldNotCreateAccount => 'تعذر إنشاء حسابك. يرجى المحاولة مجددًا.';
+
+  @override
+  String get somethingWentWrong => 'حدث خطأ ما. يرجى المحاولة مجددًا.';
+
+  @override
+  String get familySetup => 'إعداد العائلة';
+
+  @override
+  String get connectWithFamily => 'تواصل مع عائلتك';
+
+  @override
+  String get createOrJoinFamily =>
+      'أنشئ مجموعة عائلية جديدة أو انضم إلى مجموعة موجودة.';
+
+  @override
+  String get createFamily => 'إنشاء عائلة';
+
+  @override
+  String get joinFamily => 'الانضمام إلى عائلة';
+
+  @override
+  String get createFamilyGroup => 'أنشئ مجموعتك العائلية';
+
+  @override
+  String get createFamilyDescription =>
+      'اختر اسمًا لعائلتك وادعُ أقاربك للانضمام.';
+
+  @override
+  String get createFamilyLoginRequired => 'يجب تسجيل الدخول لإنشاء عائلة.';
+
+  @override
+  String get familyCreated => 'تم إنشاء العائلة بنجاح.';
+
+  @override
+  String get couldNotCreateFamily =>
+      'تعذر إنشاء العائلة. يرجى المحاولة مجددًا.';
+
+  @override
+  String get familyImageComing => 'ستتم إضافة رفع صورة العائلة لاحقًا.';
+
+  @override
+  String get familyName => 'اسم العائلة';
+
+  @override
+  String get familyNameHint => 'عائلة صلة';
+
+  @override
+  String get familyDescriptionOptional => 'وصف العائلة (اختياري)';
+
+  @override
+  String get familyDescriptionHint => 'رسالة قصيرة عن عائلتك';
+
+  @override
+  String get creatingFamily => 'جارٍ إنشاء العائلة...';
+
+  @override
+  String get yourInvitationCode => 'رمز دعوتك';
+
+  @override
+  String get shareInvitationCode =>
+      'شارك هذا الرمز مع أقاربك ليتمكنوا من الانضمام إلى عائلتك.';
+
+  @override
+  String get copyingComing => 'سيتم تفعيل النسخ قريبًا.';
+
+  @override
+  String get copyCode => 'نسخ الرمز';
+
+  @override
+  String get continueToHome => 'المتابعة إلى الرئيسية';
+
+  @override
+  String get joinYourFamily => 'انضم إلى عائلتك';
+
+  @override
+  String get joinFamilyDescription =>
+      'أدخل رمز الدعوة المكوّن من ستة أحرف الذي شاركته عائلتك.';
+
+  @override
+  String get joinFamilyLoginRequired => 'يجب تسجيل الدخول للانضمام إلى عائلة.';
+
+  @override
+  String get invitationCodeNotFound => 'لم يتم العثور على رمز الدعوة.';
+
+  @override
+  String get couldNotJoinFamily =>
+      'تعذر الانضمام إلى العائلة. يرجى المحاولة مجددًا.';
+
+  @override
+  String get invitationCode => 'رمز الدعوة';
+
+  @override
+  String get invitationCodeHint => 'A7K9Q2';
+
+  @override
+  String get joiningFamily => 'جارٍ الانضمام إلى العائلة...';
+
+  @override
+  String get validationFullNameRequired => 'الاسم الكامل مطلوب.';
+
+  @override
+  String get validationNameMinLength =>
+      'يجب أن يحتوي الاسم على حرفين على الأقل.';
+
+  @override
+  String get validationNameMaxLength => 'لا يمكن أن يزيد الاسم على ٤٠ حرفًا.';
+
+  @override
+  String get validationNameLettersOnly => 'يمكن أن يحتوي الاسم على أحرف فقط.';
+
+  @override
+  String get validationEmailRequired => 'البريد الإلكتروني مطلوب.';
+
+  @override
+  String get validationEmailNoSpaces =>
+      'لا يمكن أن يحتوي البريد الإلكتروني على مسافات.';
+
+  @override
+  String get validationEmailInvalid => 'أدخل بريدًا إلكترونيًا صالحًا.';
+
+  @override
+  String get validationPasswordRequired => 'كلمة المرور مطلوبة.';
+
+  @override
+  String get validationPasswordMinLength =>
+      'يجب أن تحتوي كلمة المرور على ٨ أحرف على الأقل.';
+
+  @override
+  String get validationPasswordUppercase =>
+      'يجب أن تحتوي كلمة المرور على حرف إنجليزي كبير.';
+
+  @override
+  String get validationPasswordLowercase =>
+      'يجب أن تحتوي كلمة المرور على حرف إنجليزي صغير.';
+
+  @override
+  String get validationPasswordNumber => 'يجب أن تحتوي كلمة المرور على رقم.';
+
+  @override
+  String get validationConfirmPasswordRequired => 'يرجى تأكيد كلمة المرور.';
+
+  @override
+  String get validationPasswordsMismatch => 'كلمتا المرور غير متطابقتين.';
+
+  @override
+  String get validationFamilyNameRequired => 'اسم العائلة مطلوب.';
+
+  @override
+  String get validationFamilyNameMinLength =>
+      'يجب أن يحتوي اسم العائلة على حرفين على الأقل.';
+
+  @override
+  String get validationFamilyNameMaxLength =>
+      'لا يمكن أن يزيد اسم العائلة على ٤٠ حرفًا.';
+
+  @override
+  String get validationFamilyNameInvalid =>
+      'يحتوي اسم العائلة على أحرف غير صالحة.';
+
+  @override
+  String get validationInvitationCodeRequired => 'رمز الدعوة مطلوب.';
+
+  @override
+  String get validationInvitationCodeLength =>
+      'يجب أن يتكوّن رمز الدعوة من ٦ أحرف بالضبط.';
+
+  @override
+  String get validationInvitationCodeCharacters =>
+      'يمكن أن يحتوي رمز الدعوة على أحرف وأرقام فقط.';
 }
