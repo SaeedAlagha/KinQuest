@@ -62,7 +62,8 @@ import 'app_localizations_en.dart';
 /// be consistent with the languages listed in the AppLocalizations.supportedLocales
 /// property.
 abstract class AppLocalizations {
-  AppLocalizations(String locale) : localeName = intl.Intl.canonicalizedLocale(locale.toString());
+  AppLocalizations(String locale)
+    : localeName = intl.Intl.canonicalizedLocale(locale.toString());
 
   final String localeName;
 
@@ -70,7 +71,8 @@ abstract class AppLocalizations {
     return Localizations.of<AppLocalizations>(context, AppLocalizations);
   }
 
-  static const LocalizationsDelegate<AppLocalizations> delegate = _AppLocalizationsDelegate();
+  static const LocalizationsDelegate<AppLocalizations> delegate =
+      _AppLocalizationsDelegate();
 
   /// A list of this localizations delegate along with the default localizations
   /// delegates.
@@ -82,17 +84,18 @@ abstract class AppLocalizations {
   /// Additional delegates can be added by appending to this list in
   /// MaterialApp. This list does not have to be used at all if a custom list
   /// of delegates is preferred or required.
-  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates = <LocalizationsDelegate<dynamic>>[
-    delegate,
-    GlobalMaterialLocalizations.delegate,
-    GlobalCupertinoLocalizations.delegate,
-    GlobalWidgetsLocalizations.delegate,
-  ];
+  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates =
+      <LocalizationsDelegate<dynamic>>[
+        delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+      ];
 
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = <Locale>[
     Locale('ar'),
-    Locale('en')
+    Locale('en'),
   ];
 
   /// No description provided for @appName.
@@ -994,9 +997,568 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Open today\'s challenge before claiming the reward.'**
   String get openChallengeBeforeClaiming;
+
+  /// No description provided for @welcomePrivateFamilySpace.
+  ///
+  /// In en, this message translates to:
+  /// **'A private family space for shared stories, playful challenges, and the moments that keep everyone connected.'**
+  String get welcomePrivateFamilySpace;
+
+  /// No description provided for @uaeYearOfFamily2026.
+  ///
+  /// In en, this message translates to:
+  /// **'UAE YEAR OF FAMILY 2026'**
+  String get uaeYearOfFamily2026;
+
+  /// No description provided for @everyBondHelpsFamilyGrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Every bond helps a family grow'**
+  String get everyBondHelpsFamilyGrow;
+
+  /// No description provided for @silaEverydayMoments.
+  ///
+  /// In en, this message translates to:
+  /// **'Sila turns everyday moments into stronger roots, closer bonds, and shared growth.'**
+  String get silaEverydayMoments;
+
+  /// No description provided for @familyMomentsStayPrivate.
+  ///
+  /// In en, this message translates to:
+  /// **'Your family moments stay with your family.'**
+  String get familyMomentsStayPrivate;
+
+  /// No description provided for @logIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Log In'**
+  String get logIn;
+
+  /// No description provided for @createAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Account'**
+  String get createAccount;
+
+  /// No description provided for @welcomeBackToSila.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome back to Sila'**
+  String get welcomeBackToSila;
+
+  /// No description provided for @loginDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Reconnect with your family circle and continue where you left off.'**
+  String get loginDescription;
+
+  /// No description provided for @emailAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Email address'**
+  String get emailAddress;
+
+  /// No description provided for @emailAddressHint.
+  ///
+  /// In en, this message translates to:
+  /// **'name@example.com'**
+  String get emailAddressHint;
+
+  /// No description provided for @password.
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
+  String get password;
+
+  /// No description provided for @forgotPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Forgot password?'**
+  String get forgotPassword;
+
+  /// No description provided for @passwordRecoveryComing.
+  ///
+  /// In en, this message translates to:
+  /// **'Password recovery will be added with Firebase.'**
+  String get passwordRecoveryComing;
+
+  /// No description provided for @loggingIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Logging In...'**
+  String get loggingIn;
+
+  /// No description provided for @enterDeveloperFamily.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter Developer Family'**
+  String get enterDeveloperFamily;
+
+  /// No description provided for @debugPreviewDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Debug preview only • Uses read-only demo data'**
+  String get debugPreviewDescription;
+
+  /// No description provided for @noAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Don\'t have an account?'**
+  String get noAccount;
+
+  /// No description provided for @createOne.
+  ///
+  /// In en, this message translates to:
+  /// **'Create one'**
+  String get createOne;
+
+  /// No description provided for @incorrectEmailOrPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Incorrect email or password.'**
+  String get incorrectEmailOrPassword;
+
+  /// No description provided for @accountDisabled.
+  ///
+  /// In en, this message translates to:
+  /// **'This account has been disabled.'**
+  String get accountDisabled;
+
+  /// No description provided for @pleaseEnterValidEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a valid email address.'**
+  String get pleaseEnterValidEmail;
+
+  /// No description provided for @tooManyLoginAttempts.
+  ///
+  /// In en, this message translates to:
+  /// **'Too many attempts. Please try again later.'**
+  String get tooManyLoginAttempts;
+
+  /// No description provided for @noInternetConnection.
+  ///
+  /// In en, this message translates to:
+  /// **'No internet connection. Please try again.'**
+  String get noInternetConnection;
+
+  /// No description provided for @couldNotLogIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not log in. Please try again.'**
+  String get couldNotLogIn;
+
+  /// No description provided for @joinSila.
+  ///
+  /// In en, this message translates to:
+  /// **'Join Sila'**
+  String get joinSila;
+
+  /// No description provided for @signupDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Create your account and bring your family circle closer.'**
+  String get signupDescription;
+
+  /// No description provided for @fullName.
+  ///
+  /// In en, this message translates to:
+  /// **'Full name'**
+  String get fullName;
+
+  /// No description provided for @dateOfBirth.
+  ///
+  /// In en, this message translates to:
+  /// **'Date of birth'**
+  String get dateOfBirth;
+
+  /// No description provided for @dateOfBirthHint.
+  ///
+  /// In en, this message translates to:
+  /// **'DD/MM/YYYY'**
+  String get dateOfBirthHint;
+
+  /// No description provided for @passwordRequirements.
+  ///
+  /// In en, this message translates to:
+  /// **'8+ characters, uppercase, lowercase, and number'**
+  String get passwordRequirements;
+
+  /// No description provided for @confirmPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm password'**
+  String get confirmPassword;
+
+  /// No description provided for @acceptTerms.
+  ///
+  /// In en, this message translates to:
+  /// **'I agree to the Terms of Service and Privacy Policy.'**
+  String get acceptTerms;
+
+  /// No description provided for @creatingAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Creating Account...'**
+  String get creatingAccount;
+
+  /// No description provided for @alreadyHaveAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Already have an account?'**
+  String get alreadyHaveAccount;
+
+  /// No description provided for @dateOfBirthRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Date of birth is required.'**
+  String get dateOfBirthRequired;
+
+  /// No description provided for @selectValidDateOfBirth.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a valid date of birth.'**
+  String get selectValidDateOfBirth;
+
+  /// No description provided for @dateOfBirthFuture.
+  ///
+  /// In en, this message translates to:
+  /// **'Date of birth cannot be in the future.'**
+  String get dateOfBirthFuture;
+
+  /// No description provided for @acceptTermsRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'You must accept the Terms of Service and Privacy Policy.'**
+  String get acceptTermsRequired;
+
+  /// No description provided for @emailAlreadyInUse.
+  ///
+  /// In en, this message translates to:
+  /// **'An account already exists with this email.'**
+  String get emailAlreadyInUse;
+
+  /// No description provided for @weakPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Your password is too weak.'**
+  String get weakPassword;
+
+  /// No description provided for @couldNotCreateAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not create your account. Please try again.'**
+  String get couldNotCreateAccount;
+
+  /// No description provided for @somethingWentWrong.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong. Please try again.'**
+  String get somethingWentWrong;
+
+  /// No description provided for @familySetup.
+  ///
+  /// In en, this message translates to:
+  /// **'Family Setup'**
+  String get familySetup;
+
+  /// No description provided for @connectWithFamily.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect with your family'**
+  String get connectWithFamily;
+
+  /// No description provided for @createOrJoinFamily.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a new family group or join an existing one.'**
+  String get createOrJoinFamily;
+
+  /// No description provided for @createFamily.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a Family'**
+  String get createFamily;
+
+  /// No description provided for @joinFamily.
+  ///
+  /// In en, this message translates to:
+  /// **'Join a Family'**
+  String get joinFamily;
+
+  /// No description provided for @createFamilyGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Create your family group'**
+  String get createFamilyGroup;
+
+  /// No description provided for @createFamilyDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Give your family a name and invite relatives to join.'**
+  String get createFamilyDescription;
+
+  /// No description provided for @createFamilyLoginRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'You must be logged in to create a family.'**
+  String get createFamilyLoginRequired;
+
+  /// No description provided for @familyCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Family created successfully.'**
+  String get familyCreated;
+
+  /// No description provided for @couldNotCreateFamily.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not create the family. Please try again.'**
+  String get couldNotCreateFamily;
+
+  /// No description provided for @familyImageComing.
+  ///
+  /// In en, this message translates to:
+  /// **'Family image upload will be added later.'**
+  String get familyImageComing;
+
+  /// No description provided for @familyName.
+  ///
+  /// In en, this message translates to:
+  /// **'Family name'**
+  String get familyName;
+
+  /// No description provided for @familyNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Alagha Family'**
+  String get familyNameHint;
+
+  /// No description provided for @familyDescriptionOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Family description (optional)'**
+  String get familyDescriptionOptional;
+
+  /// No description provided for @familyDescriptionHint.
+  ///
+  /// In en, this message translates to:
+  /// **'A short message about your family'**
+  String get familyDescriptionHint;
+
+  /// No description provided for @creatingFamily.
+  ///
+  /// In en, this message translates to:
+  /// **'Creating Family...'**
+  String get creatingFamily;
+
+  /// No description provided for @yourInvitationCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Your invitation code'**
+  String get yourInvitationCode;
+
+  /// No description provided for @shareInvitationCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Share this code with relatives so they can join your family.'**
+  String get shareInvitationCode;
+
+  /// No description provided for @copyingComing.
+  ///
+  /// In en, this message translates to:
+  /// **'Copying will be connected next.'**
+  String get copyingComing;
+
+  /// No description provided for @copyCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy Code'**
+  String get copyCode;
+
+  /// No description provided for @continueToHome.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue to Home'**
+  String get continueToHome;
+
+  /// No description provided for @joinYourFamily.
+  ///
+  /// In en, this message translates to:
+  /// **'Join your family'**
+  String get joinYourFamily;
+
+  /// No description provided for @joinFamilyDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the six-character invitation code shared by your family.'**
+  String get joinFamilyDescription;
+
+  /// No description provided for @joinFamilyLoginRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'You must be logged in to join a family.'**
+  String get joinFamilyLoginRequired;
+
+  /// No description provided for @invitationCodeNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Invitation code not found.'**
+  String get invitationCodeNotFound;
+
+  /// No description provided for @couldNotJoinFamily.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not join the family. Please try again.'**
+  String get couldNotJoinFamily;
+
+  /// No description provided for @invitationCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Invitation code'**
+  String get invitationCode;
+
+  /// No description provided for @invitationCodeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'A7K9Q2'**
+  String get invitationCodeHint;
+
+  /// No description provided for @joiningFamily.
+  ///
+  /// In en, this message translates to:
+  /// **'Joining Family...'**
+  String get joiningFamily;
+
+  /// No description provided for @validationFullNameRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Full name is required.'**
+  String get validationFullNameRequired;
+
+  /// No description provided for @validationNameMinLength.
+  ///
+  /// In en, this message translates to:
+  /// **'Name must contain at least 2 characters.'**
+  String get validationNameMinLength;
+
+  /// No description provided for @validationNameMaxLength.
+  ///
+  /// In en, this message translates to:
+  /// **'Name cannot contain more than 40 characters.'**
+  String get validationNameMaxLength;
+
+  /// No description provided for @validationNameLettersOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Name can only contain letters.'**
+  String get validationNameLettersOnly;
+
+  /// No description provided for @validationEmailRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Email address is required.'**
+  String get validationEmailRequired;
+
+  /// No description provided for @validationEmailNoSpaces.
+  ///
+  /// In en, this message translates to:
+  /// **'Email address cannot contain spaces.'**
+  String get validationEmailNoSpaces;
+
+  /// No description provided for @validationEmailInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid email address.'**
+  String get validationEmailInvalid;
+
+  /// No description provided for @validationPasswordRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Password is required.'**
+  String get validationPasswordRequired;
+
+  /// No description provided for @validationPasswordMinLength.
+  ///
+  /// In en, this message translates to:
+  /// **'Password must contain at least 8 characters.'**
+  String get validationPasswordMinLength;
+
+  /// No description provided for @validationPasswordUppercase.
+  ///
+  /// In en, this message translates to:
+  /// **'Password must contain an uppercase letter.'**
+  String get validationPasswordUppercase;
+
+  /// No description provided for @validationPasswordLowercase.
+  ///
+  /// In en, this message translates to:
+  /// **'Password must contain a lowercase letter.'**
+  String get validationPasswordLowercase;
+
+  /// No description provided for @validationPasswordNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Password must contain a number.'**
+  String get validationPasswordNumber;
+
+  /// No description provided for @validationConfirmPasswordRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please confirm your password.'**
+  String get validationConfirmPasswordRequired;
+
+  /// No description provided for @validationPasswordsMismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Passwords do not match.'**
+  String get validationPasswordsMismatch;
+
+  /// No description provided for @validationFamilyNameRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Family name is required.'**
+  String get validationFamilyNameRequired;
+
+  /// No description provided for @validationFamilyNameMinLength.
+  ///
+  /// In en, this message translates to:
+  /// **'Family name must contain at least 2 characters.'**
+  String get validationFamilyNameMinLength;
+
+  /// No description provided for @validationFamilyNameMaxLength.
+  ///
+  /// In en, this message translates to:
+  /// **'Family name cannot contain more than 40 characters.'**
+  String get validationFamilyNameMaxLength;
+
+  /// No description provided for @validationFamilyNameInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Family name contains invalid characters.'**
+  String get validationFamilyNameInvalid;
+
+  /// No description provided for @validationInvitationCodeRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Invitation code is required.'**
+  String get validationInvitationCodeRequired;
+
+  /// No description provided for @validationInvitationCodeLength.
+  ///
+  /// In en, this message translates to:
+  /// **'Invitation code must contain exactly 6 characters.'**
+  String get validationInvitationCodeLength;
+
+  /// No description provided for @validationInvitationCodeCharacters.
+  ///
+  /// In en, this message translates to:
+  /// **'Invitation code can only contain letters and numbers.'**
+  String get validationInvitationCodeCharacters;
 }
 
-class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
+class _AppLocalizationsDelegate
+    extends LocalizationsDelegate<AppLocalizations> {
   const _AppLocalizationsDelegate();
 
   @override
@@ -1005,25 +1567,26 @@ class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> 
   }
 
   @override
-  bool isSupported(Locale locale) => <String>['ar', 'en'].contains(locale.languageCode);
+  bool isSupported(Locale locale) =>
+      <String>['ar', 'en'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
 }
 
 AppLocalizations lookupAppLocalizations(Locale locale) {
-
-
   // Lookup logic when only language code is specified.
   switch (locale.languageCode) {
-    case 'ar': return AppLocalizationsAr();
-    case 'en': return AppLocalizationsEn();
+    case 'ar':
+      return AppLocalizationsAr();
+    case 'en':
+      return AppLocalizationsEn();
   }
 
   throw FlutterError(
     'AppLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
     'an issue with the localizations generation tool. Please file an issue '
     'on GitHub with a reproducible sample app and the gen-l10n configuration '
-    'that was used.'
+    'that was used.',
   );
 }

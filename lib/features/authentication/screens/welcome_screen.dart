@@ -4,6 +4,7 @@ import '../../../core/branding/app_brand.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/family_year_banner.dart';
 import '../../../core/widgets/sila_brand_mark.dart';
+import '../../../l10n/app_localizations.dart';
 import 'login_screen.dart';
 import 'signup_screen.dart';
 
@@ -100,6 +101,7 @@ class _WelcomeHero extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
+    final strings = AppLocalizations.of(context)!;
 
     return Column(
       crossAxisAlignment: isWide
@@ -107,7 +109,9 @@ class _WelcomeHero extends StatelessWidget {
           : CrossAxisAlignment.center,
       children: [
         Align(
-          alignment: isWide ? Alignment.centerLeft : Alignment.center,
+          alignment: isWide
+              ? AlignmentDirectional.centerStart
+              : Alignment.center,
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 380),
             child: FamilyYearBanner(compact: !isWide),
@@ -173,7 +177,7 @@ class _WelcomeHero extends StatelessWidget {
         ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 620),
           child: Text(
-            'A private family space for shared stories, playful challenges, and the moments that keep everyone connected.',
+            strings.welcomePrivateFamilySpace,
             textAlign: isWide ? TextAlign.start : TextAlign.center,
             style: textTheme.bodyLarge?.copyWith(
               color: AppTheme.secondaryTextColor,
@@ -255,6 +259,7 @@ class _WelcomeActions extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
+    final strings = AppLocalizations.of(context)!;
 
     return Container(
       width: double.infinity,
@@ -283,7 +288,7 @@ class _WelcomeActions extends StatelessWidget {
               borderRadius: BorderRadius.circular(99),
             ),
             child: Text(
-              'UAE YEAR OF FAMILY 2026',
+              strings.uaeYearOfFamily2026,
               style: textTheme.labelSmall?.copyWith(
                 color: AppTheme.primaryColor,
                 fontWeight: FontWeight.w800,
@@ -293,12 +298,12 @@ class _WelcomeActions extends StatelessWidget {
           ),
           const SizedBox(height: 18),
           Text(
-            'Every bond helps a family grow',
+            strings.everyBondHelpsFamilyGrow,
             style: textTheme.headlineSmall,
           ),
           const SizedBox(height: 10),
           Text(
-            'Sila turns everyday moments into stronger roots, closer bonds, and shared growth.',
+            strings.silaEverydayMoments,
             style: textTheme.bodyLarge?.copyWith(
               color: AppTheme.secondaryTextColor,
             ),
@@ -309,7 +314,7 @@ class _WelcomeActions extends StatelessWidget {
             child: FilledButton.icon(
               onPressed: onLogin,
               icon: const Icon(Icons.arrow_forward_rounded),
-              label: const Text('Log In'),
+              label: Text(strings.logIn),
             ),
           ),
           const SizedBox(height: 12),
@@ -318,7 +323,7 @@ class _WelcomeActions extends StatelessWidget {
             child: OutlinedButton.icon(
               onPressed: onSignup,
               icon: const Icon(Icons.person_add_alt_1_outlined),
-              label: const Text('Create Account'),
+              label: Text(strings.createAccount),
             ),
           ),
           const SizedBox(height: 18),
@@ -332,7 +337,7 @@ class _WelcomeActions extends StatelessWidget {
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  'Your family moments stay with your family.',
+                  strings.familyMomentsStayPrivate,
                   style: textTheme.bodySmall?.copyWith(
                     color: AppTheme.secondaryTextColor,
                   ),

@@ -1,10 +1,11 @@
 import 'dart:math';
 
-import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 
 import '../../../core/validation/form_validators.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../home/screens/main_navigation_screen.dart';
 
 class CreateFamilyScreen extends StatefulWidget {
@@ -52,10 +53,9 @@ class _CreateFamilyScreenState extends State<CreateFamilyScreen> {
     final user = FirebaseAuth.instance.currentUser;
 
     if (user == null) {
+      final strings = AppLocalizations.of(context)!;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('You must be logged in to create a family.'),
-        ),
+        SnackBar(content: Text(strings.createFamilyLoginRequired)),
       );
       return;
     }
@@ -100,7 +100,7 @@ class _CreateFamilyScreenState extends State<CreateFamilyScreen> {
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Family created successfully.')),
+        SnackBar(content: Text(AppLocalizations.of(context)!.familyCreated)),
       );
     } on FirebaseException catch (_) {
       if (!mounted) {
@@ -108,8 +108,8 @@ class _CreateFamilyScreenState extends State<CreateFamilyScreen> {
       }
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Could not create the family. Please try again.'),
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.couldNotCreateFamily),
         ),
       );
     } finally {
@@ -123,8 +123,11 @@ class _CreateFamilyScreenState extends State<CreateFamilyScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context)!;
+    final validators = LocalizedFormValidators(strings);
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Create Family')),
+      appBar: AppBar(title: Text(strings.createFamily)),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
@@ -137,14 +140,14 @@ class _CreateFamilyScreenState extends State<CreateFamilyScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Create your family group',
+                      strings.createFamilyGroup,
                       style: Theme.of(context).textTheme.headlineMedium,
                     ),
 
                     const SizedBox(height: 8),
 
                     Text(
-                      'Give your family a name and invite relatives to join.',
+                      strings.createFamilyDescription,
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
 
@@ -164,16 +167,14 @@ class _CreateFamilyScreenState extends State<CreateFamilyScreen> {
                               color: Theme.of(context).colorScheme.primary,
                             ),
                           ),
-                          Positioned(
-                            right: 0,
+                          PositionedDirectional(
+                            end: 0,
                             bottom: 0,
                             child: IconButton.filled(
                               onPressed: () {
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text(
-                                      'Family image upload will be added later.',
-                                    ),
+                                  SnackBar(
+                                    content: Text(strings.familyImageComing),
                                   ),
                                 );
                               },
@@ -190,11 +191,11 @@ class _CreateFamilyScreenState extends State<CreateFamilyScreen> {
                       controller: _familyNameController,
                       textCapitalization: TextCapitalization.words,
                       textInputAction: TextInputAction.next,
-                      validator: FormValidators.validateFamilyName,
-                      decoration: const InputDecoration(
-                        labelText: 'Family name',
-                        hintText: 'Alagha Family',
-                        prefixIcon: Icon(Icons.home_outlined),
+                      validator: validators.validateFamilyName,
+                      decoration: InputDecoration(
+                        labelText: strings.familyName,
+                        hintText: strings.familyNameHint,
+                        prefixIcon: const Icon(Icons.home_outlined),
                       ),
                     ),
 
@@ -204,10 +205,10 @@ class _CreateFamilyScreenState extends State<CreateFamilyScreen> {
                       controller: _descriptionController,
                       maxLength: 120,
                       maxLines: 3,
-                      decoration: const InputDecoration(
-                        labelText: 'Family description (optional)',
-                        hintText: 'A short message about your family',
-                        prefixIcon: Icon(Icons.edit_note_outlined),
+                      decoration: InputDecoration(
+                        labelText: strings.familyDescriptionOptional,
+                        hintText: strings.familyDescriptionHint,
+                        prefixIcon: const Icon(Icons.edit_note_outlined),
                         alignLabelWithHint: true,
                       ),
                     ),
@@ -220,8 +221,8 @@ class _CreateFamilyScreenState extends State<CreateFamilyScreen> {
                         onPressed: _isCreatingFamily ? null : _createFamily,
                         child: Text(
                           _isCreatingFamily
-                              ? 'Creating Family...'
-                              : 'Create Family',
+                              ? strings.creatingFamily
+                              : strings.createFamily,
                         ),
                       ),
                     ),
@@ -238,9 +239,11 @@ class _CreateFamilyScreenState extends State<CreateFamilyScreen> {
                         ),
                         child: Column(
                           children: [
-                            const Text(
-                              'Your invitation code',
-                              style: TextStyle(fontWeight: FontWeight.w600),
+                            Text(
+                              strings.yourInvitationCode,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
 
                             const SizedBox(height: 10),
@@ -256,8 +259,8 @@ class _CreateFamilyScreenState extends State<CreateFamilyScreen> {
 
                             const SizedBox(height: 10),
 
-                            const Text(
-                              'Share this code with relatives so they can join your family.',
+                            Text(
+                              strings.shareInvitationCode,
                               textAlign: TextAlign.center,
                             ),
 
@@ -266,15 +269,13 @@ class _CreateFamilyScreenState extends State<CreateFamilyScreen> {
                             OutlinedButton.icon(
                               onPressed: () {
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text(
-                                      'Copying will be connected next.',
-                                    ),
+                                  SnackBar(
+                                    content: Text(strings.copyingComing),
                                   ),
                                 );
                               },
                               icon: const Icon(Icons.copy_outlined),
-                              label: const Text('Copy Code'),
+                              label: Text(strings.copyCode),
                             ),
 
                             const SizedBox(height: 12),
@@ -292,7 +293,7 @@ class _CreateFamilyScreenState extends State<CreateFamilyScreen> {
                                     (route) => false,
                                   );
                                 },
-                                child: const Text('Continue to Home'),
+                                child: Text(strings.continueToHome),
                               ),
                             ),
                           ],

@@ -1,9 +1,10 @@
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../../core/validation/form_validators.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../home/screens/main_navigation_screen.dart';
 
 class JoinFamilyScreen extends StatefulWidget {
@@ -36,11 +37,10 @@ class _JoinFamilyScreenState extends State<JoinFamilyScreen> {
     final user = FirebaseAuth.instance.currentUser;
 
     if (user == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('You must be logged in to join a family.'),
-        ),
-      );
+      final strings = AppLocalizations.of(context)!;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(strings.joinFamilyLoginRequired)));
       return;
     }
 
@@ -63,7 +63,9 @@ class _JoinFamilyScreenState extends State<JoinFamilyScreen> {
         }
 
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Invitation code not found.')),
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.invitationCodeNotFound),
+          ),
         );
 
         return;
@@ -93,8 +95,8 @@ class _JoinFamilyScreenState extends State<JoinFamilyScreen> {
       }
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Could not join the family. Please try again.'),
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.couldNotJoinFamily),
         ),
       );
     } finally {
@@ -108,8 +110,11 @@ class _JoinFamilyScreenState extends State<JoinFamilyScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context)!;
+    final validators = LocalizedFormValidators(strings);
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Join Family')),
+      appBar: AppBar(title: Text(strings.joinFamily)),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
@@ -124,14 +129,14 @@ class _JoinFamilyScreenState extends State<JoinFamilyScreen> {
                     const SizedBox(height: 20),
 
                     Text(
-                      'Join your family',
+                      strings.joinYourFamily,
                       style: Theme.of(context).textTheme.headlineMedium,
                     ),
 
                     const SizedBox(height: 8),
 
                     Text(
-                      'Enter the six-character invitation code shared by your family.',
+                      strings.joinFamilyDescription,
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
 
@@ -142,17 +147,17 @@ class _JoinFamilyScreenState extends State<JoinFamilyScreen> {
                       textCapitalization: TextCapitalization.characters,
                       textInputAction: TextInputAction.done,
                       maxLength: 6,
-                      validator: FormValidators.validateInvitationCode,
+                      validator: validators.validateInvitationCode,
                       onFieldSubmitted: (_) => _joinFamily(),
                       inputFormatters: [
                         FilteringTextInputFormatter.allow(
                           RegExp(r'[A-Za-z0-9]'),
                         ),
                       ],
-                      decoration: const InputDecoration(
-                        labelText: 'Invitation code',
-                        hintText: 'A7K9Q2',
-                        prefixIcon: Icon(Icons.key_outlined),
+                      decoration: InputDecoration(
+                        labelText: strings.invitationCode,
+                        hintText: strings.invitationCodeHint,
+                        prefixIcon: const Icon(Icons.key_outlined),
                         counterText: '',
                       ),
                     ),
@@ -166,8 +171,8 @@ class _JoinFamilyScreenState extends State<JoinFamilyScreen> {
                         icon: const Icon(Icons.group_add_outlined),
                         label: Text(
                           _isJoiningFamily
-                              ? 'Joining Family...'
-                              : 'Join Family',
+                              ? strings.joiningFamily
+                              : strings.joinFamily,
                         ),
                       ),
                     ),
