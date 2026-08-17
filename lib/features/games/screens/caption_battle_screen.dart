@@ -1,10 +1,15 @@
 import 'dart:math';
 import 'dart:typed_data';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../competitions/config/competition_games.dart';
+import '../../competitions/models/competition_game_result.dart';
+import '../../competitions/models/competition_player_result.dart';
+import '../../competitions/models/game_play_mode.dart';
 import '../services/caption_battle_ai_service.dart';
 
 enum _CaptionBattlePhase {
@@ -17,7 +22,12 @@ enum _CaptionBattlePhase {
 }
 
 class CaptionBattleScreen extends StatefulWidget {
-  const CaptionBattleScreen({super.key});
+  const CaptionBattleScreen({
+    super.key,
+    this.playMode = GamePlayMode.quickPlay,
+  });
+
+  final GamePlayMode playMode;
 
   @override
   State<CaptionBattleScreen> createState() => _CaptionBattleScreenState();
@@ -884,6 +894,37 @@ class _CaptionBattleScreenState extends State<CaptionBattleScreen> {
     );
   }
 
+  CompetitionGameResult _buildCompetitionResult() {
+    final leaderboard = _familyMembers
+        .where((player) => _selectedPlayerIds.contains(player.id))
+        .toList();
+
+    leaderboard.sort(
+      (a, b) => (_scores[b.id] ?? 0).compareTo(_scores[a.id] ?? 0),
+    );
+
+    final results = <CompetitionPlayerResult>[];
+
+    for (var index = 0; index < leaderboard.length; index++) {
+      final player = leaderboard[index];
+
+      results.add(
+        CompetitionPlayerResult(
+          userId: player.id,
+          name: player.name,
+          gameScore: _scores[player.id] ?? 0,
+          placement: index + 1,
+        ),
+      );
+    }
+
+    return CompetitionGameResult(
+      gameId: CompetitionGameIds.captionBattle,
+      gameName: 'Caption Battle',
+      players: results,
+    );
+  }
+
   Widget _buildFinalResults() {
     final players = List<_CaptionPlayer>.from(_selectedPlayers)
       ..sort((a, b) => (_scores[b.id] ?? 0).compareTo(_scores[a.id] ?? 0));
@@ -900,8 +941,9 @@ class _CaptionBattleScreenState extends State<CaptionBattleScreen> {
               _heroCard(
                 icon: Icons.emoji_events_rounded,
                 title: 'Caption Battle Results',
-                description:
-                    'Every vote counted. Here is the final local leaderboard.',
+                description: widget.playMode.isOfficial
+                    ? '${widget.playMode.displayName} results are ready.'
+                    : 'Every vote counted. Here is the final local leaderboard.',
               ),
               const SizedBox(height: 20),
               for (var i = 0; i < players.length; i++) ...[
@@ -914,16 +956,34 @@ class _CaptionBattleScreenState extends State<CaptionBattleScreen> {
               ],
               const SizedBox(height: 16),
               FilledButton.icon(
-                onPressed: _playAgain,
-                icon: const Icon(Icons.replay_rounded),
-                label: const Text('Play Again'),
+                onPressed: () {
+                  if (widget.playMode.isOfficial) {
+                    Navigator.of(context).pop(_buildCompetitionResult());
+                    return;
+                  }
+
+                  _playAgain();
+                },
+                icon: Icon(
+                  widget.playMode.isOfficial
+                      ? Icons.arrow_back_rounded
+                      : Icons.replay_rounded,
+                ),
+                label: Text(
+                  widget.playMode.isOfficial
+                      ? 'Return to ${widget.playMode.displayName}'
+                      : 'Play Again',
+                ),
               ),
-              const SizedBox(height: 10),
-              OutlinedButton.icon(
-                onPressed: () => Navigator.of(context).pop(),
-                icon: const Icon(Icons.arrow_back_rounded),
-                label: const Text('Back to Quick Play'),
-              ),
+
+              if (!widget.playMode.isOfficial) ...[
+                const SizedBox(height: 10),
+                OutlinedButton.icon(
+                  onPressed: () => Navigator.of(context).pop(),
+                  icon: const Icon(Icons.arrow_back_rounded),
+                  label: const Text('Back to Quick Play'),
+                ),
+              ],
               const SizedBox(height: 12),
               Text(
                 'Quick Play scores are local to this game and do not affect Tokens or global rankings.',

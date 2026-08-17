@@ -5,12 +5,18 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
+import '../../competitions/config/competition_games.dart';
+import '../../competitions/models/competition_game_result.dart';
+import '../../competitions/models/competition_player_result.dart';
+import '../../competitions/models/game_play_mode.dart';
 import '../services/pass_the_bomb_ai_service.dart';
 
 enum _BombPhase { setup, playing, roundResult, finalLeaderboard }
 
 class PassTheBombScreen extends StatefulWidget {
-  const PassTheBombScreen({super.key});
+  const PassTheBombScreen({super.key, this.playMode = GamePlayMode.quickPlay});
+
+  final GamePlayMode playMode;
 
   @override
   State<PassTheBombScreen> createState() => _PassTheBombScreenState();
@@ -685,6 +691,35 @@ class _PassTheBombScreenState extends State<PassTheBombScreen> {
     );
   }
 
+  CompetitionGameResult _buildCompetitionResult() {
+    final rankedPlayers = List<_BombPlayer>.from(_players);
+
+    rankedPlayers.sort(
+      (a, b) => (_scores[b.id] ?? 0).compareTo(_scores[a.id] ?? 0),
+    );
+
+    final results = <CompetitionPlayerResult>[];
+
+    for (var index = 0; index < rankedPlayers.length; index++) {
+      final player = rankedPlayers[index];
+
+      results.add(
+        CompetitionPlayerResult(
+          userId: player.id,
+          name: player.name,
+          gameScore: _scores[player.id] ?? 0,
+          placement: index + 1,
+        ),
+      );
+    }
+
+    return CompetitionGameResult(
+      gameId: CompetitionGameIds.passTheBomb,
+      gameName: 'Pass the Bomb',
+      players: results,
+    );
+  }
+
   Widget _buildLeaderboardScreen() {
     final rankedPlayers = List<_BombPlayer>.from(_players);
 
@@ -692,25 +727,30 @@ class _PassTheBombScreenState extends State<PassTheBombScreen> {
       (a, b) => (_scores[b.id] ?? 0).compareTo(_scores[a.id] ?? 0),
     );
 
+    final isOfficial = widget.playMode.isOfficial;
+
     return ListView(
       padding: const EdgeInsets.all(24),
       children: [
         Text(
-          'Quick Play Leaderboard',
+          isOfficial
+              ? '${widget.playMode.displayName} Results'
+              : 'Quick Play Leaderboard',
           textAlign: TextAlign.center,
           style: Theme.of(
             context,
           ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 8),
-        const Text(
-          'Session scores only — no Tokens or official ranking changes.',
+        Text(
+          isOfficial
+              ? 'Official game results are ready.'
+              : 'Session scores only - no Tokens or official ranking changes.',
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 24),
         ...List.generate(rankedPlayers.length, (index) {
           final player = rankedPlayers[index];
-
           final score = _scores[player.id] ?? 0;
 
           return Card(
@@ -727,15 +767,30 @@ class _PassTheBombScreenState extends State<PassTheBombScreen> {
           );
         }),
         const SizedBox(height: 24),
-        FilledButton.icon(
-          onPressed: _playAgain,
-          icon: const Icon(Icons.refresh_rounded),
-          label: const Text('Play Again'),
-        ),
-        const SizedBox(height: 10),
+
+        if (!isOfficial) ...[
+          FilledButton.icon(
+            onPressed: _playAgain,
+            icon: const Icon(Icons.refresh_rounded),
+            label: const Text('Play Again'),
+          ),
+          const SizedBox(height: 10),
+        ],
+
         OutlinedButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text('Back to Quick Play'),
+          onPressed: () {
+            if (isOfficial) {
+              Navigator.of(context).pop(_buildCompetitionResult());
+              return;
+            }
+
+            Navigator.of(context).pop();
+          },
+          child: Text(
+            isOfficial
+                ? 'Return to ${widget.playMode.displayName}'
+                : 'Back to Quick Play',
+          ),
         ),
       ],
     );

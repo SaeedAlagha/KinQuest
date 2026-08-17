@@ -438,11 +438,10 @@ class _FamilyQuizScreenState extends State<FamilyQuizScreen> {
 
   void _advancePrivateRound() {
     if (_currentQuestionIndex == _questions.length - 1) {
-      _awardTokens(5, won: _matches == _questions.length);
-
       setState(() {
         _phase = _FamilyQuizPhase.results;
       });
+
       return;
     }
 
@@ -487,11 +486,10 @@ class _FamilyQuizScreenState extends State<FamilyQuizScreen> {
 
   void _advanceVotingRound() {
     if (_currentQuestionIndex == _questions.length - 1) {
-      _awardTokens(5, won: false);
-
       setState(() {
         _phase = _FamilyQuizPhase.results;
       });
+
       return;
     }
 
@@ -1117,63 +1115,6 @@ class _FamilyQuizScreenState extends State<FamilyQuizScreen> {
     );
   }
 
-  Future<void> _awardTokens(int amount, {required bool won}) async {
-    if (widget.developerPreview) {
-      return;
-    }
-
-    try {
-      final user = FirebaseAuth.instance.currentUser;
-
-      if (user == null) {
-        return;
-      }
-
-      final userRef = FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid);
-
-      final userDoc = await userRef.get();
-      final data = userDoc.data();
-
-      final currentStreak = (data?['currentStreak'] ?? 0) as int;
-      final lastPlayedTimestamp = data?['lastPlayedAt'] as Timestamp?;
-
-      final now = DateTime.now();
-      final today = DateTime(now.year, now.month, now.day);
-
-      var newStreak = 1;
-
-      if (lastPlayedTimestamp != null) {
-        final lastPlayed = lastPlayedTimestamp.toDate();
-        final lastPlayedDay = DateTime(
-          lastPlayed.year,
-          lastPlayed.month,
-          lastPlayed.day,
-        );
-
-        final difference = today.difference(lastPlayedDay).inDays;
-
-        if (difference == 0) {
-          newStreak = currentStreak == 0 ? 1 : currentStreak;
-        } else if (difference == 1) {
-          newStreak = currentStreak + 1;
-        }
-      }
-
-      await userRef.update({
-        'tokens': FieldValue.increment(amount),
-        'gamesPlayed': FieldValue.increment(1),
-        if (won) 'wins': FieldValue.increment(1),
-        'currentStreak': newStreak,
-        'lastPlayedAt': FieldValue.serverTimestamp(),
-        'updatedAt': FieldValue.serverTimestamp(),
-      });
-    } catch (error) {
-      // Ignore Firebase errors here so the game can still finish.
-    }
-  }
-
   Widget _buildResults(ColorScheme colorScheme) {
     return ListView(
       key: const ValueKey(_FamilyQuizPhase.results),
@@ -1195,10 +1136,16 @@ class _FamilyQuizScreenState extends State<FamilyQuizScreen> {
         const SizedBox(height: 12),
         Text(
           _isVotingMode
-              ? 'There are no wrong answers—these are your family results.'
+              ? 'There are no wrong answers - these are your family results.'
               : 'Your family matched $_matches of ${_questions.length} private answers.',
           textAlign: TextAlign.center,
           style: Theme.of(context).textTheme.bodyLarge,
+        ),
+        const SizedBox(height: 8),
+        Text(
+          'Quick Play awards no Tokens or official ranking points.',
+          textAlign: TextAlign.center,
+          style: Theme.of(context).textTheme.bodySmall,
         ),
         if (_isVotingMode) ...[
           const SizedBox(height: 28),
