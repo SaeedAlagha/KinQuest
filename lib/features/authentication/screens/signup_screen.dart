@@ -121,6 +121,11 @@ class _SignupScreenState extends State<SignupScreen> {
         'birthDate': Timestamp.fromDate(_selectedBirthDate!),
         'familyId': null,
         'tokens': 0,
+        'rankingPoints': 0,
+        'officialWins': 0,
+        'dailyWins': 0,
+        'weeklyWins': 0,
+        'monthlyWins': 0,
         'createdAt': FieldValue.serverTimestamp(),
         'updatedAt': FieldValue.serverTimestamp(),
       });
