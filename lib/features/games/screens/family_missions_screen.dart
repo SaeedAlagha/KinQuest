@@ -1513,9 +1513,9 @@ class _FamilyMissionsScreenState extends State<FamilyMissionsScreen> {
               _personalAssignments.length + _familyAssignments.length,
             ),
             textAlign: TextAlign.center,
-            style: Theme.of(
-              context,
-            ).textTheme.bodyLarge?.copyWith(color: AppTheme.secondaryTextColor),
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
           ),
           const SizedBox(height: 18),
           Wrap(
@@ -1591,7 +1591,7 @@ class _FamilyMissionsScreenState extends State<FamilyMissionsScreen> {
                       Text(
                         copy.description,
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: AppTheme.secondaryTextColor,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                       ),
                       const SizedBox(height: 12),
@@ -1905,7 +1905,7 @@ class _SectionHeader extends StatelessWidget {
               Text(
                 subtitle,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: AppTheme.secondaryTextColor,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               ),
             ],

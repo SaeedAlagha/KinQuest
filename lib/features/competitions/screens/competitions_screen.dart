@@ -222,13 +222,14 @@ class _CompetitionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final strings = AppLocalizations.of(context)!;
     final accent = competition.accent;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: AlignmentDirectional.topStart,
           end: AlignmentDirectional.bottomEnd,
-          colors: [AppTheme.surfaceColor, accent.withValues(alpha: 0.075)],
+          colors: [colorScheme.surface, accent.withValues(alpha: 0.075)],
         ),
         borderRadius: BorderRadius.circular(26),
         border: Border.all(color: accent.withValues(alpha: 0.22)),
@@ -282,7 +283,7 @@ class _CompetitionCard extends StatelessWidget {
                 competition.description,
               ),
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppTheme.secondaryTextColor,
+                color: colorScheme.onSurfaceVariant,
                 height: 1.4,
               ),
             ),

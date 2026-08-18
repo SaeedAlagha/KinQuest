@@ -614,7 +614,7 @@ class _CaptionBattleScreenState extends State<CaptionBattleScreen> {
                     Text(
                       'Choose the kind of creative challenge your family wants.',
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: AppTheme.secondaryTextColor,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                     ),
                     const SizedBox(height: 14),
@@ -677,7 +677,7 @@ class _CaptionBattleScreenState extends State<CaptionBattleScreen> {
                       Text(
                         'Add a Memory with a photo first, then return here.',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: AppTheme.secondaryTextColor,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                       ),
                     ] else ...[
@@ -685,7 +685,7 @@ class _CaptionBattleScreenState extends State<CaptionBattleScreen> {
                       Text(
                         'This game will play $_selectedRounds ${_selectedRounds == 1 ? 'round' : 'rounds'}.',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: AppTheme.secondaryTextColor,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                       ),
                     ],
@@ -720,7 +720,7 @@ class _CaptionBattleScreenState extends State<CaptionBattleScreen> {
                     Text(
                       'Select at least 2 family members.',
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: AppTheme.secondaryTextColor,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                     ),
                     const SizedBox(height: 14),
@@ -769,7 +769,7 @@ class _CaptionBattleScreenState extends State<CaptionBattleScreen> {
                 'Quick Play only • No Tokens or global ranking',
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: AppTheme.secondaryTextColor,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               ),
             ],
@@ -848,7 +848,7 @@ class _CaptionBattleScreenState extends State<CaptionBattleScreen> {
                       Text(
                         CaptionBattleAiService.instructionForMode(_currentMode),
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: AppTheme.secondaryTextColor,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                       ),
                       const SizedBox(height: 18),
@@ -957,7 +957,7 @@ class _CaptionBattleScreenState extends State<CaptionBattleScreen> {
               Text(
                 'Authors stay hidden until everyone votes.',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: AppTheme.secondaryTextColor,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               ),
               const SizedBox(height: 16),
@@ -1127,7 +1127,7 @@ class _CaptionBattleScreenState extends State<CaptionBattleScreen> {
                 'Quick Play scores are local to this game and do not affect Tokens or global rankings.',
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: AppTheme.secondaryTextColor,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               ),
             ],
@@ -1169,9 +1169,11 @@ class _CaptionBattleScreenState extends State<CaptionBattleScreen> {
       borderRadius: BorderRadius.circular(26),
       child: Container(
         decoration: BoxDecoration(
-          color: AppTheme.surfaceColor,
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(26),
-          border: Border.all(color: AppTheme.outlineColor),
+          border: Border.all(
+            color: Theme.of(context).colorScheme.outlineVariant,
+          ),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -1216,10 +1218,10 @@ class _CaptionBattleScreenState extends State<CaptionBattleScreen> {
     required VoidCallback onVote,
   }) {
     return Material(
-      color: AppTheme.surfaceColor,
+      color: Theme.of(context).colorScheme.surface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(22),
-        side: const BorderSide(color: AppTheme.outlineColor),
+        side: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
       ),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
@@ -1259,10 +1261,12 @@ class _CaptionBattleScreenState extends State<CaptionBattleScreen> {
       decoration: BoxDecoration(
         color: isWinner
             ? AppTheme.goldColor.withValues(alpha: 0.12)
-            : AppTheme.surfaceColor,
+            : Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(22),
         border: Border.all(
-          color: isWinner ? AppTheme.goldColor : AppTheme.outlineColor,
+          color: isWinner
+              ? AppTheme.goldColor
+              : Theme.of(context).colorScheme.outlineVariant,
         ),
       ),
       child: Column(
@@ -1306,10 +1310,12 @@ class _CaptionBattleScreenState extends State<CaptionBattleScreen> {
       decoration: BoxDecoration(
         color: place == 1
             ? AppTheme.goldColor.withValues(alpha: 0.12)
-            : AppTheme.surfaceColor,
+            : Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(22),
         border: Border.all(
-          color: place == 1 ? AppTheme.goldColor : AppTheme.outlineColor,
+          color: place == 1
+              ? AppTheme.goldColor
+              : Theme.of(context).colorScheme.outlineVariant,
         ),
       ),
       child: Row(
@@ -1341,9 +1347,9 @@ class _CaptionBattleScreenState extends State<CaptionBattleScreen> {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: AppTheme.surfaceColor,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(28),
-        border: Border.all(color: AppTheme.outlineColor),
+        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1367,7 +1373,7 @@ class _CaptionBattleScreenState extends State<CaptionBattleScreen> {
                 Text(
                   description,
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: AppTheme.secondaryTextColor,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                 ),
               ],
@@ -1383,9 +1389,9 @@ class _CaptionBattleScreenState extends State<CaptionBattleScreen> {
       width: double.infinity,
       padding: const EdgeInsets.all(22),
       decoration: BoxDecoration(
-        color: AppTheme.surfaceColor,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: AppTheme.outlineColor),
+        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
       ),
       child: child,
     );

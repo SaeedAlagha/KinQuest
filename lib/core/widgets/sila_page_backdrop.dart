@@ -9,13 +9,15 @@ class SilaPageBackdrop extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return DecoratedBox(
-      decoration: const BoxDecoration(gradient: AppTheme.pageGradient),
+      decoration: BoxDecoration(gradient: AppTheme.pageGradientFor(context)),
       child: Stack(
         fit: StackFit.expand,
         children: [
-          const IgnorePointer(
-            child: CustomPaint(painter: _SilaBackdropPainter()),
+          IgnorePointer(
+            child: CustomPaint(painter: _SilaBackdropPainter(isDark: isDark)),
           ),
           child,
         ],
@@ -25,20 +27,22 @@ class SilaPageBackdrop extends StatelessWidget {
 }
 
 class _SilaBackdropPainter extends CustomPainter {
-  const _SilaBackdropPainter();
+  const _SilaBackdropPainter({required this.isDark});
+
+  final bool isDark;
 
   @override
   void paint(Canvas canvas, Size size) {
     final shortSide = size.shortestSide;
     final connectionPaint = Paint()
-      ..color = AppTheme.primaryColor.withValues(alpha: 0.045)
+      ..color = AppTheme.primaryColor.withValues(alpha: isDark ? 0.16 : 0.045)
       ..strokeWidth = 1.4
       ..style = PaintingStyle.stroke;
     final greenOrb = Paint()
-      ..color = AppTheme.uaeGreen.withValues(alpha: 0.045)
+      ..color = AppTheme.uaeGreen.withValues(alpha: isDark ? 0.13 : 0.045)
       ..style = PaintingStyle.fill;
     final redOrb = Paint()
-      ..color = AppTheme.uaeRed.withValues(alpha: 0.032)
+      ..color = AppTheme.uaeRed.withValues(alpha: isDark ? 0.085 : 0.032)
       ..style = PaintingStyle.fill;
 
     canvas.drawCircle(
@@ -66,7 +70,7 @@ class _SilaBackdropPainter extends CustomPainter {
     canvas.drawPath(path, connectionPaint);
 
     final nodePaint = Paint()
-      ..color = AppTheme.primaryColor.withValues(alpha: 0.07)
+      ..color = AppTheme.primaryColor.withValues(alpha: isDark ? 0.24 : 0.07)
       ..style = PaintingStyle.fill;
     for (final node in nodes) {
       canvas.drawCircle(node, 4, nodePaint);
@@ -74,5 +78,7 @@ class _SilaBackdropPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  bool shouldRepaint(covariant _SilaBackdropPainter oldDelegate) {
+    return oldDelegate.isDark != isDark;
+  }
 }

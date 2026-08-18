@@ -220,14 +220,15 @@ class _GamesHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final strings = AppLocalizations.of(context)!;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(28),
       decoration: BoxDecoration(
-        color: AppTheme.surfaceColor,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(28),
-        border: Border.all(color: AppTheme.outlineColor),
+        border: Border.all(color: colorScheme.outlineVariant),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -260,7 +261,7 @@ class _GamesHeader extends StatelessWidget {
                     Text(
                       strings.gamesEyebrow,
                       style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        color: AppTheme.primaryColor,
+                        color: colorScheme.primary,
                         fontWeight: FontWeight.w800,
                         letterSpacing: 1.1,
                       ),
@@ -274,7 +275,7 @@ class _GamesHeader extends StatelessWidget {
                     Text(
                       strings.gamesDescription,
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: AppTheme.secondaryTextColor,
+                        color: colorScheme.onSurfaceVariant,
                       ),
                     ),
                   ],
@@ -297,14 +298,15 @@ class _GameCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final strings = AppLocalizations.of(context)!;
+    final colorScheme = Theme.of(context).colorScheme;
     final borderColor = game.isSignatureFeature
         ? AppTheme.primaryColor.withValues(alpha: 0.5)
-        : AppTheme.outlineColor;
+        : colorScheme.outlineVariant;
 
     return Material(
       color: game.isSignatureFeature
-          ? AppTheme.primaryColor.withValues(alpha: 0.045)
-          : AppTheme.surfaceColor,
+          ? colorScheme.primaryContainer.withValues(alpha: 0.36)
+          : colorScheme.surface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(26),
         side: BorderSide(
@@ -341,7 +343,7 @@ class _GameCard extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: game.isAvailable
                           ? AppTheme.tealColor.withValues(alpha: 0.12)
-                          : AppTheme.textColor.withValues(alpha: 0.055),
+                          : colorScheme.onSurface.withValues(alpha: 0.055),
                       borderRadius: BorderRadius.circular(99),
                     ),
                     child: Text(
@@ -349,7 +351,7 @@ class _GameCard extends StatelessWidget {
                       style: Theme.of(context).textTheme.labelSmall?.copyWith(
                         color: game.isAvailable
                             ? const Color(0xFF167A70)
-                            : AppTheme.secondaryTextColor,
+                            : colorScheme.onSurfaceVariant,
                         fontWeight: FontWeight.w800,
                         letterSpacing: 0.55,
                       ),
@@ -379,14 +381,14 @@ class _GameCard extends StatelessWidget {
                   Text(
                     game.isAvailable ? strings.openGame : strings.preview,
                     style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                      color: AppTheme.primaryColor,
+                      color: colorScheme.primary,
                     ),
                   ),
                   const SizedBox(width: 8),
-                  const Icon(
+                  Icon(
                     Icons.arrow_forward_rounded,
                     size: 20,
-                    color: AppTheme.primaryColor,
+                    color: colorScheme.primary,
                   ),
                 ],
               ),
@@ -470,7 +472,7 @@ class PartyGamesScreen extends StatelessWidget {
                       Text(
                         strings.partyGamesSubtitle,
                         style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          color: AppTheme.secondaryTextColor,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                       ),
                       const SizedBox(height: 24),
@@ -513,12 +515,13 @@ class _PartyGameCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final strings = AppLocalizations.of(context)!;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Material(
-      color: AppTheme.surfaceColor,
+      color: colorScheme.surface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(22),
-        side: const BorderSide(color: AppTheme.outlineColor),
+        side: BorderSide(color: colorScheme.outlineVariant),
       ),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
@@ -582,6 +585,7 @@ class GamePlaceholderScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final strings = AppLocalizations.of(context)!;
     final localizedTitle = _localizedAnyGameTitle(strings, gameTitle);
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
       appBar: AppBar(title: Text(localizedTitle)),
@@ -593,9 +597,9 @@ class GamePlaceholderScreen extends StatelessWidget {
               constraints: const BoxConstraints(maxWidth: 560),
               padding: const EdgeInsets.all(36),
               decoration: BoxDecoration(
-                color: AppTheme.surfaceColor,
+                color: colorScheme.surface,
                 borderRadius: BorderRadius.circular(30),
-                border: Border.all(color: AppTheme.outlineColor),
+                border: Border.all(color: colorScheme.outlineVariant),
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -624,7 +628,7 @@ class GamePlaceholderScreen extends StatelessWidget {
                     strings.gameFutureUpdate,
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: AppTheme.secondaryTextColor,
+                      color: colorScheme.onSurfaceVariant,
                     ),
                   ),
                 ],

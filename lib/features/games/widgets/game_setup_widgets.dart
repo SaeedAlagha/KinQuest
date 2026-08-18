@@ -171,6 +171,8 @@ class GameSetupSectionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -178,8 +180,8 @@ class GameSetupSectionCard extends StatelessWidget {
           begin: AlignmentDirectional.topStart,
           end: AlignmentDirectional.bottomEnd,
           colors: [
-            AppTheme.surfaceColor,
-            AppTheme.surfaceMutedColor.withValues(alpha: 0.62),
+            colorScheme.surface,
+            colorScheme.surfaceContainerLow.withValues(alpha: 0.82),
           ],
         ),
         borderRadius: BorderRadius.circular(25),
@@ -229,7 +231,7 @@ class GameRoundSelector extends StatelessWidget {
           Text(
             description,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: AppTheme.secondaryTextColor,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),
           const SizedBox(height: 14),

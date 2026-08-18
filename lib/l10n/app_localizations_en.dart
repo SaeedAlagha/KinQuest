@@ -15,6 +15,36 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settings => 'Settings';
 
   @override
+  String get preferences => 'Preferences';
+
+  @override
+  String get appearance => 'Appearance';
+
+  @override
+  String get appearanceDescription => 'Choose how Sila looks across the app';
+
+  @override
+  String get selectAppearance => 'Choose your Sila theme';
+
+  @override
+  String get silaLightTheme => 'Sila Light';
+
+  @override
+  String get silaLightThemeDescription => 'Bright, calm, and familiar';
+
+  @override
+  String get darkTheme => 'Dark';
+
+  @override
+  String get darkThemeDescription => 'A comfortable palette for evenings';
+
+  @override
+  String get uaeFamilyYearTheme => 'UAE Family Year 2026';
+
+  @override
+  String get uaeFamilyYearThemeDescription => 'Warm family colors inspired by the UAE';
+
+  @override
   String get language => 'Language';
 
   @override
