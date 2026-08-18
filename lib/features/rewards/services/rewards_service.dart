@@ -715,108 +715,153 @@ class RewardsService {
       });
     });
   }
+
   Future<void> updateFamilyReward({
-  required String familyId,
-  required String rewardId,
-  required String userId,
-  required String title,
-  required String description,
-  required int tokenCost,
-  required RewardAvailability availability,
-  required bool approvalRequired,
-}) async {
-  final familyRef = FirebaseFirestore.instance
-      .collection('families')
-      .doc(familyId);
+    required String familyId,
+    required String rewardId,
+    required String userId,
+    required String title,
+    required String description,
+    required int tokenCost,
+    required RewardAvailability availability,
+    required bool approvalRequired,
+  }) async {
+    final familyRef = FirebaseFirestore.instance
+        .collection('families')
+        .doc(familyId);
 
-  final rewardRef = familyRef
-      .collection('rewards')
-      .doc(rewardId);
+    final rewardRef = familyRef.collection('rewards').doc(rewardId);
 
-  await FirebaseFirestore.instance.runTransaction((transaction) async {
-    final familySnapshot = await transaction.get(familyRef);
+    await FirebaseFirestore.instance.runTransaction((transaction) async {
+      final familySnapshot = await transaction.get(familyRef);
 
-    if (!familySnapshot.exists) {
-      throw Exception('Family not found.');
-    }
+      if (!familySnapshot.exists) {
+        throw Exception('Family not found.');
+      }
 
-    final familyData = familySnapshot.data()!;
-    final ownerId = familyData['ownerId']?.toString();
+      final familyData = familySnapshot.data()!;
+      final ownerId = familyData['ownerId']?.toString();
 
-    if (ownerId != userId) {
-      throw Exception(
-        'Only the Family Admin can edit rewards.',
-      );
-    }
+      if (ownerId != userId) {
+        throw Exception('Only the Family Admin can edit rewards.');
+      }
 
-    final rewardSnapshot = await transaction.get(rewardRef);
+      final rewardSnapshot = await transaction.get(rewardRef);
 
-    if (!rewardSnapshot.exists) {
-      throw Exception('Reward not found.');
-    }
+      if (!rewardSnapshot.exists) {
+        throw Exception('Reward not found.');
+      }
 
-    if (title.trim().length < 3) {
-      throw Exception(
-        'Reward name must be at least 3 characters.',
-      );
-    }
+      if (title.trim().length < 3) {
+        throw Exception('Reward name must be at least 3 characters.');
+      }
 
-    if (tokenCost <= 0) {
-      throw Exception('Enter a valid Token cost.');
-    }
+      if (tokenCost <= 0) {
+        throw Exception('Enter a valid Token cost.');
+      }
 
-    transaction.update(rewardRef, {
-      'title': title.trim(),
-      'description': description.trim(),
-      'tokenCost': tokenCost,
-      'availability': availability.name,
-      'approvalRequired': approvalRequired,
-      'updatedAt': FieldValue.serverTimestamp(),
+      transaction.update(rewardRef, {
+        'title': title.trim(),
+        'description': description.trim(),
+        'tokenCost': tokenCost,
+        'availability': availability.name,
+        'approvalRequired': approvalRequired,
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
     });
-  });
-}
+  }
 
-Future<void> setRewardActive({
-  required String familyId,
-  required String rewardId,
-  required String userId,
-  required bool active,
-}) async {
-  final familyRef = FirebaseFirestore.instance
-      .collection('families')
-      .doc(familyId);
+  Future<void> setRewardActive({
+    required String familyId,
+    required String rewardId,
+    required String userId,
+    required bool active,
+  }) async {
+    final familyRef = FirebaseFirestore.instance
+        .collection('families')
+        .doc(familyId);
 
-  final rewardRef = familyRef
-      .collection('rewards')
-      .doc(rewardId);
+    final rewardRef = familyRef.collection('rewards').doc(rewardId);
 
-  await FirebaseFirestore.instance.runTransaction((transaction) async {
-    final familySnapshot = await transaction.get(familyRef);
+    await FirebaseFirestore.instance.runTransaction((transaction) async {
+      final familySnapshot = await transaction.get(familyRef);
 
-    if (!familySnapshot.exists) {
-      throw Exception('Family not found.');
-    }
+      if (!familySnapshot.exists) {
+        throw Exception('Family not found.');
+      }
 
-    final ownerId =
-        familySnapshot.data()?['ownerId']?.toString();
+      final ownerId = familySnapshot.data()?['ownerId']?.toString();
 
-    if (ownerId != userId) {
-      throw Exception(
-        'Only the Family Admin can manage rewards.',
-      );
-    }
+      if (ownerId != userId) {
+        throw Exception('Only the Family Admin can manage rewards.');
+      }
 
-    final rewardSnapshot = await transaction.get(rewardRef);
+      final rewardSnapshot = await transaction.get(rewardRef);
 
-    if (!rewardSnapshot.exists) {
-      throw Exception('Reward not found.');
-    }
+      if (!rewardSnapshot.exists) {
+        throw Exception('Reward not found.');
+      }
 
-    transaction.update(rewardRef, {
-      'active': active,
-      'updatedAt': FieldValue.serverTimestamp(),
+      transaction.update(rewardRef, {
+        'active': active,
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
     });
-  });
-}
+  }
 
+  Future<void> equipDigitalReward({
+    required String userId,
+    required String rewardId,
+  }) async {
+    final userRef = _firestore.collection('users').doc(userId);
+
+    final ownedRewardsRef = userRef.collection('ownedRewards');
+
+    await _firestore.runTransaction((transaction) async {
+      final selectedRewardRef = ownedRewardsRef.doc(rewardId);
+
+      final selectedSnapshot = await transaction.get(selectedRewardRef);
+
+      if (!selectedSnapshot.exists) {
+        throw Exception('You do not own this digital reward.');
+      }
+
+      final allOwned = await ownedRewardsRef.get();
+
+      for (final document in allOwned.docs) {
+        transaction.update(document.reference, {
+          'equipped': document.id == rewardId,
+        });
+      }
+
+      transaction.update(userRef, {
+        'equippedRewardId': rewardId,
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+    });
+  }
+
+  Future<void> unequipDigitalReward({
+    required String userId,
+    required String rewardId,
+  }) async {
+    final userRef = _firestore.collection('users').doc(userId);
+
+    final rewardRef = userRef.collection('ownedRewards').doc(rewardId);
+
+    await _firestore.runTransaction((transaction) async {
+      final rewardSnapshot = await transaction.get(rewardRef);
+
+      if (!rewardSnapshot.exists) {
+        throw Exception('You do not own this digital reward.');
+      }
+
+      transaction.update(rewardRef, {'equipped': false});
+
+      transaction.update(userRef, {
+        'equippedRewardId': FieldValue.delete(),
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+    });
+  }
 }

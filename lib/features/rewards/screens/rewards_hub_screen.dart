@@ -8,6 +8,7 @@ import 'manage_rewards_screen.dart';
 import 'reward_approval_screen.dart';
 import 'token_history_screen.dart';
 import 'my_reward_requests_screen.dart';
+import 'my_digital_rewards_screen.dart';
 
 class RewardsHubScreen extends StatefulWidget {
   const RewardsHubScreen({super.key, this.developerPreview = false});
@@ -315,6 +316,17 @@ class _RewardsHubScreenState extends State<RewardsHubScreen> {
                         ),
                         icon: const Icon(Icons.card_giftcard_outlined),
                         label: const Text('My Requests'),
+                      ),
+
+                      FilledButton.tonalIcon(
+                        onPressed: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const MyDigitalRewardsScreen(),
+                          ),
+                        ),
+                        icon: const Icon(Icons.workspace_premium_outlined),
+                        label: const Text('My Digital Rewards'),
                       ),
 
                       FilledButton.tonalIcon(
