@@ -1375,7 +1375,7 @@ class _DeveloperFamilyCard extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 10),
-            Text(strings.profileFamilyMemberCount(4)),
+            Text(strings.profileFamilyMemberCount(5)),
           ],
         ),
       ),

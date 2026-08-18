@@ -88,26 +88,31 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     super.initState();
 
     _screens = widget.developerPreview
-        ? const [
+        ? [
             HomeDashboard(
               name: 'Sila Developer',
               familyName: 'Developer Family',
               memberCount: 5,
               tokens: '480',
               developerPreview: true,
+              onFamilyOverview: _openFamilyOverview,
             ),
-            MemoriesScreen(developerPreview: true),
-            CompetitionsScreen(developerPreview: true),
-            FamilyMissionsScreen(developerPreview: true),
-            ProfileScreen(developerPreview: true),
+            const MemoriesScreen(developerPreview: true),
+            const CompetitionsScreen(developerPreview: true),
+            const FamilyMissionsScreen(developerPreview: true),
+            const ProfileScreen(developerPreview: true),
           ]
-        : const [
-            HomeScreen(),
-            MemoriesScreen(),
-            CompetitionsScreen(),
-            FamilyMissionsScreen(),
-            ProfileScreen(),
+        : [
+            HomeScreen(onFamilyOverview: _openFamilyOverview),
+            const MemoriesScreen(),
+            const CompetitionsScreen(),
+            const FamilyMissionsScreen(),
+            const ProfileScreen(),
           ];
+  }
+
+  void _openFamilyOverview() {
+    _selectScreen(4);
   }
 
   void _selectScreen(int index) {

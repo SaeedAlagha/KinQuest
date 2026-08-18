@@ -9,10 +9,13 @@ import '../../../l10n/app_localizations.dart';
 import '../../competitions/screens/daily_challenge_screen.dart';
 import '../../games/screens/games_screen.dart';
 import '../../memories/screens/add_memory_screen.dart';
+import '../../profile/screens/profile_screen.dart';
 import '../../rewards/screens/rewards_hub_screen.dart';
 
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
+  const HomeScreen({super.key, this.onFamilyOverview});
+
+  final VoidCallback? onFamilyOverview;
 
   @override
   Widget build(BuildContext context) {
@@ -42,6 +45,7 @@ class HomeScreen extends StatelessWidget {
             familyName: strings.noFamilyJoined,
             memberCount: 0,
             tokens: tokens.toString(),
+            onFamilyOverview: onFamilyOverview,
           );
         }
 
@@ -63,6 +67,7 @@ class HomeScreen extends StatelessWidget {
               familyName: familyName,
               memberCount: members.length,
               tokens: tokens.toString(),
+              onFamilyOverview: onFamilyOverview,
             );
           },
         );
@@ -79,6 +84,7 @@ class HomeDashboard extends StatelessWidget {
     required this.memberCount,
     required this.tokens,
     this.developerPreview = false,
+    this.onFamilyOverview,
   });
 
   final String name;
@@ -86,12 +92,28 @@ class HomeDashboard extends StatelessWidget {
   final int memberCount;
   final String tokens;
   final bool developerPreview;
+  final VoidCallback? onFamilyOverview;
 
   void _showPreviewNotice(BuildContext context) {
     final strings = AppLocalizations.of(context)!;
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(strings.developerPreviewMemoryReadOnly)),
+    );
+  }
+
+  void _openFamilyOverview(BuildContext context) {
+    final overviewCallback = onFamilyOverview;
+
+    if (overviewCallback != null) {
+      overviewCallback();
+      return;
+    }
+
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => ProfileScreen(developerPreview: developerPreview),
+      ),
     );
   }
 
@@ -127,7 +149,7 @@ class HomeDashboard extends StatelessWidget {
                               child: _FamilyOverviewCard(
                                 familyName: familyName,
                                 memberCount: memberCount,
-                                onOverview: () {},
+                                onOverview: () => _openFamilyOverview(context),
                               ),
                             ),
                             const SizedBox(width: 20),
@@ -145,7 +167,7 @@ class HomeDashboard extends StatelessWidget {
                         _FamilyOverviewCard(
                           familyName: familyName,
                           memberCount: memberCount,
-                          onOverview: () {},
+                          onOverview: () => _openFamilyOverview(context),
                         ),
                         const SizedBox(height: 16),
                         _FamilyStats(
