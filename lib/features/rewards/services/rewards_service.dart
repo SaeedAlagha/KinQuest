@@ -442,6 +442,62 @@ class RewardsService {
     });
   }
 
+  Future<void> completeRewardRequest({
+    required String familyId,
+    required String requestId,
+    required String approverId,
+  }) async {
+    final familyRef = FirebaseFirestore.instance
+        .collection('families')
+        .doc(familyId);
+
+    final requestRef = familyRef.collection('rewardRequests').doc(requestId);
+
+    await FirebaseFirestore.instance.runTransaction((transaction) async {
+      final familySnapshot = await transaction.get(familyRef);
+
+      if (!familySnapshot.exists) {
+        throw Exception('Family not found.');
+      }
+
+      final familyData = familySnapshot.data()!;
+
+      final ownerId = familyData['ownerId']?.toString();
+
+      final approverIds = List<String>.from(
+        familyData['rewardApproverIds'] ?? const <String>[],
+      );
+
+      final canApprove =
+          approverId == ownerId || approverIds.contains(approverId);
+
+      if (!canApprove) {
+        throw Exception('You do not have permission to complete this reward.');
+      }
+
+      final requestSnapshot = await transaction.get(requestRef);
+
+      if (!requestSnapshot.exists) {
+        throw Exception('Reward request not found.');
+      }
+
+      final requestData = requestSnapshot.data()!;
+
+      final status = requestData['status']?.toString();
+
+      if (status != RewardRequestStatus.approved.name) {
+        throw Exception('Only approved rewards can be marked completed.');
+      }
+
+      transaction.update(requestRef, {
+        'status': RewardRequestStatus.completed.name,
+        'completedBy': approverId,
+        'completedAt': FieldValue.serverTimestamp(),
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+    });
+  }
+
   Future<void> declineRewardRequest({
     required String familyId,
     required String requestId,

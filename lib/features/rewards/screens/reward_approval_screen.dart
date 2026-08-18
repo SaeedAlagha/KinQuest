@@ -166,6 +166,62 @@ class _RewardApprovalScreenState extends State<RewardApprovalScreen> {
     }
   }
 
+  Future<void> _completeRequest({
+    required String familyId,
+    required String requestId,
+    required String approverId,
+  }) async {
+    if (_processingRequestId != null) return;
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Mark reward completed?'),
+          content: const Text(
+            'Use this after the family reward has actually been fulfilled.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('Mark Completed'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmed != true || !mounted) return;
+
+    setState(() {
+      _processingRequestId = requestId;
+    });
+
+    try {
+      await _rewardsService.completeRewardRequest(
+        familyId: familyId,
+        requestId: requestId,
+        approverId: approverId,
+      );
+    } catch (error) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(_messageFromError(error))));
+    } finally {
+      if (mounted) {
+        setState(() {
+          _processingRequestId = null;
+        });
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
@@ -275,7 +331,6 @@ class _RewardApprovalScreenState extends State<RewardApprovalScreen> {
               .collection('families')
               .doc(familyId)
               .collection('rewardRequests')
-              .where('status', isEqualTo: RewardRequestStatus.pending.name)
               .snapshots(),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting &&
@@ -296,7 +351,14 @@ class _RewardApprovalScreenState extends State<RewardApprovalScreen> {
             }
 
             final requests =
-                snapshot.data?.docs.map(RewardRequest.fromDocument).toList() ??
+                snapshot.data?.docs
+                    .map(RewardRequest.fromDocument)
+                    .where(
+                      (request) =>
+                          request.status == RewardRequestStatus.pending ||
+                          request.status == RewardRequestStatus.approved,
+                    )
+                    .toList() ??
                 [];
 
             requests.sort((a, b) {
@@ -354,6 +416,11 @@ class _RewardApprovalScreenState extends State<RewardApprovalScreen> {
                     requestId: request.id,
                     approverId: approverId,
                   ),
+                  onComplete: () => _completeRequest(
+                    familyId: familyId,
+                    requestId: request.id,
+                    approverId: approverId,
+                  ),
                 );
               },
             );
@@ -370,12 +437,14 @@ class _RewardRequestCard extends StatelessWidget {
     required this.isProcessing,
     required this.onApprove,
     required this.onDecline,
+    required this.onComplete,
   });
 
   final RewardRequest request;
   final bool isProcessing;
   final VoidCallback onApprove;
   final VoidCallback onDecline;
+  final VoidCallback onComplete;
 
   Future<String> _loadRequesterName() async {
     try {
@@ -456,32 +525,49 @@ class _RewardRequestCard extends StatelessWidget {
               const SizedBox(height: 4),
               Text(request.requesterNote!),
             ],
-            const SizedBox(height: 18),
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: isProcessing ? null : onDecline,
-                    icon: const Icon(Icons.close_rounded),
-                    label: const Text('Decline'),
+            if (request.status == RewardRequestStatus.pending)
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: isProcessing ? null : onDecline,
+                      icon: const Icon(Icons.close_rounded),
+                      label: const Text('Decline'),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: FilledButton.icon(
+                      onPressed: isProcessing ? null : onApprove,
+                      icon: isProcessing
+                          ? const SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Icon(Icons.check_rounded),
+                      label: Text(isProcessing ? 'Processing...' : 'Approve'),
+                    ),
+                  ),
+                ],
+              )
+            else if (request.status == RewardRequestStatus.approved)
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton.icon(
+                  onPressed: isProcessing ? null : onComplete,
+                  icon: isProcessing
+                      ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.task_alt_rounded),
+                  label: Text(
+                    isProcessing ? 'Processing...' : 'Mark Completed',
                   ),
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: FilledButton.icon(
-                    onPressed: isProcessing ? null : onApprove,
-                    icon: isProcessing
-                        ? const SizedBox(
-                            width: 18,
-                            height: 18,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const Icon(Icons.check_rounded),
-                    label: Text(isProcessing ? 'Processing...' : 'Approve'),
-                  ),
-                ),
-              ],
-            ),
+              ),
           ],
         ),
       ),
