@@ -317,6 +317,7 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> {
           final isWinner = winners.any(
             (winningPlayer) => winningPlayer.userId == player.userId,
           );
+
           final isRunnerUp = runnersUp.any(
             (runnerUp) => runnerUp.userId == player.userId,
           );
@@ -339,6 +340,24 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> {
               ),
             },
           }, SetOptions(merge: true));
+
+          if (isWinner) {
+            final tokenTransactionRef = userRef
+                .collection('tokenTransactions')
+                .doc();
+
+            transaction.set(tokenTransactionRef, {
+              'userId': player.userId,
+              'familyId': familyId,
+              'amount': CompetitionRewards.dailyWinnerTokens,
+              'type': 'earned',
+              'reason': 'Daily Challenge Winner',
+              'relatedRewardId': null,
+              'relatedRequestId': null,
+              'relatedCompetitionId': null,
+              'createdAt': FieldValue.serverTimestamp(),
+            });
+          }
         }
 
         return true;

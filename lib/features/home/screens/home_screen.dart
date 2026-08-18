@@ -9,6 +9,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../competitions/screens/daily_challenge_screen.dart';
 import '../../games/screens/games_screen.dart';
 import '../../memories/screens/add_memory_screen.dart';
+import '../../rewards/screens/rewards_hub_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -212,6 +213,24 @@ class HomeDashboard extends StatelessWidget {
                                 ),
                               ),
                             ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: _QuickActionCard(
+                                icon: Icons.redeem_rounded,
+                                accent: AppTheme.goldColor,
+                                title: 'Rewards',
+                                subtitle:
+                                    'Spend Tokens on family and digital rewards.',
+                                onTap: () => Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => RewardsHubScreen(
+                                      developerPreview: developerPreview,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
                           ],
                         )
                       else ...[
@@ -239,6 +258,22 @@ class HomeDashboard extends StatelessWidget {
                             context,
                             MaterialPageRoute(
                               builder: (_) => GamesScreen(
+                                developerPreview: developerPreview,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        _QuickActionCard(
+                          icon: Icons.redeem_rounded,
+                          accent: AppTheme.goldColor,
+                          title: 'Rewards',
+                          subtitle:
+                              'Spend Tokens on family and digital rewards.',
+                          onTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => RewardsHubScreen(
                                 developerPreview: developerPreview,
                               ),
                             ),

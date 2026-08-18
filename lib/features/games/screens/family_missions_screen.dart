@@ -1100,10 +1100,18 @@ class _FamilyMissionsScreenState extends State<FamilyMissionsScreen> {
         'rewarded': true,
       });
 
-      transaction.update(userRef, {
-        'missionsCompleted': FieldValue.increment(1),
-        'tokens': FieldValue.increment(assignment.mission.tokenReward),
-        'updatedAt': FieldValue.serverTimestamp(),
+      final tokenTransactionRef = userRef.collection('tokenTransactions').doc();
+
+      transaction.set(tokenTransactionRef, {
+        'userId': userId,
+        'familyId': familyId,
+        'amount': assignment.mission.tokenReward,
+        'type': 'earned',
+        'reason': 'Mission: ${assignment.mission.title}',
+        'relatedRewardId': null,
+        'relatedRequestId': null,
+        'relatedCompetitionId': null,
+        'createdAt': FieldValue.serverTimestamp(),
       });
 
       transaction.set(boardRef, {
@@ -1232,6 +1240,22 @@ class _FamilyMissionsScreenState extends State<FamilyMissionsScreen> {
           'missionsCompleted': FieldValue.increment(1),
           'tokens': FieldValue.increment(assignment.mission.tokenReward),
           'updatedAt': FieldValue.serverTimestamp(),
+        });
+
+        final tokenTransactionRef = userRef
+            .collection('tokenTransactions')
+            .doc();
+
+        transaction.set(tokenTransactionRef, {
+          'userId': participantId,
+          'familyId': familyId,
+          'amount': assignment.mission.tokenReward,
+          'type': 'earned',
+          'reason': 'Family Mission: ${assignment.mission.title}',
+          'relatedRewardId': null,
+          'relatedRequestId': null,
+          'relatedCompetitionId': null,
+          'createdAt': FieldValue.serverTimestamp(),
         });
       }
 

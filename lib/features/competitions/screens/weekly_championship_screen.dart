@@ -612,11 +612,13 @@ class _WeeklyChampionshipScreenState extends State<WeeklyChampionshipScreen> {
 
           final rankingReward = _rankingRewardForPlacement(placement.placement);
 
+          final isChampion = placement.userId == champion.userId;
+
           transaction.set(userRef, {
             'gamesPlayed': FieldValue.increment(placement.roundsPlayed),
             'rankingPoints': FieldValue.increment(rankingReward),
             'updatedAt': FieldValue.serverTimestamp(),
-            if (placement.userId == champion.userId) ...{
+            if (isChampion) ...{
               'tokens': FieldValue.increment(
                 CompetitionRewards.weeklyChampionTokens,
               ),
@@ -624,6 +626,24 @@ class _WeeklyChampionshipScreenState extends State<WeeklyChampionshipScreen> {
               'weeklyWins': FieldValue.increment(1),
             },
           }, SetOptions(merge: true));
+
+          if (isChampion) {
+            final tokenTransactionRef = userRef
+                .collection('tokenTransactions')
+                .doc();
+
+            transaction.set(tokenTransactionRef, {
+              'userId': placement.userId,
+              'familyId': familyId,
+              'amount': CompetitionRewards.weeklyChampionTokens,
+              'type': 'earned',
+              'reason': 'Weekly Championship Winner',
+              'relatedRewardId': null,
+              'relatedRequestId': null,
+              'relatedCompetitionId': null,
+              'createdAt': FieldValue.serverTimestamp(),
+            });
+          }
         }
 
         return true;

@@ -600,7 +600,21 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
           'trophies': FieldValue.increment(1),
           'updatedAt': FieldValue.serverTimestamp(),
         }, SetOptions(merge: true));
+        final tokenTransactionRef = championRef
+            .collection('tokenTransactions')
+            .doc();
 
+        transaction.set(tokenTransactionRef, {
+          'userId': championId,
+          'familyId': familyId,
+          'amount': CompetitionRewards.monthlyChampionTokens,
+          'type': 'earned',
+          'reason': 'Monthly Cup Champion',
+          'relatedRewardId': null,
+          'relatedRequestId': null,
+          'relatedCompetitionId': _competitionId,
+          'createdAt': FieldValue.serverTimestamp(),
+        });
         final runnerUpRef = firestore.collection('users').doc(runnerUpId);
 
         transaction.set(runnerUpRef, {
