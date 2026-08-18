@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../models/family_reward.dart';
 import '../services/rewards_service.dart';
+import 'reward_approvers_screen.dart';
 
 class ManageRewardsScreen extends StatefulWidget {
   const ManageRewardsScreen({super.key, this.developerPreview = false});
@@ -113,209 +114,200 @@ class _ManageRewardsScreenState extends State<ManageRewardsScreen> {
   }
 
   Future<void> _editReward({
-  required String familyId,
-  required String userId,
-  required FamilyReward reward,
-}) async {
-  final titleController = TextEditingController(
-    text: reward.title,
-  );
+    required String familyId,
+    required String userId,
+    required FamilyReward reward,
+  }) async {
+    final titleController = TextEditingController(text: reward.title);
 
-  final descriptionController = TextEditingController(
-    text: reward.description,
-  );
+    final descriptionController = TextEditingController(
+      text: reward.description,
+    );
 
-  final costController = TextEditingController(
-    text: reward.tokenCost.toString(),
-  );
+    final costController = TextEditingController(
+      text: reward.tokenCost.toString(),
+    );
 
-  var availability = reward.availability;
-  var approvalRequired = reward.approvalRequired;
+    var availability = reward.availability;
+    var approvalRequired = reward.approvalRequired;
 
-  final saved = await showDialog<bool>(
-    context: context,
-    builder: (dialogContext) {
-      return StatefulBuilder(
-        builder: (context, setDialogState) {
-          final isDigital =
-              reward.type == FamilyRewardType.digital;
+    final saved = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            final isDigital = reward.type == FamilyRewardType.digital;
 
-          return AlertDialog(
-            title: const Text('Edit Reward'),
-            content: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  TextField(
-                    controller: titleController,
-                    decoration: const InputDecoration(
-                      labelText: 'Reward name',
-                      border: OutlineInputBorder(),
+            return AlertDialog(
+              title: const Text('Edit Reward'),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextField(
+                      controller: titleController,
+                      decoration: const InputDecoration(
+                        labelText: 'Reward name',
+                        border: OutlineInputBorder(),
+                      ),
                     ),
-                  ),
 
-                  const SizedBox(height: 14),
+                    const SizedBox(height: 14),
 
-                  TextField(
-                    controller: descriptionController,
-                    maxLines: 3,
-                    decoration: const InputDecoration(
-                      labelText: 'Description',
-                      border: OutlineInputBorder(),
+                    TextField(
+                      controller: descriptionController,
+                      maxLines: 3,
+                      decoration: const InputDecoration(
+                        labelText: 'Description',
+                        border: OutlineInputBorder(),
+                      ),
                     ),
-                  ),
 
-                  const SizedBox(height: 14),
+                    const SizedBox(height: 14),
 
-                  TextField(
-                    controller: costController,
-                    keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(
-                      labelText: 'Token cost',
-                      border: OutlineInputBorder(),
+                    TextField(
+                      controller: costController,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(
+                        labelText: 'Token cost',
+                        border: OutlineInputBorder(),
+                      ),
                     ),
-                  ),
 
-                  const SizedBox(height: 14),
+                    const SizedBox(height: 14),
 
-                  DropdownButtonFormField<RewardAvailability>(
-                    initialValue: availability,
-                    decoration: const InputDecoration(
-                      labelText: 'Redemption limit',
-                      border: OutlineInputBorder(),
-                    ),
-                    items: const [
-                      DropdownMenuItem(
-                        value: RewardAvailability.unlimited,
-                        child: Text('Unlimited'),
+                    DropdownButtonFormField<RewardAvailability>(
+                      initialValue: availability,
+                      decoration: const InputDecoration(
+                        labelText: 'Redemption limit',
+                        border: OutlineInputBorder(),
                       ),
-                      DropdownMenuItem(
-                        value: RewardAvailability.daily,
-                        child: Text('Once per day'),
-                      ),
-                      DropdownMenuItem(
-                        value: RewardAvailability.weekly,
-                        child: Text('Once per week'),
-                      ),
-                      DropdownMenuItem(
-                        value: RewardAvailability.monthly,
-                        child: Text('Once per month'),
-                      ),
-                      DropdownMenuItem(
-                        value: RewardAvailability.oneTime,
-                        child: Text('One time'),
-                      ),
-                    ],
-                    onChanged: (value) {
-                      if (value == null) return;
-
-                      setDialogState(() {
-                        availability = value;
-                      });
-                    },
-                  ),
-
-                  if (!isDigital) ...[
-                    const SizedBox(height: 8),
-                    SwitchListTile(
-                      contentPadding: EdgeInsets.zero,
-                      title: const Text('Approval required'),
-                      value: approvalRequired,
+                      items: const [
+                        DropdownMenuItem(
+                          value: RewardAvailability.unlimited,
+                          child: Text('Unlimited'),
+                        ),
+                        DropdownMenuItem(
+                          value: RewardAvailability.daily,
+                          child: Text('Once per day'),
+                        ),
+                        DropdownMenuItem(
+                          value: RewardAvailability.weekly,
+                          child: Text('Once per week'),
+                        ),
+                        DropdownMenuItem(
+                          value: RewardAvailability.monthly,
+                          child: Text('Once per month'),
+                        ),
+                        DropdownMenuItem(
+                          value: RewardAvailability.oneTime,
+                          child: Text('One time'),
+                        ),
+                      ],
                       onChanged: (value) {
+                        if (value == null) return;
+
                         setDialogState(() {
-                          approvalRequired = value;
+                          availability = value;
                         });
                       },
                     ),
+
+                    if (!isDigital) ...[
+                      const SizedBox(height: 8),
+                      SwitchListTile(
+                        contentPadding: EdgeInsets.zero,
+                        title: const Text('Approval required'),
+                        value: approvalRequired,
+                        onChanged: (value) {
+                          setDialogState(() {
+                            approvalRequired = value;
+                          });
+                        },
+                      ),
+                    ],
                   ],
-                ],
+                ),
               ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(dialogContext, false);
-                },
-                child: const Text('Cancel'),
-              ),
-              FilledButton(
-                onPressed: () {
-                  Navigator.pop(dialogContext, true);
-                },
-                child: const Text('Save Changes'),
-              ),
-            ],
-          );
-        },
-      );
-    },
-  );
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(dialogContext, false);
+                  },
+                  child: const Text('Cancel'),
+                ),
+                FilledButton(
+                  onPressed: () {
+                    Navigator.pop(dialogContext, true);
+                  },
+                  child: const Text('Save Changes'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
 
-  if (saved != true || !mounted) {
-    titleController.dispose();
-    descriptionController.dispose();
-    costController.dispose();
-    return;
-  }
-
-  final tokenCost =
-      int.tryParse(costController.text.trim());
-
-  try {
-    if (tokenCost == null || tokenCost <= 0) {
-      throw Exception('Enter a valid Token cost.');
+    if (saved != true || !mounted) {
+      titleController.dispose();
+      descriptionController.dispose();
+      costController.dispose();
+      return;
     }
 
-    await _rewardsService.updateFamilyReward(
-      familyId: familyId,
-      rewardId: reward.id,
-      userId: userId,
-      title: titleController.text,
-      description: descriptionController.text,
-      tokenCost: tokenCost,
-      availability: availability,
-      approvalRequired: reward.type ==
-              FamilyRewardType.digital
-          ? false
-          : approvalRequired,
-    );
-  } catch (error) {
-    if (!mounted) return;
+    final tokenCost = int.tryParse(costController.text.trim());
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(_messageFromError(error)),
-      ),
-    );
-  } finally {
-    titleController.dispose();
-    descriptionController.dispose();
-    costController.dispose();
+    try {
+      if (tokenCost == null || tokenCost <= 0) {
+        throw Exception('Enter a valid Token cost.');
+      }
+
+      await _rewardsService.updateFamilyReward(
+        familyId: familyId,
+        rewardId: reward.id,
+        userId: userId,
+        title: titleController.text,
+        description: descriptionController.text,
+        tokenCost: tokenCost,
+        availability: availability,
+        approvalRequired: reward.type == FamilyRewardType.digital
+            ? false
+            : approvalRequired,
+      );
+    } catch (error) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(_messageFromError(error))));
+    } finally {
+      titleController.dispose();
+      descriptionController.dispose();
+      costController.dispose();
+    }
   }
-}
 
-Future<void> _toggleRewardActive({
-  required String familyId,
-  required String userId,
-  required FamilyReward reward,
-}) async {
-  try {
-    await _rewardsService.setRewardActive(
-      familyId: familyId,
-      rewardId: reward.id,
-      userId: userId,
-      active: !reward.active,
-    );
-  } catch (error) {
-    if (!mounted) return;
+  Future<void> _toggleRewardActive({
+    required String familyId,
+    required String userId,
+    required FamilyReward reward,
+  }) async {
+    try {
+      await _rewardsService.setRewardActive(
+        familyId: familyId,
+        rewardId: reward.id,
+        userId: userId,
+        active: !reward.active,
+      );
+    } catch (error) {
+      if (!mounted) return;
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(_messageFromError(error)),
-      ),
-    );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(_messageFromError(error))));
+    }
   }
-}
 
   @override
   Widget build(BuildContext context) {
@@ -423,12 +415,26 @@ Future<void> _toggleRewardActive({
                     children: [
                       _buildIntroCard(),
                       const SizedBox(height: 24),
+                      SizedBox(
+                        width: double.infinity,
+                        child: OutlinedButton.icon(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const RewardApproversScreen(),
+                              ),
+                            );
+                          },
+                          icon: const Icon(Icons.admin_panel_settings_outlined),
+                          label: const Text('Manage Reward Approvers'),
+                        ),
+                      ),
+
+                      const SizedBox(height: 24),
                       _buildCreateForm(familyId: familyId, userId: userId),
                       const SizedBox(height: 30),
-                      _buildExistingRewards(
-                        familyId,
-                        userId,
-                      ),                    
+                      _buildExistingRewards(familyId, userId),
                     ],
                   ),
                 ),
@@ -641,7 +647,7 @@ Future<void> _toggleRewardActive({
     );
   }
 
-  Widget _buildExistingRewards(String familyId, String userId,) {
+  Widget _buildExistingRewards(String familyId, String userId) {
     return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
       stream: FirebaseFirestore.instance
           .collection('families')
@@ -711,48 +717,46 @@ Future<void> _toggleRewardActive({
                       '${reward.active ? 'Active' : 'Paused'}',
                     ),
                     trailing: PopupMenuButton<String>(
-                        onSelected: (value) {
-                          if (value == 'edit') {
-                            _editReward(
-                              familyId: familyId,
-                              userId: userId,
-                              reward: reward,
-                            );
-                          }
+                      onSelected: (value) {
+                        if (value == 'edit') {
+                          _editReward(
+                            familyId: familyId,
+                            userId: userId,
+                            reward: reward,
+                          );
+                        }
 
-                          if (value == 'toggle') {
-                            _toggleRewardActive(
-                              familyId: familyId,
-                              userId: userId,
-                              reward: reward,
-                            );
-                          }
-                        },
-                        itemBuilder: (context) => [
-                          const PopupMenuItem(
-                            value: 'edit',
-                            child: ListTile(
-                              leading: Icon(Icons.edit_outlined),
-                              title: Text('Edit'),
+                        if (value == 'toggle') {
+                          _toggleRewardActive(
+                            familyId: familyId,
+                            userId: userId,
+                            reward: reward,
+                          );
+                        }
+                      },
+                      itemBuilder: (context) => [
+                        const PopupMenuItem(
+                          value: 'edit',
+                          child: ListTile(
+                            leading: Icon(Icons.edit_outlined),
+                            title: Text('Edit'),
+                          ),
+                        ),
+                        PopupMenuItem(
+                          value: 'toggle',
+                          child: ListTile(
+                            leading: Icon(
+                              reward.active
+                                  ? Icons.pause_circle_outline
+                                  : Icons.play_circle_outline,
+                            ),
+                            title: Text(
+                              reward.active ? 'Pause Reward' : 'Resume Reward',
                             ),
                           ),
-                          PopupMenuItem(
-                            value: 'toggle',
-                            child: ListTile(
-                              leading: Icon(
-                                reward.active
-                                    ? Icons.pause_circle_outline
-                                    : Icons.play_circle_outline,
-                              ),
-                              title: Text(
-                                reward.active
-                                    ? 'Pause Reward'
-                                    : 'Resume Reward',
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
