@@ -9,6 +9,58 @@ class RewardsService {
 
   final FirebaseFirestore _firestore;
 
+  DocumentReference<Map<String, dynamic>>? _redemptionLockRef({
+    required DocumentReference<Map<String, dynamic>> familyRef,
+    required String userId,
+    required String rewardId,
+    required String availability,
+  }) {
+    final now = DateTime.now().toUtc();
+
+    String twoDigits(int value) => value.toString().padLeft(2, '0');
+
+    final dayKey = '${now.year}${twoDigits(now.month)}${twoDigits(now.day)}';
+
+    final weekStart = now.subtract(
+      Duration(days: now.weekday - DateTime.monday),
+    );
+
+    final weekKey =
+        '${weekStart.year}'
+        '${twoDigits(weekStart.month)}'
+        '${twoDigits(weekStart.day)}';
+
+    final monthKey = '${now.year}${twoDigits(now.month)}';
+
+    switch (availability) {
+      case 'unlimited':
+        return null;
+
+      case 'daily':
+        return familyRef
+            .collection('rewardRedemptionLocks')
+            .doc('${userId}_${rewardId}_daily_$dayKey');
+
+      case 'weekly':
+        return familyRef
+            .collection('rewardRedemptionLocks')
+            .doc('${userId}_${rewardId}_weekly_$weekKey');
+
+      case 'monthly':
+        return familyRef
+            .collection('rewardRedemptionLocks')
+            .doc('${userId}_${rewardId}_monthly_$monthKey');
+
+      case 'oneTime':
+        return familyRef
+            .collection('rewardRedemptionLocks')
+            .doc('${userId}_${rewardId}_oneTime');
+
+      default:
+        throw Exception('Invalid reward availability setting.');
+    }
+  }
+
   Future<String> createFamilyReward({
     required String familyId,
     required String creatorId,
@@ -156,6 +208,39 @@ class RewardsService {
       final availability =
           rewardData['availability']?.toString() ??
           RewardAvailability.unlimited.name;
+
+      final redemptionLockRef = _redemptionLockRef(
+        familyRef: familyRef,
+        userId: userId,
+        rewardId: rewardRef.id,
+        availability: availability,
+      );
+
+      if (redemptionLockRef != null) {
+        final redemptionSnapshot = await transaction.get(redemptionLockRef);
+
+        if (redemptionSnapshot.exists) {
+          switch (availability) {
+            case 'daily':
+              throw Exception('You have already redeemed this reward today.');
+
+            case 'weekly':
+              throw Exception(
+                'You have already redeemed this reward this week.',
+              );
+
+            case 'monthly':
+              throw Exception(
+                'You have already redeemed this reward this month.',
+              );
+
+            case 'oneTime':
+              throw Exception(
+                'You have already redeemed this one-time reward.',
+              );
+          }
+        }
+      }
 
       transaction.set(requestRef, {
         'familyId': familyId,
@@ -321,57 +406,12 @@ class RewardsService {
         throw Exception('The requester no longer has enough Tokens.');
       }
 
-      final now = DateTime.now().toUtc();
-
-      String twoDigits(int value) => value.toString().padLeft(2, '0');
-
-      final dayKey = '${now.year}${twoDigits(now.month)}${twoDigits(now.day)}';
-
-      final weekStart = now.subtract(
-        Duration(days: now.weekday - DateTime.monday),
+      final redemptionLockRef = _redemptionLockRef(
+        familyRef: familyRef,
+        userId: userId,
+        rewardId: rewardId,
+        availability: availability,
       );
-
-      final weekKey =
-          '${weekStart.year}'
-          '${twoDigits(weekStart.month)}'
-          '${twoDigits(weekStart.day)}';
-
-      final monthKey = '${now.year}${twoDigits(now.month)}';
-
-      DocumentReference<Map<String, dynamic>>? redemptionLockRef;
-
-      switch (availability) {
-        case 'unlimited':
-          redemptionLockRef = null;
-          break;
-
-        case 'daily':
-          redemptionLockRef = familyRef
-              .collection('rewardRedemptionLocks')
-              .doc('${userId}_${rewardId}_daily_$dayKey');
-          break;
-
-        case 'weekly':
-          redemptionLockRef = familyRef
-              .collection('rewardRedemptionLocks')
-              .doc('${userId}_${rewardId}_weekly_$weekKey');
-          break;
-
-        case 'monthly':
-          redemptionLockRef = familyRef
-              .collection('rewardRedemptionLocks')
-              .doc('${userId}_${rewardId}_monthly_$monthKey');
-          break;
-
-        case 'oneTime':
-          redemptionLockRef = familyRef
-              .collection('rewardRedemptionLocks')
-              .doc('${userId}_${rewardId}_oneTime');
-          break;
-
-        default:
-          throw Exception('Invalid reward availability setting.');
-      }
 
       if (redemptionLockRef != null) {
         final redemptionSnapshot = await transaction.get(redemptionLockRef);
@@ -407,9 +447,10 @@ class RewardsService {
       });
 
       transaction.update(requestRef, {
-        'status': RewardRequestStatus.declined.name,
+        'status': RewardRequestStatus.approved.name,
         'approverId': approverId,
         'approverNote': approverNote?.trim(),
+        'approvedAt': FieldValue.serverTimestamp(),
         'updatedAt': FieldValue.serverTimestamp(),
       });
 
@@ -437,8 +478,6 @@ class RewardsService {
           'redeemedAt': FieldValue.serverTimestamp(),
         });
       }
-
-      transaction.delete(pendingLockRef);
     });
   }
 
