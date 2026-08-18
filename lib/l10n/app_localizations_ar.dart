@@ -1550,4 +1550,25 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get missionFamilyKindnessProjectProofHint => 'أرسل إثباتًا آمنًا ومحترمًا لما صنعته عائلتك أو فعلته.';
+
+  @override
+  String get officialWins => 'Official Wins';
+
+  @override
+  String get dailyWins => 'Daily Wins';
+
+  @override
+  String get weeklyWins => 'Weekly Wins';
+
+  @override
+  String get monthlyWins => 'Monthly Wins';
+
+  @override
+  String get missionsCompleted => 'Missions Completed';
+
+  @override
+  String get memoriesAdded => 'Memories Added';
+
+  @override
+  String get rankingPoints => 'Ranking Points';
 }

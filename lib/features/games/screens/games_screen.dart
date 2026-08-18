@@ -18,10 +18,14 @@ import 'truth_or_dare_screen.dart';
 import 'would_you_rather_screen.dart';
 
 class GamesScreen extends StatelessWidget {
-  const GamesScreen({super.key, this.developerPreview = false});
+  const GamesScreen({
+    super.key,
+    this.developerPreview = false,
+    this.participantIds,
+  });
 
   final bool developerPreview;
-
+  final Set<String>? participantIds;
   static const List<_GameItem> _games = [
     _GameItem(
       icon: Icons.favorite_rounded,
@@ -30,25 +34,6 @@ class GamesScreen extends StatelessWidget {
       description:
           'Share real answers and discover how well your family knows one another.',
       eyebrow: 'CONNECTED PLAY',
-      isAvailable: true,
-    ),
-
-    _GameItem(
-      icon: Icons.quiz_outlined,
-      accent: AppTheme.coralColor,
-      title: 'Trivia',
-      description:
-          'Challenge your family with questions and compete for the highest score.',
-      eyebrow: 'KNOWLEDGE',
-      isAvailable: true,
-    ),
-
-    _GameItem(
-      icon: Icons.emoji_emotions_outlined,
-      accent: AppTheme.coralColor,
-      title: 'Emoji Guess',
-      description: 'Decode emoji clues and compete to get the highest score.',
-      eyebrow: 'GUESSING GAME',
       isAvailable: true,
     ),
 
@@ -120,13 +105,22 @@ class GamesScreen extends StatelessWidget {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) => switch (game.title) {
-          'Family Quiz' => FamilyQuizScreen(developerPreview: developerPreview),
-          'Family Impostor' => const FamilyImpostorScreen(),
-          'Secret Mission' => const SecretMissionScreen(),
-          'Caption Battle' => const CaptionBattleScreen(),
-          'Pass the Bomb' => const PassTheBombScreen(),
-          'Draw & Guess' => const DrawAndGuessScreen(),
-          'Don\'t Say It' => const DontSayItScreen(),
+          'Family Quiz' => FamilyQuizScreen(
+            developerPreview: developerPreview,
+            participantIds: participantIds,
+          ),
+          'Family Impostor' => FamilyImpostorScreen(
+            participantIds: participantIds,
+          ),
+          'Secret Mission' => SecretMissionScreen(
+            participantIds: participantIds,
+          ),
+          'Caption Battle' => CaptionBattleScreen(
+            participantIds: participantIds,
+          ),
+          'Pass the Bomb' => PassTheBombScreen(participantIds: participantIds),
+          'Draw & Guess' => DrawAndGuessScreen(participantIds: participantIds),
+          'Don\'t Say It' => DontSayItScreen(participantIds: participantIds),
           'Trivia' => const TriviaScreen(),
           'Emoji Guess' => const EmojiGuessScreen(),
           'Party Games' => const PartyGamesScreen(),

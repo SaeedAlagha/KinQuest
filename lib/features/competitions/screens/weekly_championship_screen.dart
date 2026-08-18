@@ -30,6 +30,7 @@ class _WeeklyChampionshipScreenState extends State<WeeklyChampionshipScreen> {
   bool _completed = false;
 
   String? _familyId;
+  Set<String> _participantIds = {};
   String? _championName;
   String? _errorMessage;
 
@@ -142,7 +143,14 @@ class _WeeklyChampionshipScreenState extends State<WeeklyChampionshipScreen> {
           .collection('officialCompetitions')
           .doc(_competitionId)
           .get();
+      final membersSnapshot = await firestore
+          .collection('users')
+          .where('familyId', isEqualTo: familyId)
+          .get();
 
+      final participantIds = membersSnapshot.docs
+          .map((document) => document.id)
+          .toSet();
       final data = competitionDoc.data();
 
       final loadedRounds = <_WeeklyRoundRecord>[];
@@ -165,6 +173,7 @@ class _WeeklyChampionshipScreenState extends State<WeeklyChampionshipScreen> {
 
       setState(() {
         _familyId = familyId;
+        _participantIds = participantIds;
         _rounds
           ..clear()
           ..addAll(loadedRounds);
@@ -195,7 +204,12 @@ class _WeeklyChampionshipScreenState extends State<WeeklyChampionshipScreen> {
 
     final result = await Navigator.of(context).push<CompetitionGameResult>(
       MaterialPageRoute(
-        builder: (_) => game.build(GamePlayMode.weeklyChampionship),
+        builder: (_) => game.build(
+          GamePlayMode.weeklyChampionship,
+          participantIds: widget.developerPreview || _participantIds.isEmpty
+              ? null
+              : _participantIds,
+        ),
       ),
     );
 
@@ -238,6 +252,30 @@ class _WeeklyChampionshipScreenState extends State<WeeklyChampionshipScreen> {
 
     final scoredPlayers = <CompetitionPlayerResult>[];
 
+    if (result.sharedWin) {
+      final winningIds = result.leaders.map((player) => player.userId).toSet();
+
+      for (final player in players) {
+        final isWinningTeamMember = winningIds.contains(player.userId);
+
+        scoredPlayers.add(
+          CompetitionPlayerResult(
+            userId: player.userId,
+            name: player.name,
+            gameScore: player.gameScore,
+            placement: isWinningTeamMember ? 1 : 2,
+            championshipPoints: isWinningTeamMember ? 1 : 0,
+          ),
+        );
+      }
+
+      return _WeeklyRoundRecord(
+        roundIndex: roundIndex,
+        gameId: result.gameId,
+        gameName: result.gameName,
+        players: scoredPlayers,
+      );
+    }
     var previousScore = 0;
     var placement = 0;
 
@@ -637,19 +675,34 @@ class _WeeklyChampionshipScreenState extends State<WeeklyChampionshipScreen> {
   List<_FinalWeeklyStanding> _finalPlacements(List<_WeeklyStanding> ordered) {
     final result = <_FinalWeeklyStanding>[];
 
-    var previousPoints = -1;
-    var placement = 0;
+    if (ordered.isEmpty) {
+      return result;
+    }
 
     for (var index = 0; index < ordered.length; index++) {
       final standing = ordered[index];
 
-      if (index == 0) {
-        placement = 1;
-      } else if (standing.championshipPoints != previousPoints) {
-        placement = index + 1;
-      }
+      int placement;
 
-      previousPoints = standing.championshipPoints;
+      if (index == 0) {
+        // The champion is deliberately placed first.
+        // This remains true even when another player had the same
+        // Championship Points before the tie-break.
+        placement = 1;
+      } else if (index == 1) {
+        // Nobody else may remain placement 1 after the tie-break.
+        placement = 2;
+      } else {
+        final previousStanding = ordered[index - 1];
+        final previousPlacement = result[index - 1].placement;
+
+        if (standing.championshipPoints ==
+            previousStanding.championshipPoints) {
+          placement = previousPlacement;
+        } else {
+          placement = index + 1;
+        }
+      }
 
       result.add(
         _FinalWeeklyStanding(
@@ -768,7 +821,8 @@ class _WeeklyChampionshipScreenState extends State<WeeklyChampionshipScreen> {
                 ),
                 const SizedBox(height: 10),
                 const Text(
-                  'Round points: 1st 10 • 2nd 7 • 3rd 5 • 4th 3 • participation 1',
+                  'Individual rounds: 1st 10 • 2nd 7 • 3rd 5 • 4th 3 • participation 1\n'
+                  'Team rounds: winning-team members +1 • losing-team members +0',
                 ),
               ],
             ),

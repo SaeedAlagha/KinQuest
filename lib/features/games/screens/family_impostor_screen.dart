@@ -28,10 +28,11 @@ class FamilyImpostorScreen extends StatefulWidget {
   const FamilyImpostorScreen({
     super.key,
     this.playMode = GamePlayMode.quickPlay,
+    this.participantIds,
   });
 
   final GamePlayMode playMode;
-
+  final Set<String>? participantIds;
   @override
   State<FamilyImpostorScreen> createState() => _FamilyImpostorScreenState();
 }
@@ -132,11 +133,22 @@ class _FamilyImpostorScreenState extends State<FamilyImpostorScreen> {
       if (!mounted) {
         return;
       }
-
+      final availableMembers = widget.participantIds == null
+          ? members
+          : members
+                .where((member) => widget.participantIds!.contains(member.id))
+                .toList();
       setState(() {
         _familyMembers
           ..clear()
-          ..addAll(members);
+          ..addAll(availableMembers);
+
+        _selectedPlayerIds
+          ..clear()
+          ..addAll(
+            widget.participantIds ??
+                availableMembers.map((member) => member.id),
+          );
 
         _isLoading = false;
       });
@@ -355,7 +367,9 @@ class _FamilyImpostorScreenState extends State<FamilyImpostorScreen> {
                   margin: EdgeInsets.zero,
                   child: CheckboxListTile(
                     value: selected,
-                    onChanged: (_) => _togglePlayer(player),
+                    onChanged: widget.participantIds == null
+                        ? (_) => _togglePlayer(player)
+                        : null,
                     secondary: CircleAvatar(
                       child: Text(
                         player.name.isEmpty

@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
-
+import '../../games/screens/trivia_screen.dart';
+import '../../games/screens/emoji_guess_screen.dart';
+import '../../games/screens/family_quiz_screen.dart';
+import '../../games/screens/dont_say_it_screen.dart';
 import '../../games/screens/caption_battle_screen.dart';
 import '../../games/screens/draw_and_guess_screen.dart';
 import '../../games/screens/family_impostor_screen.dart';
@@ -36,13 +39,40 @@ class OfficialCompetitionGames {
 
   static final List<OfficialCompetitionGame> dailyPool = [
     OfficialCompetitionGame(
+      gameId: CompetitionGameIds.familyQuiz,
+      name: 'Family Quiz',
+      icon: Icons.quiz_rounded,
+      description:
+          'Answer family-focused questions and compete for the highest score.',
+      builder: (playMode, participantIds) =>
+          FamilyQuizScreen(playMode: playMode, participantIds: participantIds),
+    ),
+    OfficialCompetitionGame(
       gameId: CompetitionGameIds.familyImpostor,
       name: 'Family Impostor',
       icon: Icons.visibility_off_rounded,
       description:
           'Find the impostor, protect the secret word, and outsmart your family.',
+      builder: (playMode, participantIds) => FamilyImpostorScreen(
+        playMode: playMode,
+        participantIds: participantIds,
+      ),
+    ),
+    OfficialCompetitionGame(
+      gameId: CompetitionGameIds.trivia,
+      name: 'Trivia',
+      icon: Icons.quiz,
+      description: 'Compete in teams and answer trivia questions.',
       builder: (playMode, participantIds) =>
-          FamilyImpostorScreen(playMode: playMode),
+          TriviaScreen(playMode: playMode, participantIds: participantIds),
+    ),
+    OfficialCompetitionGame(
+      gameId: CompetitionGameIds.emojiGuess,
+      name: 'Emoji Guess',
+      icon: Icons.emoji_emotions_rounded,
+      description: 'Decode emoji puzzles with your team and race for the win.',
+      builder: (playMode, participantIds) =>
+          EmojiGuessScreen(playMode: playMode, participantIds: participantIds),
     ),
     OfficialCompetitionGame(
       gameId: CompetitionGameIds.passTheBomb,
@@ -86,10 +116,23 @@ class OfficialCompetitionGames {
         participantIds: participantIds,
       ),
     ),
+    OfficialCompetitionGame(
+      gameId: CompetitionGameIds.dontSayIt,
+      name: "Don't Say It",
+      icon: Icons.record_voice_over_rounded,
+      description:
+          'Give clues without saying the forbidden words and score with your family.',
+      builder: (playMode, participantIds) =>
+          DontSayItScreen(playMode: playMode, participantIds: participantIds),
+    ),
   ];
 
   static final List<OfficialCompetitionGame> monthlyPool = dailyPool
-      .where((game) => game.gameId != CompetitionGameIds.familyImpostor)
+      .where(
+        (game) =>
+            game.gameId == CompetitionGameIds.familyQuiz ||
+            game.gameId == CompetitionGameIds.dontSayIt,
+      )
       .toList();
 
   static OfficialCompetitionGame dailyGameFor(DateTime date) {

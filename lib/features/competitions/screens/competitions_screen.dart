@@ -3,8 +3,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'daily_challenge_screen.dart';
 import '../../../l10n/app_localizations.dart';
-import '../../games/screens/games_screen.dart';
+import '../../games/screens/quick_play_player_selection_screen.dart';
 import 'weekly_championship_screen.dart';
+import 'monthly_cup_screen.dart';
 
 class CompetitionsScreen extends StatelessWidget {
   const CompetitionsScreen({super.key, this.developerPreview = false});
@@ -74,8 +75,9 @@ class CompetitionsScreen extends StatelessWidget {
                   if (competition.title == 'Quick Play') {
                     Navigator.of(context).push(
                       MaterialPageRoute(
-                        builder: (_) =>
-                            GamesScreen(developerPreview: developerPreview),
+                        builder: (_) => QuickPlayPlayerSelectionScreen(
+                          developerPreview: developerPreview,
+                        ),
                       ),
                     );
                     return;
@@ -98,6 +100,18 @@ class CompetitionsScreen extends StatelessWidget {
                         ),
                       ),
                     );
+                    return;
+                  }
+
+                  if (competition.title == 'Monthly Cup') {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => MonthlyCupScreen(
+                          developerPreview: developerPreview,
+                        ),
+                      ),
+                    );
+
                     return;
                   }
                   Navigator.of(context).push(

@@ -29,6 +29,19 @@ class _FamilyMissionsScreenState extends State<FamilyMissionsScreen> {
   final _picker = ImagePicker();
   final _aiService = const FamilyMissionAiService();
   final _random = Random();
+  String get _weekKey {
+    final now = DateTime.now();
+
+    final monday = DateTime(
+      now.year,
+      now.month,
+      now.day,
+    ).subtract(Duration(days: now.weekday - DateTime.monday));
+
+    return '${monday.year}-'
+        '${monday.month.toString().padLeft(2, '0')}-'
+        '${monday.day.toString().padLeft(2, '0')}';
+  }
 
   final List<_MissionAssignment> _personalAssignments = [];
   final List<_MissionAssignment> _familyAssignments = [];
@@ -178,16 +191,25 @@ class _FamilyMissionsScreenState extends State<FamilyMissionsScreen> {
 
       final familyBoardDoc = await familyBoardRef.get();
 
-      final personalAssignments = _parseAssignments(
-        personalBoardDoc.data()?['assignments'],
-        MissionScope.personal,
-      );
+      final personalBoardWeekKey = personalBoardDoc
+          .data()?['weekKey']
+          ?.toString();
 
-      final familyAssignments = _parseAssignments(
-        familyBoardDoc.data()?['assignments'],
-        MissionScope.family,
-      );
+      final personalAssignments = personalBoardWeekKey == _weekKey
+          ? _parseAssignments(
+              personalBoardDoc.data()?['assignments'],
+              MissionScope.personal,
+            )
+          : <_MissionAssignment>[];
 
+      final familyBoardWeekKey = familyBoardDoc.data()?['weekKey']?.toString();
+
+      final familyAssignments = familyBoardWeekKey == _weekKey
+          ? _parseAssignments(
+              familyBoardDoc.data()?['assignments'],
+              MissionScope.family,
+            )
+          : <_MissionAssignment>[];
       _fillAssignments(
         assignments: personalAssignments,
         scope: MissionScope.personal,
@@ -206,22 +228,28 @@ class _FamilyMissionsScreenState extends State<FamilyMissionsScreen> {
         'boardType': 'personal',
         'userId': user.uid,
         'familyId': familyId,
+        'weekKey': _weekKey,
         'assignments': personalAssignments
             .map((item) => item.toFirestore())
             .toList(),
         'updatedAt': FieldValue.serverTimestamp(),
       }, SetOptions(merge: true));
-
       // Only create the shared board if one does not
       // already exist. This keeps every family member
       // looking at the same assignments.
+      // Create or refresh the shared family board once per week.
+      // The transaction ensures every family member uses the same
+      // shared assignments for the current week.
       await firestore.runTransaction((transaction) async {
         final freshFamilyBoard = await transaction.get(familyBoardRef);
 
-        if (!freshFamilyBoard.exists) {
+        final storedWeekKey = freshFamilyBoard.data()?['weekKey']?.toString();
+
+        if (!freshFamilyBoard.exists || storedWeekKey != _weekKey) {
           transaction.set(familyBoardRef, {
             'boardType': 'family',
             'familyId': familyId,
+            'weekKey': _weekKey,
             'assignments': familyAssignments
                 .map((item) => item.toFirestore())
                 .toList(),
@@ -248,6 +276,7 @@ class _FamilyMissionsScreenState extends State<FamilyMissionsScreen> {
         await familyBoardRef.set({
           'boardType': 'family',
           'familyId': familyId,
+          'weekKey': _weekKey,
           'assignments': sharedFamilyAssignments
               .map((item) => item.toFirestore())
               .toList(),

@@ -66,7 +66,7 @@ class ProfileScreen extends StatelessWidget {
           const SizedBox(height: 24),
           _SectionTitle(title: strings.familyTrophyCabinet),
           const SizedBox(height: 12),
-          const _TrophyCabinetPlaceholder(),
+          _TrophyCabinetSection(developerPreview: developerPreview),
           const SizedBox(height: 24),
           _SectionTitle(title: strings.settings),
           const SizedBox(height: 12),
@@ -395,17 +395,28 @@ class _StatisticsGrid extends StatelessWidget {
       builder: (context, userSnapshot) {
         final data = userSnapshot.data?.data();
 
-        final gamesPlayed = data?['gamesPlayed'] ?? 0;
-        final wins = data?['wins'] ?? 0;
-        final currentStreak = data?['currentStreak'] ?? 0;
+        final gamesPlayed = (data?['gamesPlayed'] as num?)?.toInt() ?? 0;
+        final officialWins = (data?['officialWins'] as num?)?.toInt() ?? 0;
+        final dailyWins = (data?['dailyWins'] as num?)?.toInt() ?? 0;
+        final weeklyWins = (data?['weeklyWins'] as num?)?.toInt() ?? 0;
+        final monthlyWins = (data?['monthlyWins'] as num?)?.toInt() ?? 0;
+        final missionsCompleted =
+            (data?['missionsCompleted'] as num?)?.toInt() ?? 0;
+        final currentStreak = (data?['currentStreak'] as num?)?.toInt() ?? 0;
+        final rankingPoints = (data?['rankingPoints'] as num?)?.toInt() ?? 0;
         final familyId = data?['familyId'] as String?;
 
         if (familyId == null || familyId.isEmpty) {
           return _buildStatistics(
             strings: strings,
             gamesPlayed: gamesPlayed,
-            wins: wins,
+            officialWins: officialWins,
+            dailyWins: dailyWins,
+            weeklyWins: weeklyWins,
+            monthlyWins: monthlyWins,
+            missionsCompleted: missionsCompleted,
             currentStreak: currentStreak,
+            rankingPoints: rankingPoints,
             memoryCount: 0,
           );
         }
@@ -423,8 +434,13 @@ class _StatisticsGrid extends StatelessWidget {
             return _buildStatistics(
               strings: strings,
               gamesPlayed: gamesPlayed,
-              wins: wins,
+              officialWins: officialWins,
+              dailyWins: dailyWins,
+              weeklyWins: weeklyWins,
+              monthlyWins: monthlyWins,
+              missionsCompleted: missionsCompleted,
               currentStreak: currentStreak,
+              rankingPoints: rankingPoints,
               memoryCount: memoryCount,
             );
           },
@@ -436,13 +452,15 @@ class _StatisticsGrid extends StatelessWidget {
   Widget _buildStatistics({
     required AppLocalizations strings,
     required int gamesPlayed,
-    required int wins,
+    required int officialWins,
+    required int dailyWins,
+    required int weeklyWins,
+    required int monthlyWins,
+    required int missionsCompleted,
     required int currentStreak,
+    required int rankingPoints,
     required int memoryCount,
   }) {
-    final achievementsCompleted =
-        (wins >= 20 ? 1 : 0) + (memoryCount >= 100 ? 1 : 0);
-
     final statistics = [
       _StatisticItem(
         icon: Icons.sports_esports,
@@ -451,8 +469,33 @@ class _StatisticsGrid extends StatelessWidget {
       ),
       _StatisticItem(
         icon: Icons.emoji_events,
-        label: strings.wins,
-        value: wins.toString(),
+        label: strings.officialWins,
+        value: officialWins.toString(),
+      ),
+      _StatisticItem(
+        icon: Icons.today_rounded,
+        label: strings.dailyWins,
+        value: dailyWins.toString(),
+      ),
+      _StatisticItem(
+        icon: Icons.emoji_events_outlined,
+        label: strings.weeklyWins,
+        value: weeklyWins.toString(),
+      ),
+      _StatisticItem(
+        icon: Icons.workspace_premium_outlined,
+        label: strings.monthlyWins,
+        value: monthlyWins.toString(),
+      ),
+      _StatisticItem(
+        icon: Icons.flag_rounded,
+        label: strings.missionsCompleted,
+        value: missionsCompleted.toString(),
+      ),
+      _StatisticItem(
+        icon: Icons.photo_library_outlined,
+        label: strings.memoriesAdded,
+        value: memoryCount.toString(),
       ),
       _StatisticItem(
         icon: Icons.local_fire_department,
@@ -460,9 +503,9 @@ class _StatisticsGrid extends StatelessWidget {
         value: strings.profileDayCount(currentStreak),
       ),
       _StatisticItem(
-        icon: Icons.stars,
-        label: strings.achievements,
-        value: achievementsCompleted.toString(),
+        icon: Icons.leaderboard_rounded,
+        label: strings.rankingPoints,
+        value: rankingPoints.toString(),
       ),
     ];
 
@@ -664,16 +707,17 @@ class _AchievementsSection extends StatelessWidget {
           .snapshots(),
       builder: (context, userSnapshot) {
         final userData = userSnapshot.data?.data();
-        final wins = userData?['wins'] ?? 0;
-        final missionsCompleted = userData?['missionsCompleted'] ?? 0;
+        final officialWins = (userData?['officialWins'] as num?)?.toInt() ?? 0;
+        final missionsCompleted =
+            (userData?['missionsCompleted'] as num?)?.toInt() ?? 0;
         final familyId = userData?['familyId'] as String?;
 
-        final quizProgress = (wins / 20).clamp(0.0, 1.0);
+        final quizProgress = (officialWins / 20).clamp(0.0, 1.0);
 
         if (familyId == null || familyId.isEmpty) {
           return _buildAchievements(
             strings: strings,
-            wins: wins,
+            wins: officialWins,
             quizProgress: quizProgress,
             memoryCount: 0,
             missionsCompleted: missionsCompleted,
@@ -692,7 +736,7 @@ class _AchievementsSection extends StatelessWidget {
 
             return _buildAchievements(
               strings: strings,
-              wins: wins,
+              wins: officialWins,
               quizProgress: quizProgress,
               memoryCount: memoryCount,
               missionsCompleted: missionsCompleted,
@@ -865,13 +909,119 @@ class _EmptyStateCard extends StatelessWidget {
   }
 }
 
-class _TrophyCabinetPlaceholder extends StatelessWidget {
-  const _TrophyCabinetPlaceholder();
+class _TrophyCabinetSection extends StatelessWidget {
+  const _TrophyCabinetSection({required this.developerPreview});
+
+  final bool developerPreview;
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final strings = AppLocalizations.of(context)!;
+
+    if (developerPreview) {
+      return _buildTrophies(context, [
+        const _ProfileTrophy(
+          title: 'Monthly Cup Champion',
+          monthKey: '2026-08',
+          winnerName: 'Preview Player',
+        ),
+      ]);
+    }
+
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user == null) {
+      return _buildEmpty(context, strings);
+    }
+
+    return FutureBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+      future: FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get(),
+      builder: (context, userSnapshot) {
+        if (userSnapshot.connectionState == ConnectionState.waiting) {
+          return const Center(
+            child: Padding(
+              padding: EdgeInsets.all(24),
+              child: CircularProgressIndicator(),
+            ),
+          );
+        }
+
+        final familyId = userSnapshot.data
+            ?.data()?['familyId']
+            ?.toString()
+            .trim();
+
+        if (familyId == null || familyId.isEmpty) {
+          return _buildEmpty(context, strings);
+        }
+
+        return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+          stream: FirebaseFirestore.instance
+              .collection('families')
+              .doc(familyId)
+              .collection('trophies')
+              .orderBy('earnedAt', descending: true)
+              .snapshots(),
+          builder: (context, trophySnapshot) {
+            if (trophySnapshot.connectionState == ConnectionState.waiting) {
+              return const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(24),
+                  child: CircularProgressIndicator(),
+                ),
+              );
+            }
+
+            if (trophySnapshot.hasError) {
+              return Container(
+                padding: const EdgeInsets.all(22),
+                decoration: BoxDecoration(
+                  color: colorScheme.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: const Text(
+                  'Could not load trophies right now.',
+                  textAlign: TextAlign.center,
+                ),
+              );
+            }
+
+            final trophies =
+                trophySnapshot.data?.docs
+                    .where(
+                      (document) => document.data()['winnerId'] == user.uid,
+                    )
+                    .map((document) {
+                      final data = document.data();
+
+                      return _ProfileTrophy(
+                        title:
+                            data['title']?.toString() ?? 'Monthly Cup Champion',
+                        monthKey: data['monthKey']?.toString() ?? '',
+                        winnerName:
+                            data['winnerName']?.toString() ?? 'Champion',
+                      );
+                    })
+                    .toList() ??
+                [];
+
+            if (trophies.isEmpty) {
+              return _buildEmpty(context, strings);
+            }
+
+            return _buildTrophies(context, trophies);
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildEmpty(BuildContext context, AppLocalizations strings) {
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Container(
       padding: const EdgeInsets.all(22),
@@ -899,6 +1049,41 @@ class _TrophyCabinetPlaceholder extends StatelessWidget {
       ),
     );
   }
+
+  Widget _buildTrophies(BuildContext context, List<_ProfileTrophy> trophies) {
+    return Column(
+      children: trophies.map((trophy) {
+        return Card(
+          child: ListTile(
+            leading: const CircleAvatar(
+              child: Icon(Icons.emoji_events_rounded),
+            ),
+            title: Text(
+              trophy.title,
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+            subtitle: Text(
+              trophy.monthKey.isEmpty
+                  ? trophy.winnerName
+                  : '${trophy.monthKey} • ${trophy.winnerName}',
+            ),
+          ),
+        );
+      }).toList(),
+    );
+  }
+}
+
+class _ProfileTrophy {
+  const _ProfileTrophy({
+    required this.title,
+    required this.monthKey,
+    required this.winnerName,
+  });
+
+  final String title;
+  final String monthKey;
+  final String winnerName;
 }
 
 class _SettingsSection extends StatelessWidget {

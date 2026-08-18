@@ -6,6 +6,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../services/trivia_ai_service.dart';
+import '../../competitions/config/competition_games.dart';
+import '../../competitions/models/competition_game_result.dart';
+import '../../competitions/models/competition_player_result.dart';
+import '../../competitions/models/game_play_mode.dart';
 
 enum _TriviaPhase {
   setup,
@@ -18,7 +22,14 @@ enum _TriviaPhase {
 }
 
 class TriviaScreen extends StatefulWidget {
-  const TriviaScreen({super.key});
+  const TriviaScreen({
+    super.key,
+    this.playMode = GamePlayMode.quickPlay,
+    this.participantIds,
+  });
+
+  final GamePlayMode playMode;
+  final Set<String>? participantIds;
 
   @override
   State<TriviaScreen> createState() => _TriviaScreenState();
@@ -107,8 +118,7 @@ class _TriviaScreenState extends State<TriviaScreen> {
 
         setState(() {
           _isLoadingFamily = false;
-          _familyError =
-              'Join or create a family before playing Trivia.';
+          _familyError = 'Join or create a family before playing Trivia.';
         });
 
         return;
@@ -134,17 +144,27 @@ class _TriviaScreenState extends State<TriviaScreen> {
       }).toList();
 
       members.sort(
-        (a, b) => a.name.toLowerCase().compareTo(
-              b.name.toLowerCase(),
-            ),
+        (a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()),
       );
 
       if (!mounted) return;
 
+      final availableMembers = widget.participantIds == null
+          ? members
+          : members
+                .where((member) => widget.participantIds!.contains(member.id))
+                .toList();
+
       setState(() {
         _familyMembers
           ..clear()
-          ..addAll(members);
+          ..addAll(availableMembers);
+
+        if (widget.participantIds != null) {
+          _selectedPlayerIds
+            ..clear()
+            ..addAll(availableMembers.map((member) => member.id));
+        }
 
         _isLoadingFamily = false;
       });
@@ -163,31 +183,20 @@ class _TriviaScreenState extends State<TriviaScreen> {
       if (_selectedPlayerIds.contains(player.id)) {
         _selectedPlayerIds.remove(player.id);
 
-        _teamA.removeWhere(
-          (member) => member.id == player.id,
-        );
+        _teamA.removeWhere((member) => member.id == player.id);
 
-        _teamB.removeWhere(
-          (member) => member.id == player.id,
-        );
+        _teamB.removeWhere((member) => member.id == player.id);
       } else {
         _selectedPlayerIds.add(player.id);
       }
     });
   }
 
-  void _assignPlayerToTeam(
-    _TriviaPlayer player,
-    String team,
-  ) {
+  void _assignPlayerToTeam(_TriviaPlayer player, String team) {
     setState(() {
-      _teamA.removeWhere(
-        (member) => member.id == player.id,
-      );
+      _teamA.removeWhere((member) => member.id == player.id);
 
-      _teamB.removeWhere(
-        (member) => member.id == player.id,
-      );
+      _teamB.removeWhere((member) => member.id == player.id);
 
       if (team == 'A') {
         _teamA.add(player);
@@ -198,12 +207,11 @@ class _TriviaScreenState extends State<TriviaScreen> {
   }
 
   void _shuffleTeams() {
-    final selectedPlayers = _familyMembers
-        .where(
-          (player) => _selectedPlayerIds.contains(player.id),
-        )
-        .toList()
-      ..shuffle(Random());
+    final selectedPlayers =
+        _familyMembers
+            .where((player) => _selectedPlayerIds.contains(player.id))
+            .toList()
+          ..shuffle(Random());
 
     setState(() {
       _teamA.clear();
@@ -224,8 +232,7 @@ class _TriviaScreenState extends State<TriviaScreen> {
       return;
     }
 
-    final assignedPlayers =
-        _teamA.length + _teamB.length;
+    final assignedPlayers = _teamA.length + _teamB.length;
 
     if (assignedPlayers != _selectedPlayerIds.length) {
       return;
@@ -236,8 +243,7 @@ class _TriviaScreenState extends State<TriviaScreen> {
     });
 
     try {
-      final totalQuestions =
-          (_selectedRounds * _questionsPerRound) + 1;
+      final totalQuestions = (_selectedRounds * _questionsPerRound) + 1;
 
       final generated = await _aiService.generateQuestions(
         category: _selectedCategory,
@@ -259,7 +265,6 @@ class _TriviaScreenState extends State<TriviaScreen> {
 
         _teamAScore = 0;
         _teamBScore = 0;
-        
 
         _selectedAnswer = null;
         _questionResultMessage = '';
@@ -278,22 +283,17 @@ class _TriviaScreenState extends State<TriviaScreen> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text(
-            'Could not prepare Trivia. Please try again.',
-          ),
+          content: Text('Could not prepare Trivia. Please try again.'),
         ),
       );
     }
   }
 
-  bool get _teamAStartsQuestion =>
-      _globalQuestionIndex.isEven;
+  bool get _teamAStartsQuestion => _globalQuestionIndex.isEven;
 
-  String get _startingTeamName =>
-      _teamAStartsQuestion ? 'Team A' : 'Team B';
+  String get _startingTeamName => _teamAStartsQuestion ? 'Team A' : 'Team B';
 
-  String get _stealingTeamName =>
-      _teamAStartsQuestion ? 'Team B' : 'Team A';
+  String get _stealingTeamName => _teamAStartsQuestion ? 'Team B' : 'Team A';
 
   void _startNormalQuestion() {
     _questionTimer?.cancel();
@@ -304,10 +304,7 @@ class _TriviaScreenState extends State<TriviaScreen> {
       _phase = _TriviaPhase.question;
     });
 
-    _startTimer(
-      seconds: _secondsPerQuestion,
-      onFinished: _startSteal,
-    );
+    _startTimer(seconds: _secondsPerQuestion, onFinished: _startSteal);
   }
 
   void _startSteal() {
@@ -324,8 +321,7 @@ class _TriviaScreenState extends State<TriviaScreen> {
     _startTimer(
       seconds: 10,
       onFinished: () {
-        final question =
-            _questions[_globalQuestionIndex];
+        final question = _questions[_globalQuestionIndex];
 
         setState(() {
           _questionResultMessage =
@@ -339,38 +335,32 @@ class _TriviaScreenState extends State<TriviaScreen> {
     );
   }
 
-  void _startTimer({
-    required int seconds,
-    required VoidCallback onFinished,
-  }) {
+  void _startTimer({required int seconds, required VoidCallback onFinished}) {
     _questionTimer?.cancel();
 
     _secondsRemaining = seconds;
 
-    _questionTimer = Timer.periodic(
-      const Duration(seconds: 1),
-      (timer) {
-        if (!mounted) {
-          timer.cancel();
-          return;
-        }
+    _questionTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted) {
+        timer.cancel();
+        return;
+      }
 
-        if (_secondsRemaining <= 1) {
-          timer.cancel();
-
-          setState(() {
-            _secondsRemaining = 0;
-          });
-
-          onFinished();
-          return;
-        }
+      if (_secondsRemaining <= 1) {
+        timer.cancel();
 
         setState(() {
-          _secondsRemaining--;
+          _secondsRemaining = 0;
         });
-      },
-    );
+
+        onFinished();
+        return;
+      }
+
+      setState(() {
+        _secondsRemaining--;
+      });
+    });
   }
 
   void _selectNormalAnswer(int index) {
@@ -378,11 +368,9 @@ class _TriviaScreenState extends State<TriviaScreen> {
 
     _questionTimer?.cancel();
 
-    final question =
-        _questions[_globalQuestionIndex];
+    final question = _questions[_globalQuestionIndex];
 
-    final correct =
-        index == question.correctIndex;
+    final correct = index == question.correctIndex;
 
     if (correct) {
       setState(() {
@@ -414,31 +402,29 @@ class _TriviaScreenState extends State<TriviaScreen> {
 
     _questionTimer?.cancel();
 
-    final question =
-        _questions[_globalQuestionIndex];
+    final question = _questions[_globalQuestionIndex];
 
-    final correct =
-        index == question.correctIndex;
+    final correct = index == question.correctIndex;
 
     if (_isTieBreaker) {
-  if (correct) {
-    setState(() {
-      _teamBScore += 1;
-      _selectedAnswer = index;
-      _isTieBreaker = false;
-      _phase = _TriviaPhase.finalResults;
-    });
-  } else {
-    setState(() {
-      _teamAScore += 1;
-      _selectedAnswer = index;
-      _isTieBreaker = false;
-      _phase = _TriviaPhase.finalResults;
-    });
-  }
+      if (correct) {
+        setState(() {
+          _teamBScore += 1;
+          _selectedAnswer = index;
+          _isTieBreaker = false;
+          _phase = _TriviaPhase.finalResults;
+        });
+      } else {
+        setState(() {
+          _teamAScore += 1;
+          _selectedAnswer = index;
+          _isTieBreaker = false;
+          _phase = _TriviaPhase.finalResults;
+        });
+      }
 
-  return;
-}
+      return;
+    }
 
     if (correct) {
       setState(() {
@@ -471,8 +457,7 @@ class _TriviaScreenState extends State<TriviaScreen> {
   }
 
   void _continueAfterQuestion() {
-    final isLastQuestionInRound =
-        _questionInRound == _questionsPerRound - 1;
+    final isLastQuestionInRound = _questionInRound == _questionsPerRound - 1;
 
     if (isLastQuestionInRound) {
       setState(() {
@@ -491,28 +476,27 @@ class _TriviaScreenState extends State<TriviaScreen> {
   }
 
   void _continueAfterRound() {
-    final isLastRound =
-        _currentRound == _selectedRounds;
+    final isLastRound = _currentRound == _selectedRounds;
 
     if (isLastRound) {
-  if (_teamAScore == _teamBScore) {
-    setState(() {
-      _isTieBreaker = true;
-      _globalQuestionIndex++;
-      _selectedAnswer = null;
-      _secondsRemaining = 10;
-      _phase = _TriviaPhase.tieBreaker;
-    });
+      if (_teamAScore == _teamBScore) {
+        setState(() {
+          _isTieBreaker = true;
+          _globalQuestionIndex++;
+          _selectedAnswer = null;
+          _secondsRemaining = 10;
+          _phase = _TriviaPhase.tieBreaker;
+        });
 
-    return;
-  }
+        return;
+      }
 
-  setState(() {
-    _phase = _TriviaPhase.finalResults;
-  });
+      setState(() {
+        _phase = _TriviaPhase.finalResults;
+      });
 
-  return;
-}
+      return;
+    }
 
     setState(() {
       _currentRound++;
@@ -546,14 +530,9 @@ class _TriviaScreenState extends State<TriviaScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Trivia'),
-      ),
+      appBar: AppBar(title: const Text('Trivia')),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: _buildBody(),
-        ),
+        child: Padding(padding: const EdgeInsets.all(24), child: _buildBody()),
       ),
     );
   }
@@ -563,31 +542,20 @@ class _TriviaScreenState extends State<TriviaScreen> {
       _TriviaPhase.setup => _buildSetup(),
       _TriviaPhase.question => _buildQuestionScreen(),
       _TriviaPhase.steal => _buildStealScreen(),
-      _TriviaPhase.questionResult =>
-      _buildQuestionResultScreen(),
-      _TriviaPhase.roundSummary =>
-      _buildRoundSummaryScreen(),
-      _TriviaPhase.tieBreaker =>
-      _buildTieBreakerScreen(),
-      _TriviaPhase.finalResults =>
-      _buildFinalResultsScreen(),
+      _TriviaPhase.questionResult => _buildQuestionResultScreen(),
+      _TriviaPhase.roundSummary => _buildRoundSummaryScreen(),
+      _TriviaPhase.tieBreaker => _buildTieBreakerScreen(),
+      _TriviaPhase.finalResults => _buildFinalResultsScreen(),
     };
   }
 
   Widget _buildSetup() {
     if (_isLoadingFamily) {
-      return const Center(
-        child: CircularProgressIndicator(),
-      );
+      return const Center(child: CircularProgressIndicator());
     }
 
     if (_familyError != null) {
-      return Center(
-        child: Text(
-          _familyError!,
-          textAlign: TextAlign.center,
-        ),
-      );
+      return Center(child: Text(_familyError!, textAlign: TextAlign.center));
     }
 
     return SingleChildScrollView(
@@ -596,23 +564,19 @@ class _TriviaScreenState extends State<TriviaScreen> {
         children: [
           Text(
             'Who is playing?',
-            style:
-                Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+            style: Theme.of(
+              context,
+            ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
           ),
 
           const SizedBox(height: 8),
 
-          const Text(
-            'Choose at least 2 players.',
-          ),
+          const Text('Choose at least 2 players.'),
 
           const SizedBox(height: 16),
 
           ..._familyMembers.map((player) {
-            final selected =
-                _selectedPlayerIds.contains(player.id);
+            final selected = _selectedPlayerIds.contains(player.id);
 
             return CheckboxListTile(
               value: selected,
@@ -625,87 +589,69 @@ class _TriviaScreenState extends State<TriviaScreen> {
 
           Text(
             'Choose teams',
-            style:
-                Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
           ),
 
           const SizedBox(height: 8),
 
-          const Text(
-            'Assign every selected player to Team A or Team B.',
-          ),
+          const Text('Assign every selected player to Team A or Team B.'),
 
           const SizedBox(height: 16),
 
           ..._familyMembers
-              .where(
-                (player) =>
-                    _selectedPlayerIds.contains(player.id),
-              )
+              .where((player) => _selectedPlayerIds.contains(player.id))
               .map((player) {
-            final inTeamA = _teamA.any(
-              (member) => member.id == player.id,
-            );
+                final inTeamA = _teamA.any((member) => member.id == player.id);
 
-            final inTeamB = _teamB.any(
-              (member) => member.id == player.id,
-            );
+                final inTeamB = _teamB.any((member) => member.id == player.id);
 
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: Card(
-                margin: EdgeInsets.zero,
-                child: Padding(
-                  padding: const EdgeInsets.all(14),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          player.name,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.w600,
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: Card(
+                    margin: EdgeInsets.zero,
+                    child: Padding(
+                      padding: const EdgeInsets.all(14),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              player.name,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
                           ),
-                        ),
-                      ),
 
-                      ChoiceChip(
-                        label: const Text('Team A'),
-                        selected: inTeamA,
-                        onSelected: (_) {
-                          _assignPlayerToTeam(
-                            player,
-                            'A',
-                          );
-                        },
-                      ),
+                          ChoiceChip(
+                            label: const Text('Team A'),
+                            selected: inTeamA,
+                            onSelected: (_) {
+                              _assignPlayerToTeam(player, 'A');
+                            },
+                          ),
 
-                      const SizedBox(width: 8),
+                          const SizedBox(width: 8),
 
-                      ChoiceChip(
-                        label: const Text('Team B'),
-                        selected: inTeamB,
-                        onSelected: (_) {
-                          _assignPlayerToTeam(
-                            player,
-                            'B',
-                          );
-                        },
+                          ChoiceChip(
+                            label: const Text('Team B'),
+                            selected: inTeamB,
+                            onSelected: (_) {
+                              _assignPlayerToTeam(player, 'B');
+                            },
+                          ),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
-                ),
-              ),
-            );
-          }),
+                );
+              }),
 
           const SizedBox(height: 12),
 
           OutlinedButton.icon(
-            onPressed: _selectedPlayerIds.length >= 2
-                ? _shuffleTeams
-                : null,
+            onPressed: _selectedPlayerIds.length >= 2 ? _shuffleTeams : null,
             icon: const Icon(Icons.shuffle),
             label: const Text('Shuffle Teams'),
           ),
@@ -717,17 +663,11 @@ class _TriviaScreenState extends State<TriviaScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Expanded(
-                  child: _buildTeamCard(
-                    title: 'Team A',
-                    players: _teamA,
-                  ),
+                  child: _buildTeamCard(title: 'Team A', players: _teamA),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: _buildTeamCard(
-                    title: 'Team B',
-                    players: _teamB,
-                  ),
+                  child: _buildTeamCard(title: 'Team B', players: _teamB),
                 ),
               ],
             ),
@@ -737,10 +677,9 @@ class _TriviaScreenState extends State<TriviaScreen> {
 
           Text(
             'Category',
-            style:
-                Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
           ),
 
           const SizedBox(height: 12),
@@ -751,8 +690,7 @@ class _TriviaScreenState extends State<TriviaScreen> {
             children: _categories.map((category) {
               return ChoiceChip(
                 label: Text(category),
-                selected:
-                    category == _selectedCategory,
+                selected: category == _selectedCategory,
                 onSelected: (_) {
                   setState(() {
                     _selectedCategory = category;
@@ -766,10 +704,9 @@ class _TriviaScreenState extends State<TriviaScreen> {
 
           Text(
             'Rounds',
-            style:
-                Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
           ),
 
           const SizedBox(height: 12),
@@ -779,8 +716,7 @@ class _TriviaScreenState extends State<TriviaScreen> {
             children: [2, 4, 6].map((rounds) {
               return ChoiceChip(
                 label: Text('$rounds'),
-                selected:
-                    _selectedRounds == rounds,
+                selected: _selectedRounds == rounds,
                 onSelected: (_) {
                   setState(() {
                     _selectedRounds = rounds;
@@ -794,10 +730,9 @@ class _TriviaScreenState extends State<TriviaScreen> {
 
           Text(
             'Questions per round',
-            style:
-                Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
           ),
 
           const SizedBox(height: 12),
@@ -807,8 +742,7 @@ class _TriviaScreenState extends State<TriviaScreen> {
             children: [4, 6, 10].map((questionCount) {
               return ChoiceChip(
                 label: Text('$questionCount'),
-                selected:
-                    _questionsPerRound == questionCount,
+                selected: _questionsPerRound == questionCount,
                 onSelected: (_) {
                   setState(() {
                     _questionsPerRound = questionCount;
@@ -822,10 +756,9 @@ class _TriviaScreenState extends State<TriviaScreen> {
 
           Text(
             'Time per question',
-            style:
-                Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
           ),
 
           const SizedBox(height: 12),
@@ -835,8 +768,7 @@ class _TriviaScreenState extends State<TriviaScreen> {
             children: [20, 30, 45].map((seconds) {
               return ChoiceChip(
                 label: Text('$seconds sec'),
-                selected:
-                    _secondsPerQuestion == seconds,
+                selected: _secondsPerQuestion == seconds,
                 onSelected: (_) {
                   setState(() {
                     _secondsPerQuestion = seconds;
@@ -849,7 +781,8 @@ class _TriviaScreenState extends State<TriviaScreen> {
           const SizedBox(height: 32),
 
           FilledButton(
-            onPressed: _teamA.isNotEmpty &&
+            onPressed:
+                _teamA.isNotEmpty &&
                     _teamB.isNotEmpty &&
                     (_teamA.length + _teamB.length ==
                         _selectedPlayerIds.length) &&
@@ -858,15 +791,12 @@ class _TriviaScreenState extends State<TriviaScreen> {
                 : null,
             child: _isLoadingQuestions
                 ? const Row(
-                    mainAxisAlignment:
-                        MainAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       SizedBox(
                         width: 20,
                         height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                        ),
+                        child: CircularProgressIndicator(strokeWidth: 2),
                       ),
                       SizedBox(width: 12),
                       Text('Preparing Trivia...'),
@@ -888,16 +818,9 @@ class _TriviaScreenState extends State<TriviaScreen> {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            Text(
-              title,
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+            Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
             const SizedBox(height: 10),
-            ...players.map(
-              (player) => Text(player.name),
-            ),
+            ...players.map((player) => Text(player.name)),
           ],
         ),
       ),
@@ -905,8 +828,7 @@ class _TriviaScreenState extends State<TriviaScreen> {
   }
 
   Widget _buildQuestionScreen() {
-    final question =
-        _questions[_globalQuestionIndex];
+    final question = _questions[_globalQuestionIndex];
 
     return _buildQuestionLayout(
       heading: '$_startingTeamName\'S TURN',
@@ -917,8 +839,7 @@ class _TriviaScreenState extends State<TriviaScreen> {
   }
 
   Widget _buildStealScreen() {
-    final question =
-        _questions[_globalQuestionIndex];
+    final question = _questions[_globalQuestionIndex];
 
     return _buildQuestionLayout(
       heading: 'STEAL — $_stealingTeamName',
@@ -941,10 +862,9 @@ class _TriviaScreenState extends State<TriviaScreen> {
           Text(
             heading,
             textAlign: TextAlign.center,
-            style:
-                Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+            style: Theme.of(
+              context,
+            ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
           ),
 
           const SizedBox(height: 8),
@@ -960,10 +880,9 @@ class _TriviaScreenState extends State<TriviaScreen> {
           Text(
             '$seconds s',
             textAlign: TextAlign.center,
-            style:
-                Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+            style: Theme.of(
+              context,
+            ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
           ),
 
           const SizedBox(height: 24),
@@ -974,37 +893,27 @@ class _TriviaScreenState extends State<TriviaScreen> {
               child: Text(
                 question.question,
                 textAlign: TextAlign.center,
-                style:
-                    Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
               ),
             ),
           ),
 
           const SizedBox(height: 20),
 
-          ...List.generate(
-            question.options.length,
-            (index) {
-              return Padding(
-                padding:
-                    const EdgeInsets.only(bottom: 12),
-                child: FilledButton.tonal(
-                  onPressed: () => onAnswer(index),
-                  child: Padding(
-                    padding:
-                        const EdgeInsets.symmetric(
-                      vertical: 14,
-                    ),
-                    child: Text(
-                      question.options[index],
-                    ),
-                  ),
+          ...List.generate(question.options.length, (index) {
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: FilledButton.tonal(
+                onPressed: () => onAnswer(index),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  child: Text(question.options[index]),
                 ),
-              );
-            },
-          ),
+              ),
+            );
+          }),
 
           const SizedBox(height: 20),
 
@@ -1012,20 +921,15 @@ class _TriviaScreenState extends State<TriviaScreen> {
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Row(
-                mainAxisAlignment:
-                    MainAxisAlignment.spaceAround,
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
                   Text(
                     'Team A: $_teamAScore',
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                   Text(
                     'Team B: $_teamBScore',
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                 ],
               ),
@@ -1041,27 +945,20 @@ class _TriviaScreenState extends State<TriviaScreen> {
       child: SingleChildScrollView(
         child: Column(
           children: [
-            const Icon(
-              Icons.fact_check_outlined,
-              size: 72,
-            ),
+            const Icon(Icons.fact_check_outlined, size: 72),
 
             const SizedBox(height: 20),
 
             Text(
               'Question Complete',
-              style:
-                  Theme.of(context).textTheme.headlineMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+              style: Theme.of(
+                context,
+              ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
 
             const SizedBox(height: 18),
 
-            Text(
-              _questionResultMessage,
-              textAlign: TextAlign.center,
-            ),
+            Text(_questionResultMessage, textAlign: TextAlign.center),
 
             const SizedBox(height: 28),
 
@@ -1069,17 +966,10 @@ class _TriviaScreenState extends State<TriviaScreen> {
               child: Padding(
                 padding: const EdgeInsets.all(18),
                 child: Row(
-                  mainAxisAlignment:
-                      MainAxisAlignment.spaceAround,
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    Text(
-                      'Team A\n$_teamAScore',
-                      textAlign: TextAlign.center,
-                    ),
-                    Text(
-                      'Team B\n$_teamBScore',
-                      textAlign: TextAlign.center,
-                    ),
+                    Text('Team A\n$_teamAScore', textAlign: TextAlign.center),
+                    Text('Team B\n$_teamBScore', textAlign: TextAlign.center),
                   ],
                 ),
               ),
@@ -1092,8 +982,7 @@ class _TriviaScreenState extends State<TriviaScreen> {
               child: FilledButton(
                 onPressed: _continueAfterQuestion,
                 child: Text(
-                  _questionInRound ==
-                          _questionsPerRound - 1
+                  _questionInRound == _questionsPerRound - 1
                       ? 'Round Results'
                       : 'Next Question',
                 ),
@@ -1110,35 +999,29 @@ class _TriviaScreenState extends State<TriviaScreen> {
       child: SingleChildScrollView(
         child: Column(
           children: [
-            const Icon(
-              Icons.flag_outlined,
-              size: 72,
-            ),
+            const Icon(Icons.flag_outlined, size: 72),
 
             const SizedBox(height: 20),
 
             Text(
               'Round $_currentRound Complete',
-              style:
-                  Theme.of(context).textTheme.headlineMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+              style: Theme.of(
+                context,
+              ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
 
             const SizedBox(height: 28),
 
             Text(
               'Team A: $_teamAScore',
-              style:
-                  Theme.of(context).textTheme.titleLarge,
+              style: Theme.of(context).textTheme.titleLarge,
             ),
 
             const SizedBox(height: 12),
 
             Text(
               'Team B: $_teamBScore',
-              style:
-                  Theme.of(context).textTheme.titleLarge,
+              style: Theme.of(context).textTheme.titleLarge,
             ),
 
             const SizedBox(height: 32),
@@ -1160,49 +1043,72 @@ class _TriviaScreenState extends State<TriviaScreen> {
     );
   }
 
+  CompetitionGameResult _buildCompetitionResult() {
+    final teamAWon = _teamAScore > _teamBScore;
+
+    final winningTeam = teamAWon ? _teamA : _teamB;
+    final losingTeam = teamAWon ? _teamB : _teamA;
+
+    final players = <CompetitionPlayerResult>[
+      ...winningTeam.map(
+        (player) => CompetitionPlayerResult(
+          userId: player.id,
+          name: player.name,
+          gameScore: 1,
+          placement: 1,
+        ),
+      ),
+      ...losingTeam.map(
+        (player) => CompetitionPlayerResult(
+          userId: player.id,
+          name: player.name,
+          gameScore: 0,
+          placement: 2,
+        ),
+      ),
+    ];
+
+    return CompetitionGameResult(
+      gameId: CompetitionGameIds.trivia,
+      gameName: 'Trivia',
+      players: players,
+      sharedWin: true,
+    );
+  }
+
   Widget _buildFinalResultsScreen() {
     final isTie = _teamAScore == _teamBScore;
 
-    final winner = _teamAScore > _teamBScore
-        ? 'Team A'
-        : 'Team B';
+    final winner = _teamAScore > _teamBScore ? 'Team A' : 'Team B';
 
     return Center(
       child: SingleChildScrollView(
         child: Column(
           children: [
-            const Icon(
-              Icons.emoji_events,
-              size: 80,
-            ),
+            const Icon(Icons.emoji_events, size: 80),
 
             const SizedBox(height: 20),
 
             Text(
-              isTie
-                  ? 'Trivia Tie!'
-                  : '$winner Wins!',
+              isTie ? 'Trivia Tie!' : '$winner Wins!',
               textAlign: TextAlign.center,
-              style:
-                  Theme.of(context).textTheme.headlineMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+              style: Theme.of(
+                context,
+              ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
 
             const SizedBox(height: 28),
 
             Text(
               'Team A: $_teamAScore',
-              style:
-                  Theme.of(context).textTheme.titleLarge,
+              style: Theme.of(context).textTheme.titleLarge,
             ),
 
             const SizedBox(height: 12),
 
             Text(
               'Team B: $_teamBScore',
-              style:
-                  Theme.of(context).textTheme.titleLarge,
+              style: Theme.of(context).textTheme.titleLarge,
             ),
 
             const SizedBox(height: 20),
@@ -1210,11 +1116,21 @@ class _TriviaScreenState extends State<TriviaScreen> {
             SizedBox(
               width: double.infinity,
               child: FilledButton(
-                onPressed: _playAgain,
-                child: const Text('Play Again'),
+                onPressed: () {
+                  if (widget.playMode.isOfficial) {
+                    Navigator.of(context).pop(_buildCompetitionResult());
+                    return;
+                  }
+
+                  _playAgain();
+                },
+                child: Text(
+                  widget.playMode.isOfficial
+                      ? 'Return to ${widget.playMode.displayName}'
+                      : 'Play Again',
+                ),
               ),
             ),
-
             const SizedBox(height: 12),
 
             SizedBox(
@@ -1231,58 +1147,57 @@ class _TriviaScreenState extends State<TriviaScreen> {
       ),
     );
   }
+
   Widget _buildTieBreakerScreen() {
-  final question = _questions[_globalQuestionIndex];
+    final question = _questions[_globalQuestionIndex];
 
-  return SingleChildScrollView(
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Text(
-          'TIE-BREAKER',
-          textAlign: TextAlign.center,
-          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                fontWeight: FontWeight.bold,
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            'TIE-BREAKER',
+            textAlign: TextAlign.center,
+            style: Theme.of(
+              context,
+            ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
+          ),
+
+          const SizedBox(height: 8),
+
+          const Text(
+            'One final question decides the winner.',
+            textAlign: TextAlign.center,
+          ),
+
+          const SizedBox(height: 18),
+
+          Text(
+            '10 s',
+            textAlign: TextAlign.center,
+            style: Theme.of(
+              context,
+            ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
+          ),
+
+          const SizedBox(height: 24),
+
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Text(
+                question.question,
+                textAlign: TextAlign.center,
+                style: Theme.of(
+                  context,
+                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
               ),
-        ),
-
-        const SizedBox(height: 8),
-
-        const Text(
-          'One final question decides the winner.',
-          textAlign: TextAlign.center,
-        ),
-
-        const SizedBox(height: 18),
-
-        Text(
-          '10 s',
-          textAlign: TextAlign.center,
-          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-        ),
-
-        const SizedBox(height: 24),
-
-        Card(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Text(
-              question.question,
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
             ),
           ),
-        ),
 
-        const SizedBox(height: 20),
+          const SizedBox(height: 20),
 
-        ...List.generate(
-          question.options.length,
-          (index) {
+          ...List.generate(question.options.length, (index) {
             return Padding(
               padding: const EdgeInsets.only(bottom: 12),
               child: FilledButton.tonal(
@@ -1293,60 +1208,58 @@ class _TriviaScreenState extends State<TriviaScreen> {
                 ),
               ),
             );
-          },
-        ),
-      ],
-    ),
-  );
-}
-void _selectTieBreakerAnswer(int index) {
-  if (_selectedAnswer != null) return;
-
-  final question = _questions[_globalQuestionIndex];
-  final correct = index == question.correctIndex;
-
-  if (correct) {
-    setState(() {
-      _teamAScore += 1;
-      _selectedAnswer = index;
-      _phase = _TriviaPhase.finalResults;
-    });
-
-    return;
+          }),
+        ],
+      ),
+    );
   }
 
-  setState(() {
-    _selectedAnswer = index;
-  });
+  void _selectTieBreakerAnswer(int index) {
+    if (_selectedAnswer != null) return;
 
-  _startTieBreakerSteal();
-}
-void _startTieBreakerSteal() {
-  _questionTimer?.cancel();
+    final question = _questions[_globalQuestionIndex];
+    final correct = index == question.correctIndex;
 
-  setState(() {
-    _selectedAnswer = null;
-    _secondsRemaining = 10;
-    _phase = _TriviaPhase.steal;
-  });
-
-  _startTimer(
-    seconds: 10,
-    onFinished: () {
+    if (correct) {
       setState(() {
         _teamAScore += 1;
+        _selectedAnswer = index;
         _phase = _TriviaPhase.finalResults;
       });
-    },
-  );
-}
+
+      return;
+    }
+
+    setState(() {
+      _selectedAnswer = index;
+    });
+
+    _startTieBreakerSteal();
+  }
+
+  void _startTieBreakerSteal() {
+    _questionTimer?.cancel();
+
+    setState(() {
+      _selectedAnswer = null;
+      _secondsRemaining = 10;
+      _phase = _TriviaPhase.steal;
+    });
+
+    _startTimer(
+      seconds: 10,
+      onFinished: () {
+        setState(() {
+          _teamAScore += 1;
+          _phase = _TriviaPhase.finalResults;
+        });
+      },
+    );
+  }
 }
 
 class _TriviaPlayer {
-  const _TriviaPlayer({
-    required this.id,
-    required this.name,
-  });
+  const _TriviaPlayer({required this.id, required this.name});
 
   final String id;
   final String name;

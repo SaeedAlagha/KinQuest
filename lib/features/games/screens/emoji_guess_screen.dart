@@ -6,6 +6,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../services/emoji_guess_ai_service.dart';
+import '../../competitions/config/competition_games.dart';
+import '../../competitions/models/competition_game_result.dart';
+import '../../competitions/models/competition_player_result.dart';
+import '../../competitions/models/game_play_mode.dart';
 
 enum _EmojiGuessPhase {
   setup,
@@ -18,7 +22,14 @@ enum _EmojiGuessPhase {
 }
 
 class EmojiGuessScreen extends StatefulWidget {
-  const EmojiGuessScreen({super.key});
+  const EmojiGuessScreen({
+    super.key,
+    this.playMode = GamePlayMode.quickPlay,
+    this.participantIds,
+  });
+
+  final GamePlayMode playMode;
+  final Set<String>? participantIds;
 
   @override
   State<EmojiGuessScreen> createState() => _EmojiGuessScreenState();
@@ -68,8 +79,7 @@ class _EmojiGuessScreenState extends State<EmojiGuessScreen> {
 
   bool _isTieBreaker = false;
 
-  final TextEditingController _answerController =
-  TextEditingController();
+  final TextEditingController _answerController = TextEditingController();
 
   bool _isCheckingAnswer = false;
 
@@ -112,8 +122,7 @@ class _EmojiGuessScreenState extends State<EmojiGuessScreen> {
 
         setState(() {
           _isLoadingFamily = false;
-          _familyError =
-              'Join or create a family before playing Emoji Guess.';
+          _familyError = 'Join or create a family before playing Emoji Guess.';
         });
 
         return;
@@ -139,17 +148,26 @@ class _EmojiGuessScreenState extends State<EmojiGuessScreen> {
       }).toList();
 
       members.sort(
-        (a, b) => a.name.toLowerCase().compareTo(
-              b.name.toLowerCase(),
-            ),
+        (a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()),
       );
 
       if (!mounted) return;
+      final availableMembers = widget.participantIds == null
+          ? members
+          : members
+                .where((member) => widget.participantIds!.contains(member.id))
+                .toList();
 
       setState(() {
         _familyMembers
           ..clear()
-          ..addAll(members);
+          ..addAll(availableMembers);
+
+        if (widget.participantIds != null) {
+          _selectedPlayerIds
+            ..clear()
+            ..addAll(availableMembers.map((member) => member.id));
+        }
 
         _isLoadingFamily = false;
       });
@@ -168,31 +186,20 @@ class _EmojiGuessScreenState extends State<EmojiGuessScreen> {
       if (_selectedPlayerIds.contains(player.id)) {
         _selectedPlayerIds.remove(player.id);
 
-        _teamA.removeWhere(
-          (member) => member.id == player.id,
-        );
+        _teamA.removeWhere((member) => member.id == player.id);
 
-        _teamB.removeWhere(
-          (member) => member.id == player.id,
-        );
+        _teamB.removeWhere((member) => member.id == player.id);
       } else {
         _selectedPlayerIds.add(player.id);
       }
     });
   }
 
-  void _assignPlayerToTeam(
-    _EmojiPlayer player,
-    String team,
-  ) {
+  void _assignPlayerToTeam(_EmojiPlayer player, String team) {
     setState(() {
-      _teamA.removeWhere(
-        (member) => member.id == player.id,
-      );
+      _teamA.removeWhere((member) => member.id == player.id);
 
-      _teamB.removeWhere(
-        (member) => member.id == player.id,
-      );
+      _teamB.removeWhere((member) => member.id == player.id);
 
       if (team == 'A') {
         _teamA.add(player);
@@ -203,12 +210,11 @@ class _EmojiGuessScreenState extends State<EmojiGuessScreen> {
   }
 
   void _shuffleTeams() {
-    final selectedPlayers = _familyMembers
-        .where(
-          (player) => _selectedPlayerIds.contains(player.id),
-        )
-        .toList()
-      ..shuffle(Random());
+    final selectedPlayers =
+        _familyMembers
+            .where((player) => _selectedPlayerIds.contains(player.id))
+            .toList()
+          ..shuffle(Random());
 
     setState(() {
       _teamA.clear();
@@ -229,8 +235,7 @@ class _EmojiGuessScreenState extends State<EmojiGuessScreen> {
       return;
     }
 
-    if (_teamA.length + _teamB.length !=
-        _selectedPlayerIds.length) {
+    if (_teamA.length + _teamB.length != _selectedPlayerIds.length) {
       return;
     }
 
@@ -239,8 +244,7 @@ class _EmojiGuessScreenState extends State<EmojiGuessScreen> {
     });
 
     try {
-      final totalPuzzles =
-          (_selectedRounds * _puzzlesPerRound) + 1;
+      final totalPuzzles = (_selectedRounds * _puzzlesPerRound) + 1;
 
       final generated = await _aiService.generatePuzzles(
         category: _selectedCategory,
@@ -281,14 +285,11 @@ class _EmojiGuessScreenState extends State<EmojiGuessScreen> {
     }
   }
 
-  bool get _teamAStartsPuzzle =>
-      _globalPuzzleIndex.isEven;
+  bool get _teamAStartsPuzzle => _globalPuzzleIndex.isEven;
 
-  String get _startingTeamName =>
-      _teamAStartsPuzzle ? 'Team A' : 'Team B';
+  String get _startingTeamName => _teamAStartsPuzzle ? 'Team A' : 'Team B';
 
-  String get _stealingTeamName =>
-      _teamAStartsPuzzle ? 'Team B' : 'Team A';
+  String get _stealingTeamName => _teamAStartsPuzzle ? 'Team B' : 'Team A';
 
   void _startNormalPuzzle() {
     _timer?.cancel();
@@ -299,17 +300,14 @@ class _EmojiGuessScreenState extends State<EmojiGuessScreen> {
       _phase = _EmojiGuessPhase.puzzle;
     });
 
-    _startTimer(
-      seconds: _secondsPerPuzzle,
-      onFinished: _startSteal,
-    );
+    _startTimer(seconds: _secondsPerPuzzle, onFinished: _startSteal);
   }
 
   void _startSteal() {
     _timer?.cancel();
 
     setState(() {
-       _answerController.clear();
+      _answerController.clear();
       _secondsRemaining = 10;
       _phase = _EmojiGuessPhase.steal;
     });
@@ -345,38 +343,32 @@ class _EmojiGuessScreenState extends State<EmojiGuessScreen> {
     );
   }
 
-  void _startTimer({
-    required int seconds,
-    required VoidCallback onFinished,
-  }) {
+  void _startTimer({required int seconds, required VoidCallback onFinished}) {
     _timer?.cancel();
 
     _secondsRemaining = seconds;
 
-    _timer = Timer.periodic(
-      const Duration(seconds: 1),
-      (timer) {
-        if (!mounted) {
-          timer.cancel();
-          return;
-        }
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted) {
+        timer.cancel();
+        return;
+      }
 
-        if (_secondsRemaining <= 1) {
-          timer.cancel();
-
-          setState(() {
-            _secondsRemaining = 0;
-          });
-
-          onFinished();
-          return;
-        }
+      if (_secondsRemaining <= 1) {
+        timer.cancel();
 
         setState(() {
-          _secondsRemaining--;
+          _secondsRemaining = 0;
         });
-      },
-    );
+
+        onFinished();
+        return;
+      }
+
+      setState(() {
+        _secondsRemaining--;
+      });
+    });
   }
 
   void _handleCorrectNormalAnswer() {
@@ -411,7 +403,6 @@ class _EmojiGuessScreenState extends State<EmojiGuessScreen> {
       _phase = _EmojiGuessPhase.puzzleResult;
     });
   }
-
 
   void _handleCorrectSteal() {
     _timer?.cancel();
@@ -476,8 +467,7 @@ class _EmojiGuessScreenState extends State<EmojiGuessScreen> {
   }
 
   void _continueAfterPuzzle() {
-    final isLastPuzzleInRound =
-        _puzzleInRound == _puzzlesPerRound - 1;
+    final isLastPuzzleInRound = _puzzleInRound == _puzzlesPerRound - 1;
 
     if (isLastPuzzleInRound) {
       setState(() {
@@ -496,8 +486,7 @@ class _EmojiGuessScreenState extends State<EmojiGuessScreen> {
   }
 
   void _continueAfterRound() {
-    final isLastRound =
-        _currentRound == _selectedRounds;
+    final isLastRound = _currentRound == _selectedRounds;
 
     if (isLastRound) {
       if (_teamAScore == _teamBScore) {
@@ -508,10 +497,7 @@ class _EmojiGuessScreenState extends State<EmojiGuessScreen> {
           _phase = _EmojiGuessPhase.tieBreaker;
         });
 
-        _startTimer(
-          seconds: 10,
-          onFinished: _startSteal,
-        );
+        _startTimer(seconds: 10, onFinished: _startSteal);
 
         return;
       }
@@ -554,14 +540,9 @@ class _EmojiGuessScreenState extends State<EmojiGuessScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Emoji Guess'),
-      ),
+      appBar: AppBar(title: const Text('Emoji Guess')),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: _buildBody(),
-        ),
+        child: Padding(padding: const EdgeInsets.all(24), child: _buildBody()),
       ),
     );
   }
@@ -571,31 +552,20 @@ class _EmojiGuessScreenState extends State<EmojiGuessScreen> {
       _EmojiGuessPhase.setup => _buildSetup(),
       _EmojiGuessPhase.puzzle => _buildPuzzleScreen(),
       _EmojiGuessPhase.steal => _buildStealScreen(),
-      _EmojiGuessPhase.puzzleResult =>
-        _buildPuzzleResultScreen(),
-      _EmojiGuessPhase.roundSummary =>
-        _buildRoundSummaryScreen(),
-      _EmojiGuessPhase.tieBreaker =>
-        _buildTieBreakerScreen(),
-      _EmojiGuessPhase.finalResults =>
-        _buildFinalResultsScreen(),
+      _EmojiGuessPhase.puzzleResult => _buildPuzzleResultScreen(),
+      _EmojiGuessPhase.roundSummary => _buildRoundSummaryScreen(),
+      _EmojiGuessPhase.tieBreaker => _buildTieBreakerScreen(),
+      _EmojiGuessPhase.finalResults => _buildFinalResultsScreen(),
     };
   }
 
   Widget _buildSetup() {
     if (_isLoadingFamily) {
-      return const Center(
-        child: CircularProgressIndicator(),
-      );
+      return const Center(child: CircularProgressIndicator());
     }
 
     if (_familyError != null) {
-      return Center(
-        child: Text(
-          _familyError!,
-          textAlign: TextAlign.center,
-        ),
-      );
+      return Center(child: Text(_familyError!, textAlign: TextAlign.center));
     }
 
     return SingleChildScrollView(
@@ -604,25 +574,19 @@ class _EmojiGuessScreenState extends State<EmojiGuessScreen> {
         children: [
           Text(
             'Who is playing?',
-            style: Theme.of(context)
-                .textTheme
-                .headlineMedium
-                ?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
           ),
 
           const SizedBox(height: 8),
 
-          const Text(
-            'Choose at least 2 players.',
-          ),
+          const Text('Choose at least 2 players.'),
 
           const SizedBox(height: 16),
 
           ..._familyMembers.map((player) {
-            final selected =
-                _selectedPlayerIds.contains(player.id);
+            final selected = _selectedPlayerIds.contains(player.id);
 
             return CheckboxListTile(
               value: selected,
@@ -635,89 +599,69 @@ class _EmojiGuessScreenState extends State<EmojiGuessScreen> {
 
           Text(
             'Choose teams',
-            style: Theme.of(context)
-                .textTheme
-                .titleLarge
-                ?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
           ),
 
           const SizedBox(height: 8),
 
-          const Text(
-            'Assign every selected player to Team A or Team B.',
-          ),
+          const Text('Assign every selected player to Team A or Team B.'),
 
           const SizedBox(height: 16),
 
           ..._familyMembers
-              .where(
-                (player) =>
-                    _selectedPlayerIds.contains(player.id),
-              )
+              .where((player) => _selectedPlayerIds.contains(player.id))
               .map((player) {
-            final inTeamA = _teamA.any(
-              (member) => member.id == player.id,
-            );
+                final inTeamA = _teamA.any((member) => member.id == player.id);
 
-            final inTeamB = _teamB.any(
-              (member) => member.id == player.id,
-            );
+                final inTeamB = _teamB.any((member) => member.id == player.id);
 
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: Card(
-                margin: EdgeInsets.zero,
-                child: Padding(
-                  padding: const EdgeInsets.all(14),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          player.name,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.w600,
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: Card(
+                    margin: EdgeInsets.zero,
+                    child: Padding(
+                      padding: const EdgeInsets.all(14),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              player.name,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
                           ),
-                        ),
-                      ),
 
-                      ChoiceChip(
-                        label: const Text('Team A'),
-                        selected: inTeamA,
-                        onSelected: (_) {
-                          _assignPlayerToTeam(
-                            player,
-                            'A',
-                          );
-                        },
-                      ),
+                          ChoiceChip(
+                            label: const Text('Team A'),
+                            selected: inTeamA,
+                            onSelected: (_) {
+                              _assignPlayerToTeam(player, 'A');
+                            },
+                          ),
 
-                      const SizedBox(width: 8),
+                          const SizedBox(width: 8),
 
-                      ChoiceChip(
-                        label: const Text('Team B'),
-                        selected: inTeamB,
-                        onSelected: (_) {
-                          _assignPlayerToTeam(
-                            player,
-                            'B',
-                          );
-                        },
+                          ChoiceChip(
+                            label: const Text('Team B'),
+                            selected: inTeamB,
+                            onSelected: (_) {
+                              _assignPlayerToTeam(player, 'B');
+                            },
+                          ),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
-                ),
-              ),
-            );
-          }),
+                );
+              }),
 
           const SizedBox(height: 12),
 
           OutlinedButton.icon(
-            onPressed: _selectedPlayerIds.length >= 2
-                ? _shuffleTeams
-                : null,
+            onPressed: _selectedPlayerIds.length >= 2 ? _shuffleTeams : null,
             icon: const Icon(Icons.shuffle),
             label: const Text('Shuffle Teams'),
           ),
@@ -726,12 +670,9 @@ class _EmojiGuessScreenState extends State<EmojiGuessScreen> {
 
           Text(
             'Category',
-            style: Theme.of(context)
-                .textTheme
-                .titleLarge
-                ?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
           ),
 
           const SizedBox(height: 12),
@@ -742,8 +683,7 @@ class _EmojiGuessScreenState extends State<EmojiGuessScreen> {
             children: _categories.map((category) {
               return ChoiceChip(
                 label: Text(category),
-                selected:
-                    category == _selectedCategory,
+                selected: category == _selectedCategory,
                 onSelected: (_) {
                   setState(() {
                     _selectedCategory = category;
@@ -757,12 +697,9 @@ class _EmojiGuessScreenState extends State<EmojiGuessScreen> {
 
           Text(
             'Rounds',
-            style: Theme.of(context)
-                .textTheme
-                .titleLarge
-                ?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
           ),
 
           const SizedBox(height: 12),
@@ -772,8 +709,7 @@ class _EmojiGuessScreenState extends State<EmojiGuessScreen> {
             children: [3, 5, 10].map((rounds) {
               return ChoiceChip(
                 label: Text('$rounds'),
-                selected:
-                    _selectedRounds == rounds,
+                selected: _selectedRounds == rounds,
                 onSelected: (_) {
                   setState(() {
                     _selectedRounds = rounds;
@@ -787,28 +723,22 @@ class _EmojiGuessScreenState extends State<EmojiGuessScreen> {
 
           Text(
             'Puzzles per round',
-            style: Theme.of(context)
-                .textTheme
-                .titleLarge
-                ?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
           ),
 
           const SizedBox(height: 12),
 
           Wrap(
             spacing: 10,
-            children:
-                [4, 6, 10].map((puzzleCount) {
+            children: [4, 6, 10].map((puzzleCount) {
               return ChoiceChip(
                 label: Text('$puzzleCount'),
-                selected:
-                    _puzzlesPerRound == puzzleCount,
+                selected: _puzzlesPerRound == puzzleCount,
                 onSelected: (_) {
                   setState(() {
-                    _puzzlesPerRound =
-                        puzzleCount;
+                    _puzzlesPerRound = puzzleCount;
                   });
                 },
               );
@@ -819,12 +749,9 @@ class _EmojiGuessScreenState extends State<EmojiGuessScreen> {
 
           Text(
             'Time per puzzle',
-            style: Theme.of(context)
-                .textTheme
-                .titleLarge
-                ?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
           ),
 
           const SizedBox(height: 12),
@@ -834,8 +761,7 @@ class _EmojiGuessScreenState extends State<EmojiGuessScreen> {
             children: [20, 30, 45].map((seconds) {
               return ChoiceChip(
                 label: Text('$seconds sec'),
-                selected:
-                    _secondsPerPuzzle == seconds,
+                selected: _secondsPerPuzzle == seconds,
                 onSelected: (_) {
                   setState(() {
                     _secondsPerPuzzle = seconds;
@@ -848,7 +774,8 @@ class _EmojiGuessScreenState extends State<EmojiGuessScreen> {
           const SizedBox(height: 32),
 
           FilledButton(
-            onPressed: _teamA.isNotEmpty &&
+            onPressed:
+                _teamA.isNotEmpty &&
                     _teamB.isNotEmpty &&
                     (_teamA.length + _teamB.length ==
                         _selectedPlayerIds.length) &&
@@ -865,8 +792,7 @@ class _EmojiGuessScreenState extends State<EmojiGuessScreen> {
   }
 
   Widget _buildPuzzleScreen() {
-    final puzzle =
-        _puzzles[_globalPuzzleIndex];
+    final puzzle = _puzzles[_globalPuzzleIndex];
 
     return _buildPuzzleLayout(
       heading: '$_startingTeamName\'S TURN',
@@ -876,8 +802,7 @@ class _EmojiGuessScreenState extends State<EmojiGuessScreen> {
   }
 
   Widget _buildStealScreen() {
-    final puzzle =
-        _puzzles[_globalPuzzleIndex];
+    final puzzle = _puzzles[_globalPuzzleIndex];
 
     return _buildPuzzleLayout(
       heading: 'STEAL — $_stealingTeamName',
@@ -898,12 +823,9 @@ class _EmojiGuessScreenState extends State<EmojiGuessScreen> {
           Text(
             heading,
             textAlign: TextAlign.center,
-            style: Theme.of(context)
-                .textTheme
-                .headlineSmall
-                ?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
           ),
 
           const SizedBox(height: 8),
@@ -919,12 +841,9 @@ class _EmojiGuessScreenState extends State<EmojiGuessScreen> {
           Text(
             '$_secondsRemaining s',
             textAlign: TextAlign.center,
-            style: Theme.of(context)
-                .textTheme
-                .headlineMedium
-                ?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
           ),
 
           const SizedBox(height: 32),
@@ -932,9 +851,7 @@ class _EmojiGuessScreenState extends State<EmojiGuessScreen> {
           Text(
             puzzle.emojis,
             textAlign: TextAlign.center,
-            style: const TextStyle(
-              fontSize: 72,
-            ),
+            style: const TextStyle(fontSize: 72),
           ),
 
           const SizedBox(height: 24),
@@ -942,52 +859,42 @@ class _EmojiGuessScreenState extends State<EmojiGuessScreen> {
           Text(
             'Hint: ${puzzle.hint}',
             textAlign: TextAlign.center,
-            style: Theme.of(context)
-                .textTheme
-                .titleMedium,
+            style: Theme.of(context).textTheme.titleMedium,
           ),
 
           const SizedBox(height: 36),
 
           TextField(
-  controller: _answerController,
-  enabled: !_isCheckingAnswer,
-  textInputAction: TextInputAction.done,
-  decoration: const InputDecoration(
-    labelText: 'Type your answer',
-    prefixIcon: Icon(Icons.edit_outlined),
-    border: OutlineInputBorder(),
-  ),
-  onSubmitted: (_) {
-    _submitTypedAnswer(steal: steal);
-  },
-),
-
-const SizedBox(height: 14),
-
-FilledButton.icon(
-  onPressed: _isCheckingAnswer
-      ? null
-      : () {
-          _submitTypedAnswer(
-            steal: steal,
-          );
-        },
-  icon: _isCheckingAnswer
-      ? const SizedBox(
-          width: 18,
-          height: 18,
-          child: CircularProgressIndicator(
-            strokeWidth: 2,
+            controller: _answerController,
+            enabled: !_isCheckingAnswer,
+            textInputAction: TextInputAction.done,
+            decoration: const InputDecoration(
+              labelText: 'Type your answer',
+              prefixIcon: Icon(Icons.edit_outlined),
+              border: OutlineInputBorder(),
+            ),
+            onSubmitted: (_) {
+              _submitTypedAnswer(steal: steal);
+            },
           ),
-        )
-      : const Icon(Icons.send_rounded),
-  label: Text(
-    _isCheckingAnswer
-        ? 'Checking...'
-        : 'Submit Answer',
-  ),
-),
+
+          const SizedBox(height: 14),
+
+          FilledButton.icon(
+            onPressed: _isCheckingAnswer
+                ? null
+                : () {
+                    _submitTypedAnswer(steal: steal);
+                  },
+            icon: _isCheckingAnswer
+                ? const SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Icon(Icons.send_rounded),
+            label: Text(_isCheckingAnswer ? 'Checking...' : 'Submit Answer'),
+          ),
 
           const SizedBox(height: 24),
 
@@ -1001,8 +908,7 @@ FilledButton.icon(
   }
 
   Widget _buildPuzzleResultScreen() {
-    final puzzle =
-        _puzzles[_globalPuzzleIndex];
+    final puzzle = _puzzles[_globalPuzzleIndex];
 
     return Center(
       child: Column(
@@ -1010,32 +916,23 @@ FilledButton.icon(
         children: [
           Text(
             'Puzzle Complete',
-            style: Theme.of(context)
-                .textTheme
-                .headlineMedium
-                ?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
           ),
 
           const SizedBox(height: 18),
 
-          Text(
-            _resultMessage,
-            textAlign: TextAlign.center,
-          ),
+          Text(_resultMessage, textAlign: TextAlign.center),
 
           const SizedBox(height: 18),
 
           Text(
             'Answer: ${puzzle.answer}',
             textAlign: TextAlign.center,
-            style: Theme.of(context)
-                .textTheme
-                .titleMedium
-                ?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
           ),
 
           const SizedBox(height: 28),
@@ -1043,8 +940,7 @@ FilledButton.icon(
           FilledButton(
             onPressed: _continueAfterPuzzle,
             child: Text(
-              _puzzleInRound ==
-                      _puzzlesPerRound - 1
+              _puzzleInRound == _puzzlesPerRound - 1
                   ? 'Round Results'
                   : 'Next Puzzle',
             ),
@@ -1055,12 +951,9 @@ FilledButton.icon(
   }
 
   Widget _buildRoundSummaryScreen() {
+    final isLastRound = _currentRound == _selectedRounds;
 
-    final isLastRound =
-    _currentRound == _selectedRounds;
-
-    final isTie =
-    _teamAScore == _teamBScore;
+    final isTie = _teamAScore == _teamBScore;
 
     return Center(
       child: Column(
@@ -1068,12 +961,9 @@ FilledButton.icon(
         children: [
           Text(
             'Round $_currentRound Complete',
-            style: Theme.of(context)
-                .textTheme
-                .headlineMedium
-                ?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
           ),
 
           const SizedBox(height: 28),
@@ -1088,11 +978,11 @@ FilledButton.icon(
             onPressed: _continueAfterRound,
             child: Text(
               isLastRound
-              ? isTie
-              ? 'Start Tie-Breaker'
-              : 'See Final Results'
-          : 'Start Round ${_currentRound + 1}',
-),
+                  ? isTie
+                        ? 'Start Tie-Breaker'
+                        : 'See Final Results'
+                  : 'Start Round ${_currentRound + 1}',
+            ),
           ),
         ],
       ),
@@ -1100,8 +990,7 @@ FilledButton.icon(
   }
 
   Widget _buildTieBreakerScreen() {
-    final puzzle =
-        _puzzles[_globalPuzzleIndex];
+    final puzzle = _puzzles[_globalPuzzleIndex];
 
     return _buildPuzzleLayout(
       heading: 'TIE-BREAKER — $_startingTeamName',
@@ -1110,30 +999,55 @@ FilledButton.icon(
     );
   }
 
+  CompetitionGameResult _buildCompetitionResult() {
+    final teamAWon = _teamAScore > _teamBScore;
+
+    final winningTeam = teamAWon ? _teamA : _teamB;
+    final losingTeam = teamAWon ? _teamB : _teamA;
+
+    final players = <CompetitionPlayerResult>[
+      ...winningTeam.map(
+        (player) => CompetitionPlayerResult(
+          userId: player.id,
+          name: player.name,
+          gameScore: 1,
+          placement: 1,
+        ),
+      ),
+      ...losingTeam.map(
+        (player) => CompetitionPlayerResult(
+          userId: player.id,
+          name: player.name,
+          gameScore: 0,
+          placement: 2,
+        ),
+      ),
+    ];
+
+    return CompetitionGameResult(
+      gameId: CompetitionGameIds.emojiGuess,
+      gameName: 'Emoji Guess',
+      players: players,
+      sharedWin: true,
+    );
+  }
+
   Widget _buildFinalResultsScreen() {
-    final winner = _teamAScore > _teamBScore
-        ? 'Team A'
-        : 'Team B';
+    final winner = _teamAScore > _teamBScore ? 'Team A' : 'Team B';
 
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(
-            Icons.emoji_events,
-            size: 80,
-          ),
+          const Icon(Icons.emoji_events, size: 80),
 
           const SizedBox(height: 20),
 
           Text(
             '$winner Wins!',
-            style: Theme.of(context)
-                .textTheme
-                .headlineMedium
-                ?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
           ),
 
           const SizedBox(height: 28),
@@ -1143,10 +1057,20 @@ FilledButton.icon(
           Text('Team B: $_teamBScore'),
 
           const SizedBox(height: 32),
-
           FilledButton(
-            onPressed: _playAgain,
-            child: const Text('Play Again'),
+            onPressed: () {
+              if (widget.playMode.isOfficial) {
+                Navigator.of(context).pop(_buildCompetitionResult());
+                return;
+              }
+
+              _playAgain();
+            },
+            child: Text(
+              widget.playMode.isOfficial
+                  ? 'Return to ${widget.playMode.displayName}'
+                  : 'Play Again',
+            ),
           ),
 
           const SizedBox(height: 12),
@@ -1161,66 +1085,59 @@ FilledButton.icon(
       ),
     );
   }
-  Future<void> _submitTypedAnswer({
-  required bool steal,
-}) async {
-  final answer =
-      _answerController.text.trim();
 
-  if (answer.isEmpty || _isCheckingAnswer) {
-    return;
-  }
+  Future<void> _submitTypedAnswer({required bool steal}) async {
+    final answer = _answerController.text.trim();
 
-  _timer?.cancel();
-
-  setState(() {
-    _isCheckingAnswer = true;
-  });
-
-  final puzzle =
-      _puzzles[_globalPuzzleIndex];
-
-  bool correct = false;
-
-  try {
-    correct = await _aiService.checkAnswer(
-      expectedAnswer: puzzle.answer,
-      playerAnswer: answer,
-    );
-  } catch (_) {
-    correct = false;
-  }
-
-  if (!mounted) return;
-
-  setState(() {
-    _isCheckingAnswer = false;
-  });
-
-  if (correct) {
-    if (steal) {
-      _handleCorrectSteal();
-    } else {
-      _handleCorrectNormalAnswer();
+    if (answer.isEmpty || _isCheckingAnswer) {
+      return;
     }
 
-    return;
-  }
+    _timer?.cancel();
 
-  if (steal) {
-    _handleFailedSteal();
-  } else {
-    _startSteal();
-  }
-}
+    setState(() {
+      _isCheckingAnswer = true;
+    });
 
+    final puzzle = _puzzles[_globalPuzzleIndex];
+
+    bool correct = false;
+
+    try {
+      correct = await _aiService.checkAnswer(
+        expectedAnswer: puzzle.answer,
+        playerAnswer: answer,
+      );
+    } catch (_) {
+      correct = false;
+    }
+
+    if (!mounted) return;
+
+    setState(() {
+      _isCheckingAnswer = false;
+    });
+
+    if (correct) {
+      if (steal) {
+        _handleCorrectSteal();
+      } else {
+        _handleCorrectNormalAnswer();
+      }
+
+      return;
+    }
+
+    if (steal) {
+      _handleFailedSteal();
+    } else {
+      _startSteal();
+    }
+  }
 }
 
 class _EmojiPlayer {
-  const _EmojiPlayer({
-    required this.id,
-    required this.name,
-  });
+  const _EmojiPlayer({required this.id, required this.name});
 
   final String id;
   final String name;

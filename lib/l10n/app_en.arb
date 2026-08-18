@@ -594,5 +594,11 @@
   "missionFamilyRecreatePhotoProofHint": "Submit the recreated photo and explain which old photo inspired it.",
   "missionFamilyKindnessProjectTitle": "Complete a Kindness Project",
   "missionFamilyKindnessProjectDescription": "Work together on something genuinely helpful for another person without expecting a reward from them.",
-  "missionFamilyKindnessProjectProofHint": "Submit safe and respectful proof of what your family made or did."
-}
+"missionFamilyKindnessProjectProofHint": "Submit safe and respectful proof of what your family made or did.",
+"officialWins": "Official Wins",
+"dailyWins": "Daily Wins",
+"weeklyWins": "Weekly Wins",
+"monthlyWins": "Monthly Wins",
+"missionsCompleted": "Missions Completed",
+"memoriesAdded": "Memories Added",
+"rankingPoints": "Ranking Points"}

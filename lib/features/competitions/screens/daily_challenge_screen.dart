@@ -103,10 +103,17 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> {
 
       if (!mounted) return;
 
+      final storedWinnerNames = data?['winnerNames'];
+
+      final loadedWinnerName =
+          storedWinnerNames is List && storedWinnerNames.isNotEmpty
+          ? storedWinnerNames.whereType<String>().join(', ')
+          : data?['winnerName'] as String?;
+
       setState(() {
         _familyId = familyId;
         _completedToday = competitionDoc.exists && data?['completed'] == true;
-        _winnerName = data?['winnerName'] as String?;
+        _winnerName = loadedWinnerName;
         _isLoading = false;
       });
     } catch (_) {
@@ -221,11 +228,17 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> {
       return;
     }
 
-    final winner = tieBreakWinner ?? rankedPlayers.first;
+    final winners = result.sharedWin
+        ? result.leaders
+        : <CompetitionPlayerResult>[tieBreakWinner ?? rankedPlayers.first];
+
+    final winner = winners.first;
 
     final runnersUp = <CompetitionPlayerResult>[];
-
-    if (tieBreakWinner != null) {
+    if (result.sharedWin) {
+      // Team-result games deliberately have multiple winners.
+      // Losing-team members are not Daily runners-up.
+    } else if (tieBreakWinner != null) {
       runnersUp.addAll(
         result.leaders.where((player) => player.userId != winner.userId),
       );
@@ -249,7 +262,9 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> {
 
       setState(() {
         _latestResult = result;
-        _winnerName = winner.name;
+        _winnerName = result.sharedWin
+            ? winners.map((player) => player.name).join(', ')
+            : winner.name;
         _completedToday = true;
         _isSettling = false;
       });
@@ -283,6 +298,9 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> {
           'players': rankedPlayers.map((player) => player.toMap()).toList(),
           'winnerId': winner.userId,
           'winnerName': winner.name,
+          'winnerIds': winners.map((player) => player.userId).toList(),
+          'winnerNames': winners.map((player) => player.name).toList(),
+          'sharedWin': result.sharedWin,
           'tieBreakUsed': tieBreakWinner != null,
           if (tieBreakWinner != null) 'tieBreakWinnerId': tieBreakWinner.userId,
           'completed': true,
@@ -296,8 +314,9 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> {
         for (final player in rankedPlayers) {
           final userRef = firestore.collection('users').doc(player.userId);
 
-          final isWinner = player.userId == winner.userId;
-
+          final isWinner = winners.any(
+            (winningPlayer) => winningPlayer.userId == player.userId,
+          );
           final isRunnerUp = runnersUp.any(
             (runnerUp) => runnerUp.userId == player.userId,
           );
@@ -314,7 +333,6 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> {
               ),
               'officialWins': FieldValue.increment(1),
               'dailyWins': FieldValue.increment(1),
-              'dailyChallengesCompleted': FieldValue.increment(1),
             } else if (isRunnerUp) ...{
               'rankingPoints': FieldValue.increment(
                 CompetitionRewards.dailyRunnerUpRankingPoints,
@@ -346,15 +364,21 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> {
 
       setState(() {
         _latestResult = result;
-        _winnerName = winner.name;
+        _winnerName = result.sharedWin
+            ? winners.map((player) => player.name).join(', ')
+            : winner.name;
         _completedToday = true;
         _isSettling = false;
       });
 
+      final displayedWinnerNames = result.sharedWin
+          ? winners.map((player) => player.name).join(', ')
+          : winner.name;
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            '${winner.name} won today\'s Daily Challenge! '
+            '$displayedWinnerNames won today\'s Daily Challenge! '
             '+${CompetitionRewards.dailyWinnerTokens} Tokens and '
             '+${CompetitionRewards.dailyWinnerRankingPoints} Ranking Points.',
           ),

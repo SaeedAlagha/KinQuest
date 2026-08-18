@@ -41,11 +41,12 @@ void main() {
     expect(find.text('لا توجد أمنيات عائلية بعد'), findsOneWidget);
 
     await tester.scrollUntilVisible(
-      find.text('لا توجد كؤوس بعد'),
+      find.text('Monthly Cup Champion'),
       300,
       scrollable: scrollable,
     );
-    expect(find.text('لا توجد كؤوس بعد'), findsOneWidget);
+    expect(find.text('Monthly Cup Champion'), findsOneWidget);
+    expect(find.textContaining('2026-08'), findsOneWidget);
 
     await tester.scrollUntilVisible(
       find.text('إعدادات التطبيق'),

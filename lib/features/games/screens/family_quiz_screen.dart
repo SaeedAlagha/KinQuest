@@ -5,6 +5,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../services/family_quiz_ai_service.dart';
+import '../../competitions/config/competition_games.dart';
+import '../../competitions/models/competition_game_result.dart';
+import '../../competitions/models/competition_player_result.dart';
+import '../../competitions/models/game_play_mode.dart';
 
 enum _FamilyQuizPhase {
   setup,
@@ -25,10 +29,14 @@ class FamilyQuizScreen extends StatefulWidget {
     super.key,
     this.aiService = const FamilyQuizAiService(),
     this.developerPreview = false,
+    this.playMode = GamePlayMode.quickPlay,
+    this.participantIds,
   });
 
   final FamilyQuizAiService aiService;
   final bool developerPreview;
+  final GamePlayMode playMode;
+  final Set<String>? participantIds;
 
   @override
   State<FamilyQuizScreen> createState() => _FamilyQuizScreenState();
@@ -211,7 +219,7 @@ class _FamilyQuizScreenState extends State<FamilyQuizScreen> {
       _players.where((player) => player.id != _currentSubject.id).toList();
 
   _QuizPlayer get _currentGuesser => _guessers[_currentGuesserIndex];
-
+  bool get _hasLockedParticipants => widget.participantIds != null;
   @override
   void initState() {
     super.initState();
@@ -286,7 +294,11 @@ class _FamilyQuizScreenState extends State<FamilyQuizScreen> {
       members.sort(
         (a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()),
       );
-
+      final availableMembers = widget.participantIds == null
+          ? members
+          : members
+                .where((member) => widget.participantIds!.contains(member.id))
+                .toList();
       if (!mounted) {
         return;
       }
@@ -294,10 +306,23 @@ class _FamilyQuizScreenState extends State<FamilyQuizScreen> {
       setState(() {
         _familyMembers
           ..clear()
-          ..addAll(members);
+          ..addAll(availableMembers);
+
+        _selectedPlayerIds.clear();
+        if (_hasLockedParticipants) {
+          _selectedPlayerIds.addAll(
+            availableMembers.map((member) => member.id),
+          );
+        }
 
         _isLoadingFamily = false;
-        _familyError = null;
+
+        if (_hasLockedParticipants && availableMembers.length < 2) {
+          _familyError =
+              'This official Family Quiz match does not have enough valid family members.';
+        } else {
+          _familyError = null;
+        }
       });
     } catch (_) {
       if (!mounted) {
@@ -322,13 +347,16 @@ class _FamilyQuizScreenState extends State<FamilyQuizScreen> {
   }
 
   Future<void> _startGame() async {
-    if (_selectedPlayerIds.length < 2) {
-      return;
-    }
-
     final selectedPlayers = _familyMembers
         .where((player) => _selectedPlayerIds.contains(player.id))
         .toList();
+
+    if (selectedPlayers.length < 2) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Family Quiz needs at least 2 players.')),
+      );
+      return;
+    }
 
     final totalQuestions = _selectedRounds * _questionsPerRound;
 
@@ -610,7 +638,13 @@ class _FamilyQuizScreenState extends State<FamilyQuizScreen> {
       _currentVoterIndex = 0;
       _selectedVoteIndex = null;
       _currentVotes = [];
-
+      _selectedPlayerIds
+        ..clear()
+        ..addAll(
+          _hasLockedParticipants
+              ? _familyMembers.map((player) => player.id)
+              : const <String>[],
+        );
       _scores.clear();
     });
   }
@@ -729,7 +763,9 @@ class _FamilyQuizScreenState extends State<FamilyQuizScreen> {
                 margin: EdgeInsets.zero,
                 child: CheckboxListTile(
                   value: selected,
-                  onChanged: (_) => _togglePlayer(player),
+                  onChanged: _hasLockedParticipants
+                      ? null
+                      : (_) => _togglePlayer(player),
                   secondary: CircleAvatar(
                     child: Text(
                       player.name.isEmpty ? '?' : player.name[0].toUpperCase(),
@@ -1193,6 +1229,42 @@ class _FamilyQuizScreenState extends State<FamilyQuizScreen> {
     );
   }
 
+  CompetitionGameResult _buildCompetitionResult() {
+    final leaderboard = List<_QuizPlayer>.from(_players)
+      ..sort((a, b) => (_scores[b.id] ?? 0).compareTo(_scores[a.id] ?? 0));
+
+    final results = <CompetitionPlayerResult>[];
+
+    int placement = 0;
+    int? previousScore;
+
+    for (var index = 0; index < leaderboard.length; index++) {
+      final player = leaderboard[index];
+      final score = _scores[player.id] ?? 0;
+
+      if (previousScore == null || score != previousScore) {
+        placement = index + 1;
+      }
+
+      results.add(
+        CompetitionPlayerResult(
+          userId: player.id,
+          name: player.name,
+          gameScore: score,
+          placement: placement,
+        ),
+      );
+
+      previousScore = score;
+    }
+
+    return CompetitionGameResult(
+      gameId: CompetitionGameIds.familyQuiz,
+      gameName: 'Family Quiz',
+      players: results,
+    );
+  }
+
   Widget _buildFinalResults() {
     final leaderboard = [..._players];
 
@@ -1251,8 +1323,21 @@ class _FamilyQuizScreenState extends State<FamilyQuizScreen> {
 
           const SizedBox(height: 16),
 
-          FilledButton(onPressed: _playAgain, child: const Text('Play Again')),
+          FilledButton(
+            onPressed: () {
+              if (widget.playMode.isOfficial) {
+                Navigator.of(context).pop(_buildCompetitionResult());
+                return;
+              }
 
+              _playAgain();
+            },
+            child: Text(
+              widget.playMode.isOfficial
+                  ? 'Return to ${widget.playMode.displayName}'
+                  : 'Play Again',
+            ),
+          ),
           const SizedBox(height: 12),
 
           OutlinedButton(

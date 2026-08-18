@@ -2968,6 +2968,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Submit safe and respectful proof of what your family made or did.'**
   String get missionFamilyKindnessProjectProofHint;
+
+  /// No description provided for @officialWins.
+  ///
+  /// In en, this message translates to:
+  /// **'Official Wins'**
+  String get officialWins;
+
+  /// No description provided for @dailyWins.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily Wins'**
+  String get dailyWins;
+
+  /// No description provided for @weeklyWins.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly Wins'**
+  String get weeklyWins;
+
+  /// No description provided for @monthlyWins.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly Wins'**
+  String get monthlyWins;
+
+  /// No description provided for @missionsCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Missions Completed'**
+  String get missionsCompleted;
+
+  /// No description provided for @memoriesAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'Memories Added'**
+  String get memoriesAdded;
+
+  /// No description provided for @rankingPoints.
+  ///
+  /// In en, this message translates to:
+  /// **'Ranking Points'**
+  String get rankingPoints;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

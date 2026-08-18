@@ -40,13 +40,15 @@ void main() {
     await tester.tap(find.widgetWithText(FilledButton, 'عرض').first);
     await tester.pumpAndSettle();
 
-    expect(find.text('اختاروا لعبتكم العائلية المفضلة'), findsOneWidget);
-    expect(find.text('اختبار العائلة'), findsOneWidget);
+    expect(find.text('Choose Players'), findsOneWidget);
+    expect(find.text('Who is playing?'), findsOneWidget);
+    expect(find.text('4 players selected'), findsOneWidget);
 
-    await tester.tap(find.text('اختبار العائلة'));
+    await tester.tap(find.widgetWithText(FilledButton, 'Choose Game'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Who is playing?'), findsOneWidget);
+    expect(find.text('اختاروا لعبتكم العائلية المفضلة'), findsOneWidget);
+    expect(find.text('اختبار العائلة'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 

@@ -1,8 +1,14 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+
+import '../../competitions/config/competition_games.dart';
+import '../../competitions/models/competition_game_result.dart';
+import '../../competitions/models/competition_player_result.dart';
+import '../../competitions/models/game_play_mode.dart';
 import '../services/dont_say_it_ai_service.dart';
-import 'dart:async';
 
 enum _DontSayItPhase {
   setup,
@@ -15,7 +21,14 @@ enum _DontSayItPhase {
 }
 
 class DontSayItScreen extends StatefulWidget {
-  const DontSayItScreen({super.key});
+  const DontSayItScreen({
+    super.key,
+    this.playMode = GamePlayMode.quickPlay,
+    this.participantIds,
+  });
+
+  final GamePlayMode playMode;
+  final Set<String>? participantIds;
 
   @override
   State<DontSayItScreen> createState() => _DontSayItScreenState();
@@ -24,7 +37,12 @@ class DontSayItScreen extends StatefulWidget {
 class _DontSayItScreenState extends State<DontSayItScreen> {
   bool _isLoading = true;
   String? _errorMessage;
+  bool get _hasLockedParticipants => widget.participantIds != null;
 
+  bool get _isLockedHeadToHead =>
+      widget.playMode.isOfficial &&
+      widget.participantIds != null &&
+      widget.participantIds!.length == 2;
   final List<_DontSayItPlayer> _familyMembers = [];
   final Set<String> _selectedPlayerIds = {};
 
@@ -50,7 +68,7 @@ class _DontSayItScreenState extends State<DontSayItScreen> {
 
   final Map<String, int> _scores = {};
 
-String _turnResultMessage = '';
+  String _turnResultMessage = '';
 
   @override
   void initState() {
@@ -59,7 +77,7 @@ String _turnResultMessage = '';
   }
 
   @override
-    void dispose() {
+  void dispose() {
     _turnTimer?.cancel();
     super.dispose();
   }
@@ -117,11 +135,13 @@ String _turnResultMessage = '';
       }).toList();
 
       members.sort(
-        (a, b) => a.name.toLowerCase().compareTo(
-              b.name.toLowerCase(),
-            ),
+        (a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()),
       );
-
+      final availableMembers = widget.participantIds == null
+          ? members
+          : members
+                .where((member) => widget.participantIds!.contains(member.id))
+                .toList();
       if (!mounted) {
         return;
       }
@@ -129,9 +149,24 @@ String _turnResultMessage = '';
       setState(() {
         _familyMembers
           ..clear()
-          ..addAll(members);
+          ..addAll(availableMembers);
+
+        _selectedPlayerIds.clear();
+
+        if (_hasLockedParticipants) {
+          _selectedPlayerIds.addAll(
+            availableMembers.map((member) => member.id),
+          );
+        }
 
         _isLoading = false;
+
+        if (_hasLockedParticipants && availableMembers.length < 2) {
+          _errorMessage =
+              'This official Don\'t Say It match does not have enough valid family members.';
+        } else {
+          _errorMessage = null;
+        }
       });
     } catch (_) {
       if (!mounted) {
@@ -155,126 +190,114 @@ String _turnResultMessage = '';
     });
   }
 
-Future<void> _continueToGame() async {
-  if (_selectedPlayerIds.length < 2) {
-    
-    return;
-  }
-
-  setState(() {
-    _isPreparingGame = true;
-  });
-
-  try {
+  Future<void> _continueToGame() async {
     final selectedPlayers = _familyMembers
-        .where(
-          (player) => _selectedPlayerIds.contains(player.id),
-        )
+        .where((player) => _selectedPlayerIds.contains(player.id))
         .toList();
 
-    _scores.clear();
-
-    for (final player in selectedPlayers) {
-      _scores[player.id] = 0;
-    }    
-
-       
-
-    final totalTurns =
-        selectedPlayers.length * _selectedRounds;
-
-
-    final cards = await _aiService.generateCards(
-      count: totalTurns,
-    );
-
-    if (cards.length < totalTurns) {
-      throw Exception('Not enough cards generated');
-    }
-
-    if (!mounted) {
-      return;
-    }
-
-   setState(() {
-  _players = selectedPlayers;
-  _cards = cards;
-
-  _currentPlayerIndex = 0;
-  _currentCardIndex = 0;
-  _currentRound = 1;
-
-  _phase = _DontSayItPhase.passToClueGiver;
-  _isPreparingGame = false;
-});
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          '${cards.length} AI cards generated successfully.',
+    if (selectedPlayers.length < 2) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Don\'t Say It needs at least 2 players.'),
         ),
-      ),
-    );
-
-    // Private turn reveal comes next.
-  } catch (_) {
-    if (!mounted) {
+      );
       return;
     }
 
     setState(() {
-      _isPreparingGame = false;
+      _isPreparingGame = true;
     });
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text(
-          'Could not prepare Don\'t Say It. Make sure the AI server is running.',
+    try {
+      _scores.clear();
+
+      for (final player in selectedPlayers) {
+        _scores[player.id] = 0;
+      }
+
+      final totalTurns = selectedPlayers.length * _selectedRounds;
+
+      final cards = await _aiService.generateCards(count: totalTurns);
+
+      if (cards.length < totalTurns) {
+        throw Exception('Not enough cards generated');
+      }
+
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        _players = selectedPlayers;
+        _cards = cards;
+
+        _currentPlayerIndex = 0;
+        _currentCardIndex = 0;
+        _currentRound = 1;
+
+        _phase = _DontSayItPhase.passToClueGiver;
+        _isPreparingGame = false;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('${cards.length} AI cards generated successfully.'),
         ),
-      ),
-    );
+      );
+
+      // Private turn reveal comes next.
+    } catch (_) {
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        _isPreparingGame = false;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Could not prepare Don\'t Say It. Make sure the AI server is running.',
+          ),
+        ),
+      );
+    }
   }
-}
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Don\'t Say It'),
-      ),
-      body: SafeArea(
-        child: _buildBody(),
-      ),
+      appBar: AppBar(title: const Text('Don\'t Say It')),
+      body: SafeArea(child: _buildBody()),
     );
   }
 
   Widget _buildBody() {
-  if (_phase == _DontSayItPhase.passToClueGiver) {
-   return _buildPassToClueGiverScreen();
-  }
+    if (_phase == _DontSayItPhase.passToClueGiver) {
+      return _buildPassToClueGiverScreen();
+    }
 
-  if (_phase == _DontSayItPhase.revealCard) {
-    return _buildRevealCardScreen();
-  }
-  if (_phase == _DontSayItPhase.playingTurn) {
-   return _buildPlayingTurnScreen();
-  }
+    if (_phase == _DontSayItPhase.revealCard) {
+      return _buildRevealCardScreen();
+    }
+    if (_phase == _DontSayItPhase.playingTurn) {
+      return _buildPlayingTurnScreen();
+    }
 
-  if (_phase == _DontSayItPhase.chooseGuesser) {
-    return _buildChooseGuesserScreen();
-  }
+    if (_phase == _DontSayItPhase.chooseGuesser) {
+      return _buildChooseGuesserScreen();
+    }
 
-  if (_phase == _DontSayItPhase.turnResult) {
-    return _buildTurnResultScreen();
-  }
+    if (_phase == _DontSayItPhase.turnResult) {
+      return _buildTurnResultScreen();
+    }
 
-  if (_phase == _DontSayItPhase.finalLeaderboard) {
-    return _buildFinalLeaderboardScreen();
-  }
+    if (_phase == _DontSayItPhase.finalLeaderboard) {
+      return _buildFinalLeaderboardScreen();
+    }
     if (_isLoading) {
-      return const Center(
-        child: CircularProgressIndicator(),
-      );
+      return const Center(child: CircularProgressIndicator());
     }
 
     if (_errorMessage != null) {
@@ -284,10 +307,7 @@ Future<void> _continueToGame() async {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(
-                Icons.error_outline,
-                size: 64,
-              ),
+              const Icon(Icons.error_outline, size: 64),
               const SizedBox(height: 16),
               Text(
                 _errorMessage!,
@@ -319,9 +339,9 @@ Future<void> _continueToGame() async {
         children: [
           Text(
             'Who is playing?',
-            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
           Text(
@@ -331,8 +351,7 @@ Future<void> _continueToGame() async {
           const SizedBox(height: 20),
 
           ..._familyMembers.map((player) {
-            final selected =
-                _selectedPlayerIds.contains(player.id);
+            final selected = _selectedPlayerIds.contains(player.id);
 
             return Padding(
               padding: const EdgeInsets.only(bottom: 10),
@@ -340,19 +359,17 @@ Future<void> _continueToGame() async {
                 margin: EdgeInsets.zero,
                 child: CheckboxListTile(
                   value: selected,
-                  onChanged: (_) => _togglePlayer(player),
+                  onChanged: _hasLockedParticipants
+                      ? null
+                      : (_) => _togglePlayer(player),
                   secondary: CircleAvatar(
                     child: Text(
-                      player.name.isEmpty
-                          ? '?'
-                          : player.name[0].toUpperCase(),
+                      player.name.isEmpty ? '?' : player.name[0].toUpperCase(),
                     ),
                   ),
                   title: Text(
                     player.name,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: const TextStyle(fontWeight: FontWeight.w600),
                   ),
                 ),
               ),
@@ -363,9 +380,9 @@ Future<void> _continueToGame() async {
 
           Text(
             'How many rounds?',
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 12),
 
@@ -389,9 +406,9 @@ Future<void> _continueToGame() async {
 
           Text(
             'Time per turn',
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 12),
 
@@ -414,173 +431,163 @@ Future<void> _continueToGame() async {
           const SizedBox(height: 30),
 
           FilledButton.icon(
-           onPressed: _selectedPlayerIds.length >= 2 && !_isPreparingGame
-            ? _continueToGame
-            : null,
+            onPressed: _selectedPlayerIds.length >= 2 && !_isPreparingGame
+                ? _continueToGame
+                : null,
             icon: const Icon(Icons.play_arrow),
-            label: Text(
-                _isPreparingGame
-                    ? 'Preparing Game...'
-                    : 'Continue',
-            ),
+            label: Text(_isPreparingGame ? 'Preparing Game...' : 'Continue'),
           ),
         ],
       ),
     );
   }
 
-Widget _buildPassToClueGiverScreen() {
-  final player = _players[_currentPlayerIndex];
+  Widget _buildPassToClueGiverScreen() {
+    final player = _players[_currentPlayerIndex];
 
-  return Center(
-    child: Padding(
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Icon(
-            Icons.lock_outline,
-            size: 72,
-          ),
-          const SizedBox(height: 24),
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.lock_outline, size: 72),
+            const SizedBox(height: 24),
 
-          Text(
-            'Pass the phone to ${player.name}',
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-          ),
+            Text(
+              'Pass the phone to ${player.name}',
+              textAlign: TextAlign.center,
+              style: Theme.of(
+                context,
+              ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+            ),
 
-          const SizedBox(height: 12),
+            const SizedBox(height: 12),
 
-          Text(
-            'Round $_currentRound of $_selectedRounds',
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
+            Text(
+              'Round $_currentRound of $_selectedRounds',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
 
-          const SizedBox(height: 12),
+            const SizedBox(height: 12),
 
-          const Text(
-            'Everyone else should look away.',
-            textAlign: TextAlign.center,
-          ),
+            const Text(
+              'Everyone else should look away.',
+              textAlign: TextAlign.center,
+            ),
 
-          const SizedBox(height: 32),
+            const SizedBox(height: 32),
 
-          SizedBox(
-            width: double.infinity,
-            child: FilledButton(
-              onPressed: () {
-                setState(() {
-                  _phase = _DontSayItPhase.revealCard;
-                });
-              },
-              child: Text(
-                'I\'m ${player.name}',
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton(
+                onPressed: () {
+                  setState(() {
+                    _phase = _DontSayItPhase.revealCard;
+                  });
+                },
+                child: Text('I\'m ${player.name}'),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
 
-Widget _buildRevealCardScreen() {
-  final player = _players[_currentPlayerIndex];
-  final card = _cards[_currentCardIndex];
+  Widget _buildRevealCardScreen() {
+    final player = _players[_currentPlayerIndex];
+    final card = _cards[_currentCardIndex];
 
-  return Center(
-    child: SingleChildScrollView(
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            '${player.name}, your word is:',
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
+    return Center(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              '${player.name}, your word is:',
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
 
-          const SizedBox(height: 16),
+            const SizedBox(height: 16),
 
-          Text(
-            card.word,
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-          ),
+            Text(
+              card.word,
+              textAlign: TextAlign.center,
+              style: Theme.of(
+                context,
+              ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
+            ),
 
-          const SizedBox(height: 28),
+            const SizedBox(height: 28),
 
-          Text(
-            'DON\'T SAY:',
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-          ),
+            Text(
+              'DON\'T SAY:',
+              style: Theme.of(
+                context,
+              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+            ),
 
-          const SizedBox(height: 16),
+            const SizedBox(height: 16),
 
-          ...card.forbiddenWords.map(
-            (word) => Padding(
-              padding: const EdgeInsets.only(bottom: 10),
-              child: Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 14,
-                ),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(14),
-                  color: Theme.of(context)
-                      .colorScheme
-                      .surfaceContainerHighest,
-                ),
-                child: Text(
-                  word,
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.titleMedium,
+            ...card.forbiddenWords.map(
+              (word) => Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 14,
+                  ),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(14),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.surfaceContainerHighest,
+                  ),
+                  child: Text(
+                    word,
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
                 ),
               ),
             ),
-          ),
 
-          const SizedBox(height: 28),
+            const SizedBox(height: 28),
 
-          const Text(
-            'Remember the card. Don\'t let anyone else see it.',
-            textAlign: TextAlign.center,
-          ),
-
-          const SizedBox(height: 28),
-
-          SizedBox(
-            width: double.infinity,
-            child: FilledButton.icon(
-              onPressed: _startTurn,
-              icon: const Icon(Icons.timer_outlined),
-              label: const Text('Start Turn'),
+            const Text(
+              'Remember the card. Don\'t let anyone else see it.',
+              textAlign: TextAlign.center,
             ),
-          ),
-        ],
+
+            const SizedBox(height: 28),
+
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton.icon(
+                onPressed: _startTurn,
+                icon: const Icon(Icons.timer_outlined),
+                label: const Text('Start Turn'),
+              ),
+            ),
+          ],
+        ),
       ),
-    ),
-  );
-}
-void _startTurn() {
-  _turnTimer?.cancel();
+    );
+  }
 
-  setState(() {
-    _secondsRemaining = _secondsPerTurn;
-    _phase = _DontSayItPhase.playingTurn;
-  });
+  void _startTurn() {
+    _turnTimer?.cancel();
 
-  _turnTimer = Timer.periodic(
-    const Duration(seconds: 1),
-    (timer) {
+    setState(() {
+      _secondsRemaining = _secondsPerTurn;
+      _phase = _DontSayItPhase.playingTurn;
+    });
+
+    _turnTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (!mounted) {
         timer.cancel();
         return;
@@ -601,323 +608,365 @@ void _startTurn() {
       setState(() {
         _secondsRemaining--;
       });
-    },
-  );
-}
-Widget _buildPlayingTurnScreen() {
-  final player = _players[_currentPlayerIndex];
+    });
+  }
 
-  return Center(
-    child: Padding(
+  Widget _buildPlayingTurnScreen() {
+    final player = _players[_currentPlayerIndex];
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              '${player.name} is describing',
+              textAlign: TextAlign.center,
+              style: Theme.of(
+                context,
+              ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+            ),
+
+            const SizedBox(height: 16),
+
+            Text(
+              '$_secondsRemaining s',
+              style: Theme.of(
+                context,
+              ).textTheme.displaySmall?.copyWith(fontWeight: FontWeight.bold),
+            ),
+
+            const SizedBox(height: 24),
+
+            const Text(
+              'Everyone else: guess aloud!',
+              textAlign: TextAlign.center,
+            ),
+
+            const SizedBox(height: 32),
+
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton.icon(
+                onPressed: _someoneGuessedIt,
+                icon: const Icon(Icons.check_circle_outline),
+                label: const Text('Someone Guessed It'),
+              ),
+            ),
+
+            const SizedBox(height: 12),
+
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: _skipTurn,
+                icon: const Icon(Icons.skip_next),
+                label: const Text('Skip'),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _someoneGuessedIt() {
+    _turnTimer?.cancel();
+
+    setState(() {
+      _phase = _DontSayItPhase.chooseGuesser;
+    });
+  }
+
+  void _skipTurn() {
+    _turnTimer?.cancel();
+
+    setState(() {
+      _turnResultMessage = 'Turn skipped. No points awarded.';
+      _phase = _DontSayItPhase.turnResult;
+    });
+  }
+
+  Widget _buildChooseGuesserScreen() {
+    final clueGiver = _players[_currentPlayerIndex];
+
+    final possibleGuessers = _players
+        .where((player) => player.id != clueGiver.id)
+        .toList();
+
+    return Padding(
       padding: const EdgeInsets.all(24),
       child: Column(
-        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
-            '${player.name} is describing',
+            'Who guessed it?',
             textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-          ),
-
-          const SizedBox(height: 16),
-
-          Text(
-            '$_secondsRemaining s',
-            style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-          ),
-
-          const SizedBox(height: 24),
-
-          const Text(
-            'Everyone else: guess aloud!',
-            textAlign: TextAlign.center,
-          ),
-
-          const SizedBox(height: 32),
-
-          SizedBox(
-            width: double.infinity,
-            child: FilledButton.icon(
-              onPressed: _someoneGuessedIt,
-              icon: const Icon(Icons.check_circle_outline),
-              label: const Text('Someone Guessed It'),
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
           ),
 
           const SizedBox(height: 12),
 
-          SizedBox(
-            width: double.infinity,
-            child: OutlinedButton.icon(
-              onPressed: _skipTurn,
-              icon: const Icon(Icons.skip_next),
-              label: const Text('Skip'),
-            ),
-          ),
-        ],
-      ),
-    ),
-  );
-}
-void _someoneGuessedIt() {
-  _turnTimer?.cancel();
-
-  setState(() {
-    _phase = _DontSayItPhase.chooseGuesser;
-  });
-}
-void _skipTurn() {
-  _turnTimer?.cancel();
-
-  setState(() {
-    _turnResultMessage = 'Turn skipped. No points awarded.';
-    _phase = _DontSayItPhase.turnResult;
-  });
-}
-Widget _buildChooseGuesserScreen() {
-  final clueGiver = _players[_currentPlayerIndex];
-
-  final possibleGuessers = _players
-      .where((player) => player.id != clueGiver.id)
-      .toList();
-
-  return Padding(
-    padding: const EdgeInsets.all(24),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Text(
-          'Who guessed it?',
-          textAlign: TextAlign.center,
-          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-        ),
-
-        const SizedBox(height: 12),
-
-        const Text(
-          'Choose the player who guessed the secret word correctly.',
-          textAlign: TextAlign.center,
-        ),
-
-        const SizedBox(height: 24),
-
-        Expanded(
-          child: ListView.separated(
-            itemCount: possibleGuessers.length,
-            separatorBuilder: (_, _) => const SizedBox(height: 10),
-            itemBuilder: (context, index) {
-              final player = possibleGuessers[index];
-
-              return FilledButton.tonal(
-                onPressed: () => _awardCorrectGuess(player),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  child: Text(player.name),
-                ),
-              );
-            },
-          ),
-        ),
-      ],
-    ),
-  );
-}
-void _awardCorrectGuess(_DontSayItPlayer guesser) {
-  final clueGiver = _players[_currentPlayerIndex];
-
-  _scores[clueGiver.id] =
-      (_scores[clueGiver.id] ?? 0) + 1;
-
-  _scores[guesser.id] =
-      (_scores[guesser.id] ?? 0) + 1;
-
-  setState(() {
-    _turnResultMessage =
-        '${guesser.name} guessed correctly!\n\n'
-        '${clueGiver.name} +1 point\n'
-        '${guesser.name} +1 point';
-
-    _phase = _DontSayItPhase.turnResult;
-  });
-}
-Widget _buildTurnResultScreen() {
-  final card = _cards[_currentCardIndex];
-
-  return Center(
-    child: Padding(
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Icon(
-            Icons.celebration_outlined,
-            size: 72,
-          ),
-
-          const SizedBox(height: 20),
-
-          Text(
-            'Turn Complete',
-            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-          ),
-
-          const SizedBox(height: 16),
-
-          Text(
-            _turnResultMessage,
+          const Text(
+            'Choose the player who guessed the secret word correctly.',
             textAlign: TextAlign.center,
           ),
 
           const SizedBox(height: 24),
 
-          Text(
-            'Secret word: ${card.word}',
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-          ),
+          Expanded(
+            child: ListView.separated(
+              itemCount: possibleGuessers.length,
+              separatorBuilder: (_, _) => const SizedBox(height: 10),
+              itemBuilder: (context, index) {
+                final player = possibleGuessers[index];
 
-          const SizedBox(height: 32),
-
-          SizedBox(
-            width: double.infinity,
-            child: FilledButton(
-              onPressed: _continueAfterTurn,
-              child: const Text('Continue'),
+                return FilledButton.tonal(
+                  onPressed: () => _awardCorrectGuess(player),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    child: Text(player.name),
+                  ),
+                );
+              },
             ),
           ),
         ],
       ),
-    ),
-  );
-}
-void _continueAfterTurn() {
-  final isLastPlayer =
-      _currentPlayerIndex == _players.length - 1;
-
-  final isLastRound =
-      _currentRound == _selectedRounds;
-
-  if (isLastPlayer && isLastRound) {
-    setState(() {
-      _phase = _DontSayItPhase.finalLeaderboard;
-    });
-
-    return;
+    );
   }
 
-  setState(() {
-    _currentCardIndex++;
-    _turnResultMessage = '';
+  void _awardCorrectGuess(_DontSayItPlayer guesser) {
+    final clueGiver = _players[_currentPlayerIndex];
 
-    if (isLastPlayer) {
-      _currentPlayerIndex = 0;
-      _currentRound++;
-    } else {
-      _currentPlayerIndex++;
+    if (_isLockedHeadToHead) {
+      _scores[clueGiver.id] = (_scores[clueGiver.id] ?? 0) + 1;
+
+      setState(() {
+        _turnResultMessage =
+            '${guesser.name} guessed correctly!\n\n'
+            '${clueGiver.name} +1 point';
+
+        _phase = _DontSayItPhase.turnResult;
+      });
+
+      return;
     }
 
-    _phase = _DontSayItPhase.passToClueGiver;
-  });
-}
-Widget _buildFinalLeaderboardScreen() {
-  final leaderboard = [..._players];
+    _scores[clueGiver.id] = (_scores[clueGiver.id] ?? 0) + 1;
 
-  leaderboard.sort(
-    (a, b) => (_scores[b.id] ?? 0).compareTo(
-      _scores[a.id] ?? 0,
-    ),
-  );
+    _scores[guesser.id] = (_scores[guesser.id] ?? 0) + 1;
 
-  return Padding(
-    padding: const EdgeInsets.all(24),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        const Icon(
-          Icons.emoji_events_outlined,
-          size: 72,
-        ),
+    setState(() {
+      _turnResultMessage =
+          '${guesser.name} guessed correctly!\n\n'
+          '${clueGiver.name} +1 point\n'
+          '${guesser.name} +1 point';
 
-        const SizedBox(height: 16),
+      _phase = _DontSayItPhase.turnResult;
+    });
+  }
 
-        Text(
-          'Don\'t Say It Complete!',
-          textAlign: TextAlign.center,
-          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                fontWeight: FontWeight.bold,
+  Widget _buildTurnResultScreen() {
+    final card = _cards[_currentCardIndex];
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.celebration_outlined, size: 72),
+
+            const SizedBox(height: 20),
+
+            Text(
+              'Turn Complete',
+              style: Theme.of(
+                context,
+              ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
+            ),
+
+            const SizedBox(height: 16),
+
+            Text(_turnResultMessage, textAlign: TextAlign.center),
+
+            const SizedBox(height: 24),
+
+            Text(
+              'Secret word: ${card.word}',
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+            ),
+
+            const SizedBox(height: 32),
+
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton(
+                onPressed: _continueAfterTurn,
+                child: const Text('Continue'),
               ),
+            ),
+          ],
         ),
+      ),
+    );
+  }
 
-        const SizedBox(height: 8),
+  void _continueAfterTurn() {
+    final isLastPlayer = _currentPlayerIndex == _players.length - 1;
 
-        const Text(
-          'Quick Play results only — no Tokens or official ranking.',
-          textAlign: TextAlign.center,
+    final isLastRound = _currentRound == _selectedRounds;
+
+    if (isLastPlayer && isLastRound) {
+      setState(() {
+        _phase = _DontSayItPhase.finalLeaderboard;
+      });
+
+      return;
+    }
+
+    setState(() {
+      _currentCardIndex++;
+      _turnResultMessage = '';
+
+      if (isLastPlayer) {
+        _currentPlayerIndex = 0;
+        _currentRound++;
+      } else {
+        _currentPlayerIndex++;
+      }
+
+      _phase = _DontSayItPhase.passToClueGiver;
+    });
+  }
+
+  CompetitionGameResult _buildCompetitionResult() {
+    final leaderboard = List<_DontSayItPlayer>.from(_players)
+      ..sort((a, b) => (_scores[b.id] ?? 0).compareTo(_scores[a.id] ?? 0));
+
+    final results = <CompetitionPlayerResult>[];
+
+    int placement = 0;
+    int? previousScore;
+
+    for (var index = 0; index < leaderboard.length; index++) {
+      final player = leaderboard[index];
+      final score = _scores[player.id] ?? 0;
+
+      if (previousScore == null || score != previousScore) {
+        placement = index + 1;
+      }
+
+      results.add(
+        CompetitionPlayerResult(
+          userId: player.id,
+          name: player.name,
+          gameScore: score,
+          placement: placement,
         ),
+      );
 
-        const SizedBox(height: 28),
+      previousScore = score;
+    }
 
-        Expanded(
-          child: ListView.separated(
-            itemCount: leaderboard.length,
-            separatorBuilder: (_, _) =>
-                const Divider(height: 1),
-            itemBuilder: (context, index) {
-              final player = leaderboard[index];
-              final score = _scores[player.id] ?? 0;
+    return CompetitionGameResult(
+      gameId: CompetitionGameIds.dontSayIt,
+      gameName: 'Don\'t Say It',
+      players: results,
+    );
+  }
 
-              return ListTile(
-                leading: CircleAvatar(
-                  child: Text('${index + 1}'),
-                ),
-                title: Text(
-                  player.name,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                trailing: Text(
-                  '$score pts',
-                  style: Theme.of(context)
-                      .textTheme
-                      .titleMedium
-                      ?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                ),
-              );
-            },
+  Widget _buildFinalLeaderboardScreen() {
+    final leaderboard = [..._players];
+
+    leaderboard.sort(
+      (a, b) => (_scores[b.id] ?? 0).compareTo(_scores[a.id] ?? 0),
+    );
+
+    return Padding(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const Icon(Icons.emoji_events_outlined, size: 72),
+
+          const SizedBox(height: 16),
+
+          Text(
+            'Don\'t Say It Complete!',
+            textAlign: TextAlign.center,
+            style: Theme.of(
+              context,
+            ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
           ),
-        ),
 
-        const SizedBox(height: 16),
+          const SizedBox(height: 8),
 
-        FilledButton(
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
-          child: const Text('Back to Games'),
-        ),
-      ],
-    ),
-  );
-}
+          Text(
+            widget.playMode.isOfficial
+                ? '${widget.playMode.displayName} results are ready.'
+                : 'Quick Play results only — no Tokens or official ranking.',
+            textAlign: TextAlign.center,
+          ),
+
+          const SizedBox(height: 28),
+
+          Expanded(
+            child: ListView.separated(
+              itemCount: leaderboard.length,
+              separatorBuilder: (_, _) => const Divider(height: 1),
+              itemBuilder: (context, index) {
+                final player = leaderboard[index];
+                final score = _scores[player.id] ?? 0;
+
+                return ListTile(
+                  leading: CircleAvatar(child: Text('${index + 1}')),
+                  title: Text(
+                    player.name,
+                    style: const TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                  trailing: Text(
+                    '$score pts',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+
+          const SizedBox(height: 16),
+
+          FilledButton(
+            onPressed: () {
+              if (widget.playMode.isOfficial) {
+                Navigator.of(context).pop(_buildCompetitionResult());
+                return;
+              }
+
+              Navigator.of(context).pop();
+            },
+            child: Text(
+              widget.playMode.isOfficial
+                  ? 'Return to ${widget.playMode.displayName}'
+                  : 'Back to Games',
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _DontSayItPlayer {
-  const _DontSayItPlayer({
-    required this.id,
-    required this.name,
-  });
+  const _DontSayItPlayer({required this.id, required this.name});
 
   final String id;
   final String name;
