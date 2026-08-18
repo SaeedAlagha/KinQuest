@@ -715,4 +715,108 @@ class RewardsService {
       });
     });
   }
+  Future<void> updateFamilyReward({
+  required String familyId,
+  required String rewardId,
+  required String userId,
+  required String title,
+  required String description,
+  required int tokenCost,
+  required RewardAvailability availability,
+  required bool approvalRequired,
+}) async {
+  final familyRef = FirebaseFirestore.instance
+      .collection('families')
+      .doc(familyId);
+
+  final rewardRef = familyRef
+      .collection('rewards')
+      .doc(rewardId);
+
+  await FirebaseFirestore.instance.runTransaction((transaction) async {
+    final familySnapshot = await transaction.get(familyRef);
+
+    if (!familySnapshot.exists) {
+      throw Exception('Family not found.');
+    }
+
+    final familyData = familySnapshot.data()!;
+    final ownerId = familyData['ownerId']?.toString();
+
+    if (ownerId != userId) {
+      throw Exception(
+        'Only the Family Admin can edit rewards.',
+      );
+    }
+
+    final rewardSnapshot = await transaction.get(rewardRef);
+
+    if (!rewardSnapshot.exists) {
+      throw Exception('Reward not found.');
+    }
+
+    if (title.trim().length < 3) {
+      throw Exception(
+        'Reward name must be at least 3 characters.',
+      );
+    }
+
+    if (tokenCost <= 0) {
+      throw Exception('Enter a valid Token cost.');
+    }
+
+    transaction.update(rewardRef, {
+      'title': title.trim(),
+      'description': description.trim(),
+      'tokenCost': tokenCost,
+      'availability': availability.name,
+      'approvalRequired': approvalRequired,
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
+  });
+}
+
+Future<void> setRewardActive({
+  required String familyId,
+  required String rewardId,
+  required String userId,
+  required bool active,
+}) async {
+  final familyRef = FirebaseFirestore.instance
+      .collection('families')
+      .doc(familyId);
+
+  final rewardRef = familyRef
+      .collection('rewards')
+      .doc(rewardId);
+
+  await FirebaseFirestore.instance.runTransaction((transaction) async {
+    final familySnapshot = await transaction.get(familyRef);
+
+    if (!familySnapshot.exists) {
+      throw Exception('Family not found.');
+    }
+
+    final ownerId =
+        familySnapshot.data()?['ownerId']?.toString();
+
+    if (ownerId != userId) {
+      throw Exception(
+        'Only the Family Admin can manage rewards.',
+      );
+    }
+
+    final rewardSnapshot = await transaction.get(rewardRef);
+
+    if (!rewardSnapshot.exists) {
+      throw Exception('Reward not found.');
+    }
+
+    transaction.update(rewardRef, {
+      'active': active,
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
+  });
+}
+
 }
