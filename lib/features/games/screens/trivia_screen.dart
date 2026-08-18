@@ -27,10 +27,12 @@ class TriviaScreen extends StatefulWidget {
     super.key,
     this.playMode = GamePlayMode.quickPlay,
     this.participantIds,
+    this.developerPreview = false,
   });
 
   final GamePlayMode playMode;
   final Set<String>? participantIds;
+  final bool developerPreview;
 
   @override
   State<TriviaScreen> createState() => _TriviaScreenState();
@@ -86,13 +88,39 @@ class _TriviaScreenState extends State<TriviaScreen> {
   @override
   void initState() {
     super.initState();
-    _loadFamilyMembers();
+    if (widget.developerPreview) {
+      _loadPreviewFamilyMembers();
+    } else {
+      _loadFamilyMembers();
+    }
   }
 
   @override
   void dispose() {
     _questionTimer?.cancel();
     super.dispose();
+  }
+
+  void _loadPreviewFamilyMembers() {
+    const members = [
+      _TriviaPlayer(id: 'preview-1', name: 'Alex'),
+      _TriviaPlayer(id: 'preview-2', name: 'Sam'),
+      _TriviaPlayer(id: 'preview-3', name: 'Jordan'),
+      _TriviaPlayer(id: 'preview-4', name: 'Taylor'),
+    ];
+    final availableMembers = widget.participantIds == null
+        ? members
+        : members
+              .where((member) => widget.participantIds!.contains(member.id))
+              .toList();
+
+    _familyMembers
+      ..clear()
+      ..addAll(availableMembers);
+    _selectedPlayerIds
+      ..clear()
+      ..addAll(availableMembers.map((member) => member.id));
+    _isLoadingFamily = false;
   }
 
   Future<void> _loadFamilyMembers() async {
