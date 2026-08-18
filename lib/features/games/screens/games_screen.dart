@@ -111,6 +111,7 @@ class GamesScreen extends StatelessWidget {
           ),
           'Family Impostor' => FamilyImpostorScreen(
             participantIds: participantIds,
+            developerPreview: developerPreview,
           ),
           'Secret Mission' => SecretMissionScreen(
             participantIds: participantIds,
