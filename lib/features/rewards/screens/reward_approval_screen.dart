@@ -377,6 +377,33 @@ class _RewardRequestCard extends StatelessWidget {
   final VoidCallback onApprove;
   final VoidCallback onDecline;
 
+  Future<String> _loadRequesterName() async {
+    try {
+      final userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(request.userId)
+          .get();
+
+      final data = userDoc.data();
+
+      final name = data?['name']?.toString().trim();
+
+      if (name != null && name.isNotEmpty) {
+        return name;
+      }
+
+      final email = data?['email']?.toString().trim();
+
+      if (email != null && email.isNotEmpty) {
+        return email;
+      }
+
+      return 'Family member';
+    } catch (_) {
+      return 'Family member';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -398,7 +425,21 @@ class _RewardRequestCard extends StatelessWidget {
                         style: Theme.of(context).textTheme.titleMedium
                             ?.copyWith(fontWeight: FontWeight.bold),
                       ),
+
                       const SizedBox(height: 4),
+
+                      FutureBuilder<String>(
+                        future: _loadRequesterName(),
+                        builder: (context, snapshot) {
+                          return Text(
+                            'Requested by ${snapshot.data ?? '...'}',
+                            style: Theme.of(context).textTheme.bodyMedium,
+                          );
+                        },
+                      ),
+
+                      const SizedBox(height: 4),
+
                       Text('${request.tokenCost} Tokens'),
                     ],
                   ),

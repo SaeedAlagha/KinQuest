@@ -7,6 +7,7 @@ import '../services/rewards_service.dart';
 import 'manage_rewards_screen.dart';
 import 'reward_approval_screen.dart';
 import 'token_history_screen.dart';
+import 'my_reward_requests_screen.dart';
 
 class RewardsHubScreen extends StatefulWidget {
   const RewardsHubScreen({super.key, this.developerPreview = false});
@@ -301,49 +302,59 @@ class _RewardsHubScreenState extends State<RewardsHubScreen> {
                 children: [
                   const _RewardsIntro(),
                   const SizedBox(height: 20),
-                  if (isFamilyAdmin || canApproveRewards) ...[
-                    Wrap(
-                      spacing: 12,
-                      runSpacing: 12,
-                      children: [
+                  Wrap(
+                    spacing: 12,
+                    runSpacing: 12,
+                    children: [
+                      FilledButton.tonalIcon(
+                        onPressed: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const MyRewardRequestsScreen(),
+                          ),
+                        ),
+                        icon: const Icon(Icons.card_giftcard_outlined),
+                        label: const Text('My Requests'),
+                      ),
+
+                      FilledButton.tonalIcon(
+                        onPressed: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const TokenHistoryScreen(),
+                          ),
+                        ),
+                        icon: const Icon(Icons.receipt_long_rounded),
+                        label: const Text('Token History'),
+                      ),
+
+                      if (isFamilyAdmin)
+                        FilledButton.icon(
+                          onPressed: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const ManageRewardsScreen(),
+                            ),
+                          ),
+                          icon: const Icon(Icons.admin_panel_settings_rounded),
+                          label: const Text('Manage Rewards'),
+                        ),
+
+                      if (canApproveRewards)
                         FilledButton.tonalIcon(
                           onPressed: () => Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (_) => const TokenHistoryScreen(),
+                              builder: (_) => const RewardApprovalScreen(),
                             ),
                           ),
-                          icon: const Icon(Icons.receipt_long_rounded),
-                          label: const Text('Token History'),
+                          icon: const Icon(Icons.fact_check_rounded),
+                          label: const Text('Reward Approvals'),
                         ),
-                        if (isFamilyAdmin)
-                          FilledButton.icon(
-                            onPressed: () => Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => const ManageRewardsScreen(),
-                              ),
-                            ),
-                            icon: const Icon(
-                              Icons.admin_panel_settings_rounded,
-                            ),
-                            label: const Text('Manage Rewards'),
-                          ),
-                        if (canApproveRewards)
-                          FilledButton.tonalIcon(
-                            onPressed: () => Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => const RewardApprovalScreen(),
-                              ),
-                            ),
-                            icon: const Icon(Icons.fact_check_rounded),
-                            label: const Text('Reward Approvals'),
-                          ),
-                      ],
-                    ),
-                    const SizedBox(height: 24),
-                  ],
+                    ],
+                  ),
+
+                  const SizedBox(height: 24),
                   _RewardSection(
                     title: 'Family Rewards',
                     subtitle:
