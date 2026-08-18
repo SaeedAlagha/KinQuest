@@ -9,6 +9,7 @@ import '../../competitions/models/competition_game_result.dart';
 import '../../competitions/models/competition_player_result.dart';
 import '../../competitions/models/game_play_mode.dart';
 import '../services/draw_and_guess_ai_service.dart';
+import '../widgets/game_setup_widgets.dart';
 
 enum _DrawGamePhase {
   setup,
@@ -57,6 +58,8 @@ class _DrawAndGuessScreenState extends State<DrawAndGuessScreen> {
 
   int _currentArtistIndex = 0;
   int _currentPromptIndex = 0;
+  int _currentRound = 1;
+  int _selectedRounds = 3;
 
   _DrawGamePhase _phase = _DrawGamePhase.setup;
   bool _isLoading = true;
@@ -199,7 +202,9 @@ class _DrawAndGuessScreenState extends State<DrawAndGuessScreen> {
         _scores[player.id] = 0;
       }
 
-      final prompts = await _aiService.generatePrompts(count: 6);
+      final prompts = await _aiService.generatePrompts(
+        count: selectedPlayers.length * _selectedRounds,
+      );
 
       if (prompts.isEmpty) {
         throw Exception('No prompts generated');
@@ -215,6 +220,7 @@ class _DrawAndGuessScreenState extends State<DrawAndGuessScreen> {
 
         _currentArtistIndex = 0;
         _currentPromptIndex = 0;
+        _currentRound = 1;
 
         _phase = _DrawGamePhase.passToArtist;
         _isPreparingGame = false;
@@ -333,6 +339,18 @@ class _DrawAndGuessScreenState extends State<DrawAndGuessScreen> {
             'Choose at least 2 family members. ',
             style: Theme.of(context).textTheme.bodyLarge,
           ),
+          const SizedBox(height: 18),
+          GameRoundSelector(
+            value: _selectedRounds,
+            onChanged: (rounds) {
+              setState(() {
+                _selectedRounds = rounds;
+              });
+            },
+            keyPrefix: 'drawing-round-option',
+            description:
+                'Every selected artist gets one drawing turn in each round.',
+          ),
           const SizedBox(height: 24),
 
           Expanded(
@@ -398,6 +416,11 @@ class _DrawAndGuessScreenState extends State<DrawAndGuessScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            Text(
+              'Round $_currentRound of $_selectedRounds',
+              style: Theme.of(context).textTheme.labelLarge,
+            ),
+            const SizedBox(height: 12),
             const Icon(Icons.lock_outline, size: 72),
             const SizedBox(height: 24),
             Text(
@@ -842,8 +865,11 @@ class _DrawAndGuessScreenState extends State<DrawAndGuessScreen> {
               child: FilledButton(
                 onPressed: _continueAfterRound,
                 child: Text(
-                  _currentArtistIndex == _players.length - 1
+                  _currentRound == _selectedRounds &&
+                          _currentArtistIndex == _players.length - 1
                       ? 'View Final Leaderboard'
+                      : _currentArtistIndex == _players.length - 1
+                      ? 'Start Round ${_currentRound + 1}'
                       : 'Next Artist',
                 ),
               ),
@@ -856,8 +882,9 @@ class _DrawAndGuessScreenState extends State<DrawAndGuessScreen> {
 
   void _continueAfterRound() {
     final isLastArtist = _currentArtistIndex == _players.length - 1;
+    final isLastRound = _currentRound == _selectedRounds;
 
-    if (isLastArtist) {
+    if (isLastArtist && isLastRound) {
       setState(() {
         _phase = _DrawGamePhase.finalLeaderboard;
       });
@@ -866,7 +893,12 @@ class _DrawAndGuessScreenState extends State<DrawAndGuessScreen> {
     }
 
     setState(() {
-      _currentArtistIndex++;
+      if (isLastArtist) {
+        _currentRound++;
+        _currentArtistIndex = 0;
+      } else {
+        _currentArtistIndex++;
+      }
 
       _currentPromptIndex = (_currentPromptIndex + 1) % _prompts.length;
 

@@ -9,6 +9,7 @@ import '../../competitions/models/competition_game_result.dart';
 import '../../competitions/models/competition_player_result.dart';
 import '../../competitions/models/game_play_mode.dart';
 import '../services/dont_say_it_ai_service.dart';
+import '../widgets/game_setup_widgets.dart';
 
 enum _DontSayItPhase {
   setup,
@@ -378,28 +379,13 @@ class _DontSayItScreenState extends State<DontSayItScreen> {
 
           const SizedBox(height: 24),
 
-          Text(
-            'How many rounds?',
-            style: Theme.of(
-              context,
-            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 12),
-
-          Wrap(
-            spacing: 10,
-            runSpacing: 10,
-            children: [3, 5, 10].map((rounds) {
-              return ChoiceChip(
-                label: Text('$rounds rounds'),
-                selected: _selectedRounds == rounds,
-                onSelected: (_) {
-                  setState(() {
-                    _selectedRounds = rounds;
-                  });
-                },
-              );
-            }).toList(),
+          GameRoundSelector(
+            value: _selectedRounds,
+            onChanged: (rounds) {
+              setState(() {
+                _selectedRounds = rounds;
+              });
+            },
           ),
 
           const SizedBox(height: 28),

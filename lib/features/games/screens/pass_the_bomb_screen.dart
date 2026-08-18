@@ -10,6 +10,7 @@ import '../../competitions/models/competition_game_result.dart';
 import '../../competitions/models/competition_player_result.dart';
 import '../../competitions/models/game_play_mode.dart';
 import '../services/pass_the_bomb_ai_service.dart';
+import '../widgets/game_setup_widgets.dart';
 
 enum _BombPhase { setup, playing, roundResult, finalLeaderboard }
 
@@ -28,7 +29,7 @@ class PassTheBombScreen extends StatefulWidget {
 }
 
 class _PassTheBombScreenState extends State<PassTheBombScreen> {
-  static const int _roundCount = 5;
+  int _selectedRounds = 3;
 
   final _aiService = const PassTheBombAiService();
   final _answerController = TextEditingController();
@@ -185,10 +186,10 @@ class _PassTheBombScreenState extends State<PassTheBombScreen> {
           .toList();
 
       final categories = await _aiService.generateCategories(
-        count: _roundCount,
+        count: _selectedRounds,
       );
 
-      if (categories.length < _roundCount) {
+      if (categories.length < _selectedRounds) {
         throw Exception('Not enough categories generated.');
       }
 
@@ -369,7 +370,7 @@ class _PassTheBombScreenState extends State<PassTheBombScreen> {
   }
 
   void _nextRound() {
-    if (_currentRoundIndex + 1 >= _roundCount) {
+    if (_currentRoundIndex + 1 >= _selectedRounds) {
       _bombTimer?.cancel();
 
       setState(() {
@@ -505,6 +506,16 @@ class _PassTheBombScreenState extends State<PassTheBombScreen> {
           const Text(
             'Answer quickly, pass the phone, and do not repeat an answer.',
           ),
+          const SizedBox(height: 18),
+          GameRoundSelector(
+            value: _selectedRounds,
+            onChanged: (rounds) {
+              setState(() {
+                _selectedRounds = rounds;
+              });
+            },
+            keyPrefix: 'bomb-round-option',
+          ),
           const SizedBox(height: 24),
           Expanded(
             child: ListView.separated(
@@ -569,7 +580,7 @@ class _PassTheBombScreenState extends State<PassTheBombScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
-                'Round ${_currentRoundIndex + 1} of $_roundCount',
+                'Round ${_currentRoundIndex + 1} of $_selectedRounds',
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.titleMedium,
               ),
@@ -697,7 +708,7 @@ class _PassTheBombScreenState extends State<PassTheBombScreen> {
               FilledButton(
                 onPressed: _nextRound,
                 child: Text(
-                  _currentRoundIndex + 1 >= _roundCount
+                  _currentRoundIndex + 1 >= _selectedRounds
                       ? 'View Final Leaderboard'
                       : 'Next Round',
                 ),

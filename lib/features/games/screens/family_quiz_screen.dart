@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../services/family_quiz_ai_service.dart';
+import '../widgets/game_setup_widgets.dart';
 import '../../competitions/config/competition_games.dart';
 import '../../competitions/models/competition_game_result.dart';
 import '../../competitions/models/competition_player_result.dart';
@@ -809,29 +810,13 @@ class _FamilyQuizScreenState extends State<FamilyQuizScreen> {
 
           const SizedBox(height: 28),
 
-          Text(
-            'Rounds',
-            style: Theme.of(
-              context,
-            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-          ),
-
-          const SizedBox(height: 12),
-
-          Wrap(
-            spacing: 10,
-            runSpacing: 10,
-            children: [3, 5, 10].map((rounds) {
-              return ChoiceChip(
-                label: Text('$rounds'),
-                selected: _selectedRounds == rounds,
-                onSelected: (_) {
-                  setState(() {
-                    _selectedRounds = rounds;
-                  });
-                },
-              );
-            }).toList(),
+          GameRoundSelector(
+            value: _selectedRounds,
+            onChanged: (rounds) {
+              setState(() {
+                _selectedRounds = rounds;
+              });
+            },
           ),
 
           const SizedBox(height: 28),

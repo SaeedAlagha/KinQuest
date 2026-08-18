@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 
 import '../services/never_have_i_ever_ai_service.dart';
+import '../widgets/game_setup_widgets.dart';
 
 class NeverHaveIEverScreen extends StatefulWidget {
   const NeverHaveIEverScreen({super.key});
@@ -61,6 +62,7 @@ class _NeverHaveIEverScreenState extends State<NeverHaveIEverScreen> {
   };
 
   String _selectedCategory = 'Family';
+  int _selectedRounds = 3;
   bool _isLoading = false;
   bool _isPlaying = false;
   bool _showResults = false;
@@ -82,7 +84,7 @@ class _NeverHaveIEverScreenState extends State<NeverHaveIEverScreen> {
     try {
       final generated = await _aiService.generatePrompts(
         category: _selectedCategory,
-        count: 10,
+        count: _selectedRounds,
       );
 
       if (!mounted) return;
@@ -100,7 +102,7 @@ class _NeverHaveIEverScreenState extends State<NeverHaveIEverScreen> {
       if (!mounted) return;
 
       setState(() {
-        _prompts = fallback;
+        _prompts = fallback.take(_selectedRounds).toList();
         _currentIndex = 0;
         _isPlaying = true;
         _isLoading = false;
@@ -137,44 +139,61 @@ class _NeverHaveIEverScreenState extends State<NeverHaveIEverScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Never Have I Ever')),
-      body: Padding(
-        padding: const EdgeInsets.all(24),
-        child: _showResults
-            ? _buildResults()
-            : _isPlaying
-            ? _buildGame()
-            : _buildSetup(),
-      ),
+      body: _showResults || _isPlaying
+          ? Padding(
+              padding: const EdgeInsets.all(24),
+              child: _showResults ? _buildResults() : _buildGame(),
+            )
+          : _buildSetup(),
     );
   }
 
   Widget _buildSetup() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
+    return GameSetupView(
+      icon: Icons.sentiment_satisfied_alt_rounded,
+      title: 'Never Have I Ever',
+      description:
+          'Pick a family-friendly theme and choose 1, 3, or 5 prompts for a quick round of surprising stories.',
       children: [
-        const Text(
-          'Choose a category',
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 24),
-        Wrap(
-          spacing: 10,
-          runSpacing: 10,
-          children: _categories.map((category) {
-            final selected = category == _selectedCategory;
+        GameSetupSectionCard(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Choose a category',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              const SizedBox(height: 14),
+              Wrap(
+                spacing: 10,
+                runSpacing: 10,
+                children: _categories.map((category) {
+                  final selected = category == _selectedCategory;
 
-            return ChoiceChip(
-              label: Text(category),
-              selected: selected,
-              onSelected: (_) {
-                setState(() {
-                  _selectedCategory = category;
-                });
-              },
-            );
-          }).toList(),
+                  return ChoiceChip(
+                    label: Text(category),
+                    selected: selected,
+                    onSelected: (_) {
+                      setState(() {
+                        _selectedCategory = category;
+                      });
+                    },
+                  );
+                }).toList(),
+              ),
+            ],
+          ),
         ),
-        const SizedBox(height: 40),
+        const SizedBox(height: 18),
+        GameRoundSelector(
+          value: _selectedRounds,
+          onChanged: (rounds) {
+            setState(() {
+              _selectedRounds = rounds;
+            });
+          },
+        ),
+        const SizedBox(height: 22),
         ElevatedButton(
           onPressed: _isLoading ? null : _startGame,
           child: _isLoading

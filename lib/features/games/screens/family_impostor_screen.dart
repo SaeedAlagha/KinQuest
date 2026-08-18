@@ -9,6 +9,7 @@ import '../../competitions/models/competition_game_result.dart';
 import '../../competitions/models/competition_player_result.dart';
 import '../../competitions/models/game_play_mode.dart';
 import '../services/family_impostor_ai_service.dart';
+import '../widgets/game_setup_widgets.dart';
 
 enum _GamePhase {
   setup,
@@ -47,6 +48,7 @@ class _FamilyImpostorScreenState extends State<FamilyImpostorScreen> {
   final Set<String> _selectedPlayerIds = {};
   final _aiService = const FamilyImpostorAiService();
   String? _selectedCategory;
+  int _selectedRounds = 3;
 
   bool _isStartingGame = false;
 
@@ -228,7 +230,7 @@ class _FamilyImpostorScreenState extends State<FamilyImpostorScreen> {
       }
 
       final rounds = await _aiService.generateRounds(
-        count: 5,
+        count: _selectedRounds,
         category: _selectedCategory,
       );
 
@@ -385,6 +387,16 @@ class _FamilyImpostorScreenState extends State<FamilyImpostorScreen> {
         ),
         const SizedBox(height: 20),
         _buildCategoryPicker(),
+        const SizedBox(height: 18),
+        GameRoundSelector(
+          value: _selectedRounds,
+          onChanged: (rounds) {
+            setState(() {
+              _selectedRounds = rounds;
+            });
+          },
+          keyPrefix: 'impostor-round-option',
+        ),
         const SizedBox(height: 28),
         Text(
           'Who is playing?',

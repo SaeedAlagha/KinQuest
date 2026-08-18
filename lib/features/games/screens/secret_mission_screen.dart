@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../services/secret_mission_ai_service.dart';
+import '../widgets/game_setup_widgets.dart';
 import '../../competitions/config/competition_games.dart';
 import '../../competitions/models/competition_game_result.dart';
 import '../../competitions/models/competition_player_result.dart';
@@ -34,8 +35,9 @@ class SecretMissionScreen extends StatefulWidget {
 }
 
 class _SecretMissionScreenState extends State<SecretMissionScreen> {
-  static const int _totalRounds = 3;
   static const Duration _roundDuration = Duration(minutes: 10);
+
+  int _selectedRounds = 3;
 
   final _aiService = const SecretMissionAiService();
 
@@ -275,7 +277,7 @@ class _SecretMissionScreenState extends State<SecretMissionScreen> {
   }
 
   Future<void> _startNextRound() async {
-    if (_currentRound >= _totalRounds || _isGeneratingMissions) {
+    if (_currentRound >= _selectedRounds || _isGeneratingMissions) {
       return;
     }
 
@@ -442,7 +444,7 @@ class _SecretMissionScreenState extends State<SecretMissionScreen> {
 
     if (_currentJudgeIndex + 1 >= _players.length) {
       setState(() {
-        _phase = _currentRound >= _totalRounds
+        _phase = _currentRound >= _selectedRounds
             ? _SecretMissionPhase.leaderboard
             : _SecretMissionPhase.roundResults;
       });
@@ -595,12 +597,22 @@ class _SecretMissionScreenState extends State<SecretMissionScreen> {
             'Choose the family members playing together on this phone.',
           ),
           const SizedBox(height: 10),
-          const Text(
-            '3 rounds • 10 minutes per round • 1 secret mission per player each round.',
+          Text(
+            '$_selectedRounds ${_selectedRounds == 1 ? 'round' : 'rounds'} • 10 minutes per round • 1 secret mission per player each round.',
           ),
           const SizedBox(height: 10),
           const Text(
             'Complete your mission naturally without letting the others figure it out.',
+          ),
+          const SizedBox(height: 18),
+          GameRoundSelector(
+            value: _selectedRounds,
+            onChanged: (rounds) {
+              setState(() {
+                _selectedRounds = rounds;
+              });
+            },
+            keyPrefix: 'mission-round-option',
           ),
           const SizedBox(height: 24),
           Expanded(
@@ -663,7 +675,7 @@ class _SecretMissionScreenState extends State<SecretMissionScreen> {
           child: Column(
             children: [
               Text(
-                'Round $_currentRound of $_totalRounds',
+                'Round $_currentRound of $_selectedRounds',
                 style: Theme.of(
                   context,
                 ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
@@ -748,7 +760,7 @@ class _SecretMissionScreenState extends State<SecretMissionScreen> {
           child: Column(
             children: [
               Text(
-                'Round $_currentRound of $_totalRounds',
+                'Round $_currentRound of $_selectedRounds',
                 style: Theme.of(
                   context,
                 ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
@@ -824,7 +836,7 @@ class _SecretMissionScreenState extends State<SecretMissionScreen> {
           child: Column(
             children: [
               Text(
-                'Round $_currentRound of $_totalRounds',
+                'Round $_currentRound of $_selectedRounds',
                 style: Theme.of(
                   context,
                 ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
@@ -904,7 +916,7 @@ class _SecretMissionScreenState extends State<SecretMissionScreen> {
         ),
         const SizedBox(height: 8),
         Text(
-          '${_totalRounds - _currentRound} round${_totalRounds - _currentRound == 1 ? '' : 's'} remaining',
+          '${_selectedRounds - _currentRound} round${_selectedRounds - _currentRound == 1 ? '' : 's'} remaining',
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 24),
@@ -1025,7 +1037,7 @@ class _SecretMissionScreenState extends State<SecretMissionScreen> {
         Text(
           isOfficial
               ? '${widget.playMode.displayName} results are ready.'
-              : '3 rounds complete - Quick Play session only - no Tokens or official ranking changes.',
+              : '$_selectedRounds ${_selectedRounds == 1 ? 'round' : 'rounds'} complete - Quick Play session only - no Tokens or official ranking changes.',
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 24),
@@ -1037,7 +1049,7 @@ class _SecretMissionScreenState extends State<SecretMissionScreen> {
             child: ListTile(
               leading: CircleAvatar(child: Text('${index + 1}')),
               title: Text(player.name),
-              subtitle: Text('$score of $_totalRounds missions completed'),
+              subtitle: Text('$score of $_selectedRounds missions completed'),
               trailing: Text(
                 '$score pt${score == 1 ? '' : 's'}',
                 style: Theme.of(

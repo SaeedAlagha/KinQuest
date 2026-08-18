@@ -1476,7 +1476,7 @@ app.post("/api/draw-and-guess", async (req, res) => {
     const { count } = req.body;
 
     const requestedCount = Number(count) || 6;
-    const promptCount = Math.min(Math.max(requestedCount, 1), 12);
+    const promptCount = Math.min(Math.max(requestedCount, 1), 30);
 
     const prompt = `
 Generate exactly ${promptCount} unique drawing prompts for a family game called Draw & Guess.
