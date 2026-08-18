@@ -29,10 +29,12 @@ class FamilyImpostorScreen extends StatefulWidget {
     super.key,
     this.playMode = GamePlayMode.quickPlay,
     this.participantIds,
+    this.developerPreview = false,
   });
 
   final GamePlayMode playMode;
   final Set<String>? participantIds;
+  final bool developerPreview;
   @override
   State<FamilyImpostorScreen> createState() => _FamilyImpostorScreenState();
 }
@@ -44,6 +46,7 @@ class _FamilyImpostorScreenState extends State<FamilyImpostorScreen> {
   final List<_FamilyPlayer> _familyMembers = [];
   final Set<String> _selectedPlayerIds = {};
   final _aiService = const FamilyImpostorAiService();
+  String? _selectedCategory;
 
   bool _isStartingGame = false;
 
@@ -71,13 +74,39 @@ class _FamilyImpostorScreenState extends State<FamilyImpostorScreen> {
   @override
   void initState() {
     super.initState();
-    _loadFamilyMembers();
+    if (widget.developerPreview) {
+      _loadPreviewMembers();
+    } else {
+      _loadFamilyMembers();
+    }
   }
 
   @override
   void dispose() {
     _impostorGuessController.dispose();
     super.dispose();
+  }
+
+  void _loadPreviewMembers() {
+    const members = [
+      _FamilyPlayer(id: 'preview-1', name: 'Alex'),
+      _FamilyPlayer(id: 'preview-2', name: 'Sam'),
+      _FamilyPlayer(id: 'preview-3', name: 'Jordan'),
+      _FamilyPlayer(id: 'preview-4', name: 'Taylor'),
+    ];
+    final availableMembers = widget.participantIds == null
+        ? members
+        : members
+              .where((member) => widget.participantIds!.contains(member.id))
+              .toList();
+
+    _familyMembers
+      ..clear()
+      ..addAll(availableMembers);
+    _selectedPlayerIds
+      ..clear()
+      ..addAll(availableMembers.map((member) => member.id));
+    _isLoading = false;
   }
 
   Future<void> _loadFamilyMembers() async {
@@ -198,7 +227,10 @@ class _FamilyImpostorScreenState extends State<FamilyImpostorScreen> {
         _scores[player.id] = 0;
       }
 
-      final rounds = await _aiService.generateRounds(count: 5);
+      final rounds = await _aiService.generateRounds(
+        count: 5,
+        category: _selectedCategory,
+      );
 
       if (rounds.isEmpty) {
         throw Exception('No rounds generated');
@@ -337,79 +369,147 @@ class _FamilyImpostorScreenState extends State<FamilyImpostorScreen> {
       );
     }
 
-    return Padding(
+    return ListView(
       padding: const EdgeInsets.all(24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(
-            'Who is playing?',
-            style: Theme.of(
-              context,
-            ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Choose at least 3 family members who are together with you.',
-            style: Theme.of(context).textTheme.bodyLarge,
-          ),
-          const SizedBox(height: 24),
+      children: [
+        Text(
+          'Set up your mystery',
+          style: Theme.of(
+            context,
+          ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          'Pick one category for every secret word, or keep everyone guessing with a random mix.',
+          style: Theme.of(context).textTheme.bodyLarge,
+        ),
+        const SizedBox(height: 20),
+        _buildCategoryPicker(),
+        const SizedBox(height: 28),
+        Text(
+          'Who is playing?',
+          style: Theme.of(
+            context,
+          ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          'Choose at least 3 family members who are together with you.',
+          style: Theme.of(context).textTheme.bodyLarge,
+        ),
+        const SizedBox(height: 16),
+        ..._familyMembers.map((player) {
+          final selected = _selectedPlayerIds.contains(player.id);
 
-          Expanded(
-            child: ListView.separated(
-              itemCount: _familyMembers.length,
-              separatorBuilder: (_, _) => const SizedBox(height: 10),
-              itemBuilder: (context, index) {
-                final player = _familyMembers[index];
-                final selected = _selectedPlayerIds.contains(player.id);
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: Card(
+              margin: EdgeInsets.zero,
+              child: CheckboxListTile(
+                value: selected,
+                onChanged: widget.participantIds == null
+                    ? (_) => _togglePlayer(player)
+                    : null,
+                secondary: CircleAvatar(
+                  child: Text(
+                    player.name.isEmpty ? '?' : player.name[0].toUpperCase(),
+                  ),
+                ),
+                title: Text(
+                  player.name,
+                  style: const TextStyle(fontWeight: FontWeight.w600),
+                ),
+              ),
+            ),
+          );
+        }),
+        const SizedBox(height: 6),
+        Text(
+          '${_selectedPlayerIds.length} selected',
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 12),
+        FilledButton.icon(
+          onPressed: _selectedPlayerIds.length >= 3 && !_isStartingGame
+              ? _startGame
+              : null,
+          icon: _isStartingGame
+              ? const SizedBox(
+                  width: 18,
+                  height: 18,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : const Icon(Icons.play_arrow),
+          label: Text(_isStartingGame ? 'Preparing Game...' : 'Start Game'),
+        ),
+      ],
+    );
+  }
 
-                return Card(
-                  margin: EdgeInsets.zero,
-                  child: CheckboxListTile(
-                    value: selected,
-                    onChanged: widget.participantIds == null
-                        ? (_) => _togglePlayer(player)
-                        : null,
-                    secondary: CircleAvatar(
-                      child: Text(
-                        player.name.isEmpty
-                            ? '?'
-                            : player.name[0].toUpperCase(),
-                      ),
-                    ),
-                    title: Text(
-                      player.name,
-                      style: const TextStyle(fontWeight: FontWeight.w600),
+  Widget _buildCategoryPicker() {
+    final colors = Theme.of(context).colorScheme;
+
+    return Card(
+      margin: EdgeInsets.zero,
+      color: colors.primaryContainer.withValues(alpha: 0.35),
+      child: Padding(
+        padding: const EdgeInsets.all(18),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.category_rounded, color: colors.primary),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    'Choose a category',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-                );
-              },
+                ),
+              ],
             ),
-          ),
-
-          const SizedBox(height: 16),
-
-          Text(
-            '${_selectedPlayerIds.length} selected',
-            textAlign: TextAlign.center,
-          ),
-
-          const SizedBox(height: 12),
-
-          FilledButton.icon(
-            onPressed: _selectedPlayerIds.length >= 3 && !_isStartingGame
-                ? _startGame
-                : null,
-            icon: _isStartingGame
-                ? const SizedBox(
-                    width: 18,
-                    height: 18,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : const Icon(Icons.play_arrow),
-            label: Text(_isStartingGame ? 'Preparing Game...' : 'Start Game'),
-          ),
-        ],
+            const SizedBox(height: 14),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                ChoiceChip(
+                  key: const Key('impostor-category-random'),
+                  avatar: const Icon(Icons.shuffle_rounded, size: 18),
+                  label: const Text('Random mix'),
+                  selected: _selectedCategory == null,
+                  onSelected: (_) {
+                    setState(() {
+                      _selectedCategory = null;
+                    });
+                  },
+                ),
+                ...FamilyImpostorAiService.categories.map(
+                  (category) => ChoiceChip(
+                    key: ValueKey('impostor-category-$category'),
+                    label: Text(category),
+                    selected: _selectedCategory == category,
+                    onSelected: (_) {
+                      setState(() {
+                        _selectedCategory = category;
+                      });
+                    },
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Text(
+              _selectedCategory == null
+                  ? 'Every round can surprise you with a different category.'
+                  : 'All secret words will come from $_selectedCategory.',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ],
+        ),
       ),
     );
   }

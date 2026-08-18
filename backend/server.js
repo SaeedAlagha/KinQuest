@@ -876,10 +876,33 @@ Return ONLY valid JSON.
 });
 app.post("/api/family-impostor", async (req, res) => {
   try {
-    const { rounds } = req.body;
+    const { rounds, category } = req.body;
 
     const requestedRounds = Number(rounds) || 5;
     const roundCount = Math.min(Math.max(requestedRounds, 1), 10);
+    const allowedCategories = [
+      "Food",
+      "Places",
+      "Animals",
+      "Objects",
+      "Activities",
+      "Movies",
+      "Sports",
+      "Travel",
+      "Nature",
+      "School",
+      "Home",
+      "Music",
+      "Technology",
+      "UAE & Heritage",
+    ];
+    const selectedCategory =
+      typeof category === "string" && allowedCategories.includes(category)
+        ? category
+        : null;
+    const categoryInstruction = selectedCategory
+      ? `Use exactly the category "${selectedCategory}" for every round.`
+      : "Mix the categories across the rounds. Do not use the same category for every round.";
 
     const prompt = `
 Generate exactly ${roundCount} Family Impostor rounds.
@@ -902,6 +925,11 @@ Good categories include:
 - Nature
 - School
 - Home
+- Music
+- Technology
+- UAE & Heritage
+
+${categoryInstruction}
 
 Rules:
 - Family friendly
