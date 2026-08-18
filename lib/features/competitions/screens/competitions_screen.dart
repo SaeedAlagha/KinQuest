@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+
+import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/family_year_banner.dart';
+import '../../../core/widgets/sila_page_backdrop.dart';
 import 'daily_challenge_screen.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../games/screens/quick_play_player_selection_screen.dart';
@@ -19,6 +23,7 @@ class CompetitionsScreen extends StatelessWidget {
       description:
           'Choose any game and play together on one phone. No Tokens or official ranking.',
       reward: 'Just for fun • No Tokens',
+      accent: AppTheme.primaryColor,
     ),
     _CompetitionItem(
       icon: Icons.today,
@@ -26,6 +31,7 @@ class CompetitionsScreen extends StatelessWidget {
       description:
           'Compete in today\'s selected game. The winner earns Tokens.',
       reward: 'Winner Tokens',
+      accent: AppTheme.coralColor,
     ),
     _CompetitionItem(
       icon: Icons.emoji_events,
@@ -33,6 +39,7 @@ class CompetitionsScreen extends StatelessWidget {
       description:
           'Compete across four official games and become this week\'s Family Champion.',
       reward: '+50 Tokens + Ranking Points',
+      accent: AppTheme.goldColor,
     ),
     _CompetitionItem(
       icon: Icons.workspace_premium,
@@ -40,6 +47,7 @@ class CompetitionsScreen extends StatelessWidget {
       description:
           'The family\'s biggest monthly competition. Win a trophy and bonus Tokens.',
       reward: 'Trophy and Bonus Tokens',
+      accent: Color(0xFF7B4BB7),
     ),
   ];
 
@@ -49,89 +57,154 @@ class CompetitionsScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(title: Text(strings.navPlay), centerTitle: true),
-      body: ListView(
-        padding: const EdgeInsets.all(20),
-        children: [
-          Text(
-            strings.playTogether,
-            style: Theme.of(
-              context,
-            ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            strings.playTogetherDescription,
-            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
-          ),
-          const SizedBox(height: 24),
-          ..._competitions.map(
-            (competition) => Padding(
-              padding: const EdgeInsets.only(bottom: 16),
-              child: _CompetitionCard(
-                competition: competition,
-                onTap: () {
-                  if (competition.title == 'Quick Play') {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (_) => QuickPlayPlayerSelectionScreen(
-                          developerPreview: developerPreview,
-                        ),
-                      ),
-                    );
-                    return;
-                  }
-                  if (competition.title == 'Daily Challenge') {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (_) => DailyChallengeScreen(
-                          developerPreview: developerPreview,
-                        ),
-                      ),
-                    );
-                    return;
-                  }
-                  if (competition.title == 'Weekly Championship') {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (_) => WeeklyChampionshipScreen(
-                          developerPreview: developerPreview,
-                        ),
-                      ),
-                    );
-                    return;
-                  }
-
-                  if (competition.title == 'Monthly Cup') {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (_) => MonthlyCupScreen(
-                          developerPreview: developerPreview,
-                        ),
-                      ),
-                    );
-
-                    return;
-                  }
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) => CompetitionPlaceholderScreen(
-                        competitionTitle: competition.title,
+      body: SilaPageBackdrop(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 38),
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 960),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _CompetitionArenaHero(strings: strings),
+                  const SizedBox(height: 22),
+                  ..._competitions.map(
+                    (competition) => Padding(
+                      padding: const EdgeInsets.only(bottom: 16),
+                      child: _CompetitionCard(
+                        competition: competition,
+                        onTap: () => _openCompetition(context, competition),
                       ),
                     ),
-                  );
-                },
+                  ),
+                  const SizedBox(height: 8),
+                  _FamilyLeaderboard(developerPreview: developerPreview),
+                  const SizedBox(height: 16),
+                  _SectionPlaceholder(
+                    icon: Icons.military_tech,
+                    title: strings.familyTrophyCabinet,
+                    description: strings.familyTrophyCabinetDescription,
+                  ),
+                ],
               ),
             ),
           ),
-          const SizedBox(height: 8),
-          _FamilyLeaderboard(developerPreview: developerPreview),
-          const SizedBox(height: 16),
-          _SectionPlaceholder(
-            icon: Icons.military_tech,
-            title: strings.familyTrophyCabinet,
-            description: strings.familyTrophyCabinetDescription,
+        ),
+      ),
+    );
+  }
+
+  void _openCompetition(BuildContext context, _CompetitionItem competition) {
+    final Widget destination = switch (competition.title) {
+      'Quick Play' => QuickPlayPlayerSelectionScreen(
+        developerPreview: developerPreview,
+      ),
+      'Daily Challenge' => DailyChallengeScreen(
+        developerPreview: developerPreview,
+      ),
+      'Weekly Championship' => WeeklyChampionshipScreen(
+        developerPreview: developerPreview,
+      ),
+      'Monthly Cup' => MonthlyCupScreen(developerPreview: developerPreview),
+      _ => CompetitionPlaceholderScreen(competitionTitle: competition.title),
+    };
+
+    Navigator.of(context).push(MaterialPageRoute(builder: (_) => destination));
+  }
+}
+
+class _CompetitionArenaHero extends StatelessWidget {
+  const _CompetitionArenaHero({required this.strings});
+
+  final AppLocalizations strings;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      clipBehavior: Clip.antiAlias,
+      decoration: BoxDecoration(
+        gradient: AppTheme.brandGradient,
+        borderRadius: BorderRadius.circular(30),
+        boxShadow: [
+          BoxShadow(
+            color: AppTheme.primaryDark.withValues(alpha: 0.2),
+            blurRadius: 30,
+            offset: const Offset(0, 14),
+          ),
+        ],
+      ),
+      child: Stack(
+        children: [
+          PositionedDirectional(
+            end: -38,
+            top: -58,
+            child: Container(
+              width: 190,
+              height: 190,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white.withValues(alpha: 0.08),
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(26),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const UaeColorRibbon(height: 4),
+                const SizedBox(height: 22),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      width: 64,
+                      height: 64,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(21),
+                      ),
+                      child: const Icon(
+                        Icons.emoji_events_rounded,
+                        color: Colors.white,
+                        size: 34,
+                      ),
+                    ),
+                    const SizedBox(width: 18),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            strings.growingInUnity.toUpperCase(),
+                            style: Theme.of(context).textTheme.labelSmall
+                                ?.copyWith(
+                                  color: Colors.white.withValues(alpha: 0.72),
+                                  fontWeight: FontWeight.w900,
+                                  letterSpacing: 1.05,
+                                ),
+                          ),
+                          const SizedBox(height: 5),
+                          Text(
+                            strings.playTogether,
+                            style: Theme.of(context).textTheme.headlineMedium
+                                ?.copyWith(color: Colors.white),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            strings.playTogetherDescription,
+                            style: Theme.of(context).textTheme.bodyLarge
+                                ?.copyWith(
+                                  color: Colors.white.withValues(alpha: 0.84),
+                                ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -147,42 +220,55 @@ class _CompetitionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     final strings = AppLocalizations.of(context)!;
+    final accent = competition.accent;
 
-    return Card(
-      margin: EdgeInsets.zero,
-      elevation: 1,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-        side: BorderSide(color: colorScheme.outlineVariant),
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: AlignmentDirectional.topStart,
+          end: AlignmentDirectional.bottomEnd,
+          colors: [AppTheme.surfaceColor, accent.withValues(alpha: 0.075)],
+        ),
+        borderRadius: BorderRadius.circular(26),
+        border: Border.all(color: accent.withValues(alpha: 0.22)),
+        boxShadow: [
+          BoxShadow(
+            color: accent.withValues(alpha: 0.07),
+            blurRadius: 24,
+            offset: const Offset(0, 10),
+          ),
+        ],
       ),
       child: Padding(
-        padding: const EdgeInsets.all(18),
+        padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
                 Container(
-                  width: 54,
-                  height: 54,
+                  width: 58,
+                  height: 58,
                   decoration: BoxDecoration(
-                    color: colorScheme.primaryContainer,
-                    borderRadius: BorderRadius.circular(16),
+                    color: accent,
+                    borderRadius: BorderRadius.circular(19),
+                    boxShadow: [
+                      BoxShadow(
+                        color: accent.withValues(alpha: 0.24),
+                        blurRadius: 16,
+                        offset: const Offset(0, 7),
+                      ),
+                    ],
                   ),
-                  child: Icon(
-                    competition.icon,
-                    color: colorScheme.onPrimaryContainer,
-                    size: 29,
-                  ),
+                  child: Icon(competition.icon, color: Colors.white, size: 30),
                 ),
                 const SizedBox(width: 14),
                 Expanded(
                   child: Text(
                     _localizedCompetitionTitle(strings, competition.title),
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
+                      fontWeight: FontWeight.w800,
                     ),
                   ),
                 ),
@@ -196,42 +282,69 @@ class _CompetitionCard extends StatelessWidget {
                 competition.description,
               ),
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: colorScheme.onSurfaceVariant,
+                color: AppTheme.secondaryTextColor,
                 height: 1.4,
               ),
             ),
             const SizedBox(height: 14),
-            Row(
+            Wrap(
+              alignment: WrapAlignment.spaceBetween,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              spacing: 14,
+              runSpacing: 12,
               children: [
-                Icon(Icons.card_giftcard, size: 18, color: colorScheme.primary),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    competition.title == 'Quick Play'
-                        ? _localizedCompetitionReward(
-                            strings,
-                            competition.title,
-                            competition.reward,
-                          )
-                        : strings.rewardLabel(
-                            _localizedCompetitionReward(
-                              strings,
-                              competition.title,
-                              competition.reward,
-                            ),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 9,
+                  ),
+                  decoration: BoxDecoration(
+                    color: accent.withValues(alpha: 0.11),
+                    borderRadius: BorderRadius.circular(99),
+                  ),
+                  child: Text.rich(
+                    TextSpan(
+                      children: [
+                        WidgetSpan(
+                          alignment: PlaceholderAlignment.middle,
+                          child: Icon(
+                            Icons.card_giftcard,
+                            size: 18,
+                            color: accent,
                           ),
+                        ),
+                        const TextSpan(text: '  '),
+                        TextSpan(
+                          text: competition.title == 'Quick Play'
+                              ? _localizedCompetitionReward(
+                                  strings,
+                                  competition.title,
+                                  competition.reward,
+                                )
+                              : strings.rewardLabel(
+                                  _localizedCompetitionReward(
+                                    strings,
+                                    competition.title,
+                                    competition.reward,
+                                  ),
+                                ),
+                        ),
+                      ],
+                    ),
                     style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                      color: colorScheme.primary,
-                      fontWeight: FontWeight.bold,
+                      color: Color.lerp(accent, AppTheme.primaryDark, 0.35),
+                      fontWeight: FontWeight.w800,
                     ),
                   ),
                 ),
-                SizedBox(
-                  width: 90,
-                  child: FilledButton(
-                    onPressed: onTap,
-                    child: Text(strings.view),
+                FilledButton.icon(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: accent,
+                    foregroundColor: Colors.white,
                   ),
+                  onPressed: onTap,
+                  icon: const Icon(Icons.arrow_forward_rounded, size: 19),
+                  label: Text(strings.view),
                 ),
               ],
             ),
@@ -517,12 +630,14 @@ class _CompetitionItem {
     required this.title,
     required this.description,
     required this.reward,
+    required this.accent,
   });
 
   final IconData icon;
   final String title;
   final String description;
   final String reward;
+  final Color accent;
 }
 
 String _localizedCompetitionTitle(AppLocalizations strings, String title) =>

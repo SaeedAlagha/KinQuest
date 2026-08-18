@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kinquest/core/theme/app_theme.dart';
 import 'package:kinquest/features/games/screens/games_screen.dart';
+import 'package:kinquest/features/games/widgets/game_setup_widgets.dart';
 import 'package:kinquest/l10n/app_localizations.dart';
 
 void main() {
@@ -39,6 +40,8 @@ void main() {
     );
     expect(find.text('Who is playing?'), findsOneWidget);
     expect(find.text('Alex'), findsWidgets);
+    expect(find.byType(GameSetupHero), findsOneWidget);
+    expect(find.byType(GameSetupSectionCard), findsWidgets);
     expect(find.text('1 round'), findsOneWidget);
     expect(find.text('3 rounds'), findsOneWidget);
     expect(find.text('5 rounds'), findsOneWidget);
@@ -58,6 +61,8 @@ void main() {
     );
     expect(find.text('Who is playing?'), findsOneWidget);
     expect(find.text('Taylor'), findsWidgets);
+    expect(find.byType(GameSetupHero), findsOneWidget);
+    expect(find.byType(GameSetupSectionCard), findsWidgets);
     expect(find.text('1 round'), findsOneWidget);
     expect(find.text('3 rounds'), findsOneWidget);
     expect(find.text('5 rounds'), findsOneWidget);

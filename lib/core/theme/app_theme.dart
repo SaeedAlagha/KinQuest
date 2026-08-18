@@ -10,6 +10,8 @@ class AppTheme {
   static const Color tealColor = Color(0xFF00843D);
   static const Color backgroundColor = Color(0xFFF6F7F3);
   static const Color surfaceColor = Color(0xFFFFFFFF);
+  static const Color surfaceMutedColor = Color(0xFFF0F5F1);
+  static const Color sandColor = Color(0xFFF7EEDB);
   static const Color textColor = Color(0xFF171C19);
   static const Color secondaryTextColor = Color(0xFF5D6762);
   static const Color outlineColor = Color(0xFFDDE3DF);
@@ -23,6 +25,13 @@ class AppTheme {
     end: Alignment.bottomRight,
     colors: [primaryDark, primaryColor, Color(0xFF0B9256)],
     stops: [0, 0.54, 1],
+  );
+
+  static const LinearGradient pageGradient = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [Color(0xFFF8FAF6), Color(0xFFF4F7F2), Color(0xFFFBF5F3)],
+    stops: [0, 0.58, 1],
   );
 
   static ThemeData get lightTheme {
@@ -109,12 +118,13 @@ class AppTheme {
         ),
       ),
       appBarTheme: const AppBarTheme(
-        backgroundColor: backgroundColor,
+        backgroundColor: Color(0xFFF8FAF6),
         foregroundColor: textColor,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         scrolledUnderElevation: 0,
         centerTitle: false,
+        toolbarHeight: 68,
         titleTextStyle: TextStyle(
           color: textColor,
           fontSize: 20,
@@ -125,6 +135,7 @@ class AppTheme {
         color: surfaceColor,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
+        shadowColor: primaryDark.withValues(alpha: 0.1),
         margin: EdgeInsets.zero,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(24),
@@ -138,7 +149,7 @@ class AppTheme {
           minimumSize: const Size(0, 52),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(18),
           ),
           textStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
         ),
@@ -150,7 +161,7 @@ class AppTheme {
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
           side: const BorderSide(color: outlineColor),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(18),
           ),
           textStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
         ),
@@ -190,11 +201,14 @@ class AppTheme {
         ),
       ),
       navigationBarTheme: NavigationBarThemeData(
-        height: 76,
+        height: 72,
         backgroundColor: surfaceColor,
         surfaceTintColor: Colors.transparent,
         indicatorColor: colorScheme.primaryContainer,
         labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+        indicatorShape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(18),
+        ),
         labelTextStyle: WidgetStateProperty.resolveWith((states) {
           return TextStyle(
             color: states.contains(WidgetState.selected)
@@ -208,8 +222,11 @@ class AppTheme {
         }),
       ),
       navigationRailTheme: NavigationRailThemeData(
-        backgroundColor: surfaceColor,
+        backgroundColor: Colors.transparent,
         indicatorColor: colorScheme.primaryContainer,
+        indicatorShape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
         selectedIconTheme: const IconThemeData(color: primaryColor),
         selectedLabelTextStyle: const TextStyle(
           color: primaryColor,
@@ -225,7 +242,7 @@ class AppTheme {
         backgroundColor: surfaceColor,
         selectedColor: colorScheme.primaryContainer,
         side: const BorderSide(color: outlineColor),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         labelStyle: const TextStyle(
           color: textColor,
           fontWeight: FontWeight.w600,
@@ -247,6 +264,34 @@ class AppTheme {
         backgroundColor: primaryColor,
         foregroundColor: Colors.white,
         elevation: 1,
+      ),
+      listTileTheme: ListTileThemeData(
+        iconColor: primaryColor,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 3),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      ),
+      checkboxTheme: CheckboxThemeData(
+        fillColor: WidgetStateProperty.resolveWith(
+          (states) => states.contains(WidgetState.selected)
+              ? primaryColor
+              : Colors.transparent,
+        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+      ),
+      progressIndicatorTheme: const ProgressIndicatorThemeData(
+        color: primaryColor,
+        linearTrackColor: surfaceMutedColor,
+        circularTrackColor: surfaceMutedColor,
+      ),
+      dialogTheme: DialogThemeData(
+        backgroundColor: surfaceColor,
+        surfaceTintColor: Colors.transparent,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+      ),
+      bottomSheetTheme: const BottomSheetThemeData(
+        backgroundColor: surfaceColor,
+        surfaceTintColor: Colors.transparent,
+        showDragHandle: true,
       ),
     );
   }

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/family_year_banner.dart';
+import '../../../core/widgets/sila_page_backdrop.dart';
 
 const List<int> gameRoundOptions = [1, 3, 5];
 
@@ -20,18 +22,24 @@ class GameSetupView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(20, 20, 20, 36),
-      child: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 720),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              GameSetupHero(icon: icon, title: title, description: description),
-              const SizedBox(height: 18),
-              ...children,
-            ],
+    return SilaPageBackdrop(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(20, 20, 20, 36),
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 720),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                GameSetupHero(
+                  icon: icon,
+                  title: title,
+                  description: description,
+                ),
+                const SizedBox(height: 18),
+                ...children,
+              ],
+            ),
           ),
         ),
       ),
@@ -53,46 +61,99 @@ class GameSetupHero extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
-
     return Container(
-      padding: const EdgeInsets.all(24),
+      clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            colors.primaryContainer.withValues(alpha: 0.75),
-            AppTheme.goldColor.withValues(alpha: 0.1),
-          ],
-          begin: AlignmentDirectional.topStart,
-          end: AlignmentDirectional.bottomEnd,
-        ),
-        borderRadius: BorderRadius.circular(28),
-        border: Border.all(color: colors.primary.withValues(alpha: 0.18)),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: 58,
-            height: 58,
-            decoration: BoxDecoration(
-              color: colors.primary,
-              borderRadius: BorderRadius.circular(19),
-            ),
-            child: Icon(icon, color: colors.onPrimary, size: 30),
+        gradient: AppTheme.brandGradient,
+        borderRadius: BorderRadius.circular(30),
+        boxShadow: [
+          BoxShadow(
+            color: AppTheme.primaryDark.withValues(alpha: 0.18),
+            blurRadius: 28,
+            offset: const Offset(0, 14),
           ),
-          const SizedBox(width: 18),
-          Expanded(
+        ],
+      ),
+      child: Stack(
+        children: [
+          PositionedDirectional(
+            end: -42,
+            top: -48,
+            child: Container(
+              width: 170,
+              height: 170,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white.withValues(alpha: 0.08),
+              ),
+            ),
+          ),
+          PositionedDirectional(
+            start: -46,
+            bottom: -72,
+            child: Container(
+              width: 150,
+              height: 150,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: AppTheme.uaeRed.withValues(alpha: 0.16),
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(24),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: Theme.of(context).textTheme.headlineSmall),
-                const SizedBox(height: 7),
-                Text(
-                  description,
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: AppTheme.secondaryTextColor,
-                  ),
+                const UaeColorRibbon(height: 4),
+                const SizedBox(height: 22),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      width: 60,
+                      height: 60,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.16),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.18),
+                        ),
+                      ),
+                      child: Icon(icon, color: Colors.white, size: 31),
+                    ),
+                    const SizedBox(width: 18),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'SILA FAMILY GAME',
+                            style: Theme.of(context).textTheme.labelSmall
+                                ?.copyWith(
+                                  color: Colors.white.withValues(alpha: 0.72),
+                                  fontWeight: FontWeight.w900,
+                                  letterSpacing: 1.05,
+                                ),
+                          ),
+                          const SizedBox(height: 5),
+                          Text(
+                            title,
+                            style: Theme.of(context).textTheme.headlineSmall
+                                ?.copyWith(color: Colors.white),
+                          ),
+                          const SizedBox(height: 7),
+                          Text(
+                            description,
+                            style: Theme.of(context).textTheme.bodyLarge
+                                ?.copyWith(
+                                  color: Colors.white.withValues(alpha: 0.84),
+                                ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -113,9 +174,25 @@ class GameSetupSectionCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: AppTheme.surfaceColor,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: AppTheme.outlineColor),
+        gradient: LinearGradient(
+          begin: AlignmentDirectional.topStart,
+          end: AlignmentDirectional.bottomEnd,
+          colors: [
+            AppTheme.surfaceColor,
+            AppTheme.surfaceMutedColor.withValues(alpha: 0.62),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(25),
+        border: Border.all(
+          color: AppTheme.primaryColor.withValues(alpha: 0.12),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: AppTheme.primaryDark.withValues(alpha: 0.055),
+            blurRadius: 22,
+            offset: const Offset(0, 9),
+          ),
+        ],
       ),
       child: child,
     );

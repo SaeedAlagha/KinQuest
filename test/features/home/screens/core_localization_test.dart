@@ -37,7 +37,10 @@ void main() {
     expect(find.text('العبوا معًا'), findsOneWidget);
     expect(find.text('لعب سريع'), findsOneWidget);
 
-    await tester.tap(find.widgetWithText(FilledButton, 'عرض').first);
+    final quickPlayView = find.widgetWithText(FilledButton, 'عرض').first;
+    await tester.ensureVisible(quickPlayView);
+    await tester.pumpAndSettle();
+    await tester.tap(quickPlayView);
     await tester.pumpAndSettle();
 
     expect(find.text('Choose Players'), findsOneWidget);
