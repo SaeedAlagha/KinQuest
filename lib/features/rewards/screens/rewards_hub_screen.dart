@@ -297,120 +297,143 @@ class _RewardsHubScreenState extends State<RewardsHubScreen> {
 
             digitalRewards.sort((a, b) => a.tokenCost.compareTo(b.tokenCost));
 
-            return _RewardsScaffold(
-              tokens: tokens,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const _RewardsIntro(),
-                  const SizedBox(height: 20),
-                  Wrap(
-                    spacing: 12,
-                    runSpacing: 12,
+            return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+              stream: FirebaseFirestore.instance
+                  .collection('families')
+                  .doc(familyId)
+                  .collection('rewardRequests')
+                  .where('userId', isEqualTo: userId)
+                  .where('status', isEqualTo: 'pending')
+                  .snapshots(),
+              builder: (context, requestsSnapshot) {
+                final pendingRewardIds =
+                    requestsSnapshot.data?.docs
+                        .map((doc) => doc.data()['rewardId']?.toString())
+                        .whereType<String>()
+                        .toSet() ??
+                    <String>{};
+
+                return _RewardsScaffold(
+                  tokens: tokens,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      FilledButton.tonalIcon(
-                        onPressed: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const MyRewardRequestsScreen(),
-                          ),
-                        ),
-                        icon: const Icon(Icons.card_giftcard_outlined),
-                        label: const Text('My Requests'),
-                      ),
-
-                      FilledButton.tonalIcon(
-                        onPressed: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const MyDigitalRewardsScreen(),
-                          ),
-                        ),
-                        icon: const Icon(Icons.workspace_premium_outlined),
-                        label: const Text('My Digital Rewards'),
-                      ),
-
-                      FilledButton.tonalIcon(
-                        onPressed: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const RewardWishlistScreen(),
-                          ),
-                        ),
-                        icon: const Icon(Icons.lightbulb_outline),
-                        label: const Text('Wishlist'),
-                      ),
-
-                      FilledButton.tonalIcon(
-                        onPressed: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const TokenHistoryScreen(),
-                          ),
-                        ),
-                        icon: const Icon(Icons.receipt_long_rounded),
-                        label: const Text('Token History'),
-                      ),
-
-                      if (isFamilyAdmin)
-                        FilledButton.icon(
-                          onPressed: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const ManageRewardsScreen(),
+                      const _RewardsIntro(),
+                      const SizedBox(height: 20),
+                      Wrap(
+                        spacing: 12,
+                        runSpacing: 12,
+                        children: [
+                          FilledButton.tonalIcon(
+                            onPressed: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const MyRewardRequestsScreen(),
+                              ),
                             ),
+                            icon: const Icon(Icons.card_giftcard_outlined),
+                            label: const Text('My Requests'),
                           ),
-                          icon: const Icon(Icons.admin_panel_settings_rounded),
-                          label: const Text('Manage Rewards'),
-                        ),
 
-                      if (canApproveRewards)
-                        FilledButton.tonalIcon(
-                          onPressed: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const RewardApprovalScreen(),
+                          FilledButton.tonalIcon(
+                            onPressed: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const MyDigitalRewardsScreen(),
+                              ),
                             ),
+                            icon: const Icon(Icons.workspace_premium_outlined),
+                            label: const Text('My Digital Rewards'),
                           ),
-                          icon: const Icon(Icons.fact_check_rounded),
-                          label: const Text('Reward Approvals'),
+
+                          FilledButton.tonalIcon(
+                            onPressed: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const RewardWishlistScreen(),
+                              ),
+                            ),
+                            icon: const Icon(Icons.lightbulb_outline),
+                            label: const Text('Wishlist'),
+                          ),
+
+                          FilledButton.tonalIcon(
+                            onPressed: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const TokenHistoryScreen(),
+                              ),
+                            ),
+                            icon: const Icon(Icons.receipt_long_rounded),
+                            label: const Text('Token History'),
+                          ),
+
+                          if (isFamilyAdmin)
+                            FilledButton.icon(
+                              onPressed: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const ManageRewardsScreen(),
+                                ),
+                              ),
+                              icon: const Icon(
+                                Icons.admin_panel_settings_rounded,
+                              ),
+                              label: const Text('Manage Rewards'),
+                            ),
+
+                          if (canApproveRewards)
+                            FilledButton.tonalIcon(
+                              onPressed: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const RewardApprovalScreen(),
+                                ),
+                              ),
+                              icon: const Icon(Icons.fact_check_rounded),
+                              label: const Text('Reward Approvals'),
+                            ),
+                        ],
+                      ),
+
+                      const SizedBox(height: 24),
+                      _RewardSection(
+                        title: 'Family Rewards',
+                        subtitle:
+                            'Use Tokens for family experiences and privileges. Approval may be required.',
+                        emptyMessage:
+                            'Your family has not created any family rewards yet.',
+                        rewards: familyRewards,
+                        tokens: tokens,
+                        pendingRewardIds: pendingRewardIds,
+                        isProcessing: _isProcessing,
+                        onPressed: (reward) => _requestFamilyReward(
+                          familyId: familyId,
+                          userId: userId,
+                          reward: reward,
                         ),
+                      ),
+                      const SizedBox(height: 34),
+                      _RewardSection(
+                        title: 'Digital Rewards',
+                        subtitle:
+                            'Unlock profile cosmetics and other permanent in-app rewards.',
+                        emptyMessage:
+                            'There are no digital rewards available yet.',
+                        rewards: digitalRewards,
+                        tokens: tokens,
+                        isProcessing: _isProcessing,
+                        pendingRewardIds: const <String>{},
+                        onPressed: (reward) => _purchaseDigitalReward(
+                          familyId: familyId,
+                          userId: userId,
+                          reward: reward,
+                        ),
+                      ),
                     ],
                   ),
-
-                  const SizedBox(height: 24),
-                  _RewardSection(
-                    title: 'Family Rewards',
-                    subtitle:
-                        'Use Tokens for family experiences and privileges. Approval may be required.',
-                    emptyMessage:
-                        'Your family has not created any family rewards yet.',
-                    rewards: familyRewards,
-                    tokens: tokens,
-                    isProcessing: _isProcessing,
-                    onPressed: (reward) => _requestFamilyReward(
-                      familyId: familyId,
-                      userId: userId,
-                      reward: reward,
-                    ),
-                  ),
-                  const SizedBox(height: 34),
-                  _RewardSection(
-                    title: 'Digital Rewards',
-                    subtitle:
-                        'Unlock profile cosmetics and other permanent in-app rewards.',
-                    emptyMessage: 'There are no digital rewards available yet.',
-                    rewards: digitalRewards,
-                    tokens: tokens,
-                    isProcessing: _isProcessing,
-                    onPressed: (reward) => _purchaseDigitalReward(
-                      familyId: familyId,
-                      userId: userId,
-                      reward: reward,
-                    ),
-                  ),
-                ],
-              ),
+                );
+              },
             );
           },
         );
@@ -478,6 +501,7 @@ class _RewardsHubScreenState extends State<RewardsHubScreen> {
             rewards: familyRewards,
             tokens: 1350,
             isProcessing: false,
+            pendingRewardIds: const <String>{},
             onPressed: (_) {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
@@ -495,6 +519,7 @@ class _RewardsHubScreenState extends State<RewardsHubScreen> {
             rewards: digitalRewards,
             tokens: 1350,
             isProcessing: false,
+            pendingRewardIds: const <String>{},
             onPressed: (_) {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
@@ -635,6 +660,7 @@ class _RewardSection extends StatelessWidget {
     required this.tokens,
     required this.isProcessing,
     required this.onPressed,
+    required this.pendingRewardIds,
   });
 
   final String title;
@@ -643,6 +669,7 @@ class _RewardSection extends StatelessWidget {
   final List<FamilyReward> rewards;
   final int tokens;
   final bool isProcessing;
+  final Set<String> pendingRewardIds;
   final ValueChanged<FamilyReward> onPressed;
 
   @override
@@ -673,6 +700,7 @@ class _RewardSection extends StatelessWidget {
                 reward: reward,
                 tokens: tokens,
                 isProcessing: isProcessing,
+                isPending: pendingRewardIds.contains(reward.id),
                 onPressed: () => onPressed(reward),
               ),
             ),
@@ -688,11 +716,13 @@ class _RewardCard extends StatelessWidget {
     required this.tokens,
     required this.isProcessing,
     required this.onPressed,
+    required this.isPending,
   });
 
   final FamilyReward reward;
   final int tokens;
   final bool isProcessing;
+  final bool isPending;
   final VoidCallback onPressed;
 
   @override
@@ -747,10 +777,19 @@ class _RewardCard extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 12),
-                  FilledButton(
-                    onPressed: canAfford && !isProcessing ? onPressed : null,
-                    child: Text(
-                      !canAfford
+                  FilledButton.icon(
+                    onPressed: canAfford && !isProcessing && !isPending
+                        ? onPressed
+                        : null,
+                    icon: isPending
+                        ? const Icon(Icons.schedule_rounded)
+                        : isDigital
+                        ? const Icon(Icons.lock_open_rounded)
+                        : const Icon(Icons.redeem_rounded),
+                    label: Text(
+                      isPending
+                          ? 'Pending'
+                          : !canAfford
                           ? 'Need ${reward.tokenCost - tokens} more Tokens'
                           : isDigital
                           ? 'Unlock'
