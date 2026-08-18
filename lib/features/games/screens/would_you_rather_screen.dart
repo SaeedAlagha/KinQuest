@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import '../services/ai_question_service.dart';
+import '../widgets/game_setup_widgets.dart';
 
 class WouldYouRatherScreen extends StatefulWidget {
   const WouldYouRatherScreen({super.key});
@@ -215,15 +216,6 @@ class _WouldYouRatherScreenState extends State<WouldYouRatherScreen> {
   void _selectCategory(String category) {
     setState(() {
       _selectedCategory = category;
-      _selectedRounds = min(_selectedRounds, _questionBank[category]!.length);
-    });
-  }
-
-  void _setRounds(int change) {
-    final int next = _selectedRounds + change;
-    final int maxRounds = _questionBank[_selectedCategory]!.length;
-    setState(() {
-      _selectedRounds = next.clamp(3, maxRounds);
     });
   }
 
@@ -342,7 +334,7 @@ class _WouldYouRatherScreenState extends State<WouldYouRatherScreen> {
             return AnimatedSwitcher(
               duration: const Duration(milliseconds: 200),
               child: _phase == _GamePhase.setup
-                  ? _buildSetupView(context, colors, constraints)
+                  ? _buildSetupView(context, colors)
                   : _phase == _GamePhase.playing
                   ? _buildQuestionView(context, colors, constraints)
                   : _buildResultsView(context, colors, constraints),
@@ -353,104 +345,74 @@ class _WouldYouRatherScreenState extends State<WouldYouRatherScreen> {
     );
   }
 
-  Widget _buildSetupView(
-    BuildContext context,
-    ColorScheme colors,
-    BoxConstraints constraints,
-  ) {
-    return SingleChildScrollView(
+  Widget _buildSetupView(BuildContext context, ColorScheme colors) {
+    return GameSetupView(
       key: const ValueKey(_GamePhase.setup),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-      child: ConstrainedBox(
-        constraints: BoxConstraints(
-          minHeight: max(0.0, constraints.maxHeight - 40),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              'Ready for a family-friendly question game?',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Choose a category and the number of rounds. Then make a choice in each round and see your results at the end.',
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-            const SizedBox(height: 24),
-            Text(
-              'Pick a category',
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            const SizedBox(height: 12),
-            Wrap(
-              spacing: 10,
-              runSpacing: 10,
-              children: _categories.map((category) {
-                return ChoiceChip(
-                  label: Text(category),
-                  selected: category == _selectedCategory,
-                  selectedColor: colors.primary.withValues(alpha: 0.15),
-                  labelStyle: TextStyle(
-                    color: category == _selectedCategory
-                        ? colors.primary
-                        : colors.onSurface,
-                  ),
-                  onSelected: (_) => _selectCategory(category),
-                );
-              }).toList(),
-            ),
-            const SizedBox(height: 24),
-            Text('Rounds', style: Theme.of(context).textTheme.titleMedium),
-            const SizedBox(height: 12),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                IconButton(
-                  onPressed: () => _setRounds(-1),
-                  tooltip: 'Decrease rounds',
-                  icon: Icon(Icons.remove, color: colors.primary),
-                ),
-                Text(
-                  '$_selectedRounds rounds',
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                IconButton(
-                  onPressed: () => _setRounds(1),
-                  tooltip: 'Increase rounds',
-                  icon: Icon(Icons.add, color: colors.primary),
-                ),
-              ],
-            ),
-            const SizedBox(height: 4),
-            Text(
-              'Use between 3 and ${_questionBank[_selectedCategory]!.length} rounds.',
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-            const SizedBox(height: 24),
-            ElevatedButton(
-              onPressed: _isLoadingQuestions ? null : _startGame,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                child: _isLoadingQuestions
-                    ? const Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          ),
-                          SizedBox(width: 12),
-                          Text('Generating questions...'),
-                        ],
-                      )
-                    : const Text('Start Game'),
+      icon: Icons.compare_arrows_rounded,
+      title: 'Would You Rather',
+      description:
+          'Pick a category, choose 1, 3, or 5 rounds, then discover which playful choices your family makes.',
+      children: [
+        GameSetupSectionCard(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Pick a category',
+                style: Theme.of(context).textTheme.titleLarge,
               ),
-            ),
-          ],
+              const SizedBox(height: 14),
+              Wrap(
+                spacing: 10,
+                runSpacing: 10,
+                children: _categories.map((category) {
+                  return ChoiceChip(
+                    label: Text(category),
+                    selected: category == _selectedCategory,
+                    selectedColor: colors.primary.withValues(alpha: 0.15),
+                    labelStyle: TextStyle(
+                      color: category == _selectedCategory
+                          ? colors.primary
+                          : colors.onSurface,
+                    ),
+                    onSelected: (_) => _selectCategory(category),
+                  );
+                }).toList(),
+              ),
+            ],
+          ),
         ),
-      ),
+        const SizedBox(height: 18),
+        GameRoundSelector(
+          value: _selectedRounds,
+          onChanged: (rounds) {
+            setState(() {
+              _selectedRounds = rounds;
+            });
+          },
+        ),
+        const SizedBox(height: 22),
+        ElevatedButton(
+          onPressed: _isLoadingQuestions ? null : _startGame,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            child: _isLoadingQuestions
+                ? const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
+                      SizedBox(width: 12),
+                      Text('Generating questions...'),
+                    ],
+                  )
+                : const Text('Start Game'),
+          ),
+        ),
+      ],
     );
   }
 

@@ -23,13 +23,22 @@ void main() {
 
     await tester.drag(find.byType(ListView), const Offset(0, -300));
     await tester.pump();
-    await tester.tap(find.byKey(const ValueKey('impostor-category-UAE & Heritage')));
+    await tester.tap(
+      find.byKey(const ValueKey('impostor-category-UAE & Heritage')),
+    );
     await tester.pump();
 
     expect(
       find.text('All secret words will come from UAE & Heritage.'),
       findsOneWidget,
     );
+
+    await tester.drag(find.byType(ListView), const Offset(0, -500));
+    await tester.pump();
+
+    expect(find.text('1 round'), findsOneWidget);
+    expect(find.text('3 rounds'), findsOneWidget);
+    expect(find.text('5 rounds'), findsOneWidget);
 
     await tester.drag(find.byType(ListView), const Offset(0, -700));
     await tester.pump();

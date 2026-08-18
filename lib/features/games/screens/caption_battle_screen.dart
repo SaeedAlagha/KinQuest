@@ -11,6 +11,7 @@ import '../../competitions/models/competition_game_result.dart';
 import '../../competitions/models/competition_player_result.dart';
 import '../../competitions/models/game_play_mode.dart';
 import '../services/caption_battle_ai_service.dart';
+import '../widgets/game_setup_widgets.dart';
 
 enum _CaptionBattlePhase {
   setup,
@@ -36,8 +37,6 @@ class CaptionBattleScreen extends StatefulWidget {
 }
 
 class _CaptionBattleScreenState extends State<CaptionBattleScreen> {
-  static const int _maximumRounds = 3;
-
   final CaptionBattleAiService _aiService = const CaptionBattleAiService();
 
   final TextEditingController _captionController = TextEditingController();
@@ -60,6 +59,7 @@ class _CaptionBattleScreenState extends State<CaptionBattleScreen> {
   List<String> _roundModes = [];
 
   int _roundIndex = 0;
+  int _selectedRounds = 3;
   int _captionPlayerIndex = 0;
   int _voterIndex = 0;
 
@@ -181,6 +181,12 @@ class _CaptionBattleScreenState extends State<CaptionBattleScreen> {
       setState(() {
         _familyMembers = members;
         _memories = memories;
+        if (memories.isNotEmpty && memories.length < _selectedRounds) {
+          _selectedRounds = gameRoundOptions.lastWhere(
+            (rounds) => rounds <= memories.length,
+            orElse: () => 1,
+          );
+        }
 
         _selectedPlayerIds
           ..clear()
@@ -245,7 +251,7 @@ class _CaptionBattleScreenState extends State<CaptionBattleScreen> {
       final shuffledMemories = List<_CaptionMemory>.from(_memories)
         ..shuffle(_random);
 
-      final roundCount = min(_maximumRounds, shuffledMemories.length);
+      final roundCount = min(_selectedRounds, shuffledMemories.length);
 
       final chosenMemories = shuffledMemories.take(roundCount).toList();
 
@@ -583,7 +589,7 @@ class _CaptionBattleScreenState extends State<CaptionBattleScreen> {
                     ] else ...[
                       const SizedBox(height: 10),
                       Text(
-                        'This game will play ${min(_maximumRounds, _memories.length)} ${min(_maximumRounds, _memories.length) == 1 ? 'round' : 'rounds'}.',
+                        'This game will play $_selectedRounds ${_selectedRounds == 1 ? 'round' : 'rounds'}.',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: AppTheme.secondaryTextColor,
                         ),
@@ -593,6 +599,21 @@ class _CaptionBattleScreenState extends State<CaptionBattleScreen> {
                 ),
               ),
               const SizedBox(height: 18),
+              if (_memories.isNotEmpty) ...[
+                GameRoundSelector(
+                  value: _selectedRounds,
+                  maximum: _memories.length,
+                  onChanged: (rounds) {
+                    setState(() {
+                      _selectedRounds = rounds;
+                    });
+                  },
+                  keyPrefix: 'caption-round-option',
+                  description:
+                      'Each round uses a different family photo. More photos unlock the 3 and 5-round options.',
+                ),
+                const SizedBox(height: 18),
+              ],
               _sectionCard(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,

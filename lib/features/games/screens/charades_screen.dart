@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 
 import '../services/charades_ai_service.dart';
+import '../widgets/game_setup_widgets.dart';
 
 class CharadesScreen extends StatefulWidget {
   const CharadesScreen({super.key});
@@ -37,6 +38,7 @@ class _CharadesScreenState extends State<CharadesScreen> {
   };
 
   String _selectedCategory = 'Animals';
+  int _selectedRounds = 3;
   bool _isLoading = false;
   bool _isPlaying = false;
   int _currentIndex = 0;
@@ -50,7 +52,7 @@ class _CharadesScreenState extends State<CharadesScreen> {
     try {
       final generated = await _aiService.generatePrompts(
         category: _selectedCategory,
-        count: 10,
+        count: _selectedRounds,
       );
 
       if (!mounted) return;
@@ -68,7 +70,7 @@ class _CharadesScreenState extends State<CharadesScreen> {
       if (!mounted) return;
 
       setState(() {
-        _prompts = fallback;
+        _prompts = fallback.take(_selectedRounds).toList();
         _currentIndex = 0;
         _isPlaying = true;
         _isLoading = false;
@@ -102,40 +104,58 @@ class _CharadesScreenState extends State<CharadesScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Charades')),
-      body: Padding(
-        padding: const EdgeInsets.all(24),
-        child: _isPlaying ? _buildGame() : _buildSetup(),
-      ),
+      body: _isPlaying
+          ? Padding(padding: const EdgeInsets.all(24), child: _buildGame())
+          : _buildSetup(),
     );
   }
 
   Widget _buildSetup() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
+    return GameSetupView(
+      icon: Icons.theater_comedy_rounded,
+      title: 'Charades',
+      description:
+          'Choose a theme and a 1, 3, or 5-round game, then act out each prompt without saying the answer.',
       children: [
-        const Text(
-          'Choose a category',
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 24),
-        Wrap(
-          spacing: 10,
-          runSpacing: 10,
-          children: _categories.map((category) {
-            final selected = category == _selectedCategory;
+        GameSetupSectionCard(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Choose a category',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              const SizedBox(height: 14),
+              Wrap(
+                spacing: 10,
+                runSpacing: 10,
+                children: _categories.map((category) {
+                  final selected = category == _selectedCategory;
 
-            return ChoiceChip(
-              label: Text(category),
-              selected: selected,
-              onSelected: (_) {
-                setState(() {
-                  _selectedCategory = category;
-                });
-              },
-            );
-          }).toList(),
+                  return ChoiceChip(
+                    label: Text(category),
+                    selected: selected,
+                    onSelected: (_) {
+                      setState(() {
+                        _selectedCategory = category;
+                      });
+                    },
+                  );
+                }).toList(),
+              ),
+            ],
+          ),
         ),
-        const SizedBox(height: 40),
+        const SizedBox(height: 18),
+        GameRoundSelector(
+          value: _selectedRounds,
+          onChanged: (rounds) {
+            setState(() {
+              _selectedRounds = rounds;
+            });
+          },
+        ),
+        const SizedBox(height: 22),
         ElevatedButton(
           onPressed: _isLoading ? null : _startGame,
           child: _isLoading
