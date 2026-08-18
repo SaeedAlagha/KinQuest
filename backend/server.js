@@ -1150,13 +1150,26 @@ Return ONLY valid JSON:
   }
 });app.post("/api/caption-battle/modes", async (req, res) => {
   try {
-    const { count, language } = req.body;
+    const { count, language, style } = req.body;
 
     const requestedCount = Number(count) || 3;
     const modeCount = Math.min(Math.max(requestedCount, 1), 5);
 
     const outputLanguage =
       language === "ar" ? "Arabic" : "English";
+    const styleGuidance = {
+      Storytelling:
+        "Focus on story prompts such as What Happened Next?, Before This Photo, Plot Twist, Future Memory, and Family Documentary.",
+      "Headlines & Posts":
+        "Focus on formats such as Breaking News, Sports Commentary, Movie Title, Social Media Post, and Travel Postcard.",
+      "Wild Ideas":
+        "Focus on imaginative prompts such as Wrong Answers Only, Secret Thoughts, Superhero Origin, Advertisement, and One-Word Challenge.",
+      "Surprise Me":
+        "Mix storytelling, headlines, social formats, and unexpected imaginative challenges.",
+    };
+    const selectedStyle = Object.hasOwn(styleGuidance, style)
+      ? style
+      : "Surprise Me";
 
     const prompt = `
 You create round themes for a family party game called Caption Battle.
@@ -1169,6 +1182,9 @@ During each round:
 - Players cannot vote for their own caption.
 
 Generate exactly ${modeCount} DIFFERENT round themes.
+
+Selected prompt style: ${selectedStyle}
+${styleGuidance[selectedStyle]}
 
 Write every theme in ${outputLanguage}.
 
