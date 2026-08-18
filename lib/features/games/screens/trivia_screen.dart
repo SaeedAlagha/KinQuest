@@ -561,7 +561,9 @@ class _TriviaScreenState extends State<TriviaScreen> {
     return Scaffold(
       appBar: AppBar(title: const Text('Trivia')),
       body: SafeArea(
-        child: Padding(padding: const EdgeInsets.all(24), child: _buildBody()),
+        child: _phase == _TriviaPhase.setup
+            ? _buildSetup()
+            : Padding(padding: const EdgeInsets.all(24), child: _buildBody()),
       ),
     );
   }
@@ -587,239 +589,221 @@ class _TriviaScreenState extends State<TriviaScreen> {
       return Center(child: Text(_familyError!, textAlign: TextAlign.center));
     }
 
-    return SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(
-            'Who is playing?',
-            style: Theme.of(
-              context,
-            ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
-          ),
-
-          const SizedBox(height: 8),
-
-          const Text('Choose at least 2 players.'),
-
-          const SizedBox(height: 16),
-
-          ..._familyMembers.map((player) {
-            final selected = _selectedPlayerIds.contains(player.id);
-
-            return CheckboxListTile(
-              value: selected,
-              onChanged: (_) => _togglePlayer(player),
-              title: Text(player.name),
-            );
-          }),
-
-          const SizedBox(height: 24),
-
-          Text(
-            'Choose teams',
-            style: Theme.of(
-              context,
-            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-          ),
-
-          const SizedBox(height: 8),
-
-          const Text('Assign every selected player to Team A or Team B.'),
-
-          const SizedBox(height: 16),
-
-          ..._familyMembers
-              .where((player) => _selectedPlayerIds.contains(player.id))
-              .map((player) {
-                final inTeamA = _teamA.any((member) => member.id == player.id);
-
-                final inTeamB = _teamB.any((member) => member.id == player.id);
-
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: Card(
-                    margin: EdgeInsets.zero,
-                    child: Padding(
-                      padding: const EdgeInsets.all(14),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              player.name,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
-
-                          ChoiceChip(
-                            label: const Text('Team A'),
-                            selected: inTeamA,
-                            onSelected: (_) {
-                              _assignPlayerToTeam(player, 'A');
-                            },
-                          ),
-
-                          const SizedBox(width: 8),
-
-                          ChoiceChip(
-                            label: const Text('Team B'),
-                            selected: inTeamB,
-                            onSelected: (_) {
-                              _assignPlayerToTeam(player, 'B');
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
+    return GameSetupView(
+      icon: Icons.quiz_rounded,
+      title: 'Trivia',
+      description:
+          'Build two teams, pick a category, and race through family-friendly questions.',
+      children: [
+        GameSetupSectionCard(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Who is playing?',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              const SizedBox(height: 6),
+              const Text('Choose at least 2 players for the family match.'),
+              const SizedBox(height: 12),
+              for (final player in _familyMembers)
+                Material(
+                  color: Colors.transparent,
+                  child: CheckboxListTile(
+                    contentPadding: EdgeInsets.zero,
+                    value: _selectedPlayerIds.contains(player.id),
+                    onChanged: (_) => _togglePlayer(player),
+                    secondary: const Icon(Icons.person_rounded),
+                    title: Text(player.name),
                   ),
-                );
-              }),
-
-          const SizedBox(height: 12),
-
-          OutlinedButton.icon(
-            onPressed: _selectedPlayerIds.length >= 2 ? _shuffleTeams : null,
-            icon: const Icon(Icons.shuffle),
-            label: const Text('Shuffle Teams'),
-          ),
-
-          const SizedBox(height: 20),
-
-          if (_teamA.isNotEmpty || _teamB.isNotEmpty) ...[
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: _buildTeamCard(title: 'Team A', players: _teamA),
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _buildTeamCard(title: 'Team B', players: _teamB),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
+        GameSetupSectionCard(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                'Choose teams',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              const SizedBox(height: 6),
+              const Text('Assign every selected player to Team A or Team B.'),
+              const SizedBox(height: 14),
+              ..._familyMembers
+                  .where((player) => _selectedPlayerIds.contains(player.id))
+                  .map((player) {
+                    final inTeamA = _teamA.any(
+                      (member) => member.id == player.id,
+                    );
+                    final inTeamB = _teamB.any(
+                      (member) => member.id == player.id,
+                    );
+
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 10),
+                      child: Card(
+                        child: Padding(
+                          padding: const EdgeInsets.all(12),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  player.name,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ),
+                              ChoiceChip(
+                                label: const Text('Team A'),
+                                selected: inTeamA,
+                                onSelected: (_) {
+                                  _assignPlayerToTeam(player, 'A');
+                                },
+                              ),
+                              const SizedBox(width: 8),
+                              ChoiceChip(
+                                label: const Text('Team B'),
+                                selected: inTeamB,
+                                onSelected: (_) {
+                                  _assignPlayerToTeam(player, 'B');
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    );
+                  }),
+              const SizedBox(height: 4),
+              OutlinedButton.icon(
+                onPressed: _selectedPlayerIds.length >= 2
+                    ? _shuffleTeams
+                    : null,
+                icon: const Icon(Icons.shuffle_rounded),
+                label: const Text('Shuffle Teams'),
+              ),
+              if (_teamA.isNotEmpty || _teamB.isNotEmpty) ...[
+                const SizedBox(height: 14),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: _buildTeamCard(title: 'Team A', players: _teamA),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: _buildTeamCard(title: 'Team B', players: _teamB),
+                    ),
+                  ],
                 ),
               ],
-            ),
-
-            const SizedBox(height: 28),
-          ],
-
-          Text(
-            'Category',
-            style: Theme.of(
-              context,
-            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+            ],
           ),
-
-          const SizedBox(height: 12),
-
-          Wrap(
-            spacing: 10,
-            runSpacing: 10,
-            children: _categories.map((category) {
-              return ChoiceChip(
-                label: Text(category),
-                selected: category == _selectedCategory,
-                onSelected: (_) {
-                  setState(() {
-                    _selectedCategory = category;
-                  });
-                },
-              );
-            }).toList(),
+        ),
+        const SizedBox(height: 16),
+        GameSetupSectionCard(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Category', style: Theme.of(context).textTheme.titleLarge),
+              const SizedBox(height: 12),
+              Wrap(
+                spacing: 10,
+                runSpacing: 10,
+                children: _categories.map((category) {
+                  return ChoiceChip(
+                    label: Text(category),
+                    selected: category == _selectedCategory,
+                    onSelected: (_) {
+                      setState(() {
+                        _selectedCategory = category;
+                      });
+                    },
+                  );
+                }).toList(),
+              ),
+            ],
           ),
-
-          const SizedBox(height: 28),
-
-          GameRoundSelector(
-            value: _selectedRounds,
-            onChanged: (rounds) {
-              setState(() {
-                _selectedRounds = rounds;
-              });
-            },
+        ),
+        const SizedBox(height: 16),
+        GameRoundSelector(
+          value: _selectedRounds,
+          onChanged: (rounds) {
+            setState(() {
+              _selectedRounds = rounds;
+            });
+          },
+        ),
+        const SizedBox(height: 16),
+        GameSetupSectionCard(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Match pace', style: Theme.of(context).textTheme.titleLarge),
+              const SizedBox(height: 14),
+              const Text('Questions per round'),
+              const SizedBox(height: 9),
+              Wrap(
+                spacing: 10,
+                children: [4, 6, 10].map((questionCount) {
+                  return ChoiceChip(
+                    label: Text('$questionCount'),
+                    selected: _questionsPerRound == questionCount,
+                    onSelected: (_) {
+                      setState(() {
+                        _questionsPerRound = questionCount;
+                      });
+                    },
+                  );
+                }).toList(),
+              ),
+              const SizedBox(height: 18),
+              const Text('Time per question'),
+              const SizedBox(height: 9),
+              Wrap(
+                spacing: 10,
+                runSpacing: 10,
+                children: [20, 30, 45].map((seconds) {
+                  return ChoiceChip(
+                    label: Text('$seconds sec'),
+                    selected: _secondsPerQuestion == seconds,
+                    onSelected: (_) {
+                      setState(() {
+                        _secondsPerQuestion = seconds;
+                      });
+                    },
+                  );
+                }).toList(),
+              ),
+            ],
           ),
-
-          const SizedBox(height: 28),
-
-          Text(
-            'Questions per round',
-            style: Theme.of(
-              context,
-            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 20),
+        FilledButton.icon(
+          onPressed:
+              _teamA.isNotEmpty &&
+                  _teamB.isNotEmpty &&
+                  (_teamA.length + _teamB.length ==
+                      _selectedPlayerIds.length) &&
+                  !_isLoadingQuestions
+              ? _startGame
+              : null,
+          icon: _isLoadingQuestions
+              ? const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : const Icon(Icons.play_arrow_rounded),
+          label: Text(
+            _isLoadingQuestions ? 'Preparing Trivia...' : 'Start Trivia',
           ),
-
-          const SizedBox(height: 12),
-
-          Wrap(
-            spacing: 10,
-            children: [4, 6, 10].map((questionCount) {
-              return ChoiceChip(
-                label: Text('$questionCount'),
-                selected: _questionsPerRound == questionCount,
-                onSelected: (_) {
-                  setState(() {
-                    _questionsPerRound = questionCount;
-                  });
-                },
-              );
-            }).toList(),
-          ),
-
-          const SizedBox(height: 28),
-
-          Text(
-            'Time per question',
-            style: Theme.of(
-              context,
-            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-          ),
-
-          const SizedBox(height: 12),
-
-          Wrap(
-            spacing: 10,
-            children: [20, 30, 45].map((seconds) {
-              return ChoiceChip(
-                label: Text('$seconds sec'),
-                selected: _secondsPerQuestion == seconds,
-                onSelected: (_) {
-                  setState(() {
-                    _secondsPerQuestion = seconds;
-                  });
-                },
-              );
-            }).toList(),
-          ),
-
-          const SizedBox(height: 32),
-
-          FilledButton(
-            onPressed:
-                _teamA.isNotEmpty &&
-                    _teamB.isNotEmpty &&
-                    (_teamA.length + _teamB.length ==
-                        _selectedPlayerIds.length) &&
-                    !_isLoadingQuestions
-                ? _startGame
-                : null,
-            child: _isLoadingQuestions
-                ? const Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      ),
-                      SizedBox(width: 12),
-                      Text('Preparing Trivia...'),
-                    ],
-                  )
-                : const Text('Start Trivia'),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 

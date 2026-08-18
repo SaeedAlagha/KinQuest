@@ -159,21 +159,43 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
           return Scaffold(
             body: Row(
               children: [
-                SafeArea(
-                  right: false,
-                  child: NavigationRail(
-                    extended: true,
-                    minExtendedWidth: 236,
-                    selectedIndex: _selectedIndex,
-                    onDestinationSelected: _selectScreen,
-                    leading: const Padding(
-                      padding: EdgeInsets.fromLTRB(20, 18, 20, 34),
-                      child: _NavigationBrand(),
+                Container(
+                  width: 248,
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [Colors.white, Color(0xFFF0F7F2)],
                     ),
-                    destinations: _desktopDestinations(strings),
+                    border: Border(
+                      right: BorderSide(
+                        color: AppTheme.primaryColor.withValues(alpha: 0.1),
+                      ),
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppTheme.primaryDark.withValues(alpha: 0.055),
+                        blurRadius: 24,
+                        offset: const Offset(8, 0),
+                      ),
+                    ],
+                  ),
+                  child: SafeArea(
+                    right: false,
+                    child: NavigationRail(
+                      extended: true,
+                      minExtendedWidth: 236,
+                      groupAlignment: -0.45,
+                      selectedIndex: _selectedIndex,
+                      onDestinationSelected: _selectScreen,
+                      leading: const Padding(
+                        padding: EdgeInsets.fromLTRB(20, 18, 20, 34),
+                        child: _NavigationBrand(),
+                      ),
+                      destinations: _desktopDestinations(strings),
+                    ),
                   ),
                 ),
-                const VerticalDivider(),
                 Expanded(child: _buildScreenStack(context)),
               ],
             ),
@@ -182,13 +204,63 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
 
         return Scaffold(
           body: _buildScreenStack(context),
-          bottomNavigationBar: NavigationBar(
+          bottomNavigationBar: _MobileNavigationShell(
             selectedIndex: _selectedIndex,
             onDestinationSelected: _selectScreen,
             destinations: _mobileDestinations(strings),
           ),
         );
       },
+    );
+  }
+}
+
+class _MobileNavigationShell extends StatelessWidget {
+  const _MobileNavigationShell({
+    required this.selectedIndex,
+    required this.onDestinationSelected,
+    required this.destinations,
+  });
+
+  final int selectedIndex;
+  final ValueChanged<int> onDestinationSelected;
+  final List<NavigationDestination> destinations;
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      top: false,
+      minimum: const EdgeInsets.fromLTRB(12, 0, 12, 10),
+      child: Container(
+        clipBehavior: Clip.antiAlias,
+        decoration: BoxDecoration(
+          color: AppTheme.surfaceColor,
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(
+            color: AppTheme.primaryColor.withValues(alpha: 0.11),
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: AppTheme.primaryDark.withValues(alpha: 0.13),
+              blurRadius: 28,
+              offset: const Offset(0, 10),
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const UaeColorRibbon(height: 3),
+            NavigationBar(
+              backgroundColor: Colors.transparent,
+              elevation: 0,
+              selectedIndex: selectedIndex,
+              onDestinationSelected: onDestinationSelected,
+              destinations: destinations,
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
