@@ -36,7 +36,24 @@ class GamesScreen extends StatelessWidget {
       eyebrow: 'CONNECTED PLAY',
       isAvailable: true,
     ),
-
+    _GameItem(
+      icon: Icons.quiz_rounded,
+      accent: AppTheme.tealColor,
+      title: 'Trivia',
+      description:
+          'Team up, choose a category, and race through family-friendly questions.',
+      eyebrow: 'KNOWLEDGE',
+      isAvailable: true,
+    ),
+    _GameItem(
+      icon: Icons.emoji_emotions_rounded,
+      accent: Color(0xFF4B91F1),
+      title: 'Emoji Guess',
+      description:
+          'Decode playful emoji puzzles with your team before time runs out.',
+      eyebrow: 'GUESSING GAME',
+      isAvailable: true,
+    ),
     _GameItem(
       icon: Icons.celebration_rounded,
       accent: Color(0xFFE35EAB),
@@ -123,8 +140,14 @@ class GamesScreen extends StatelessWidget {
           'Pass the Bomb' => PassTheBombScreen(participantIds: participantIds),
           'Draw & Guess' => DrawAndGuessScreen(participantIds: participantIds),
           'Don\'t Say It' => DontSayItScreen(participantIds: participantIds),
-          'Trivia' => const TriviaScreen(),
-          'Emoji Guess' => const EmojiGuessScreen(),
+          'Trivia' => TriviaScreen(
+            participantIds: participantIds,
+            developerPreview: developerPreview,
+          ),
+          'Emoji Guess' => EmojiGuessScreen(
+            participantIds: participantIds,
+            developerPreview: developerPreview,
+          ),
           'Party Games' => const PartyGamesScreen(),
           _ => GamePlaceholderScreen(gameTitle: game.title),
         },

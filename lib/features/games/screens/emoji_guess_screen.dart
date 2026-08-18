@@ -27,10 +27,12 @@ class EmojiGuessScreen extends StatefulWidget {
     super.key,
     this.playMode = GamePlayMode.quickPlay,
     this.participantIds,
+    this.developerPreview = false,
   });
 
   final GamePlayMode playMode;
   final Set<String>? participantIds;
+  final bool developerPreview;
 
   @override
   State<EmojiGuessScreen> createState() => _EmojiGuessScreenState();
@@ -89,7 +91,11 @@ class _EmojiGuessScreenState extends State<EmojiGuessScreen> {
   @override
   void initState() {
     super.initState();
-    _loadFamilyMembers();
+    if (widget.developerPreview) {
+      _loadPreviewFamilyMembers();
+    } else {
+      _loadFamilyMembers();
+    }
   }
 
   @override
@@ -97,6 +103,28 @@ class _EmojiGuessScreenState extends State<EmojiGuessScreen> {
     _timer?.cancel();
     _answerController.dispose();
     super.dispose();
+  }
+
+  void _loadPreviewFamilyMembers() {
+    const members = [
+      _EmojiPlayer(id: 'preview-1', name: 'Alex'),
+      _EmojiPlayer(id: 'preview-2', name: 'Sam'),
+      _EmojiPlayer(id: 'preview-3', name: 'Jordan'),
+      _EmojiPlayer(id: 'preview-4', name: 'Taylor'),
+    ];
+    final availableMembers = widget.participantIds == null
+        ? members
+        : members
+              .where((member) => widget.participantIds!.contains(member.id))
+              .toList();
+
+    _familyMembers
+      ..clear()
+      ..addAll(availableMembers);
+    _selectedPlayerIds
+      ..clear()
+      ..addAll(availableMembers.map((member) => member.id));
+    _isLoadingFamily = false;
   }
 
   Future<void> _loadFamilyMembers() async {
