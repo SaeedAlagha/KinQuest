@@ -360,7 +360,7 @@ class _HomeHeader extends StatelessWidget {
               Text(
                 familyName,
                 style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: AppTheme.secondaryTextColor,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               ),
             ],
@@ -603,13 +603,15 @@ class _MetricCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: AppTheme.surfaceColor,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: AppTheme.outlineColor),
+        border: Border.all(color: colorScheme.outlineVariant),
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -653,7 +655,7 @@ class _SectionHeading extends StatelessWidget {
         Text(
           eyebrow,
           style: Theme.of(context).textTheme.labelSmall?.copyWith(
-            color: AppTheme.primaryColor,
+            color: Theme.of(context).colorScheme.primary,
             fontWeight: FontWeight.w800,
             letterSpacing: 1.1,
           ),
@@ -684,11 +686,13 @@ class _QuickActionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Material(
-      color: AppTheme.surfaceColor,
+      color: colorScheme.surface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(22),
-        side: const BorderSide(color: AppTheme.outlineColor),
+        side: BorderSide(color: colorScheme.outlineVariant),
       ),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
@@ -721,9 +725,9 @@ class _QuickActionCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 12),
-              const Icon(
+              Icon(
                 Icons.arrow_forward_rounded,
-                color: AppTheme.secondaryTextColor,
+                color: colorScheme.onSurfaceVariant,
               ),
             ],
           ),

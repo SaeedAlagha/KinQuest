@@ -9,6 +9,8 @@ class FamilyYearBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Semantics(
       label:
           'UAE Year of Family 2026. Growing in Unity. عام الأسرة، نماء وانتماء.',
@@ -19,12 +21,12 @@ class FamilyYearBanner extends StatelessWidget {
           vertical: compact ? 11 : 13,
         ),
         decoration: BoxDecoration(
-          color: AppTheme.surfaceColor.withValues(alpha: 0.94),
+          color: colorScheme.surface.withValues(alpha: 0.94),
           borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: AppTheme.outlineColor),
+          border: Border.all(color: colorScheme.outlineVariant),
           boxShadow: [
             BoxShadow(
-              color: AppTheme.textColor.withValues(alpha: 0.055),
+              color: colorScheme.shadow.withValues(alpha: 0.12),
               blurRadius: 18,
               offset: const Offset(0, 8),
             ),
@@ -48,7 +50,7 @@ class FamilyYearBanner extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                          color: AppTheme.primaryDark,
+                          color: colorScheme.onSurface,
                           fontWeight: FontWeight.w800,
                         ),
                       ),
@@ -81,7 +83,7 @@ class FamilyYearBanner extends StatelessWidget {
                       vertical: 6,
                     ),
                     decoration: BoxDecoration(
-                      color: AppTheme.backgroundColor,
+                      color: colorScheme.surfaceContainerHighest,
                       borderRadius: BorderRadius.circular(99),
                     ),
                     child: const Text(
@@ -164,7 +166,7 @@ class _UaeFlag extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   const Expanded(child: ColoredBox(color: AppTheme.uaeGreen)),
-                  Expanded(child: ColoredBox(color: AppTheme.surfaceColor)),
+                  const Expanded(child: ColoredBox(color: Colors.white)),
                   const Expanded(child: ColoredBox(color: AppTheme.uaeBlack)),
                 ],
               ),

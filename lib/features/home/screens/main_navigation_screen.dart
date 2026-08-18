@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/branding/app_brand.dart';
-import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/family_year_banner.dart';
 import '../../../core/widgets/sila_brand_mark.dart';
 import '../../../l10n/app_localizations.dart';
@@ -149,6 +148,8 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     final strings = AppLocalizations.of(context)!;
 
     return LayoutBuilder(
@@ -162,19 +163,22 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                 Container(
                   width: 248,
                   decoration: BoxDecoration(
-                    gradient: const LinearGradient(
+                    gradient: LinearGradient(
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
-                      colors: [Colors.white, Color(0xFFF0F7F2)],
+                      colors: [
+                        colorScheme.surface,
+                        colorScheme.surfaceContainerLow,
+                      ],
                     ),
                     border: Border(
                       right: BorderSide(
-                        color: AppTheme.primaryColor.withValues(alpha: 0.1),
+                        color: colorScheme.primary.withValues(alpha: 0.1),
                       ),
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: AppTheme.primaryDark.withValues(alpha: 0.055),
+                        color: colorScheme.shadow.withValues(alpha: 0.12),
                         blurRadius: 24,
                         offset: const Offset(8, 0),
                       ),
@@ -228,20 +232,22 @@ class _MobileNavigationShell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return SafeArea(
       top: false,
       minimum: const EdgeInsets.fromLTRB(12, 0, 12, 10),
       child: Container(
         clipBehavior: Clip.antiAlias,
         decoration: BoxDecoration(
-          color: AppTheme.surfaceColor,
+          color: colorScheme.surface,
           borderRadius: BorderRadius.circular(24),
           border: Border.all(
-            color: AppTheme.primaryColor.withValues(alpha: 0.11),
+            color: colorScheme.primary.withValues(alpha: 0.18),
           ),
           boxShadow: [
             BoxShadow(
-              color: AppTheme.primaryDark.withValues(alpha: 0.13),
+              color: colorScheme.shadow.withValues(alpha: 0.24),
               blurRadius: 28,
               offset: const Offset(0, 10),
             ),
@@ -307,6 +313,8 @@ class _NavigationBrand extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Row(
       children: [
         const SilaBrandMark(size: 42, showShadow: false),
@@ -317,7 +325,7 @@ class _NavigationBrand extends StatelessWidget {
             Text(
               AppBrand.name,
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                color: AppTheme.primaryDark,
+                color: colorScheme.onSurface,
                 fontWeight: FontWeight.w800,
               ),
             ),
@@ -325,7 +333,7 @@ class _NavigationBrand extends StatelessWidget {
               AppBrand.arabicName,
               textDirection: TextDirection.rtl,
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                color: AppTheme.tealColor,
+                color: colorScheme.primary,
                 fontWeight: FontWeight.w700,
               ),
             ),

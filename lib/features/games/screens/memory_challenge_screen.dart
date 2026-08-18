@@ -250,7 +250,7 @@ class _MemoryChallengeScreenState extends State<MemoryChallengeScreen> {
                       'Sila uses your family photos and stories to create unique questions from moments you shared together.',
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: AppTheme.secondaryTextColor,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                     ),
                   ],

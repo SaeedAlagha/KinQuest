@@ -107,6 +107,66 @@ abstract class AppLocalizations {
   /// **'Settings'**
   String get settings;
 
+  /// No description provided for @preferences.
+  ///
+  /// In en, this message translates to:
+  /// **'Preferences'**
+  String get preferences;
+
+  /// No description provided for @appearance.
+  ///
+  /// In en, this message translates to:
+  /// **'Appearance'**
+  String get appearance;
+
+  /// No description provided for @appearanceDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose how Sila looks across the app'**
+  String get appearanceDescription;
+
+  /// No description provided for @selectAppearance.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose your Sila theme'**
+  String get selectAppearance;
+
+  /// No description provided for @silaLightTheme.
+  ///
+  /// In en, this message translates to:
+  /// **'Sila Light'**
+  String get silaLightTheme;
+
+  /// No description provided for @silaLightThemeDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Bright, calm, and familiar'**
+  String get silaLightThemeDescription;
+
+  /// No description provided for @darkTheme.
+  ///
+  /// In en, this message translates to:
+  /// **'Dark'**
+  String get darkTheme;
+
+  /// No description provided for @darkThemeDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'A comfortable palette for evenings'**
+  String get darkThemeDescription;
+
+  /// No description provided for @uaeFamilyYearTheme.
+  ///
+  /// In en, this message translates to:
+  /// **'UAE Family Year 2026'**
+  String get uaeFamilyYearTheme;
+
+  /// No description provided for @uaeFamilyYearThemeDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Warm family colors inspired by the UAE'**
+  String get uaeFamilyYearThemeDescription;
+
   /// No description provided for @language.
   ///
   /// In en, this message translates to:

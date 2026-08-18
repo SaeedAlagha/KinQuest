@@ -15,6 +15,36 @@ class AppLocalizationsAr extends AppLocalizations {
   String get settings => 'الإعدادات';
 
   @override
+  String get preferences => 'التفضيلات';
+
+  @override
+  String get appearance => 'المظهر';
+
+  @override
+  String get appearanceDescription => 'اختر مظهر صلة في جميع أنحاء التطبيق';
+
+  @override
+  String get selectAppearance => 'اختر سمة صلة';
+
+  @override
+  String get silaLightTheme => 'صلة الفاتح';
+
+  @override
+  String get silaLightThemeDescription => 'مظهر مشرق وهادئ ومألوف';
+
+  @override
+  String get darkTheme => 'الوضع الداكن';
+
+  @override
+  String get darkThemeDescription => 'ألوان مريحة للأوقات المسائية';
+
+  @override
+  String get uaeFamilyYearTheme => 'عام الأسرة الإماراتي 2026';
+
+  @override
+  String get uaeFamilyYearThemeDescription => 'ألوان عائلية دافئة مستوحاة من الإمارات';
+
+  @override
   String get language => 'اللغة';
 
   @override

@@ -101,6 +101,7 @@ class _WelcomeHero extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
+    final colorScheme = Theme.of(context).colorScheme;
     final strings = AppLocalizations.of(context)!;
 
     return Column(
@@ -131,7 +132,7 @@ class _WelcomeHero extends StatelessWidget {
               style: textTheme.displaySmall?.copyWith(
                 fontSize: isWide ? 62 : 50,
                 letterSpacing: -1.8,
-                color: AppTheme.primaryDark,
+                color: colorScheme.onSurface,
               ),
             ),
             Container(
@@ -147,7 +148,7 @@ class _WelcomeHero extends StatelessWidget {
                 AppBrand.arabicName,
                 textDirection: TextDirection.rtl,
                 style: textTheme.titleLarge?.copyWith(
-                  color: AppTheme.primaryDark,
+                  color: colorScheme.onSurface,
                   fontWeight: FontWeight.w700,
                 ),
               ),
@@ -159,7 +160,7 @@ class _WelcomeHero extends StatelessWidget {
           AppBrand.tagline,
           textAlign: isWide ? TextAlign.start : TextAlign.center,
           style: textTheme.headlineSmall?.copyWith(
-            color: AppTheme.primaryColor,
+            color: colorScheme.primary,
             height: 1.35,
           ),
         ),
@@ -169,7 +170,7 @@ class _WelcomeHero extends StatelessWidget {
           textAlign: isWide ? TextAlign.start : TextAlign.center,
           textDirection: TextDirection.rtl,
           style: textTheme.titleMedium?.copyWith(
-            color: AppTheme.tealColor,
+            color: colorScheme.primary,
             fontWeight: FontWeight.w700,
           ),
         ),
@@ -180,7 +181,7 @@ class _WelcomeHero extends StatelessWidget {
             strings.welcomePrivateFamilySpace,
             textAlign: isWide ? TextAlign.start : TextAlign.center,
             style: textTheme.bodyLarge?.copyWith(
-              color: AppTheme.secondaryTextColor,
+              color: colorScheme.onSurfaceVariant,
               fontSize: 18,
             ),
           ),
@@ -226,10 +227,12 @@ class _WelcomePill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
-        color: AppTheme.surfaceColor.withValues(alpha: 0.86),
+        color: colorScheme.surface.withValues(alpha: 0.86),
         borderRadius: BorderRadius.circular(99),
         border: Border.all(color: accent.withValues(alpha: 0.18)),
       ),
@@ -242,7 +245,7 @@ class _WelcomePill extends StatelessWidget {
             label,
             style: Theme.of(
               context,
-            ).textTheme.labelLarge?.copyWith(color: AppTheme.textColor),
+            ).textTheme.labelLarge?.copyWith(color: colorScheme.onSurface),
           ),
         ],
       ),
@@ -259,18 +262,19 @@ class _WelcomeActions extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
+    final colorScheme = Theme.of(context).colorScheme;
     final strings = AppLocalizations.of(context)!;
 
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(28),
       decoration: BoxDecoration(
-        color: AppTheme.surfaceColor.withValues(alpha: 0.94),
+        color: colorScheme.surface.withValues(alpha: 0.94),
         borderRadius: BorderRadius.circular(30),
-        border: Border.all(color: Colors.white),
+        border: Border.all(color: colorScheme.outlineVariant),
         boxShadow: [
           BoxShadow(
-            color: AppTheme.textColor.withValues(alpha: 0.08),
+            color: colorScheme.shadow.withValues(alpha: 0.16),
             blurRadius: 40,
             offset: const Offset(0, 18),
           ),
@@ -305,7 +309,7 @@ class _WelcomeActions extends StatelessWidget {
           Text(
             strings.silaEverydayMoments,
             style: textTheme.bodyLarge?.copyWith(
-              color: AppTheme.secondaryTextColor,
+              color: colorScheme.onSurfaceVariant,
             ),
           ),
           const SizedBox(height: 24),
@@ -329,17 +333,17 @@ class _WelcomeActions extends StatelessWidget {
           const SizedBox(height: 18),
           Row(
             children: [
-              const Icon(
+              Icon(
                 Icons.lock_outline_rounded,
                 size: 16,
-                color: AppTheme.secondaryTextColor,
+                color: colorScheme.onSurfaceVariant,
               ),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
                   strings.familyMomentsStayPrivate,
                   style: textTheme.bodySmall?.copyWith(
-                    color: AppTheme.secondaryTextColor,
+                    color: colorScheme.onSurfaceVariant,
                   ),
                 ),
               ),
@@ -357,18 +361,7 @@ class _WelcomeBackground extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DecoratedBox(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Color(0xFFE4F2E9),
-            AppTheme.backgroundColor,
-            Color(0xFFFBE9E9),
-          ],
-          stops: [0, 0.56, 1],
-        ),
-      ),
+      decoration: BoxDecoration(gradient: AppTheme.pageGradientFor(context)),
       child: Stack(
         children: [
           Positioned(
