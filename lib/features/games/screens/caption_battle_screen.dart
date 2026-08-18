@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:math';
 import 'dart:typed_data';
 
@@ -27,10 +28,12 @@ class CaptionBattleScreen extends StatefulWidget {
     super.key,
     this.playMode = GamePlayMode.quickPlay,
     this.participantIds,
+    this.developerPreview = false,
   });
 
   final GamePlayMode playMode;
   final Set<String>? participantIds;
+  final bool developerPreview;
 
   @override
   State<CaptionBattleScreen> createState() => _CaptionBattleScreenState();
@@ -60,6 +63,7 @@ class _CaptionBattleScreenState extends State<CaptionBattleScreen> {
 
   int _roundIndex = 0;
   int _selectedRounds = 3;
+  String _selectedPromptStyle = CaptionBattleAiService.promptStyles.first;
   int _captionPlayerIndex = 0;
   int _voterIndex = 0;
 
@@ -72,13 +76,48 @@ class _CaptionBattleScreenState extends State<CaptionBattleScreen> {
   @override
   void initState() {
     super.initState();
-    _loadGameData();
+    if (widget.developerPreview) {
+      _loadPreviewData();
+    } else {
+      _loadGameData();
+    }
   }
 
   @override
   void dispose() {
     _captionController.dispose();
     super.dispose();
+  }
+
+  void _loadPreviewData() {
+    const members = [
+      _CaptionPlayer(id: 'preview-1', name: 'Alex'),
+      _CaptionPlayer(id: 'preview-2', name: 'Sam'),
+      _CaptionPlayer(id: 'preview-3', name: 'Jordan'),
+      _CaptionPlayer(id: 'preview-4', name: 'Taylor'),
+    ];
+    final availableMembers = widget.participantIds == null
+        ? members
+        : members
+              .where((member) => widget.participantIds!.contains(member.id))
+              .toList();
+    final previewImage = base64Decode(
+      'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=',
+    );
+
+    _familyMembers = availableMembers;
+    _memories = List.generate(
+      5,
+      (index) => _CaptionMemory(
+        id: 'preview-memory-$index',
+        title: 'Developer Family Memory ${index + 1}',
+        imageBytes: previewImage,
+      ),
+    );
+    _selectedPlayerIds
+      ..clear()
+      ..addAll(availableMembers.map((member) => member.id));
+    _isLoading = false;
   }
 
   Future<void> _loadGameData() async {
@@ -261,17 +300,17 @@ class _CaptionBattleScreenState extends State<CaptionBattleScreen> {
         modes = await _aiService.generateModes(
           count: roundCount,
           languageCode: 'en',
+          promptStyle: _selectedPromptStyle,
         );
 
         if (modes.length < roundCount) {
           throw Exception('Not enough modes');
         }
       } catch (_) {
-        const fallbacks = ['Funny Caption', 'Breaking News', 'Movie Title'];
-
-        modes = List.generate(
-          roundCount,
-          (index) => fallbacks[index % fallbacks.length],
+        modes = CaptionBattleAiService.offlineModes(
+          count: roundCount,
+          promptStyle: _selectedPromptStyle,
+          random: _random,
         );
       }
 
@@ -568,6 +607,61 @@ class _CaptionBattleScreenState extends State<CaptionBattleScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
+                      'Prompt variety',
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      'Choose the kind of creative challenge your family wants.',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: AppTheme.secondaryTextColor,
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+                    Wrap(
+                      spacing: 9,
+                      runSpacing: 9,
+                      children: CaptionBattleAiService.promptStyles.map((
+                        style,
+                      ) {
+                        return ChoiceChip(
+                          key: ValueKey('caption-style-$style'),
+                          label: Text(style),
+                          selected: _selectedPromptStyle == style,
+                          onSelected: (_) {
+                            setState(() {
+                              _selectedPromptStyle = style;
+                            });
+                          },
+                        );
+                      }).toList(),
+                    ),
+                    const SizedBox(height: 14),
+                    Text(
+                      CaptionBattleAiService.descriptionForStyle(
+                        _selectedPromptStyle,
+                      ),
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      CaptionBattleAiService.examplesForStyle(
+                        _selectedPromptStyle,
+                      ),
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: AppTheme.primaryColor,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 18),
+              _sectionCard(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
                       'Family photos',
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
@@ -631,22 +725,25 @@ class _CaptionBattleScreenState extends State<CaptionBattleScreen> {
                     ),
                     const SizedBox(height: 14),
                     for (final member in _familyMembers)
-                      CheckboxListTile(
-                        contentPadding: EdgeInsets.zero,
-                        value: _selectedPlayerIds.contains(member.id),
-                        title: Text(member.name),
-                        secondary: const Icon(Icons.person_rounded),
-                        onChanged: widget.participantIds == null
-                            ? (value) {
-                                setState(() {
-                                  if (value == true) {
-                                    _selectedPlayerIds.add(member.id);
-                                  } else {
-                                    _selectedPlayerIds.remove(member.id);
-                                  }
-                                });
-                              }
-                            : null,
+                      Material(
+                        color: Colors.transparent,
+                        child: CheckboxListTile(
+                          contentPadding: EdgeInsets.zero,
+                          value: _selectedPlayerIds.contains(member.id),
+                          title: Text(member.name),
+                          secondary: const Icon(Icons.person_rounded),
+                          onChanged: widget.participantIds == null
+                              ? (value) {
+                                  setState(() {
+                                    if (value == true) {
+                                      _selectedPlayerIds.add(member.id);
+                                    } else {
+                                      _selectedPlayerIds.remove(member.id);
+                                    }
+                                  });
+                                }
+                              : null,
+                        ),
                       ),
                   ],
                 ),
@@ -747,6 +844,13 @@ class _CaptionBattleScreenState extends State<CaptionBattleScreen> {
                         _currentMode,
                         style: Theme.of(context).textTheme.headlineSmall,
                       ),
+                      const SizedBox(height: 6),
+                      Text(
+                        CaptionBattleAiService.instructionForMode(_currentMode),
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: AppTheme.secondaryTextColor,
+                        ),
+                      ),
                       const SizedBox(height: 18),
                       TextField(
                         controller: _captionController,
@@ -754,10 +858,12 @@ class _CaptionBattleScreenState extends State<CaptionBattleScreen> {
                         maxLength: 120,
                         maxLines: 3,
                         textInputAction: TextInputAction.done,
-                        decoration: const InputDecoration(
+                        decoration: InputDecoration(
                           labelText: 'Write your caption',
-                          hintText: 'Make the family laugh...',
-                          border: OutlineInputBorder(),
+                          hintText: CaptionBattleAiService.hintForMode(
+                            _currentMode,
+                          ),
+                          border: const OutlineInputBorder(),
                         ),
                       ),
                       const SizedBox(height: 12),

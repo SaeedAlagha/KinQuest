@@ -118,6 +118,7 @@ class GamesScreen extends StatelessWidget {
           ),
           'Caption Battle' => CaptionBattleScreen(
             participantIds: participantIds,
+            developerPreview: developerPreview,
           ),
           'Pass the Bomb' => PassTheBombScreen(participantIds: participantIds),
           'Draw & Guess' => DrawAndGuessScreen(participantIds: participantIds),
