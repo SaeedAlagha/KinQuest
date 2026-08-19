@@ -87,14 +87,7 @@ class _RewardWishlistNegotiationScreenState
         if (proposal.recipientId == user.uid) {
           initialTabIndex = 2;
         } else if (proposal.requesterId == user.uid) {
-          if (proposal.status == RewardWishlistStatus.accepted ||
-              proposal.status == RewardWishlistStatus.readyToRedeem ||
-              proposal.status == RewardWishlistStatus.redemptionRequested ||
-              proposal.status == RewardWishlistStatus.completed) {
-            initialTabIndex = 3;
-          } else {
-            initialTabIndex = 1;
-          }
+          initialTabIndex = 1;
         }
       }
     }
@@ -137,7 +130,7 @@ class _RewardWishlistNegotiationScreenState
       );
     }
     return DefaultTabController(
-      length: 4,
+      length: 3,
       initialIndex: _initialTabIndex,
       child: Scaffold(
         appBar: AppBar(
@@ -148,7 +141,6 @@ class _RewardWishlistNegotiationScreenState
               Tab(icon: Icon(Icons.add_circle_outline), text: 'New Request'),
               Tab(icon: Icon(Icons.send_outlined), text: 'Sent'),
               Tab(icon: Icon(Icons.inbox_outlined), text: 'Received'),
-              Tab(icon: Icon(Icons.flag_outlined), text: 'My Goals'),
             ],
           ),
         ),
@@ -157,7 +149,6 @@ class _RewardWishlistNegotiationScreenState
             _buildNewRequestTab(familyId: familyId, userId: user.uid),
             _buildSentTab(familyId: familyId, userId: user.uid),
             _buildReceivedTab(familyId: familyId, userId: user.uid),
-            _buildGoalsTab(familyId: familyId, userId: user.uid),
           ],
         ),
       ),
@@ -466,99 +457,6 @@ class _RewardWishlistNegotiationScreenState
     );
   }
 
-  Widget _buildGoalsTab({required String familyId, required String userId}) {
-    return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-      stream: FirebaseFirestore.instance
-          .collection('users')
-          .doc(userId)
-          .snapshots(),
-      builder: (context, userSnapshot) {
-        if (!userSnapshot.hasData) {
-          return const Center(child: CircularProgressIndicator());
-        }
-
-        final userData = userSnapshot.data?.data() ?? const <String, dynamic>{};
-
-        final currentTokens = (userData['tokens'] as num?)?.toInt() ?? 0;
-        final dailyWins = (userData['dailyWins'] as num?)?.toInt() ?? 0;
-        final weeklyWins = (userData['weeklyWins'] as num?)?.toInt() ?? 0;
-        final monthlyWins = (userData['monthlyWins'] as num?)?.toInt() ?? 0;
-        final missionsCompleted =
-            (userData['missionsCompleted'] as num?)?.toInt() ?? 0;
-
-        return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-          stream: _proposalStream(familyId),
-          builder: (context, proposalSnapshot) {
-            if (!proposalSnapshot.hasData) {
-              return const Center(child: CircularProgressIndicator());
-            }
-
-            final goals = proposalSnapshot.data!.docs
-                .map(RewardWishlistProposal.fromDocument)
-                .where(
-                  (proposal) =>
-                      proposal.requesterId == userId &&
-                      _matchesNotificationProposal(proposal) &&
-                      (proposal.status == RewardWishlistStatus.accepted ||
-                          proposal.status ==
-                              RewardWishlistStatus.readyToRedeem ||
-                          proposal.status ==
-                              RewardWishlistStatus.redemptionRequested ||
-                          proposal.status == RewardWishlistStatus.completed),
-                )
-                .toList();
-
-            if (goals.isEmpty) {
-              return const _EmptyState(
-                icon: Icons.flag_outlined,
-                title: 'No active goals',
-                message:
-                    'When you accept a family member\'s reward offer, it becomes a goal here.',
-              );
-            }
-
-            return ListView.separated(
-              padding: const EdgeInsets.all(16),
-              itemCount: goals.length,
-              separatorBuilder: (_, _) => const SizedBox(height: 12),
-              itemBuilder: (context, index) {
-                final proposal = goals[index];
-
-                return _GoalCard(
-                  proposal: proposal,
-                  currentTokens: currentTokens,
-                  dailyWins: dailyWins,
-                  weeklyWins: weeklyWins,
-                  monthlyWins: monthlyWins,
-                  missionsCompleted: missionsCompleted,
-                  onRedeem: proposal.status == RewardWishlistStatus.accepted
-                      ? () async {
-                          try {
-                            await _rewardsService.requestWishlistRedemption(
-                              familyId: familyId,
-                              proposalId: proposal.id,
-                              requesterId: userId,
-                            );
-
-                            _showMessage(
-                              'Redemption request sent to ${proposal.recipientName}.',
-                            );
-                          } catch (error) {
-                            _showMessage(
-                              error.toString().replaceFirst('Exception: ', ''),
-                            );
-                          }
-                        }
-                      : null,
-                );
-              },
-            );
-          },
-        );
-      },
-    );
-  }
-
   Future<void> _acceptOffer(
     String familyId,
     RewardWishlistProposal proposal,
@@ -571,7 +469,7 @@ class _RewardWishlistNegotiationScreenState
         requesterId: userId,
       );
 
-      _showMessage('${proposal.title} was added to My Goals.');
+      _showMessage('${proposal.title} was added to your Rewards goals.');
     } catch (error) {
       _showMessage(error.toString().replaceFirst('Exception: ', ''));
     }
@@ -1036,193 +934,6 @@ class _RequirementsList extends StatelessWidget {
   }
 }
 
-class _GoalCard extends StatelessWidget {
-  const _GoalCard({
-    required this.proposal,
-    required this.currentTokens,
-    required this.dailyWins,
-    required this.weeklyWins,
-    required this.monthlyWins,
-    required this.missionsCompleted,
-    this.onRedeem,
-  });
-
-  final RewardWishlistProposal proposal;
-
-  final int currentTokens;
-  final int dailyWins;
-  final int weeklyWins;
-  final int monthlyWins;
-  final int missionsCompleted;
-  final Future<void> Function()? onRedeem;
-  @override
-  Widget build(BuildContext context) {
-    final requirements = <_GoalProgress>[];
-
-    if (proposal.tokenRequirement > 0) {
-      requirements.add(
-        _GoalProgress(
-          label: 'Tokens',
-          current: currentTokens,
-          required: proposal.tokenRequirement,
-        ),
-      );
-    }
-
-    if (proposal.dailyWinsRequired > 0) {
-      requirements.add(
-        _GoalProgress(
-          label: 'Daily Challenge wins',
-          current: dailyWins,
-          required: proposal.dailyWinsRequired,
-        ),
-      );
-    }
-
-    if (proposal.weeklyWinsRequired > 0) {
-      requirements.add(
-        _GoalProgress(
-          label: 'Weekly Championship wins',
-          current: weeklyWins,
-          required: proposal.weeklyWinsRequired,
-        ),
-      );
-    }
-
-    if (proposal.monthlyWinsRequired > 0) {
-      requirements.add(
-        _GoalProgress(
-          label: 'Monthly Cup wins',
-          current: monthlyWins,
-          required: proposal.monthlyWinsRequired,
-        ),
-      );
-    }
-
-    if (proposal.missionsRequired > 0) {
-      requirements.add(
-        _GoalProgress(
-          label: 'Missions completed',
-          current: missionsCompleted,
-          required: proposal.missionsRequired,
-        ),
-      );
-    }
-
-    final complete =
-        requirements.isNotEmpty &&
-        requirements.every(
-          (requirement) => requirement.current >= requirement.required,
-        );
-
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(18),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                CircleAvatar(
-                  child: Icon(
-                    complete ? Icons.emoji_events : Icons.flag_outlined,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    proposal.title,
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Text('Agreed with ${proposal.recipientName}'),
-            const SizedBox(height: 16),
-            ...requirements.map(
-              (requirement) => Padding(
-                padding: const EdgeInsets.only(bottom: 14),
-                child: _ProgressRow(progress: requirement),
-              ),
-            ),
-            if (complete) ...[
-              const Card(
-                child: Padding(
-                  padding: EdgeInsets.all(12),
-                  child: Row(
-                    children: [
-                      Icon(Icons.celebration_outlined),
-                      SizedBox(width: 10),
-                      Expanded(child: Text('All requirements completed!')),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 10),
-              if (proposal.status == RewardWishlistStatus.accepted &&
-                  onRedeem != null)
-                SizedBox(
-                  width: double.infinity,
-                  child: FilledButton.icon(
-                    onPressed: () async {
-                      await onRedeem!();
-                    },
-                    icon: const Icon(Icons.redeem_outlined),
-                    label: const Text('Redeem Reward'),
-                  ),
-                ),
-              if (proposal.status == RewardWishlistStatus.redemptionRequested)
-                const Text(
-                  'Waiting for the other family member to confirm fulfillment.',
-                ),
-              if (proposal.status == RewardWishlistStatus.completed)
-                const Text(
-                  'Reward completed.',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _ProgressRow extends StatelessWidget {
-  const _ProgressRow({required this.progress});
-
-  final _GoalProgress progress;
-
-  @override
-  Widget build(BuildContext context) {
-    final value = progress.required <= 0
-        ? 1.0
-        : (progress.current / progress.required).clamp(0.0, 1.0);
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Expanded(
-              child: Text(
-                progress.label,
-                style: const TextStyle(fontWeight: FontWeight.w600),
-              ),
-            ),
-            Text('${progress.current} / ${progress.required}'),
-          ],
-        ),
-        const SizedBox(height: 6),
-        LinearProgressIndicator(value: value),
-      ],
-    );
-  }
-}
-
 class _StatusChip extends StatelessWidget {
   const _StatusChip({required this.status});
 
@@ -1301,16 +1012,4 @@ class _FamilyMember {
 
   final String id;
   final String name;
-}
-
-class _GoalProgress {
-  const _GoalProgress({
-    required this.label,
-    required this.current,
-    required this.required,
-  });
-
-  final String label;
-  final int current;
-  final int required;
 }

@@ -3,11 +3,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../models/family_reward.dart';
+import '../models/reward_wishlist_proposal.dart';
 import '../services/rewards_service.dart';
-import 'manage_rewards_screen.dart';
-import 'reward_approval_screen.dart';
 import 'token_history_screen.dart';
-import 'my_reward_requests_screen.dart';
 import 'my_digital_rewards_screen.dart';
 import 'reward_wishlist_negotiation_screen.dart';
 
@@ -26,73 +24,6 @@ class _RewardsHubScreenState extends State<RewardsHubScreen> {
   RewardsService get _service => _rewardsService ??= RewardsService();
 
   bool _isProcessing = false;
-
-  Future<void> _requestFamilyReward({
-    required String familyId,
-    required String userId,
-    required FamilyReward reward,
-  }) async {
-    if (_isProcessing) return;
-
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Request reward?'),
-          content: Text(
-            'Request "${reward.title}" for ${reward.tokenCost} Tokens?\n\n'
-            'Your Tokens will only be deducted if the request is approved.',
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context, false),
-              child: const Text('Cancel'),
-            ),
-            FilledButton(
-              onPressed: () => Navigator.pop(context, true),
-              child: const Text('Request'),
-            ),
-          ],
-        );
-      },
-    );
-
-    if (confirmed != true || !mounted) return;
-
-    setState(() {
-      _isProcessing = true;
-    });
-
-    try {
-      await _service.createRewardRequest(
-        familyId: familyId,
-        userId: userId,
-        reward: reward,
-      );
-
-      if (!mounted) return;
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Reward request sent. Tokens will be deducted after approval.',
-          ),
-        ),
-      );
-    } catch (error) {
-      if (!mounted) return;
-
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(_messageFromError(error))));
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isProcessing = false;
-        });
-      }
-    }
-  }
 
   Future<void> _purchaseDigitalReward({
     required String familyId,
@@ -206,7 +137,13 @@ class _RewardsHubScreenState extends State<RewardsHubScreen> {
 
         final userData = userSnapshot.data?.data();
         final familyId = userData?['familyId']?.toString().trim();
+
         final tokens = (userData?['tokens'] as num?)?.toInt() ?? 0;
+        final dailyWins = (userData?['dailyWins'] as num?)?.toInt() ?? 0;
+        final weeklyWins = (userData?['weeklyWins'] as num?)?.toInt() ?? 0;
+        final monthlyWins = (userData?['monthlyWins'] as num?)?.toInt() ?? 0;
+        final missionsCompleted =
+            (userData?['missionsCompleted'] as num?)?.toInt() ?? 0;
 
         if (familyId == null || familyId.isEmpty) {
           return _RewardsScaffold(
@@ -215,7 +152,7 @@ class _RewardsHubScreenState extends State<RewardsHubScreen> {
               icon: Icons.family_restroom_rounded,
               title: 'Join a family first',
               message:
-                  'Family Rewards become available after you create or join a family.',
+                  'Join or create a family to use Wishlist goals and rewards.',
             ),
           );
         }
@@ -224,6 +161,10 @@ class _RewardsHubScreenState extends State<RewardsHubScreen> {
           familyId: familyId,
           userId: user.uid,
           tokens: tokens,
+          dailyWins: dailyWins,
+          weeklyWins: weeklyWins,
+          monthlyWins: monthlyWins,
+          missionsCompleted: missionsCompleted,
         );
       },
     );
@@ -233,210 +174,221 @@ class _RewardsHubScreenState extends State<RewardsHubScreen> {
     required String familyId,
     required String userId,
     required int tokens,
+    required int dailyWins,
+    required int weeklyWins,
+    required int monthlyWins,
+    required int missionsCompleted,
   }) {
-    return FutureBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-      future: FirebaseFirestore.instance
+    return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+      stream: FirebaseFirestore.instance
           .collection('families')
           .doc(familyId)
-          .get(),
-      builder: (context, familySnapshot) {
-        final familyData = familySnapshot.data?.data();
-        final ownerId = familyData?['ownerId']?.toString();
+          .collection('rewards')
+          .snapshots(),
+      builder: (context, rewardsSnapshot) {
+        if (rewardsSnapshot.connectionState == ConnectionState.waiting &&
+            !rewardsSnapshot.hasData) {
+          return _RewardsScaffold(
+            tokens: tokens,
+            child: const Center(
+              child: Padding(
+                padding: EdgeInsets.all(32),
+                child: CircularProgressIndicator(),
+              ),
+            ),
+          );
+        }
 
-        final approverIds = List<String>.from(
-          familyData?['rewardApproverIds'] ?? const <String>[],
-        );
+        if (rewardsSnapshot.hasError) {
+          return _RewardsScaffold(
+            tokens: tokens,
+            child: const _RewardsMessage(
+              icon: Icons.error_outline_rounded,
+              title: 'Rewards could not be loaded',
+              message: 'Please try again in a moment.',
+            ),
+          );
+        }
 
-        final isFamilyAdmin = ownerId == userId;
-        final canApproveRewards = isFamilyAdmin || approverIds.contains(userId);
+        final digitalRewards =
+            rewardsSnapshot.data?.docs
+                .map(FamilyReward.fromDocument)
+                .where(
+                  (reward) =>
+                      reward.active && reward.type == FamilyRewardType.digital,
+                )
+                .toList() ??
+            [];
+
+        digitalRewards.sort((a, b) => a.tokenCost.compareTo(b.tokenCost));
+
         return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
           stream: FirebaseFirestore.instance
               .collection('families')
               .doc(familyId)
-              .collection('rewards')
+              .collection('rewardWishlistProposals')
+              .where('requesterId', isEqualTo: userId)
               .snapshots(),
-          builder: (context, rewardsSnapshot) {
-            if (rewardsSnapshot.connectionState == ConnectionState.waiting &&
-                !rewardsSnapshot.hasData) {
-              return _RewardsScaffold(
-                tokens: tokens,
-                child: const Center(
-                  child: Padding(
-                    padding: EdgeInsets.all(32),
-                    child: CircularProgressIndicator(),
-                  ),
-                ),
-              );
-            }
-
-            if (rewardsSnapshot.hasError) {
-              return _RewardsScaffold(
-                tokens: tokens,
-                child: const _RewardsMessage(
-                  icon: Icons.error_outline_rounded,
-                  title: 'Rewards could not be loaded',
-                  message: 'Please try again in a moment.',
-                ),
-              );
-            }
-
-            final rewards =
-                rewardsSnapshot.data?.docs
-                    .map(FamilyReward.fromDocument)
-                    .where((reward) => reward.active)
+          builder: (context, proposalSnapshot) {
+            final goals =
+                proposalSnapshot.data?.docs
+                    .map(RewardWishlistProposal.fromDocument)
+                    .where(
+                      (proposal) =>
+                          proposal.status == RewardWishlistStatus.accepted ||
+                          proposal.status ==
+                              RewardWishlistStatus.readyToRedeem ||
+                          proposal.status ==
+                              RewardWishlistStatus.redemptionRequested ||
+                          proposal.status == RewardWishlistStatus.completed,
+                    )
                     .toList() ??
                 [];
 
-            final familyRewards = rewards
-                .where((reward) => reward.type == FamilyRewardType.family)
-                .toList();
+            goals.sort(
+              (a, b) => (b.createdAt?.millisecondsSinceEpoch ?? 0).compareTo(
+                a.createdAt?.millisecondsSinceEpoch ?? 0,
+              ),
+            );
 
-            final digitalRewards = rewards
-                .where((reward) => reward.type == FamilyRewardType.digital)
-                .toList();
+            return _RewardsScaffold(
+              tokens: tokens,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const _RewardsIntro(),
+                  const SizedBox(height: 20),
 
-            familyRewards.sort((a, b) => a.tokenCost.compareTo(b.tokenCost));
-
-            digitalRewards.sort((a, b) => a.tokenCost.compareTo(b.tokenCost));
-
-            return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-              stream: FirebaseFirestore.instance
-                  .collection('families')
-                  .doc(familyId)
-                  .collection('rewardRequests')
-                  .where('userId', isEqualTo: userId)
-                  .where('status', isEqualTo: 'pending')
-                  .snapshots(),
-              builder: (context, requestsSnapshot) {
-                final pendingRewardIds =
-                    requestsSnapshot.data?.docs
-                        .map((doc) => doc.data()['rewardId']?.toString())
-                        .whereType<String>()
-                        .toSet() ??
-                    <String>{};
-
-                return _RewardsScaffold(
-                  tokens: tokens,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  Wrap(
+                    spacing: 12,
+                    runSpacing: 12,
                     children: [
-                      const _RewardsIntro(),
-                      const SizedBox(height: 20),
-                      Wrap(
-                        spacing: 12,
-                        runSpacing: 12,
-                        children: [
-                          FilledButton.tonalIcon(
-                            onPressed: () => Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => const MyRewardRequestsScreen(),
-                              ),
-                            ),
-                            icon: const Icon(Icons.card_giftcard_outlined),
-                            label: const Text('My Requests'),
+                      FilledButton.tonalIcon(
+                        onPressed: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                const RewardWishlistNegotiationScreen(),
                           ),
-
-                          FilledButton.tonalIcon(
-                            onPressed: () => Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => const MyDigitalRewardsScreen(),
-                              ),
-                            ),
-                            icon: const Icon(Icons.workspace_premium_outlined),
-                            label: const Text('My Digital Rewards'),
-                          ),
-
-                          FilledButton.tonalIcon(
-                            onPressed: () => Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) =>
-                                    const RewardWishlistNegotiationScreen(),
-                              ),
-                            ),
-                            icon: const Icon(Icons.lightbulb_outline),
-                            label: const Text('Wishlist'),
-                          ),
-
-                          FilledButton.tonalIcon(
-                            onPressed: () => Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => const TokenHistoryScreen(),
-                              ),
-                            ),
-                            icon: const Icon(Icons.receipt_long_rounded),
-                            label: const Text('Token History'),
-                          ),
-
-                          if (isFamilyAdmin)
-                            FilledButton.icon(
-                              onPressed: () => Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => const ManageRewardsScreen(),
-                                ),
-                              ),
-                              icon: const Icon(
-                                Icons.admin_panel_settings_rounded,
-                              ),
-                              label: const Text('Manage Rewards'),
-                            ),
-
-                          if (canApproveRewards)
-                            FilledButton.tonalIcon(
-                              onPressed: () => Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => const RewardApprovalScreen(),
-                                ),
-                              ),
-                              icon: const Icon(Icons.fact_check_rounded),
-                              label: const Text('Reward Approvals'),
-                            ),
-                        ],
-                      ),
-
-                      const SizedBox(height: 24),
-                      _RewardSection(
-                        title: 'Family Rewards',
-                        subtitle:
-                            'Use Tokens for family experiences and privileges. Approval may be required.',
-                        emptyMessage:
-                            'Your family has not created any family rewards yet.',
-                        rewards: familyRewards,
-                        tokens: tokens,
-                        pendingRewardIds: pendingRewardIds,
-                        isProcessing: _isProcessing,
-                        onPressed: (reward) => _requestFamilyReward(
-                          familyId: familyId,
-                          userId: userId,
-                          reward: reward,
                         ),
+                        icon: const Icon(Icons.lightbulb_outline),
+                        label: const Text('Wishlist Requests'),
                       ),
-                      const SizedBox(height: 34),
-                      _RewardSection(
-                        title: 'Digital Rewards',
-                        subtitle:
-                            'Unlock profile cosmetics and other permanent in-app rewards.',
-                        emptyMessage:
-                            'There are no digital rewards available yet.',
-                        rewards: digitalRewards,
-                        tokens: tokens,
-                        isProcessing: _isProcessing,
-                        pendingRewardIds: const <String>{},
-                        onPressed: (reward) => _purchaseDigitalReward(
-                          familyId: familyId,
-                          userId: userId,
-                          reward: reward,
+                      FilledButton.tonalIcon(
+                        onPressed: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const MyDigitalRewardsScreen(),
+                          ),
                         ),
+                        icon: const Icon(Icons.workspace_premium_outlined),
+                        label: const Text('My Digital Rewards'),
+                      ),
+                      FilledButton.tonalIcon(
+                        onPressed: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const TokenHistoryScreen(),
+                          ),
+                        ),
+                        icon: const Icon(Icons.receipt_long_rounded),
+                        label: const Text('Token History'),
                       ),
                     ],
                   ),
-                );
-              },
+
+                  const SizedBox(height: 30),
+
+                  Text(
+                    'My Goals',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    'Accepted Wishlist offers appear here and update as you make progress.',
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                  const SizedBox(height: 16),
+
+                  if (proposalSnapshot.connectionState ==
+                          ConnectionState.waiting &&
+                      !proposalSnapshot.hasData)
+                    const Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(24),
+                        child: CircularProgressIndicator(),
+                      ),
+                    )
+                  else if (goals.isEmpty)
+                    const _RewardsMessage(
+                      icon: Icons.flag_outlined,
+                      title: 'No active goals',
+                      message:
+                          'Accept a Wishlist offer and your goal will appear here.',
+                    )
+                  else
+                    ...goals.map(
+                      (proposal) => Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: _WishlistGoalCard(
+                          proposal: proposal,
+                          tokens: tokens,
+                          dailyWins: dailyWins,
+                          weeklyWins: weeklyWins,
+                          monthlyWins: monthlyWins,
+                          missionsCompleted: missionsCompleted,
+                          onRedeem: () async {
+                            try {
+                              await _service.requestWishlistRedemption(
+                                familyId: familyId,
+                                proposalId: proposal.id,
+                                requesterId: userId,
+                              );
+
+                              if (!context.mounted) return;
+
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    'Redemption request sent to ${proposal.recipientName}.',
+                                  ),
+                                ),
+                              );
+                            } catch (error) {
+                              if (!context.mounted) return;
+
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(_messageFromError(error)),
+                                ),
+                              );
+                            }
+                          },
+                        ),
+                      ),
+                    ),
+
+                  const SizedBox(height: 34),
+
+                  _RewardSection(
+                    title: 'Digital Rewards',
+                    subtitle:
+                        'Unlock built-in KinQuest cosmetics and app rewards with Tokens.',
+                    emptyMessage: 'There are no digital rewards available yet.',
+                    rewards: digitalRewards,
+                    tokens: tokens,
+                    isProcessing: _isProcessing,
+                    pendingRewardIds: const <String>{},
+                    onPressed: (reward) => _purchaseDigitalReward(
+                      familyId: familyId,
+                      userId: userId,
+                      reward: reward,
+                    ),
+                  ),
+                ],
+              ),
             );
           },
         );
@@ -446,28 +398,6 @@ class _RewardsHubScreenState extends State<RewardsHubScreen> {
 
   Widget _buildDeveloperPreview() {
     const previewRewards = [
-      FamilyReward(
-        id: 'movie-night',
-        title: 'Choose Movie Night',
-        description: 'Pick the movie for the next family movie night.',
-        tokenCost: 250,
-        type: FamilyRewardType.family,
-        approvalRequired: true,
-        availability: RewardAvailability.weekly,
-        active: true,
-        createdBy: 'preview-owner',
-      ),
-      FamilyReward(
-        id: 'choose-dinner',
-        title: 'Choose Dinner',
-        description: 'Choose what the family has for dinner.',
-        tokenCost: 350,
-        type: FamilyRewardType.family,
-        approvalRequired: true,
-        availability: RewardAvailability.weekly,
-        active: true,
-        createdBy: 'preview-owner',
-      ),
       FamilyReward(
         id: 'champion-frame',
         title: 'Champion Profile Frame',
@@ -481,10 +411,6 @@ class _RewardsHubScreenState extends State<RewardsHubScreen> {
       ),
     ];
 
-    final familyRewards = previewRewards
-        .where((reward) => reward.type == FamilyRewardType.family)
-        .toList();
-
     final digitalRewards = previewRewards
         .where((reward) => reward.type == FamilyRewardType.digital)
         .toList();
@@ -496,24 +422,7 @@ class _RewardsHubScreenState extends State<RewardsHubScreen> {
         children: [
           const _RewardsIntro(),
           const SizedBox(height: 30),
-          _RewardSection(
-            title: 'Family Rewards',
-            subtitle:
-                'Use Tokens for family experiences and privileges. Approval may be required.',
-            emptyMessage: '',
-            rewards: familyRewards,
-            tokens: 1350,
-            isProcessing: false,
-            pendingRewardIds: const <String>{},
-            onPressed: (_) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Developer Preview is read-only.'),
-                ),
-              );
-            },
-          ),
-          const SizedBox(height: 34),
+
           _RewardSection(
             title: 'Digital Rewards',
             subtitle:
@@ -649,6 +558,218 @@ class _RewardsIntro extends StatelessWidget {
           'for family experiences or digital unlocks.',
           style: Theme.of(context).textTheme.bodyLarge,
         ),
+      ],
+    );
+  }
+}
+
+class _WishlistGoalCard extends StatelessWidget {
+  const _WishlistGoalCard({
+    required this.proposal,
+    required this.tokens,
+    required this.dailyWins,
+    required this.weeklyWins,
+    required this.monthlyWins,
+    required this.missionsCompleted,
+    required this.onRedeem,
+  });
+
+  final RewardWishlistProposal proposal;
+  final int tokens;
+  final int dailyWins;
+  final int weeklyWins;
+  final int monthlyWins;
+  final int missionsCompleted;
+  final Future<void> Function() onRedeem;
+
+  @override
+  Widget build(BuildContext context) {
+    final requirements = <_WishlistGoalProgress>[];
+
+    if (proposal.tokenRequirement > 0) {
+      requirements.add(
+        _WishlistGoalProgress(
+          label: 'Tokens',
+          current: tokens,
+          required: proposal.tokenRequirement,
+        ),
+      );
+    }
+
+    if (proposal.dailyWinsRequired > 0) {
+      requirements.add(
+        _WishlistGoalProgress(
+          label: 'Daily Challenge wins',
+          current: dailyWins,
+          required: proposal.dailyWinsRequired,
+        ),
+      );
+    }
+
+    if (proposal.weeklyWinsRequired > 0) {
+      requirements.add(
+        _WishlistGoalProgress(
+          label: 'Weekly Championship wins',
+          current: weeklyWins,
+          required: proposal.weeklyWinsRequired,
+        ),
+      );
+    }
+
+    if (proposal.monthlyWinsRequired > 0) {
+      requirements.add(
+        _WishlistGoalProgress(
+          label: 'Monthly Cup wins',
+          current: monthlyWins,
+          required: proposal.monthlyWinsRequired,
+        ),
+      );
+    }
+
+    if (proposal.missionsRequired > 0) {
+      requirements.add(
+        _WishlistGoalProgress(
+          label: 'Missions completed',
+          current: missionsCompleted,
+          required: proposal.missionsRequired,
+        ),
+      );
+    }
+
+    final complete =
+        requirements.isNotEmpty &&
+        requirements.every(
+          (requirement) => requirement.current >= requirement.required,
+        );
+
+    final canRedeem =
+        complete &&
+        (proposal.status == RewardWishlistStatus.accepted ||
+            proposal.status == RewardWishlistStatus.readyToRedeem);
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(18),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                CircleAvatar(
+                  child: Icon(
+                    complete ? Icons.emoji_events_rounded : Icons.flag_outlined,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    proposal.title,
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text('Agreed with ${proposal.recipientName}'),
+            if (proposal.description.trim().isNotEmpty) ...[
+              const SizedBox(height: 6),
+              Text(proposal.description),
+            ],
+            const SizedBox(height: 16),
+
+            ...requirements.map(
+              (requirement) => Padding(
+                padding: const EdgeInsets.only(bottom: 14),
+                child: _WishlistGoalProgressRow(progress: requirement),
+              ),
+            ),
+
+            if (complete) ...[
+              const Card(
+                child: Padding(
+                  padding: EdgeInsets.all(12),
+                  child: Row(
+                    children: [
+                      Icon(Icons.celebration_outlined),
+                      SizedBox(width: 10),
+                      Expanded(child: Text('All requirements completed!')),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 10),
+            ],
+
+            if (canRedeem)
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton.icon(
+                  onPressed: () async {
+                    await onRedeem();
+                  },
+                  icon: const Icon(Icons.redeem_outlined),
+                  label: const Text('Redeem Reward'),
+                ),
+              ),
+
+            if (proposal.status == RewardWishlistStatus.redemptionRequested)
+              const Text(
+                'Waiting for the other family member to confirm fulfillment.',
+              ),
+
+            if (proposal.status == RewardWishlistStatus.completed)
+              const Text(
+                'Reward completed.',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _WishlistGoalProgress {
+  const _WishlistGoalProgress({
+    required this.label,
+    required this.current,
+    required this.required,
+  });
+
+  final String label;
+  final int current;
+  final int required;
+}
+
+class _WishlistGoalProgressRow extends StatelessWidget {
+  const _WishlistGoalProgressRow({required this.progress});
+
+  final _WishlistGoalProgress progress;
+
+  @override
+  Widget build(BuildContext context) {
+    final value = progress.required <= 0
+        ? 1.0
+        : (progress.current / progress.required).clamp(0.0, 1.0);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                progress.label,
+                style: const TextStyle(fontWeight: FontWeight.w600),
+              ),
+            ),
+            Text('${progress.current} / ${progress.required}'),
+          ],
+        ),
+        const SizedBox(height: 6),
+        LinearProgressIndicator(value: value),
       ],
     );
   }
