@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kinquest/features/rewards/digital/digital_reward_visuals.dart';
 import 'package:kinquest/features/rewards/screens/rewards_hub_screen.dart';
+import 'package:kinquest/l10n/app_localizations.dart';
 
 void main() {
   testWidgets('catalogue is responsive and blocks preview purchases', (
@@ -43,5 +44,9 @@ void main() {
 }
 
 Widget _testApp() {
-  return const MaterialApp(home: RewardsHubScreen(developerPreview: true));
+  return const MaterialApp(
+    localizationsDelegates: AppLocalizations.localizationsDelegates,
+    supportedLocales: AppLocalizations.supportedLocales,
+    home: RewardsHubScreen(developerPreview: true),
+  );
 }

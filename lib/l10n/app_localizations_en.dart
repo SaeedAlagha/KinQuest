@@ -1578,7 +1578,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get monthlyWins => 'Monthly Wins';
 
   @override
-  String get missionsCompleted => 'Missions Completed';
+  String get missionsCompleted => 'Missions completed';
 
   @override
   String get memoriesAdded => 'Memories Added';
@@ -2322,4 +2322,286 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get oneFinalQuestion => 'One final question decides the winner.';
+
+  @override
+  String get wishlist => 'Wishlist';
+
+  @override
+  String get joinFamilyWishlist => 'Join a family to use Wishlist rewards.';
+
+  @override
+  String get newRequest => 'New Request';
+
+  @override
+  String get sent => 'Sent';
+
+  @override
+  String get received => 'Received';
+
+  @override
+  String get familyNotFound => 'Family not found.';
+
+  @override
+  String get noOtherFamilyRewardMembers => 'There are no other family members to request a reward from.';
+
+  @override
+  String wishlistRequestSent(String name) {
+    return 'Wishlist request sent to $name.';
+  }
+
+  @override
+  String get noSentRequests => 'No sent requests';
+
+  @override
+  String get noSentRequestsDescription => 'Wishlist requests you send to family members will appear here.';
+
+  @override
+  String get noReceivedRequests => 'No received requests';
+
+  @override
+  String get noReceivedRequestsDescription => 'When a family member requests a reward from you, it will appear here.';
+
+  @override
+  String get requestedFrom => 'Requested from';
+
+  @override
+  String get requestedBy => 'Requested by';
+
+  @override
+  String get accept => 'Accept';
+
+  @override
+  String get reject => 'Reject';
+
+  @override
+  String get makeOffer => 'Make Offer';
+
+  @override
+  String get decline => 'Decline';
+
+  @override
+  String get confirmFulfillment => 'Confirm Fulfillment';
+
+  @override
+  String rewardMarkedFulfilled(String reward) {
+    return '$reward marked as fulfilled.';
+  }
+
+  @override
+  String rewardAddedToGoals(String reward) {
+    return '$reward was added to your Rewards goals.';
+  }
+
+  @override
+  String get offerRejected => 'Offer rejected.';
+
+  @override
+  String get wishlistRequestDeclined => 'Wishlist request declined.';
+
+  @override
+  String offerForReward(String reward) {
+    return 'Offer for $reward';
+  }
+
+  @override
+  String get offerRequirementsDescription => 'Set the progress they must complete after accepting to earn this reward.';
+
+  @override
+  String get tokensRequired => 'Tokens required';
+
+  @override
+  String get dailyChallengeWins => 'Daily Challenge wins';
+
+  @override
+  String get weeklyChampionshipWins => 'Weekly Championship wins';
+
+  @override
+  String get monthlyCupWins => 'Monthly Cup wins';
+
+  @override
+  String get sendOffer => 'Send Offer';
+
+  @override
+  String get addOfferRequirement => 'Add at least one requirement to the offer.';
+
+  @override
+  String offerSentTo(String name) {
+    return 'Offer sent to $name.';
+  }
+
+  @override
+  String get chooseRewardRecipient => 'Choose who you want to request this reward from.';
+
+  @override
+  String get rewardMinimumLength => 'Enter a reward with at least 3 characters.';
+
+  @override
+  String get whatWouldYouLikeToEarn => 'What would you like to earn?';
+
+  @override
+  String get chooseMemberForOffer => 'Choose a family member and ask them to make you an offer.';
+
+  @override
+  String get requestFrom => 'Request from';
+
+  @override
+  String get reward => 'Reward';
+
+  @override
+  String get rewardExample => 'Example: Family day out';
+
+  @override
+  String get optionalMessage => 'Message (optional)';
+
+  @override
+  String get wishlistMessageExample => 'Example: I would like to earn this as a long-term goal.';
+
+  @override
+  String get sending => 'Sending...';
+
+  @override
+  String get sendRequest => 'Send Request';
+
+  @override
+  String personLabel(String label, String name) {
+    return '$label: $name';
+  }
+
+  @override
+  String requirementTokens(int count) {
+    return '$count Tokens';
+  }
+
+  @override
+  String requirementDailyWins(int count) {
+    return '$count Daily Challenge wins';
+  }
+
+  @override
+  String requirementWeeklyWins(int count) {
+    return '$count Weekly Championship wins';
+  }
+
+  @override
+  String requirementMonthlyWins(int count) {
+    return '$count Monthly Cup wins';
+  }
+
+  @override
+  String requirementMissions(int count) {
+    return '$count missions completed';
+  }
+
+  @override
+  String get noRequirementsSet => 'No requirements set.';
+
+  @override
+  String get requirements => 'Requirements';
+
+  @override
+  String get statusRequested => 'Requested';
+
+  @override
+  String get statusOfferMade => 'Offer Made';
+
+  @override
+  String get statusActiveGoal => 'Active Goal';
+
+  @override
+  String get statusDeclined => 'Declined';
+
+  @override
+  String get statusRejected => 'Rejected';
+
+  @override
+  String get statusReady => 'Ready';
+
+  @override
+  String get statusRedeeming => 'Redeeming';
+
+  @override
+  String get statusCompleted => 'Completed';
+
+  @override
+  String get statusCancelled => 'Cancelled';
+
+  @override
+  String get wishlistRequests => 'Wishlist Requests';
+
+  @override
+  String get myGoals => 'My Goals';
+
+  @override
+  String get myGoalsDescription => 'Accepted Wishlist offers appear here and update as you make progress.';
+
+  @override
+  String get noActiveGoals => 'No active goals';
+
+  @override
+  String get noActiveGoalsDescription => 'Accept a Wishlist offer and your goal will appear here.';
+
+  @override
+  String redemptionRequestSent(String name) {
+    return 'Redemption request sent to $name.';
+  }
+
+  @override
+  String agreedWith(String name) {
+    return 'Agreed with $name';
+  }
+
+  @override
+  String get openedFromNotification => 'Opened from notification';
+
+  @override
+  String get allRequirementsCompleted => 'All requirements completed!';
+
+  @override
+  String get redeemReward => 'Redeem Reward';
+
+  @override
+  String get waitingForFulfillment => 'Waiting for the other family member to confirm fulfillment.';
+
+  @override
+  String get rewardCompleted => 'Reward completed.';
+
+  @override
+  String progressCount(int current, int required) {
+    return '$current / $required';
+  }
+
+  @override
+  String milestonesComplete(int complete, int total) {
+    return '$complete of $total milestones complete';
+  }
+
+  @override
+  String get goalInProgress => 'In progress';
+
+  @override
+  String get goalReadyToRedeem => 'Ready to redeem';
+
+  @override
+  String get goalAwaitingConfirmation => 'Awaiting confirmation';
+
+  @override
+  String get goalFulfilled => 'Fulfilled';
+
+  @override
+  String get couldNotLoadRewardsAccount => 'Could not load your Rewards account.';
+
+  @override
+  String get joinFamilyFirst => 'Join a family first';
+
+  @override
+  String get joinFamilyRewardsDescription => 'Join or create a family to use Wishlist goals and rewards.';
+
+  @override
+  String get yourTokens => 'Your Tokens';
+
+  @override
+  String get rewardsIntroTitle => 'Turn your progress into rewards';
+
+  @override
+  String get rewardsIntroDescription => 'Earn Tokens from competitions and family missions, then use them for family experiences or digital unlocks.';
 }

@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
+import '../../../l10n/app_localizations.dart';
 import '../digital/digital_reward_catalog.dart';
 import '../digital/digital_reward_definition.dart';
 import '../digital/digital_reward_service.dart';
@@ -13,9 +14,14 @@ import 'my_digital_rewards_screen.dart';
 import 'reward_wishlist_negotiation_screen.dart';
 
 class RewardsHubScreen extends StatefulWidget {
-  const RewardsHubScreen({super.key, this.developerPreview = false});
+  const RewardsHubScreen({
+    super.key,
+    this.developerPreview = false,
+    this.highlightedGoalId,
+  });
 
   final bool developerPreview;
+  final String? highlightedGoalId;
 
   @override
   State<RewardsHubScreen> createState() => _RewardsHubScreenState();
@@ -133,10 +139,11 @@ class _RewardsHubScreenState extends State<RewardsHubScreen> {
     }
 
     final user = FirebaseAuth.instance.currentUser;
+    final strings = AppLocalizations.of(context)!;
 
     if (user == null) {
-      return const Scaffold(
-        body: SafeArea(child: Center(child: Text('No user is signed in.'))),
+      return Scaffold(
+        body: SafeArea(child: Center(child: Text(strings.noUserSignedIn))),
       );
     }
 
@@ -154,11 +161,9 @@ class _RewardsHubScreenState extends State<RewardsHubScreen> {
         }
 
         if (userSnapshot.hasError) {
-          return const Scaffold(
+          return Scaffold(
             body: SafeArea(
-              child: Center(
-                child: Text('Could not load your Rewards account.'),
-              ),
+              child: Center(child: Text(strings.couldNotLoadRewardsAccount)),
             ),
           );
         }
@@ -176,11 +181,10 @@ class _RewardsHubScreenState extends State<RewardsHubScreen> {
         if (familyId == null || familyId.isEmpty) {
           return _RewardsScaffold(
             tokens: tokens,
-            child: const _RewardsMessage(
+            child: _RewardsMessage(
               icon: Icons.family_restroom_rounded,
-              title: 'Join a family first',
-              message:
-                  'Join or create a family to use Wishlist goals and rewards.',
+              title: strings.joinFamilyFirst,
+              message: strings.joinFamilyRewardsDescription,
             ),
           );
         }
@@ -207,6 +211,8 @@ class _RewardsHubScreenState extends State<RewardsHubScreen> {
     required int monthlyWins,
     required int missionsCompleted,
   }) {
+    final strings = AppLocalizations.of(context)!;
+
     return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
       stream: FirebaseFirestore.instance
           .collection('families')
@@ -235,6 +241,16 @@ class _RewardsHubScreenState extends State<RewardsHubScreen> {
           ),
         );
 
+        final highlightedGoalId = widget.highlightedGoalId?.trim();
+        if (highlightedGoalId != null && highlightedGoalId.isNotEmpty) {
+          final highlightedIndex = goals.indexWhere(
+            (goal) => goal.id == highlightedGoalId,
+          );
+          if (highlightedIndex > 0) {
+            goals.insert(0, goals.removeAt(highlightedIndex));
+          }
+        }
+
         return _RewardsScaffold(
           tokens: tokens,
           child: Column(
@@ -254,7 +270,7 @@ class _RewardsHubScreenState extends State<RewardsHubScreen> {
                       ),
                     ),
                     icon: const Icon(Icons.lightbulb_outline),
-                    label: const Text('Wishlist Requests'),
+                    label: Text(strings.wishlistRequests),
                   ),
                   FilledButton.tonalIcon(
                     onPressed: () => Navigator.push(
@@ -280,14 +296,14 @@ class _RewardsHubScreenState extends State<RewardsHubScreen> {
               ),
               const SizedBox(height: 30),
               Text(
-                'My Goals',
+                strings.myGoals,
                 style: Theme.of(
                   context,
                 ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 6),
               Text(
-                'Accepted Wishlist offers appear here and update as you make progress.',
+                strings.myGoalsDescription,
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
               const SizedBox(height: 16),
@@ -300,11 +316,10 @@ class _RewardsHubScreenState extends State<RewardsHubScreen> {
                   ),
                 )
               else if (goals.isEmpty)
-                const _RewardsMessage(
+                _RewardsMessage(
                   icon: Icons.flag_outlined,
-                  title: 'No active goals',
-                  message:
-                      'Accept a Wishlist offer and your goal will appear here.',
+                  title: strings.noActiveGoals,
+                  message: strings.noActiveGoalsDescription,
                 )
               else
                 ...goals.map(
@@ -312,6 +327,7 @@ class _RewardsHubScreenState extends State<RewardsHubScreen> {
                     padding: const EdgeInsets.only(bottom: 12),
                     child: _WishlistGoalCard(
                       proposal: proposal,
+                      highlighted: proposal.id == highlightedGoalId,
                       tokens: tokens,
                       dailyWins: dailyWins,
                       weeklyWins: weeklyWins,
@@ -329,7 +345,9 @@ class _RewardsHubScreenState extends State<RewardsHubScreen> {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text(
-                                'Redemption request sent to ${proposal.recipientName}.',
+                                strings.redemptionRequestSent(
+                                  proposal.recipientName,
+                                ),
                               ),
                             ),
                           );
@@ -413,8 +431,10 @@ class _RewardsScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context)!;
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Rewards')),
+      appBar: AppBar(title: Text(strings.rewards)),
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
@@ -456,6 +476,7 @@ class _TokenBalanceCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final strings = AppLocalizations.of(context)!;
 
     return Card(
       child: Padding(
@@ -477,7 +498,7 @@ class _TokenBalanceCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Your Tokens',
+                    strings.yourTokens,
                     style: Theme.of(context).textTheme.labelLarge,
                   ),
                   const SizedBox(height: 4),
@@ -502,19 +523,20 @@ class _RewardsIntro extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context)!;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Turn your progress into rewards',
+          strings.rewardsIntroTitle,
           style: Theme.of(
             context,
           ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 8),
         Text(
-          'Earn Tokens from competitions and family missions, then use them '
-          'for family experiences or digital unlocks.',
+          strings.rewardsIntroDescription,
           style: Theme.of(context).textTheme.bodyLarge,
         ),
       ],
@@ -531,6 +553,7 @@ class _WishlistGoalCard extends StatelessWidget {
     required this.monthlyWins,
     required this.missionsCompleted,
     required this.onRedeem,
+    this.highlighted = false,
   });
 
   final RewardWishlistProposal proposal;
@@ -540,15 +563,17 @@ class _WishlistGoalCard extends StatelessWidget {
   final int monthlyWins;
   final int missionsCompleted;
   final Future<void> Function() onRedeem;
+  final bool highlighted;
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context)!;
     final requirements = <_WishlistGoalProgress>[];
 
     if (proposal.tokenRequirement > 0) {
       requirements.add(
         _WishlistGoalProgress(
-          label: 'Tokens',
+          label: strings.tokensRequired,
           current: tokens,
           required: proposal.tokenRequirement,
         ),
@@ -558,8 +583,8 @@ class _WishlistGoalCard extends StatelessWidget {
     if (proposal.dailyWinsRequired > 0) {
       requirements.add(
         _WishlistGoalProgress(
-          label: 'Daily Challenge wins',
-          current: dailyWins,
+          label: strings.dailyChallengeWins,
+          current: proposal.dailyProgress(dailyWins),
           required: proposal.dailyWinsRequired,
         ),
       );
@@ -568,8 +593,8 @@ class _WishlistGoalCard extends StatelessWidget {
     if (proposal.weeklyWinsRequired > 0) {
       requirements.add(
         _WishlistGoalProgress(
-          label: 'Weekly Championship wins',
-          current: weeklyWins,
+          label: strings.weeklyChampionshipWins,
+          current: proposal.weeklyProgress(weeklyWins),
           required: proposal.weeklyWinsRequired,
         ),
       );
@@ -578,8 +603,8 @@ class _WishlistGoalCard extends StatelessWidget {
     if (proposal.monthlyWinsRequired > 0) {
       requirements.add(
         _WishlistGoalProgress(
-          label: 'Monthly Cup wins',
-          current: monthlyWins,
+          label: strings.monthlyCupWins,
+          current: proposal.monthlyProgress(monthlyWins),
           required: proposal.monthlyWinsRequired,
         ),
       );
@@ -588,8 +613,8 @@ class _WishlistGoalCard extends StatelessWidget {
     if (proposal.missionsRequired > 0) {
       requirements.add(
         _WishlistGoalProgress(
-          label: 'Missions completed',
-          current: missionsCompleted,
+          label: strings.missionsCompleted,
+          current: proposal.missionProgress(missionsCompleted),
           required: proposal.missionsRequired,
         ),
       );
@@ -605,8 +630,30 @@ class _WishlistGoalCard extends StatelessWidget {
         complete &&
         (proposal.status == RewardWishlistStatus.accepted ||
             proposal.status == RewardWishlistStatus.readyToRedeem);
+    final completedMilestones = requirements
+        .where((requirement) => requirement.current >= requirement.required)
+        .length;
+    final statusLabel = switch (proposal.status) {
+      RewardWishlistStatus.readyToRedeem => strings.goalReadyToRedeem,
+      RewardWishlistStatus.redemptionRequested =>
+        strings.goalAwaitingConfirmation,
+      RewardWishlistStatus.completed => strings.goalFulfilled,
+      _ => strings.goalInProgress,
+    };
 
     return Card(
+      color: highlighted
+          ? Theme.of(context).colorScheme.primaryContainer
+          : null,
+      shape: highlighted
+          ? RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(18),
+              side: BorderSide(
+                color: Theme.of(context).colorScheme.primary,
+                width: 2,
+              ),
+            )
+          : null,
       child: Padding(
         padding: const EdgeInsets.all(18),
         child: Column(
@@ -628,10 +675,26 @@ class _WishlistGoalCard extends StatelessWidget {
                     ),
                   ),
                 ),
+                Chip(label: Text(statusLabel)),
               ],
             ),
             const SizedBox(height: 8),
-            Text('Agreed with ${proposal.recipientName}'),
+            Text(strings.agreedWith(proposal.recipientName)),
+            const SizedBox(height: 6),
+            Text(
+              strings.milestonesComplete(
+                completedMilestones,
+                requirements.length,
+              ),
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+            if (highlighted) ...[
+              const SizedBox(height: 8),
+              Chip(
+                avatar: const Icon(Icons.notifications_active_outlined),
+                label: Text(strings.openedFromNotification),
+              ),
+            ],
             if (proposal.description.trim().isNotEmpty) ...[
               const SizedBox(height: 6),
               Text(proposal.description),
@@ -646,14 +709,14 @@ class _WishlistGoalCard extends StatelessWidget {
             ),
 
             if (complete) ...[
-              const Card(
+              Card(
                 child: Padding(
-                  padding: EdgeInsets.all(12),
+                  padding: const EdgeInsets.all(12),
                   child: Row(
                     children: [
-                      Icon(Icons.celebration_outlined),
-                      SizedBox(width: 10),
-                      Expanded(child: Text('All requirements completed!')),
+                      const Icon(Icons.celebration_outlined),
+                      const SizedBox(width: 10),
+                      Expanded(child: Text(strings.allRequirementsCompleted)),
                     ],
                   ),
                 ),
@@ -669,19 +732,17 @@ class _WishlistGoalCard extends StatelessWidget {
                     await onRedeem();
                   },
                   icon: const Icon(Icons.redeem_outlined),
-                  label: const Text('Redeem Reward'),
+                  label: Text(strings.redeemReward),
                 ),
               ),
 
             if (proposal.status == RewardWishlistStatus.redemptionRequested)
-              const Text(
-                'Waiting for the other family member to confirm fulfillment.',
-              ),
+              Text(strings.waitingForFulfillment),
 
             if (proposal.status == RewardWishlistStatus.completed)
-              const Text(
-                'Reward completed.',
-                style: TextStyle(fontWeight: FontWeight.bold),
+              Text(
+                strings.rewardCompleted,
+                style: const TextStyle(fontWeight: FontWeight.bold),
               ),
           ],
         ),
@@ -709,6 +770,7 @@ class _WishlistGoalProgressRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context)!;
     final value = progress.required <= 0
         ? 1.0
         : (progress.current / progress.required).clamp(0.0, 1.0);
@@ -724,7 +786,7 @@ class _WishlistGoalProgressRow extends StatelessWidget {
                 style: const TextStyle(fontWeight: FontWeight.w600),
               ),
             ),
-            Text('${progress.current} / ${progress.required}'),
+            Text(strings.progressCount(progress.current, progress.required)),
           ],
         ),
         const SizedBox(height: 6),

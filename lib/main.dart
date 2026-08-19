@@ -11,35 +11,50 @@ import 'core/localization/locale_controller.dart';
 import 'core/theme/appearance_controller.dart';
 import 'core/theme/app_theme.dart';
 import 'features/authentication/screens/welcome_screen.dart';
+import 'features/notifications/wishlist_notification_route.dart';
 import 'features/rewards/screens/reward_wishlist_negotiation_screen.dart';
+import 'features/rewards/screens/rewards_hub_screen.dart';
 import 'firebase_options.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void handleNotificationTap(RemoteMessage message) {
-  final type = message.data['type']?.toString();
-  final familyId = message.data['familyId']?.toString();
-  final proposalId = message.data['proposalId']?.toString();
+  final route = WishlistNotificationRoute.fromData(message.data);
+  final navigator = navigatorKey.currentState;
 
-  if (type == null || !type.startsWith('wishlist')) {
-    return;
+  if (route == null || navigator == null) return;
+
+  switch (route.destination) {
+    case WishlistNotificationDestination.sent:
+      navigator.push(
+        MaterialPageRoute(
+          builder: (_) => RewardWishlistNegotiationScreen(
+            familyId: route.familyId,
+            proposalId: route.proposalId,
+            initialSection: WishlistSection.sent,
+          ),
+        ),
+      );
+      return;
+    case WishlistNotificationDestination.received:
+      navigator.push(
+        MaterialPageRoute(
+          builder: (_) => RewardWishlistNegotiationScreen(
+            familyId: route.familyId,
+            proposalId: route.proposalId,
+            initialSection: WishlistSection.received,
+          ),
+        ),
+      );
+      return;
+    case WishlistNotificationDestination.goals:
+      navigator.push(
+        MaterialPageRoute(
+          builder: (_) => RewardsHubScreen(highlightedGoalId: route.proposalId),
+        ),
+      );
+      return;
   }
-
-  if (familyId == null ||
-      familyId.isEmpty ||
-      proposalId == null ||
-      proposalId.isEmpty) {
-    return;
-  }
-
-  navigatorKey.currentState?.push(
-    MaterialPageRoute(
-      builder: (_) => RewardWishlistNegotiationScreen(
-        familyId: familyId,
-        proposalId: proposalId,
-      ),
-    ),
-  );
 }
 
 Future<void> _saveFcmTokenForUser(String userId) async {

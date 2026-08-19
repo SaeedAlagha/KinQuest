@@ -72,6 +72,10 @@ class RewardsService {
         'weeklyWinsRequired': 0,
         'monthlyWinsRequired': 0,
         'missionsRequired': 0,
+        'dailyWinsBaseline': 0,
+        'weeklyWinsBaseline': 0,
+        'monthlyWinsBaseline': 0,
+        'missionsBaseline': 0,
         'createdAt': FieldValue.serverTimestamp(),
         'offeredAt': null,
         'acceptedAt': null,
@@ -86,6 +90,7 @@ class RewardsService {
         'message': '${requesterName.trim()} requested "$trimmedTitle".',
         'familyId': familyId,
         'proposalId': proposalRef.id,
+        'destination': 'wishlistReceived',
         'read': false,
         'pushPending': true,
         'createdAt': FieldValue.serverTimestamp(),
@@ -164,23 +169,32 @@ class RewardsService {
         throw Exception('You have not reached the Token requirement yet.');
       }
 
-      if (dailyWins < dailyWinsRequired) {
+      final dailyWinsBaseline =
+          (proposalData['dailyWinsBaseline'] as num?)?.toInt() ?? 0;
+      final weeklyWinsBaseline =
+          (proposalData['weeklyWinsBaseline'] as num?)?.toInt() ?? 0;
+      final monthlyWinsBaseline =
+          (proposalData['monthlyWinsBaseline'] as num?)?.toInt() ?? 0;
+      final missionsBaseline =
+          (proposalData['missionsBaseline'] as num?)?.toInt() ?? 0;
+
+      if (dailyWins - dailyWinsBaseline < dailyWinsRequired) {
         throw Exception(
           'You have not completed enough Daily Challenge wins yet.',
         );
       }
 
-      if (weeklyWins < weeklyWinsRequired) {
+      if (weeklyWins - weeklyWinsBaseline < weeklyWinsRequired) {
         throw Exception(
           'You have not completed enough Weekly Championship wins yet.',
         );
       }
 
-      if (monthlyWins < monthlyWinsRequired) {
+      if (monthlyWins - monthlyWinsBaseline < monthlyWinsRequired) {
         throw Exception('You have not completed enough Monthly Cup wins yet.');
       }
 
-      if (missionsCompleted < missionsRequired) {
+      if (missionsCompleted - missionsBaseline < missionsRequired) {
         throw Exception('You have not completed enough missions yet.');
       }
 
@@ -212,6 +226,7 @@ class RewardsService {
             'The requirements for "$title" are complete. Please confirm fulfillment.',
         'familyId': familyId,
         'proposalId': proposalId,
+        'destination': 'wishlistReceived',
         'read': false,
         'pushPending': true,
         'createdAt': FieldValue.serverTimestamp(),
@@ -316,6 +331,7 @@ class RewardsService {
         'message': '"$title" has been fulfilled.',
         'familyId': familyId,
         'proposalId': proposalId,
+        'destination': 'rewardsGoals',
         'read': false,
         'pushPending': true,
         'createdAt': FieldValue.serverTimestamp(),
@@ -364,6 +380,19 @@ class RewardsService {
         throw Exception('This wishlist request can no longer be offered.');
       }
 
+      final requesterId = data['requesterId']?.toString() ?? '';
+      final title = data['title']?.toString() ?? 'Reward';
+
+      if (requesterId.isEmpty) {
+        throw Exception('Invalid wishlist request.');
+      }
+
+      final notificationRef = _firestore
+          .collection('users')
+          .doc(requesterId)
+          .collection('notifications')
+          .doc();
+
       transaction.update(proposalRef, {
         'status': RewardWishlistStatus.offered.name,
         'tokenRequirement': tokenRequirement,
@@ -373,6 +402,19 @@ class RewardsService {
         'missionsRequired': missionsRequired,
         'offeredAt': FieldValue.serverTimestamp(),
         'updatedAt': FieldValue.serverTimestamp(),
+      });
+
+      transaction.set(notificationRef, {
+        'userId': requesterId,
+        'type': 'wishlistOffer',
+        'title': 'Wishlist Offer Ready',
+        'message': 'A family member made an offer for "$title".',
+        'familyId': familyId,
+        'proposalId': proposalId,
+        'destination': 'wishlistSent',
+        'read': false,
+        'pushPending': true,
+        'createdAt': FieldValue.serverTimestamp(),
       });
     });
   }
@@ -405,9 +447,35 @@ class RewardsService {
         throw Exception('This wishlist request can no longer be declined.');
       }
 
+      final requesterId = data['requesterId']?.toString() ?? '';
+      final title = data['title']?.toString() ?? 'Reward';
+
+      if (requesterId.isEmpty) {
+        throw Exception('Invalid wishlist request.');
+      }
+
+      final notificationRef = _firestore
+          .collection('users')
+          .doc(requesterId)
+          .collection('notifications')
+          .doc();
+
       transaction.update(proposalRef, {
         'status': RewardWishlistStatus.declined.name,
         'updatedAt': FieldValue.serverTimestamp(),
+      });
+
+      transaction.set(notificationRef, {
+        'userId': requesterId,
+        'type': 'wishlistRequestDeclined',
+        'title': 'Wishlist Request Updated',
+        'message': 'Your request for "$title" was declined.',
+        'familyId': familyId,
+        'proposalId': proposalId,
+        'destination': 'wishlistSent',
+        'read': false,
+        'pushPending': true,
+        'createdAt': FieldValue.serverTimestamp(),
       });
     });
   }
@@ -422,12 +490,18 @@ class RewardsService {
         .doc(familyId)
         .collection('rewardWishlistProposals')
         .doc(proposalId);
+    final requesterRef = _firestore.collection('users').doc(requesterId);
 
     await _firestore.runTransaction((transaction) async {
       final snapshot = await transaction.get(proposalRef);
+      final requesterSnapshot = await transaction.get(requesterRef);
 
       if (!snapshot.exists) {
         throw Exception('Wishlist offer not found.');
+      }
+
+      if (!requesterSnapshot.exists) {
+        throw Exception('Requester not found.');
       }
 
       final data = snapshot.data()!;
@@ -440,10 +514,44 @@ class RewardsService {
         throw Exception('This wishlist offer is no longer available.');
       }
 
+      final requesterData = requesterSnapshot.data()!;
+      final recipientId = data['recipientId']?.toString() ?? '';
+      final title = data['title']?.toString() ?? 'Reward';
+
+      if (recipientId.isEmpty) {
+        throw Exception('Invalid wishlist offer.');
+      }
+
+      final notificationRef = _firestore
+          .collection('users')
+          .doc(recipientId)
+          .collection('notifications')
+          .doc();
+
       transaction.update(proposalRef, {
         'status': RewardWishlistStatus.accepted.name,
         'acceptedAt': FieldValue.serverTimestamp(),
+        'dailyWinsBaseline': (requesterData['dailyWins'] as num?)?.toInt() ?? 0,
+        'weeklyWinsBaseline':
+            (requesterData['weeklyWins'] as num?)?.toInt() ?? 0,
+        'monthlyWinsBaseline':
+            (requesterData['monthlyWins'] as num?)?.toInt() ?? 0,
+        'missionsBaseline':
+            (requesterData['missionsCompleted'] as num?)?.toInt() ?? 0,
         'updatedAt': FieldValue.serverTimestamp(),
+      });
+
+      transaction.set(notificationRef, {
+        'userId': recipientId,
+        'type': 'wishlistOfferAccepted',
+        'title': 'Wishlist Goal Started',
+        'message': 'Your offer for "$title" was accepted.',
+        'familyId': familyId,
+        'proposalId': proposalId,
+        'destination': 'wishlistReceived',
+        'read': false,
+        'pushPending': true,
+        'createdAt': FieldValue.serverTimestamp(),
       });
     });
   }
@@ -476,9 +584,35 @@ class RewardsService {
         throw Exception('This wishlist offer is no longer available.');
       }
 
+      final recipientId = data['recipientId']?.toString() ?? '';
+      final title = data['title']?.toString() ?? 'Reward';
+
+      if (recipientId.isEmpty) {
+        throw Exception('Invalid wishlist offer.');
+      }
+
+      final notificationRef = _firestore
+          .collection('users')
+          .doc(recipientId)
+          .collection('notifications')
+          .doc();
+
       transaction.update(proposalRef, {
         'status': RewardWishlistStatus.rejected.name,
         'updatedAt': FieldValue.serverTimestamp(),
+      });
+
+      transaction.set(notificationRef, {
+        'userId': recipientId,
+        'type': 'wishlistOfferRejected',
+        'title': 'Wishlist Offer Updated',
+        'message': 'Your offer for "$title" was not accepted.',
+        'familyId': familyId,
+        'proposalId': proposalId,
+        'destination': 'wishlistReceived',
+        'read': false,
+        'pushPending': true,
+        'createdAt': FieldValue.serverTimestamp(),
       });
     });
   }
