@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/sila_celebration_card.dart';
+import '../../../l10n/app_localizations.dart';
 import '../config/competition_rewards.dart';
 import '../config/official_competition_games.dart';
 import '../models/competition_game_result.dart';
@@ -754,8 +755,10 @@ class _WeeklyChampionshipScreenState extends State<WeeklyChampionshipScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context)!;
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Weekly Championship')),
+      appBar: AppBar(title: Text(strings.weeklyChampionship)),
       body: SafeArea(
         child: _isLoading
             ? const Center(child: CircularProgressIndicator())
@@ -772,6 +775,7 @@ class _WeeklyChampionshipScreenState extends State<WeeklyChampionshipScreen> {
   }
 
   Widget _buildChampionship() {
+    final strings = AppLocalizations.of(context)!;
     final standings = _buildStandings();
 
     return ListView(
@@ -791,8 +795,8 @@ class _WeeklyChampionshipScreenState extends State<WeeklyChampionshipScreen> {
                 color: Colors.white,
               ),
               const SizedBox(height: 14),
-              const Text(
-                'WEEKLY CHAMPIONSHIP',
+              Text(
+                strings.weeklyChampionship.toUpperCase(),
                 style: TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.w800,
@@ -809,7 +813,7 @@ class _WeeklyChampionshipScreenState extends State<WeeklyChampionshipScreen> {
               ),
               const SizedBox(height: 10),
               Text(
-                'Four official games. Championship Points accumulate across every round.',
+                strings.weeklyCompetitionDescription,
                 textAlign: TextAlign.center,
                 style: TextStyle(color: Colors.white.withValues(alpha: 0.88)),
               ),
@@ -824,34 +828,37 @@ class _WeeklyChampionshipScreenState extends State<WeeklyChampionshipScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Championship rewards',
+                  strings.championshipRewards,
                   style: Theme.of(
                     context,
                   ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
                 ),
                 const SizedBox(height: 10),
                 Text(
-                  'Champion: +${CompetitionRewards.weeklyChampionTokens} Tokens '
-                  '+ ${CompetitionRewards.weeklyChampionRankingPoints} RP',
+                  strings.championRewardSummary(
+                    CompetitionRewards.weeklyChampionTokens,
+                    CompetitionRewards.weeklyChampionRankingPoints,
+                  ),
                 ),
                 Text(
-                  'Runner-up: +${CompetitionRewards.weeklyRunnerUpRankingPoints} RP',
+                  strings.runnerUpRewardSummary(
+                    CompetitionRewards.weeklyRunnerUpRankingPoints,
+                  ),
                 ),
                 Text(
-                  'Third place: +${CompetitionRewards.weeklyThirdPlaceRankingPoints} RP',
+                  strings.thirdPlaceRewardSummary(
+                    CompetitionRewards.weeklyThirdPlaceRankingPoints,
+                  ),
                 ),
                 const SizedBox(height: 10),
-                const Text(
-                  'Individual rounds: 1st 10 • 2nd 7 • 3rd 5 • 4th 3 • participation 1\n'
-                  'Team rounds: winning-team members +1 • losing-team members +0',
-                ),
+                Text(strings.championshipScoringDescription),
               ],
             ),
           ),
         ),
         const SizedBox(height: 20),
         Text(
-          'This week\'s games',
+          strings.thisWeeksGames,
           style: Theme.of(
             context,
           ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
@@ -869,13 +876,13 @@ class _WeeklyChampionshipScreenState extends State<WeeklyChampionshipScreen> {
                     ? const Icon(Icons.check_rounded)
                     : Text('${index + 1}'),
               ),
-              title: Text(game.name),
+              title: Text(game.localizedName(strings)),
               subtitle: Text(
                 completed
-                    ? 'Round complete'
+                    ? strings.roundComplete
                     : current
-                    ? 'Up next'
-                    : 'Locked until previous round is complete',
+                    ? strings.upNext
+                    : strings.roundLocked,
               ),
               trailing: completed
                   ? const Icon(Icons.check_circle_rounded)
@@ -900,9 +907,11 @@ class _WeeklyChampionshipScreenState extends State<WeeklyChampionshipScreen> {
                 : const Icon(Icons.play_arrow_rounded),
             label: Text(
               _isSavingRound
-                  ? 'Saving round...'
-                  : 'Play Game ${_nextGameIndex + 1}: '
-                        '${_weeklyGames[_nextGameIndex].name}',
+                  ? strings.savingRound
+                  : strings.playGameNumber(
+                      _nextGameIndex + 1,
+                      _weeklyGames[_nextGameIndex].localizedName(strings),
+                    ),
             ),
           )
         else
@@ -911,8 +920,8 @@ class _WeeklyChampionshipScreenState extends State<WeeklyChampionshipScreen> {
             icon: const Icon(Icons.emoji_events_rounded),
             label: Text(
               _isSettling
-                  ? 'Finalizing championship...'
-                  : 'Finalize Weekly Championship',
+                  ? strings.finalizingChampionship
+                  : strings.finalizeWeeklyChampionship,
             ),
           ),
         if (standings.isNotEmpty) ...[
@@ -924,6 +933,8 @@ class _WeeklyChampionshipScreenState extends State<WeeklyChampionshipScreen> {
   }
 
   Widget _buildStandingsCard(List<_WeeklyStanding> standings) {
+    final strings = AppLocalizations.of(context)!;
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(20),
@@ -931,7 +942,7 @@ class _WeeklyChampionshipScreenState extends State<WeeklyChampionshipScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              'Championship Standings',
+              strings.championshipStandings,
               style: Theme.of(
                 context,
               ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
@@ -944,12 +955,9 @@ class _WeeklyChampionshipScreenState extends State<WeeklyChampionshipScreen> {
                 contentPadding: EdgeInsets.zero,
                 leading: CircleAvatar(child: Text('${index + 1}')),
                 title: Text(standing.name),
-                subtitle: Text(
-                  '${standing.roundsPlayed} round'
-                  '${standing.roundsPlayed == 1 ? '' : 's'} played',
-                ),
+                subtitle: Text(strings.roundsPlayed(standing.roundsPlayed)),
                 trailing: Text(
-                  '${standing.championshipPoints} pts',
+                  strings.pointsAbbreviation(standing.championshipPoints),
                   style: const TextStyle(fontWeight: FontWeight.w800),
                 ),
               );
@@ -961,27 +969,30 @@ class _WeeklyChampionshipScreenState extends State<WeeklyChampionshipScreen> {
   }
 
   Widget _buildCompletedCard() {
+    final strings = AppLocalizations.of(context)!;
     final champion = _championName;
 
     return SilaCelebrationCard(
       key: const ValueKey('weekly-championship-celebration'),
-      eyebrow: 'Weekly Championship complete',
-      title: champion ?? 'A new family champion',
+      eyebrow: strings.weeklyOfficialCompleteEyebrow,
+      title: champion ?? strings.newFamilyChampion,
       subtitle: champion == null
-          ? 'Four games, one shared week, and a family story worth remembering.'
-          : '$champion is this week\'s Family Champion after four games together.',
-      rewards: const [
+          ? strings.weeklyCompleteWithoutChampion
+          : strings.weeklyCompleteWithChampion(champion),
+      rewards: [
         SilaCelebrationReward(
           icon: Icons.stars_rounded,
-          label: '+${CompetitionRewards.weeklyChampionTokens} Tokens',
+          label: strings.tokenBonus(CompetitionRewards.weeklyChampionTokens),
         ),
         SilaCelebrationReward(
           icon: Icons.trending_up_rounded,
-          label: '+${CompetitionRewards.weeklyChampionRankingPoints} RP',
+          label: strings.rankingPointBonus(
+            CompetitionRewards.weeklyChampionRankingPoints,
+          ),
         ),
         SilaCelebrationReward(
           icon: Icons.military_tech_rounded,
-          label: 'Weekly crown',
+          label: strings.weeklyCrown,
         ),
       ],
     );

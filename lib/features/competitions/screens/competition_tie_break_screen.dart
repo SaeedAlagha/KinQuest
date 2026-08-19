@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../l10n/app_localizations.dart';
 import '../models/competition_player_result.dart';
 
 class CompetitionTieBreakScreen extends StatefulWidget {
@@ -113,13 +114,16 @@ class _CompetitionTieBreakScreenState extends State<CompetitionTieBreakScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context)!;
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Tie-Break')),
+      appBar: AppBar(title: Text(strings.tieBreak)),
       body: SafeArea(child: _showingResults ? _buildResults() : _buildTurn()),
     );
   }
 
   Widget _buildTurn() {
+    final strings = AppLocalizations.of(context)!;
     final player = _currentPlayer;
 
     return Center(
@@ -130,7 +134,7 @@ class _CompetitionTieBreakScreenState extends State<CompetitionTieBreakScreen> {
           child: Column(
             children: [
               Text(
-                'Sudden Death • Round $_roundNumber',
+                strings.suddenDeathRound(_roundNumber),
                 style: Theme.of(
                   context,
                 ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
@@ -142,7 +146,7 @@ class _CompetitionTieBreakScreenState extends State<CompetitionTieBreakScreen> {
               ),
               const SizedBox(height: 20),
               Text(
-                _isTiming ? 'Counting...' : 'Pass the phone to ${player.name}',
+                _isTiming ? strings.counting : strings.passPhoneTo(player.name),
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                   fontWeight: FontWeight.w800,
@@ -150,29 +154,24 @@ class _CompetitionTieBreakScreenState extends State<CompetitionTieBreakScreen> {
               ),
               const SizedBox(height: 16),
               Text(
-                _isTiming
-                    ? 'Stop when you think exactly 5 seconds have passed.'
-                    : 'Your goal is to stop as close as possible to exactly 5 seconds.',
+                _isTiming ? strings.stopAtFiveSeconds : strings.goalFiveSeconds,
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.bodyLarge,
               ),
               const SizedBox(height: 10),
-              const Text(
-                'The timer stays hidden. Closest result wins.',
-                textAlign: TextAlign.center,
-              ),
+              Text(strings.hiddenTimerDescription, textAlign: TextAlign.center),
               const SizedBox(height: 36),
               if (!_isTiming)
                 FilledButton.icon(
                   onPressed: _startAttempt,
                   icon: const Icon(Icons.play_arrow_rounded),
-                  label: const Text('Start'),
+                  label: Text(strings.start),
                 )
               else
                 FilledButton.icon(
                   onPressed: _stopAttempt,
                   icon: const Icon(Icons.stop_rounded),
-                  label: const Text('STOP'),
+                  label: Text(strings.stop),
                 ),
             ],
           ),
@@ -182,6 +181,7 @@ class _CompetitionTieBreakScreenState extends State<CompetitionTieBreakScreen> {
   }
 
   Widget _buildResults() {
+    final strings = AppLocalizations.of(context)!;
     final winner = _winner;
 
     if (winner != null) {
@@ -197,7 +197,7 @@ class _CompetitionTieBreakScreenState extends State<CompetitionTieBreakScreen> {
                 const Icon(Icons.emoji_events_rounded, size: 80),
                 const SizedBox(height: 20),
                 Text(
-                  '${winner.name} wins the tie-break!',
+                  strings.tieBreakWinner(winner.name),
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                     fontWeight: FontWeight.w800,
@@ -205,7 +205,9 @@ class _CompetitionTieBreakScreenState extends State<CompetitionTieBreakScreen> {
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  'Only ${(distance / 1000).toStringAsFixed(3)} seconds away from exactly 5.000 seconds.',
+                  strings.secondsFromTarget(
+                    (distance / 1000).toStringAsFixed(3),
+                  ),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 28),
@@ -214,7 +216,7 @@ class _CompetitionTieBreakScreenState extends State<CompetitionTieBreakScreen> {
                     Navigator.of(context).pop(winner);
                   },
                   icon: const Icon(Icons.check_circle_rounded),
-                  label: const Text('Confirm Winner'),
+                  label: Text(strings.confirmWinner),
                 ),
               ],
             ),
@@ -233,22 +235,21 @@ class _CompetitionTieBreakScreenState extends State<CompetitionTieBreakScreen> {
               const Icon(Icons.balance_rounded, size: 72),
               const SizedBox(height: 20),
               Text(
-                'Still tied!',
+                strings.stillTied,
                 style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                   fontWeight: FontWeight.w800,
                 ),
               ),
               const SizedBox(height: 12),
               Text(
-                '${_roundPlayers.length} players were equally close. '
-                'Only those players continue to Round $_roundNumber.',
+                strings.tiedPlayersContinue(_roundPlayers.length, _roundNumber),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 28),
               FilledButton.icon(
                 onPressed: _continueAfterTie,
                 icon: const Icon(Icons.arrow_forward_rounded),
-                label: Text('Start Tie-Break Round $_roundNumber'),
+                label: Text(strings.startTieBreakRound(_roundNumber)),
               ),
             ],
           ),

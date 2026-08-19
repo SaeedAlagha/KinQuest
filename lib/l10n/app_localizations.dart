@@ -3082,6 +3082,444 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Ranking Points'**
   String get rankingPoints;
+
+  /// No description provided for @homeRewards.
+  ///
+  /// In en, this message translates to:
+  /// **'Rewards'**
+  String get homeRewards;
+
+  /// No description provided for @homeRewardsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Spend Tokens on family and digital rewards.'**
+  String get homeRewardsDescription;
+
+  /// No description provided for @officialCompetitionRule.
+  ///
+  /// In en, this message translates to:
+  /// **'One official result per family per day. Quick Play results do not affect these rewards.'**
+  String get officialCompetitionRule;
+
+  /// No description provided for @dailyWinnerRewardSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Winner: +{tokens} Tokens + {points} Ranking Points'**
+  String dailyWinnerRewardSummary(int tokens, int points);
+
+  /// No description provided for @dailyRunnerUpRewardSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Runner-up: +{points} Ranking Points'**
+  String dailyRunnerUpRewardSummary(int points);
+
+  /// No description provided for @savingOfficialResult.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving official result...'**
+  String get savingOfficialResult;
+
+  /// No description provided for @dailyOfficialCompleteEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily Challenge complete'**
+  String get dailyOfficialCompleteEyebrow;
+
+  /// No description provided for @familyChallengeCompleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Family challenge complete'**
+  String get familyChallengeCompleteTitle;
+
+  /// No description provided for @dailyCompleteWithoutWinner.
+  ///
+  /// In en, this message translates to:
+  /// **'Your family showed up, played together, and completed today\'s official challenge.'**
+  String get dailyCompleteWithoutWinner;
+
+  /// No description provided for @dailyCompleteWithWinner.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} takes today\'s family crown. Come back tomorrow for a fresh challenge.'**
+  String dailyCompleteWithWinner(String name);
+
+  /// No description provided for @tokenBonus.
+  ///
+  /// In en, this message translates to:
+  /// **'+{count} Tokens'**
+  String tokenBonus(int count);
+
+  /// No description provided for @rankingPointBonus.
+  ///
+  /// In en, this message translates to:
+  /// **'+{count} RP'**
+  String rankingPointBonus(int count);
+
+  /// No description provided for @familyMoment.
+  ///
+  /// In en, this message translates to:
+  /// **'Family moment'**
+  String get familyMoment;
+
+  /// No description provided for @tieDetected.
+  ///
+  /// In en, this message translates to:
+  /// **'Tie detected'**
+  String get tieDetected;
+
+  /// No description provided for @tieRewardPendingDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'No Tokens or Ranking Points have been awarded. Only the tied leaders advance to sudden death. No reward is granted until one winner remains.'**
+  String get tieRewardPendingDescription;
+
+  /// No description provided for @startSuddenDeathTieBreak.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Sudden-Death Tie-Break'**
+  String get startSuddenDeathTieBreak;
+
+  /// No description provided for @latestResult.
+  ///
+  /// In en, this message translates to:
+  /// **'Latest Result'**
+  String get latestResult;
+
+  /// No description provided for @pointsAbbreviation.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} pts'**
+  String pointsAbbreviation(int count);
+
+  /// No description provided for @weeklyCompetitionDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Four official games. Championship Points accumulate across every round.'**
+  String get weeklyCompetitionDescription;
+
+  /// No description provided for @championshipRewards.
+  ///
+  /// In en, this message translates to:
+  /// **'Championship rewards'**
+  String get championshipRewards;
+
+  /// No description provided for @championRewardSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Champion: +{tokens} Tokens + {points} RP'**
+  String championRewardSummary(int tokens, int points);
+
+  /// No description provided for @runnerUpRewardSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Runner-up: +{points} RP'**
+  String runnerUpRewardSummary(int points);
+
+  /// No description provided for @thirdPlaceRewardSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Third place: +{points} RP'**
+  String thirdPlaceRewardSummary(int points);
+
+  /// No description provided for @championshipScoringDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Individual rounds: 1st 10 • 2nd 7 • 3rd 5 • 4th 3 • participation 1\nTeam rounds: winning-team members +1 • losing-team members +0'**
+  String get championshipScoringDescription;
+
+  /// No description provided for @thisWeeksGames.
+  ///
+  /// In en, this message translates to:
+  /// **'This week\'s games'**
+  String get thisWeeksGames;
+
+  /// No description provided for @roundComplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Round complete'**
+  String get roundComplete;
+
+  /// No description provided for @upNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Up next'**
+  String get upNext;
+
+  /// No description provided for @roundLocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Locked until previous round is complete'**
+  String get roundLocked;
+
+  /// No description provided for @savingRound.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving round...'**
+  String get savingRound;
+
+  /// No description provided for @playGameNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Play Game {number}: {name}'**
+  String playGameNumber(int number, String name);
+
+  /// No description provided for @finalizingChampionship.
+  ///
+  /// In en, this message translates to:
+  /// **'Finalizing championship...'**
+  String get finalizingChampionship;
+
+  /// No description provided for @finalizeWeeklyChampionship.
+  ///
+  /// In en, this message translates to:
+  /// **'Finalize Weekly Championship'**
+  String get finalizeWeeklyChampionship;
+
+  /// No description provided for @championshipStandings.
+  ///
+  /// In en, this message translates to:
+  /// **'Championship Standings'**
+  String get championshipStandings;
+
+  /// No description provided for @roundsPlayed.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 round played} other{{count} rounds played}}'**
+  String roundsPlayed(int count);
+
+  /// No description provided for @weeklyOfficialCompleteEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly Championship complete'**
+  String get weeklyOfficialCompleteEyebrow;
+
+  /// No description provided for @newFamilyChampion.
+  ///
+  /// In en, this message translates to:
+  /// **'A new family champion'**
+  String get newFamilyChampion;
+
+  /// No description provided for @weeklyCompleteWithoutChampion.
+  ///
+  /// In en, this message translates to:
+  /// **'Four games, one shared week, and a family story worth remembering.'**
+  String get weeklyCompleteWithoutChampion;
+
+  /// No description provided for @weeklyCompleteWithChampion.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} is this week\'s Family Champion after four games together.'**
+  String weeklyCompleteWithChampion(String name);
+
+  /// No description provided for @weeklyCrown.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly crown'**
+  String get weeklyCrown;
+
+  /// No description provided for @monthlyCompetitionDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Four family members. Two semifinals. One final. One champion.'**
+  String get monthlyCompetitionDescription;
+
+  /// No description provided for @monthlyRewards.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly rewards'**
+  String get monthlyRewards;
+
+  /// No description provided for @monthlyChampionRewardSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Champion: +{tokens} Tokens + {points} RP + Trophy'**
+  String monthlyChampionRewardSummary(int tokens, int points);
+
+  /// No description provided for @semifinalistRewardSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Semifinalists: +{points} RP'**
+  String semifinalistRewardSummary(int points);
+
+  /// No description provided for @chooseFourCompetitors.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose exactly 4 competitors'**
+  String get chooseFourCompetitors;
+
+  /// No description provided for @startingMonthlyCup.
+  ///
+  /// In en, this message translates to:
+  /// **'Starting Monthly Cup...'**
+  String get startingMonthlyCup;
+
+  /// No description provided for @startMonthlyCup.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Monthly Cup'**
+  String get startMonthlyCup;
+
+  /// No description provided for @monthlyParticipantIncomplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly Cup participant data is incomplete.'**
+  String get monthlyParticipantIncomplete;
+
+  /// No description provided for @monthlyCupBracket.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly Cup Bracket'**
+  String get monthlyCupBracket;
+
+  /// No description provided for @semifinalNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Semifinal {number}'**
+  String semifinalNumber(int number);
+
+  /// No description provided for @finalRound.
+  ///
+  /// In en, this message translates to:
+  /// **'FINAL'**
+  String get finalRound;
+
+  /// No description provided for @gameNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Game: {name}'**
+  String gameNameLabel(String name);
+
+  /// No description provided for @versusPlayers.
+  ///
+  /// In en, this message translates to:
+  /// **'{first} vs {second}'**
+  String versusPlayers(String first, String second);
+
+  /// No description provided for @winnerNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Winner: {name}'**
+  String winnerNameLabel(String name);
+
+  /// No description provided for @playNamedRound.
+  ///
+  /// In en, this message translates to:
+  /// **'Play {round}'**
+  String playNamedRound(String round);
+
+  /// No description provided for @monthlyCupChampion.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly Cup Champion'**
+  String get monthlyCupChampion;
+
+  /// No description provided for @champion.
+  ///
+  /// In en, this message translates to:
+  /// **'Champion'**
+  String get champion;
+
+  /// No description provided for @monthlyCompleteDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'The family\'s biggest competition ends with a trophy and a memory for the cabinet.'**
+  String get monthlyCompleteDescription;
+
+  /// No description provided for @cupTrophy.
+  ///
+  /// In en, this message translates to:
+  /// **'Cup trophy'**
+  String get cupTrophy;
+
+  /// No description provided for @tieBreak.
+  ///
+  /// In en, this message translates to:
+  /// **'Tie-Break'**
+  String get tieBreak;
+
+  /// No description provided for @suddenDeathRound.
+  ///
+  /// In en, this message translates to:
+  /// **'Sudden Death • Round {number}'**
+  String suddenDeathRound(int number);
+
+  /// No description provided for @counting.
+  ///
+  /// In en, this message translates to:
+  /// **'Counting...'**
+  String get counting;
+
+  /// No description provided for @passPhoneTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Pass the phone to {name}'**
+  String passPhoneTo(String name);
+
+  /// No description provided for @stopAtFiveSeconds.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop when you think exactly 5 seconds have passed.'**
+  String get stopAtFiveSeconds;
+
+  /// No description provided for @goalFiveSeconds.
+  ///
+  /// In en, this message translates to:
+  /// **'Your goal is to stop as close as possible to exactly 5 seconds.'**
+  String get goalFiveSeconds;
+
+  /// No description provided for @hiddenTimerDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'The timer stays hidden. Closest result wins.'**
+  String get hiddenTimerDescription;
+
+  /// No description provided for @start.
+  ///
+  /// In en, this message translates to:
+  /// **'Start'**
+  String get start;
+
+  /// No description provided for @stop.
+  ///
+  /// In en, this message translates to:
+  /// **'STOP'**
+  String get stop;
+
+  /// No description provided for @tieBreakWinner.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} wins the tie-break!'**
+  String tieBreakWinner(String name);
+
+  /// No description provided for @secondsFromTarget.
+  ///
+  /// In en, this message translates to:
+  /// **'Only {seconds} seconds away from exactly 5.000 seconds.'**
+  String secondsFromTarget(String seconds);
+
+  /// No description provided for @confirmWinner.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Winner'**
+  String get confirmWinner;
+
+  /// No description provided for @stillTied.
+  ///
+  /// In en, this message translates to:
+  /// **'Still tied!'**
+  String get stillTied;
+
+  /// No description provided for @tiedPlayersContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} players were equally close. Only those players continue to Round {round}.'**
+  String tiedPlayersContinue(int count, int round);
+
+  /// No description provided for @startTieBreakRound.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Tie-Break Round {number}'**
+  String startTieBreakRound(int number);
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

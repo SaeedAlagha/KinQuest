@@ -1585,4 +1585,279 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get rankingPoints => 'Ranking Points';
+
+  @override
+  String get homeRewards => 'Rewards';
+
+  @override
+  String get homeRewardsDescription => 'Spend Tokens on family and digital rewards.';
+
+  @override
+  String get officialCompetitionRule => 'One official result per family per day. Quick Play results do not affect these rewards.';
+
+  @override
+  String dailyWinnerRewardSummary(int tokens, int points) {
+    return 'Winner: +$tokens Tokens + $points Ranking Points';
+  }
+
+  @override
+  String dailyRunnerUpRewardSummary(int points) {
+    return 'Runner-up: +$points Ranking Points';
+  }
+
+  @override
+  String get savingOfficialResult => 'Saving official result...';
+
+  @override
+  String get dailyOfficialCompleteEyebrow => 'Daily Challenge complete';
+
+  @override
+  String get familyChallengeCompleteTitle => 'Family challenge complete';
+
+  @override
+  String get dailyCompleteWithoutWinner => 'Your family showed up, played together, and completed today\'s official challenge.';
+
+  @override
+  String dailyCompleteWithWinner(String name) {
+    return '$name takes today\'s family crown. Come back tomorrow for a fresh challenge.';
+  }
+
+  @override
+  String tokenBonus(int count) {
+    return '+$count Tokens';
+  }
+
+  @override
+  String rankingPointBonus(int count) {
+    return '+$count RP';
+  }
+
+  @override
+  String get familyMoment => 'Family moment';
+
+  @override
+  String get tieDetected => 'Tie detected';
+
+  @override
+  String get tieRewardPendingDescription => 'No Tokens or Ranking Points have been awarded. Only the tied leaders advance to sudden death. No reward is granted until one winner remains.';
+
+  @override
+  String get startSuddenDeathTieBreak => 'Start Sudden-Death Tie-Break';
+
+  @override
+  String get latestResult => 'Latest Result';
+
+  @override
+  String pointsAbbreviation(int count) {
+    return '$count pts';
+  }
+
+  @override
+  String get weeklyCompetitionDescription => 'Four official games. Championship Points accumulate across every round.';
+
+  @override
+  String get championshipRewards => 'Championship rewards';
+
+  @override
+  String championRewardSummary(int tokens, int points) {
+    return 'Champion: +$tokens Tokens + $points RP';
+  }
+
+  @override
+  String runnerUpRewardSummary(int points) {
+    return 'Runner-up: +$points RP';
+  }
+
+  @override
+  String thirdPlaceRewardSummary(int points) {
+    return 'Third place: +$points RP';
+  }
+
+  @override
+  String get championshipScoringDescription => 'Individual rounds: 1st 10 • 2nd 7 • 3rd 5 • 4th 3 • participation 1\nTeam rounds: winning-team members +1 • losing-team members +0';
+
+  @override
+  String get thisWeeksGames => 'This week\'s games';
+
+  @override
+  String get roundComplete => 'Round complete';
+
+  @override
+  String get upNext => 'Up next';
+
+  @override
+  String get roundLocked => 'Locked until previous round is complete';
+
+  @override
+  String get savingRound => 'Saving round...';
+
+  @override
+  String playGameNumber(int number, String name) {
+    return 'Play Game $number: $name';
+  }
+
+  @override
+  String get finalizingChampionship => 'Finalizing championship...';
+
+  @override
+  String get finalizeWeeklyChampionship => 'Finalize Weekly Championship';
+
+  @override
+  String get championshipStandings => 'Championship Standings';
+
+  @override
+  String roundsPlayed(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count rounds played',
+      one: '1 round played',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get weeklyOfficialCompleteEyebrow => 'Weekly Championship complete';
+
+  @override
+  String get newFamilyChampion => 'A new family champion';
+
+  @override
+  String get weeklyCompleteWithoutChampion => 'Four games, one shared week, and a family story worth remembering.';
+
+  @override
+  String weeklyCompleteWithChampion(String name) {
+    return '$name is this week\'s Family Champion after four games together.';
+  }
+
+  @override
+  String get weeklyCrown => 'Weekly crown';
+
+  @override
+  String get monthlyCompetitionDescription => 'Four family members. Two semifinals. One final. One champion.';
+
+  @override
+  String get monthlyRewards => 'Monthly rewards';
+
+  @override
+  String monthlyChampionRewardSummary(int tokens, int points) {
+    return 'Champion: +$tokens Tokens + $points RP + Trophy';
+  }
+
+  @override
+  String semifinalistRewardSummary(int points) {
+    return 'Semifinalists: +$points RP';
+  }
+
+  @override
+  String get chooseFourCompetitors => 'Choose exactly 4 competitors';
+
+  @override
+  String get startingMonthlyCup => 'Starting Monthly Cup...';
+
+  @override
+  String get startMonthlyCup => 'Start Monthly Cup';
+
+  @override
+  String get monthlyParticipantIncomplete => 'Monthly Cup participant data is incomplete.';
+
+  @override
+  String get monthlyCupBracket => 'Monthly Cup Bracket';
+
+  @override
+  String semifinalNumber(int number) {
+    return 'Semifinal $number';
+  }
+
+  @override
+  String get finalRound => 'FINAL';
+
+  @override
+  String gameNameLabel(String name) {
+    return 'Game: $name';
+  }
+
+  @override
+  String versusPlayers(String first, String second) {
+    return '$first vs $second';
+  }
+
+  @override
+  String winnerNameLabel(String name) {
+    return 'Winner: $name';
+  }
+
+  @override
+  String playNamedRound(String round) {
+    return 'Play $round';
+  }
+
+  @override
+  String get monthlyCupChampion => 'Monthly Cup Champion';
+
+  @override
+  String get champion => 'Champion';
+
+  @override
+  String get monthlyCompleteDescription => 'The family\'s biggest competition ends with a trophy and a memory for the cabinet.';
+
+  @override
+  String get cupTrophy => 'Cup trophy';
+
+  @override
+  String get tieBreak => 'Tie-Break';
+
+  @override
+  String suddenDeathRound(int number) {
+    return 'Sudden Death • Round $number';
+  }
+
+  @override
+  String get counting => 'Counting...';
+
+  @override
+  String passPhoneTo(String name) {
+    return 'Pass the phone to $name';
+  }
+
+  @override
+  String get stopAtFiveSeconds => 'Stop when you think exactly 5 seconds have passed.';
+
+  @override
+  String get goalFiveSeconds => 'Your goal is to stop as close as possible to exactly 5 seconds.';
+
+  @override
+  String get hiddenTimerDescription => 'The timer stays hidden. Closest result wins.';
+
+  @override
+  String get start => 'Start';
+
+  @override
+  String get stop => 'STOP';
+
+  @override
+  String tieBreakWinner(String name) {
+    return '$name wins the tie-break!';
+  }
+
+  @override
+  String secondsFromTarget(String seconds) {
+    return 'Only $seconds seconds away from exactly 5.000 seconds.';
+  }
+
+  @override
+  String get confirmWinner => 'Confirm Winner';
+
+  @override
+  String get stillTied => 'Still tied!';
+
+  @override
+  String tiedPlayersContinue(int count, int round) {
+    return '$count players were equally close. Only those players continue to Round $round.';
+  }
+
+  @override
+  String startTieBreakRound(int number) {
+    return 'Start Tie-Break Round $number';
+  }
 }

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+
+import '../../../l10n/app_localizations.dart';
 import '../../games/screens/trivia_screen.dart';
 import '../../games/screens/emoji_guess_screen.dart';
 import '../../games/screens/family_quiz_screen.dart';
@@ -32,6 +34,32 @@ class OfficialCompetitionGame {
   Widget build(GamePlayMode playMode, {Set<String>? participantIds}) {
     return builder(playMode, participantIds);
   }
+
+  String localizedName(AppLocalizations strings) => switch (gameId) {
+    CompetitionGameIds.familyQuiz => strings.familyQuiz,
+    CompetitionGameIds.familyImpostor => strings.familyImpostor,
+    CompetitionGameIds.trivia => strings.trivia,
+    CompetitionGameIds.emojiGuess => strings.emojiGuess,
+    CompetitionGameIds.passTheBomb => strings.passTheBomb,
+    CompetitionGameIds.secretMission => strings.secretMission,
+    CompetitionGameIds.drawAndGuess => strings.drawAndGuess,
+    CompetitionGameIds.captionBattle => strings.captionBattle,
+    CompetitionGameIds.dontSayIt => strings.dontSayIt,
+    _ => name,
+  };
+
+  String localizedDescription(AppLocalizations strings) => switch (gameId) {
+    CompetitionGameIds.familyQuiz => strings.familyQuizDescription,
+    CompetitionGameIds.familyImpostor => strings.familyImpostorDescription,
+    CompetitionGameIds.trivia => strings.triviaDescription,
+    CompetitionGameIds.emojiGuess => strings.emojiGuessDescription,
+    CompetitionGameIds.passTheBomb => strings.passTheBombDescription,
+    CompetitionGameIds.secretMission => strings.secretMissionDescription,
+    CompetitionGameIds.drawAndGuess => strings.drawAndGuessDescription,
+    CompetitionGameIds.captionBattle => strings.captionBattleDescription,
+    CompetitionGameIds.dontSayIt => strings.dontSayItDescription,
+    _ => description,
+  };
 }
 
 class OfficialCompetitionGames {
