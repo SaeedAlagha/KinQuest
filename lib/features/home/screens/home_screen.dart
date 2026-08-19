@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/family_year_banner.dart';
 import '../../../core/widgets/sila_brand_mark.dart';
+import '../../../core/widgets/sila_page_backdrop.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../competitions/screens/daily_challenge_screen.dart';
 import '../../games/screens/games_screen.dart';
@@ -122,192 +123,195 @@ class HomeDashboard extends StatelessWidget {
     final strings = AppLocalizations.of(context)!;
 
     return Scaffold(
-      body: SafeArea(
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final isWide = constraints.maxWidth >= 780;
-            final pagePadding = constraints.maxWidth < 480 ? 20.0 : 32.0;
+      body: SilaPageBackdrop(
+        child: SafeArea(
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final isWide = constraints.maxWidth >= 780;
+              final pagePadding = constraints.maxWidth < 480 ? 20.0 : 32.0;
 
-            return SingleChildScrollView(
-              padding: EdgeInsets.fromLTRB(pagePadding, 28, pagePadding, 40),
-              child: Center(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 1120),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _HomeHeader(name: name, familyName: familyName),
-                      const SizedBox(height: 18),
-                      FamilyYearBanner(compact: constraints.maxWidth < 480),
-                      const SizedBox(height: 22),
-                      if (isWide)
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Expanded(
-                              flex: 7,
-                              child: _FamilyOverviewCard(
-                                familyName: familyName,
-                                memberCount: memberCount,
-                                onOverview: () => _openFamilyOverview(context),
+              return SingleChildScrollView(
+                padding: EdgeInsets.fromLTRB(pagePadding, 28, pagePadding, 40),
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 1120),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _HomeHeader(name: name, familyName: familyName),
+                        const SizedBox(height: 18),
+                        FamilyYearBanner(compact: constraints.maxWidth < 480),
+                        const SizedBox(height: 22),
+                        if (isWide)
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(
+                                flex: 7,
+                                child: _FamilyOverviewCard(
+                                  familyName: familyName,
+                                  memberCount: memberCount,
+                                  onOverview: () =>
+                                      _openFamilyOverview(context),
+                                ),
+                              ),
+                              const SizedBox(width: 20),
+                              Expanded(
+                                flex: 3,
+                                child: _FamilyStats(
+                                  stacked: true,
+                                  memberCount: memberCount,
+                                  tokens: tokens,
+                                ),
+                              ),
+                            ],
+                          )
+                        else ...[
+                          _FamilyOverviewCard(
+                            familyName: familyName,
+                            memberCount: memberCount,
+                            onOverview: () => _openFamilyOverview(context),
+                          ),
+                          const SizedBox(height: 16),
+                          _FamilyStats(
+                            stacked: false,
+                            memberCount: memberCount,
+                            tokens: tokens,
+                          ),
+                        ],
+                        const SizedBox(height: 34),
+                        _QuickActionCard(
+                          icon: Icons.today_rounded,
+                          accent: AppTheme.goldColor,
+                          title: strings.todaysDailyChallenge,
+                          subtitle: strings.dailyChallengeHomeDescription,
+                          onTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => DailyChallengeScreen(
+                                developerPreview: developerPreview,
                               ),
                             ),
-                            const SizedBox(width: 20),
-                            Expanded(
-                              flex: 3,
-                              child: _FamilyStats(
-                                stacked: true,
-                                memberCount: memberCount,
-                                tokens: tokens,
-                              ),
-                            ),
-                          ],
-                        )
-                      else ...[
-                        _FamilyOverviewCard(
-                          familyName: familyName,
-                          memberCount: memberCount,
-                          onOverview: () => _openFamilyOverview(context),
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                        _SectionHeading(
+                          eyebrow: strings.growingInUnity,
+                          title: strings.smallMomentsStrongerBonds,
+                          subtitle: strings.homeBondDescription,
                         ),
                         const SizedBox(height: 16),
-                        _FamilyStats(
-                          stacked: false,
-                          memberCount: memberCount,
-                          tokens: tokens,
-                        ),
-                      ],
-                      const SizedBox(height: 34),
-                      _QuickActionCard(
-                        icon: Icons.today_rounded,
-                        accent: AppTheme.goldColor,
-                        title: strings.todaysDailyChallenge,
-                        subtitle: strings.dailyChallengeHomeDescription,
-                        onTap: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => DailyChallengeScreen(
-                              developerPreview: developerPreview,
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                      _SectionHeading(
-                        eyebrow: strings.growingInUnity,
-                        title: strings.smallMomentsStrongerBonds,
-                        subtitle: strings.homeBondDescription,
-                      ),
-                      const SizedBox(height: 16),
-                      if (isWide)
-                        Row(
-                          children: [
-                            Expanded(
-                              child: _QuickActionCard(
-                                icon: Icons.add_photo_alternate_outlined,
-                                accent: AppTheme.coralColor,
-                                title: strings.addMemory,
-                                subtitle: strings.addMemoryDescription,
-                                onTap: developerPreview
-                                    ? () => _showPreviewNotice(context)
-                                    : () => Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (_) =>
-                                              const AddMemoryScreen(),
+                        if (isWide)
+                          Row(
+                            children: [
+                              Expanded(
+                                child: _QuickActionCard(
+                                  icon: Icons.add_photo_alternate_outlined,
+                                  accent: AppTheme.coralColor,
+                                  title: strings.addMemory,
+                                  subtitle: strings.addMemoryDescription,
+                                  onTap: developerPreview
+                                      ? () => _showPreviewNotice(context)
+                                      : () => Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (_) =>
+                                                const AddMemoryScreen(),
+                                          ),
                                         ),
+                                ),
+                              ),
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: _QuickActionCard(
+                                  icon: Icons.sports_esports_outlined,
+                                  accent: AppTheme.tealColor,
+                                  title: strings.challengeFamily,
+                                  subtitle: strings.challengeFamilyDescription,
+                                  onTap: () => Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => GamesScreen(
+                                        developerPreview: developerPreview,
                                       ),
-                              ),
-                            ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: _QuickActionCard(
-                                icon: Icons.sports_esports_outlined,
-                                accent: AppTheme.tealColor,
-                                title: strings.challengeFamily,
-                                subtitle: strings.challengeFamilyDescription,
-                                onTap: () => Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => GamesScreen(
-                                      developerPreview: developerPreview,
                                     ),
                                   ),
                                 ),
                               ),
-                            ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: _QuickActionCard(
-                                icon: Icons.redeem_rounded,
-                                accent: AppTheme.goldColor,
-                                title: 'Rewards',
-                                subtitle:
-                                    'Spend Tokens on family and digital rewards.',
-                                onTap: () => Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => RewardsHubScreen(
-                                      developerPreview: developerPreview,
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: _QuickActionCard(
+                                  icon: Icons.redeem_rounded,
+                                  accent: AppTheme.goldColor,
+                                  title: 'Rewards',
+                                  subtitle:
+                                      'Spend Tokens on family and digital rewards.',
+                                  onTap: () => Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => RewardsHubScreen(
+                                        developerPreview: developerPreview,
+                                      ),
                                     ),
                                   ),
                                 ),
                               ),
-                            ),
-                          ],
-                        )
-                      else ...[
-                        _QuickActionCard(
-                          icon: Icons.add_photo_alternate_outlined,
-                          accent: AppTheme.coralColor,
-                          title: strings.addMemory,
-                          subtitle: strings.addMemoryDescription,
-                          onTap: developerPreview
-                              ? () => _showPreviewNotice(context)
-                              : () => Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => const AddMemoryScreen(),
+                            ],
+                          )
+                        else ...[
+                          _QuickActionCard(
+                            icon: Icons.add_photo_alternate_outlined,
+                            accent: AppTheme.coralColor,
+                            title: strings.addMemory,
+                            subtitle: strings.addMemoryDescription,
+                            onTap: developerPreview
+                                ? () => _showPreviewNotice(context)
+                                : () => Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => const AddMemoryScreen(),
+                                    ),
                                   ),
+                          ),
+                          const SizedBox(height: 12),
+                          _QuickActionCard(
+                            icon: Icons.sports_esports_outlined,
+                            accent: AppTheme.tealColor,
+                            title: strings.challengeFamily,
+                            subtitle: strings.challengeFamilyDescription,
+                            onTap: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => GamesScreen(
+                                  developerPreview: developerPreview,
                                 ),
-                        ),
-                        const SizedBox(height: 12),
-                        _QuickActionCard(
-                          icon: Icons.sports_esports_outlined,
-                          accent: AppTheme.tealColor,
-                          title: strings.challengeFamily,
-                          subtitle: strings.challengeFamilyDescription,
-                          onTap: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => GamesScreen(
-                                developerPreview: developerPreview,
                               ),
                             ),
                           ),
-                        ),
-                        const SizedBox(height: 12),
-                        _QuickActionCard(
-                          icon: Icons.redeem_rounded,
-                          accent: AppTheme.goldColor,
-                          title: 'Rewards',
-                          subtitle:
-                              'Spend Tokens on family and digital rewards.',
-                          onTap: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => RewardsHubScreen(
-                                developerPreview: developerPreview,
+                          const SizedBox(height: 12),
+                          _QuickActionCard(
+                            icon: Icons.redeem_rounded,
+                            accent: AppTheme.goldColor,
+                            title: 'Rewards',
+                            subtitle:
+                                'Spend Tokens on family and digital rewards.',
+                            onTap: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => RewardsHubScreen(
+                                  developerPreview: developerPreview,
+                                ),
                               ),
                             ),
                           ),
-                        ),
+                        ],
                       ],
-                    ],
+                    ),
                   ),
                 ),
-              ),
-            );
-          },
+              );
+            },
+          ),
         ),
       ),
     );

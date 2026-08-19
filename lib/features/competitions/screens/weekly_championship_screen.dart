@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/sila_celebration_card.dart';
 import '../config/competition_rewards.dart';
 import '../config/official_competition_games.dart';
 import '../models/competition_game_result.dart';
@@ -960,30 +961,29 @@ class _WeeklyChampionshipScreenState extends State<WeeklyChampionshipScreen> {
   }
 
   Widget _buildCompletedCard() {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: AppTheme.tealColor.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Icon(
-            Icons.emoji_events_rounded,
-            color: AppTheme.tealColor,
-            size: 34,
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Text(
-              _championName == null
-                  ? 'This week\'s championship is complete.'
-                  : '${_championName!} is this week\'s Family Champion!',
-            ),
-          ),
-        ],
-      ),
+    final champion = _championName;
+
+    return SilaCelebrationCard(
+      key: const ValueKey('weekly-championship-celebration'),
+      eyebrow: 'Weekly Championship complete',
+      title: champion ?? 'A new family champion',
+      subtitle: champion == null
+          ? 'Four games, one shared week, and a family story worth remembering.'
+          : '$champion is this week\'s Family Champion after four games together.',
+      rewards: const [
+        SilaCelebrationReward(
+          icon: Icons.stars_rounded,
+          label: '+${CompetitionRewards.weeklyChampionTokens} Tokens',
+        ),
+        SilaCelebrationReward(
+          icon: Icons.trending_up_rounded,
+          label: '+${CompetitionRewards.weeklyChampionRankingPoints} RP',
+        ),
+        SilaCelebrationReward(
+          icon: Icons.military_tech_rounded,
+          label: 'Weekly crown',
+        ),
+      ],
     );
   }
 }

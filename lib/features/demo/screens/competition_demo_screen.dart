@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/family_year_banner.dart';
+import '../../../core/widgets/sila_celebration_card.dart';
 import '../../../core/widgets/sila_page_backdrop.dart';
 import '../../home/screens/main_navigation_screen.dart';
 
@@ -806,60 +807,25 @@ class _WinnerPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SilaCelebrationCard(
       key: const ValueKey('winner-panel'),
-      clipBehavior: Clip.antiAlias,
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFF173A2E), Color(0xFF0B7A50)],
+      eyebrow: copy.stepCompetition,
+      title: copy.winnerTitle,
+      subtitle: copy.winnerDescription,
+      rewards: [
+        SilaCelebrationReward(
+          icon: Icons.stars_rounded,
+          label: copy.tokensEarned,
         ),
-        borderRadius: BorderRadius.circular(24),
-      ),
-      child: Stack(
-        children: [
-          const Positioned.fill(
-            child: CustomPaint(painter: _ConfettiPainter()),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(28),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const Icon(
-                  Icons.emoji_events_rounded,
-                  size: 68,
-                  color: Color(0xFFFFD77A),
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  copy.winnerTitle,
-                  textAlign: TextAlign.center,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.headlineSmall?.copyWith(color: Colors.white),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  copy.winnerDescription,
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: Colors.white.withValues(alpha: 0.82),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                FilledButton.icon(
-                  onPressed: onContinue,
-                  style: FilledButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: AppTheme.primaryDark,
-                  ),
-                  icon: const Icon(Icons.redeem_rounded),
-                  label: Text(copy.continueToRewards),
-                ),
-              ],
-            ),
-          ),
-        ],
+      ],
+      footer: FilledButton.icon(
+        onPressed: onContinue,
+        style: FilledButton.styleFrom(
+          backgroundColor: Colors.white,
+          foregroundColor: AppTheme.primaryDark,
+        ),
+        icon: const Icon(Icons.redeem_rounded),
+        label: Text(copy.continueToRewards),
       ),
     );
   }
@@ -1046,104 +1012,46 @@ class _CompleteStage extends StatelessWidget {
       (Icons.photo_library_rounded, copy.metricMemory),
     ];
 
-    return Card(
+    return SilaCelebrationCard(
       key: const ValueKey('demo-complete'),
-      child: Padding(
-        padding: const EdgeInsets.all(28),
+      eyebrow: copy.stepComplete,
+      title: copy.completeTitle,
+      subtitle: copy.completeDescription(tokens),
+      icon: Icons.auto_awesome_rounded,
+      rewards: [
+        for (final metric in metrics)
+          SilaCelebrationReward(icon: metric.$1, label: metric.$2),
+      ],
+      footer: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 520),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Container(
-              width: 104,
-              height: 104,
-              decoration: const BoxDecoration(
-                gradient: AppTheme.brandGradient,
-                shape: BoxShape.circle,
+            FilledButton.icon(
+              key: const ValueKey('explore-full-app'),
+              onPressed: onExplore,
+              style: FilledButton.styleFrom(
+                backgroundColor: Colors.white,
+                foregroundColor: AppTheme.primaryDark,
               ),
-              child: const Icon(
-                Icons.auto_awesome_rounded,
-                size: 54,
-                color: Colors.white,
+              icon: const Icon(Icons.explore_rounded),
+              label: Text(copy.exploreSila),
+            ),
+            const SizedBox(height: 10),
+            OutlinedButton.icon(
+              onPressed: onRestart,
+              style: OutlinedButton.styleFrom(
+                foregroundColor: Colors.white,
+                side: BorderSide(color: Colors.white.withValues(alpha: 0.45)),
               ),
-            ),
-            const SizedBox(height: 22),
-            Text(
-              copy.completeTitle,
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              copy.completeDescription(tokens),
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyLarge,
-            ),
-            const SizedBox(height: 24),
-            Wrap(
-              alignment: WrapAlignment.center,
-              spacing: 10,
-              runSpacing: 10,
-              children: [
-                for (final metric in metrics)
-                  Chip(
-                    avatar: Icon(metric.$1, size: 18),
-                    label: Text(metric.$2),
-                  ),
-              ],
-            ),
-            const SizedBox(height: 26),
-            ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 520),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  FilledButton.icon(
-                    key: const ValueKey('explore-full-app'),
-                    onPressed: onExplore,
-                    icon: const Icon(Icons.explore_rounded),
-                    label: Text(copy.exploreSila),
-                  ),
-                  const SizedBox(height: 10),
-                  OutlinedButton.icon(
-                    onPressed: onRestart,
-                    icon: const Icon(Icons.replay_rounded),
-                    label: Text(copy.runAgain),
-                  ),
-                ],
-              ),
+              icon: const Icon(Icons.replay_rounded),
+              label: Text(copy.runAgain),
             ),
           ],
         ),
       ),
     );
   }
-}
-
-class _ConfettiPainter extends CustomPainter {
-  const _ConfettiPainter();
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    const points = [
-      (0.08, 0.18, AppTheme.uaeRed),
-      (0.17, 0.72, Color(0xFFFFD77A)),
-      (0.28, 0.24, AppTheme.uaeGreen),
-      (0.74, 0.2, Color(0xFFFFD77A)),
-      (0.86, 0.68, AppTheme.uaeRed),
-      (0.93, 0.3, Colors.white),
-      (0.64, 0.82, AppTheme.uaeGreen),
-    ];
-
-    for (final point in points) {
-      canvas.drawCircle(
-        Offset(size.width * point.$1, size.height * point.$2),
-        5,
-        Paint()..color = point.$3.withValues(alpha: 0.82),
-      );
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
 class CompetitionDemoCopy {
@@ -1224,6 +1132,7 @@ class CompetitionDemoCopy {
   String get winnerDescription => arabic
       ? 'ربحت العائلة 50 رمزًا ولحظة احتفال مشتركة.'
       : 'The family earned 50 Tokens and a celebration they shared together.';
+  String get tokensEarned => arabic ? '+50 رمزًا' : '+50 Tokens';
   String get continueToRewards =>
       arabic ? 'اختر مكافأة عائلية' : 'Choose a family reward';
   String get rewardTitle =>
