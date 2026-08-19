@@ -93,7 +93,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get privacyDescription => 'Your family content is associated with your signed-in account and family.';
 
   @override
-  String get accountEmail => 'Account Email';
+  String get accountEmail => 'Account email';
 
   @override
   String get changePassword => 'Change Password';
@@ -669,6 +669,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get couldNotCreateFamily => 'Could not create the family. Please try again.';
 
   @override
+  String get alreadyInFamily => 'Leave your current family before creating another one.';
+
+  @override
   String get familyImageComing => 'Family image upload will be added later.';
 
   @override
@@ -712,6 +715,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get invitationCodeNotFound => 'Invitation code not found.';
+
+  @override
+  String get alreadyFamilyMember => 'You are already a member of this family.';
+
+  @override
+  String get leaveCurrentFamilyFirst => 'Leave your current family before joining another one.';
 
   @override
   String get couldNotJoinFamily => 'Could not join the family. Please try again.';
@@ -988,6 +997,39 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileTitle => 'Profile';
 
   @override
+  String get editProfile => 'Edit Profile';
+
+  @override
+  String get editProfileTooltip => 'Edit profile';
+
+  @override
+  String get personalDetails => 'Your personal details';
+
+  @override
+  String get personalDetailsDescription => 'Keep your name recognizable so your family knows who is playing and contributing.';
+
+  @override
+  String get emailManagedSecurely => 'Your sign-in email is managed through account security.';
+
+  @override
+  String get saveProfile => 'Save Profile';
+
+  @override
+  String get savingProfile => 'Saving Profile...';
+
+  @override
+  String get profileUpdated => 'Profile updated successfully.';
+
+  @override
+  String get couldNotLoadProfile => 'Could not load your profile. Please try again.';
+
+  @override
+  String get couldNotSaveProfile => 'Could not save your profile. Please try again.';
+
+  @override
+  String get developerPreviewReadOnly => 'Developer preview is read-only. No data was changed.';
+
+  @override
   String get profileFamilySection => 'Family';
 
   @override
@@ -1070,6 +1112,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get trophiesEmptyDescription => 'Weekly and monthly championship trophies will appear here.';
 
   @override
+  String get couldNotLoadTrophies => 'Could not load family trophies. Please try again.';
+
+  @override
   String get appSettings => 'App Settings';
 
   @override
@@ -1101,6 +1146,162 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get shareFamilyInviteCode => 'Share this code with relatives so they can join this family.';
+
+  @override
+  String get manageFamily => 'Manage Family';
+
+  @override
+  String get familyManagement => 'Family Management';
+
+  @override
+  String get familyManagementDescription => 'Invite relatives, understand roles, and keep your family group organized.';
+
+  @override
+  String get familyLoadError => 'Could not load your family. Please try again.';
+
+  @override
+  String get familyMembersLoadError => 'Could not load family members. Please try again.';
+
+  @override
+  String get createOrJoinFamilyAction => 'Create or Join a Family';
+
+  @override
+  String get inviteRelatives => 'Invite relatives';
+
+  @override
+  String get familyInviteDescription => 'Share this private code only with relatives you want in your family space.';
+
+  @override
+  String get familyMembersTitle => 'Family members';
+
+  @override
+  String get familyMembersDescription => 'Roles explain what each person can manage in your family space.';
+
+  @override
+  String get familyRoles => 'Family roles';
+
+  @override
+  String get familyRoleOwner => 'Owner';
+
+  @override
+  String get familyRoleAdmin => 'Reward Admin';
+
+  @override
+  String get familyRoleMember => 'Member';
+
+  @override
+  String get familyOwnerDescription => 'Manages family details, members, roles, and ownership.';
+
+  @override
+  String get familyAdminDescription => 'Can review and approve family reward requests.';
+
+  @override
+  String get familyMemberDescription => 'Can join family games, missions, memories, and shared activities.';
+
+  @override
+  String familyMemberYou(String name) {
+    return '$name (You)';
+  }
+
+  @override
+  String get memberActions => 'Member actions';
+
+  @override
+  String get editFamily => 'Edit family';
+
+  @override
+  String get editFamilyDetails => 'Edit Family Details';
+
+  @override
+  String get saveFamily => 'Save Family';
+
+  @override
+  String get familyUpdated => 'Family details updated.';
+
+  @override
+  String get couldNotUpdateFamily => 'Could not update the family. Please try again.';
+
+  @override
+  String get makeAdmin => 'Make Reward Admin';
+
+  @override
+  String get removeAdmin => 'Remove Reward Admin';
+
+  @override
+  String get adminRoleUpdated => 'Family role updated.';
+
+  @override
+  String get couldNotUpdateAdminRole => 'Could not update this family role. Please try again.';
+
+  @override
+  String get transferOwnership => 'Transfer Ownership';
+
+  @override
+  String transferOwnershipQuestion(String name) {
+    return 'Make $name the owner?';
+  }
+
+  @override
+  String get transferOwnershipWarning => 'They will receive full family controls and you will become a regular member. This can be changed again by the new owner.';
+
+  @override
+  String get ownershipTransferred => 'Family ownership transferred.';
+
+  @override
+  String get couldNotTransferOwnership => 'Could not transfer ownership. Please try again.';
+
+  @override
+  String get removeMember => 'Remove Member';
+
+  @override
+  String removeMemberQuestion(String name) {
+    return 'Remove $name?';
+  }
+
+  @override
+  String get removeMemberWarning => 'They will lose access to this family\'s private content and can join or create another family.';
+
+  @override
+  String get familyMemberRemoved => 'Family member removed.';
+
+  @override
+  String get couldNotRemoveMember => 'Could not remove this family member. Please try again.';
+
+  @override
+  String get leaveFamily => 'Leave Family';
+
+  @override
+  String get leaveFamilyQuestion => 'Leave this family?';
+
+  @override
+  String get leaveFamilyWarning => 'You will lose access to this family\'s private content. You can join again later with an invitation code.';
+
+  @override
+  String get leftFamilySuccessfully => 'You left the family.';
+
+  @override
+  String get couldNotLeaveFamily => 'Could not leave the family. Please try again.';
+
+  @override
+  String get transferBeforeLeaving => 'Transfer Ownership to Leave';
+
+  @override
+  String get ownerCannotLeave => 'Transfer ownership first';
+
+  @override
+  String get ownerCannotLeaveDescription => 'The owner protects the family space. Transfer ownership to another member before leaving. If you are the only member, invite a trusted relative first.';
+
+  @override
+  String get gotIt => 'Got It';
+
+  @override
+  String get developerFamilyDescription => 'A warm private space for playing, sharing, and growing together.';
+
+  @override
+  String get developerFamilyMemberName => 'Mariam';
+
+  @override
+  String get developerFamilyMemberTwoName => 'Omar';
 
   @override
   String get missionsSignInRequired => 'You must be signed in to view missions.';

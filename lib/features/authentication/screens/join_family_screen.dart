@@ -50,35 +50,37 @@ class _JoinFamilyScreenState extends State<JoinFamilyScreen> {
 
     try {
       final code = _codeController.text.trim().toUpperCase();
+      final firestore = FirebaseFirestore.instance;
+      final familyReference = firestore.collection('families').doc(code);
+      final userReference = firestore.collection('users').doc(user.uid);
 
-      final familyReference = FirebaseFirestore.instance
-          .collection('families')
-          .doc(code);
+      await firestore.runTransaction((transaction) async {
+        final familySnapshot = await transaction.get(familyReference);
+        final userSnapshot = await transaction.get(userReference);
 
-      final familySnapshot = await familyReference.get();
-
-      if (!familySnapshot.exists) {
-        if (!mounted) {
-          return;
+        if (!familySnapshot.exists) {
+          throw const _FamilyNotFoundException();
         }
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(AppLocalizations.of(context)!.invitationCodeNotFound),
-          ),
-        );
+        final currentFamilyId = userSnapshot.data()?['familyId']?.toString();
 
-        return;
-      }
+        if (currentFamilyId == code) {
+          throw const _AlreadyFamilyMemberException();
+        }
 
-      await familyReference.update({
-        'members': FieldValue.arrayUnion([user.uid]),
+        if (currentFamilyId?.isNotEmpty == true) {
+          throw const _DifferentFamilyException();
+        }
+
+        transaction.update(familyReference, {
+          'members': FieldValue.arrayUnion([user.uid]),
+        });
+        transaction.set(userReference, {
+          'familyId': code,
+          'email': user.email,
+          'updatedAt': FieldValue.serverTimestamp(),
+        }, SetOptions(merge: true));
       });
-      await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
-        'familyId': code,
-        'email': user.email,
-        'updatedAt': FieldValue.serverTimestamp(),
-      }, SetOptions(merge: true));
 
       if (!mounted) {
         return;
@@ -89,7 +91,31 @@ class _JoinFamilyScreenState extends State<JoinFamilyScreen> {
         MaterialPageRoute(builder: (context) => const MainNavigationScreen()),
         (route) => false,
       );
-    } on FirebaseException {
+    } on _FamilyNotFoundException {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.invitationCodeNotFound),
+        ),
+      );
+    } on _AlreadyFamilyMemberException {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.alreadyFamilyMember),
+        ),
+      );
+    } on _DifferentFamilyException {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.leaveCurrentFamilyFirst),
+        ),
+      );
+    } catch (_) {
       if (!mounted) {
         return;
       }
@@ -185,4 +211,16 @@ class _JoinFamilyScreenState extends State<JoinFamilyScreen> {
       ),
     );
   }
+}
+
+class _FamilyNotFoundException implements Exception {
+  const _FamilyNotFoundException();
+}
+
+class _AlreadyFamilyMemberException implements Exception {
+  const _AlreadyFamilyMemberException();
+}
+
+class _DifferentFamilyException implements Exception {
+  const _DifferentFamilyException();
 }

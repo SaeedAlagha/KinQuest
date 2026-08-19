@@ -9,12 +9,14 @@ const {
   initializeTestEnvironment,
 } = require("@firebase/rules-unit-testing");
 const {
+  arrayRemove,
   arrayUnion,
   collection,
   doc,
   getDoc,
   setDoc,
   updateDoc,
+  writeBatch,
 } = require("firebase/firestore");
 
 const projectId = "demo-kinquest";
@@ -153,9 +155,60 @@ test("an invite holder can add only their own membership", async () => {
     }),
   );
 
-  await assertSucceeds(
-    updateDoc(familyReference, { members: arrayUnion("charlie") }),
+  const joinBatch = writeBatch(database);
+  joinBatch.update(familyReference, { members: arrayUnion("charlie") });
+  joinBatch.update(doc(database, "users/charlie"), {
+    familyId: "FAMILY_A",
+  });
+
+  await assertSucceeds(joinBatch.commit());
+});
+
+test("a member cannot join a second family or remove somebody else", async () => {
+  const malloryDatabase = testEnvironment
+    .authenticatedContext("mallory")
+    .firestore();
+  const bobDatabase = testEnvironment
+    .authenticatedContext("bob")
+    .firestore();
+
+  await assertFails(
+    updateDoc(doc(malloryDatabase, "families/FAMILY_A"), {
+      members: arrayUnion("mallory"),
+    }),
   );
+
+  await assertFails(
+    updateDoc(doc(bobDatabase, "families/FAMILY_A"), {
+      members: arrayRemove("alice"),
+    }),
+  );
+});
+
+test("a non-owner can leave atomically without changing other members", async () => {
+  const database = testEnvironment.authenticatedContext("bob").firestore();
+  const batch = writeBatch(database);
+
+  batch.update(doc(database, "families/FAMILY_A"), {
+    members: arrayRemove("bob"),
+    rewardApproverIds: arrayRemove("bob"),
+  });
+  batch.update(doc(database, "users/bob"), { familyId: null });
+
+  await assertSucceeds(batch.commit());
+});
+
+test("the family owner can remove a member and clear their family link", async () => {
+  const database = testEnvironment.authenticatedContext("alice").firestore();
+  const batch = writeBatch(database);
+
+  batch.update(doc(database, "families/FAMILY_A"), {
+    members: arrayRemove("bob"),
+    rewardApproverIds: arrayRemove("bob"),
+  });
+  batch.update(doc(database, "users/bob"), { familyId: null });
+
+  await assertSucceeds(batch.commit());
 });
 
 test("only the family owner can manage reward definitions", async () => {

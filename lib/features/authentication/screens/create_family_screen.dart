@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../../core/validation/form_validators.dart';
 import '../../../l10n/app_localizations.dart';
@@ -65,31 +66,52 @@ class _CreateFamilyScreenState extends State<CreateFamilyScreen> {
     });
 
     try {
-      String invitationCode;
-      DocumentReference<Map<String, dynamic>> familyReference;
+      final firestore = FirebaseFirestore.instance;
+      String? invitationCode;
 
-      do {
-        invitationCode = _generateInvitationCode();
+      for (var attempt = 0; attempt < 8 && invitationCode == null; attempt++) {
+        final candidate = _generateInvitationCode();
+        final familyReference = firestore.collection('families').doc(candidate);
+        final userReference = firestore.collection('users').doc(user.uid);
 
-        familyReference = FirebaseFirestore.instance
-            .collection('families')
-            .doc(invitationCode);
-      } while ((await familyReference.get()).exists);
+        final created = await firestore.runTransaction<bool>((
+          transaction,
+        ) async {
+          final familySnapshot = await transaction.get(familyReference);
+          final userSnapshot = await transaction.get(userReference);
 
-      await familyReference.set({
-        'name': _familyNameController.text.trim(),
-        'inviteCode': invitationCode,
-        'description': _descriptionController.text.trim(),
-        'invitationCode': invitationCode,
-        'ownerId': user.uid,
-        'members': [user.uid],
-        'createdAt': FieldValue.serverTimestamp(),
-      });
-      await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
-        'familyId': invitationCode,
-        'email': user.email,
-        'updatedAt': FieldValue.serverTimestamp(),
-      }, SetOptions(merge: true));
+          if (familySnapshot.exists) return false;
+
+          final currentFamilyId = userSnapshot.data()?['familyId']?.toString();
+
+          if (currentFamilyId?.isNotEmpty == true) {
+            throw const _AlreadyInFamilyException();
+          }
+
+          transaction.set(familyReference, {
+            'name': _familyNameController.text.trim(),
+            'inviteCode': candidate,
+            'description': _descriptionController.text.trim(),
+            'invitationCode': candidate,
+            'ownerId': user.uid,
+            'members': [user.uid],
+            'createdAt': FieldValue.serverTimestamp(),
+          });
+          transaction.set(userReference, {
+            'familyId': candidate,
+            'email': user.email,
+            'updatedAt': FieldValue.serverTimestamp(),
+          }, SetOptions(merge: true));
+
+          return true;
+        });
+
+        if (created) invitationCode = candidate;
+      }
+
+      if (invitationCode == null) {
+        throw const _InvitationCodeAllocationException();
+      }
 
       if (!mounted) {
         return;
@@ -102,7 +124,13 @@ class _CreateFamilyScreenState extends State<CreateFamilyScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(AppLocalizations.of(context)!.familyCreated)),
       );
-    } on FirebaseException catch (_) {
+    } on _AlreadyInFamilyException {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(AppLocalizations.of(context)!.alreadyInFamily)),
+      );
+    } catch (_) {
       if (!mounted) {
         return;
       }
@@ -154,34 +182,16 @@ class _CreateFamilyScreenState extends State<CreateFamilyScreen> {
                     const SizedBox(height: 28),
 
                     Center(
-                      child: Stack(
-                        children: [
-                          CircleAvatar(
-                            radius: 55,
-                            backgroundColor: Theme.of(
-                              context,
-                            ).colorScheme.primaryContainer,
-                            child: Icon(
-                              Icons.family_restroom,
-                              size: 56,
-                              color: Theme.of(context).colorScheme.primary,
-                            ),
-                          ),
-                          PositionedDirectional(
-                            end: 0,
-                            bottom: 0,
-                            child: IconButton.filled(
-                              onPressed: () {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(strings.familyImageComing),
-                                  ),
-                                );
-                              },
-                              icon: const Icon(Icons.camera_alt_outlined),
-                            ),
-                          ),
-                        ],
+                      child: CircleAvatar(
+                        radius: 55,
+                        backgroundColor: Theme.of(
+                          context,
+                        ).colorScheme.primaryContainer,
+                        child: Icon(
+                          Icons.family_restroom,
+                          size: 56,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
                       ),
                     ),
 
@@ -189,6 +199,7 @@ class _CreateFamilyScreenState extends State<CreateFamilyScreen> {
 
                     TextFormField(
                       controller: _familyNameController,
+                      enabled: !_isCreatingFamily && _invitationCode == null,
                       textCapitalization: TextCapitalization.words,
                       textInputAction: TextInputAction.next,
                       validator: validators.validateFamilyName,
@@ -203,6 +214,7 @@ class _CreateFamilyScreenState extends State<CreateFamilyScreen> {
 
                     TextFormField(
                       controller: _descriptionController,
+                      enabled: !_isCreatingFamily && _invitationCode == null,
                       maxLength: 120,
                       maxLines: 3,
                       decoration: InputDecoration(
@@ -218,7 +230,9 @@ class _CreateFamilyScreenState extends State<CreateFamilyScreen> {
                     SizedBox(
                       width: double.infinity,
                       child: FilledButton(
-                        onPressed: _isCreatingFamily ? null : _createFamily,
+                        onPressed: _isCreatingFamily || _invitationCode != null
+                            ? null
+                            : _createFamily,
                         child: Text(
                           _isCreatingFamily
                               ? strings.creatingFamily
@@ -267,10 +281,18 @@ class _CreateFamilyScreenState extends State<CreateFamilyScreen> {
                             const SizedBox(height: 14),
 
                             OutlinedButton.icon(
-                              onPressed: () {
+                              onPressed: () async {
+                                await Clipboard.setData(
+                                  ClipboardData(text: _invitationCode!),
+                                );
+
+                                if (!context.mounted) return;
+
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
-                                    content: Text(strings.copyingComing),
+                                    content: Text(
+                                      strings.familyInviteCodeCopied,
+                                    ),
                                   ),
                                 );
                               },
@@ -309,4 +331,12 @@ class _CreateFamilyScreenState extends State<CreateFamilyScreen> {
       ),
     );
   }
+}
+
+class _AlreadyInFamilyException implements Exception {
+  const _AlreadyInFamilyException();
+}
+
+class _InvitationCodeAllocationException implements Exception {
+  const _InvitationCodeAllocationException();
 }

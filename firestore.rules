@@ -40,12 +40,50 @@ service cloud.firestore {
 
     function joinsFamilyWithOnlySelf() {
       return signedIn()
+        && currentUser().data.familyId == null
         && !resource.data.members.hasAny([request.auth.uid])
         && request.resource.data.members.hasAll(resource.data.members)
         && request.resource.data.members.hasAny([request.auth.uid])
         && request.resource.data.members.size() == resource.data.members.size() + 1
         && request.resource.data.diff(resource.data).affectedKeys()
           .hasOnly(['members']);
+    }
+
+    function leavesFamilyWithOnlySelf() {
+      let oldApprovers = resource.data.get('rewardApproverIds', []);
+      let newApprovers = request.resource.data.get('rewardApproverIds', []);
+
+      return signedIn()
+        && resource.data.ownerId != request.auth.uid
+        && resource.data.members.hasAny([request.auth.uid])
+        && !request.resource.data.members.hasAny([request.auth.uid])
+        && request.resource.data.members.hasOnly(resource.data.members)
+        && request.resource.data.members.size() == resource.data.members.size() - 1
+        && newApprovers.hasOnly(oldApprovers)
+        && !newApprovers.hasAny([request.auth.uid])
+        && (
+          (
+            oldApprovers.hasAny([request.auth.uid])
+            && newApprovers.size() == oldApprovers.size() - 1
+          )
+          || (
+            !oldApprovers.hasAny([request.auth.uid])
+            && newApprovers.size() == oldApprovers.size()
+          )
+        )
+        && request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['members', 'rewardApproverIds']);
+    }
+
+    function familyOwnerClearsMembership() {
+      return signedIn()
+        && resource.data.familyId != null
+        && family(resource.data.familyId).data.ownerId == request.auth.uid
+        && request.resource.data.familyId == null
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'familyId',
+          'updatedAt'
+        ]);
     }
 
     match /users/{userId} {
@@ -62,6 +100,7 @@ service cloud.firestore {
         );
 
       allow update: if isSelf(userId)
+        || familyOwnerClearsMembership()
         || (
           signedIn()
           && resource.data.familyId != null
@@ -141,7 +180,9 @@ service cloud.firestore {
         && request.resource.data.ownerId == request.auth.uid
         && request.resource.data.members.size() == 1
         && request.resource.data.members.hasOnly([request.auth.uid]);
-      allow update: if isFamilyOwner(familyId) || joinsFamilyWithOnlySelf();
+      allow update: if isFamilyOwner(familyId)
+        || joinsFamilyWithOnlySelf()
+        || leavesFamilyWithOnlySelf();
       allow delete: if isFamilyOwner(familyId);
 
       match /memories/{memoryId} {
