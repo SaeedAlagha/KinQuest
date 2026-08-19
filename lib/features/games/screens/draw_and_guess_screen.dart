@@ -29,10 +29,12 @@ class DrawAndGuessScreen extends StatefulWidget {
     super.key,
     this.playMode = GamePlayMode.quickPlay,
     this.participantIds,
+    this.developerPreview = false,
   });
 
   final GamePlayMode playMode;
   final Set<String>? participantIds;
+  final bool developerPreview;
 
   @override
   State<DrawAndGuessScreen> createState() => _DrawAndGuessScreenState();
@@ -74,7 +76,28 @@ class _DrawAndGuessScreenState extends State<DrawAndGuessScreen> {
   @override
   void initState() {
     super.initState();
-    _loadFamilyMembers();
+    if (widget.developerPreview) {
+      _loadPreviewMembers();
+    } else {
+      _loadFamilyMembers();
+    }
+  }
+
+  void _loadPreviewMembers() {
+    const members = [
+      _DrawPlayer(id: 'preview-1', name: 'Alex'),
+      _DrawPlayer(id: 'preview-2', name: 'Sam'),
+      _DrawPlayer(id: 'preview-3', name: 'Jordan'),
+      _DrawPlayer(id: 'preview-4', name: 'Taylor'),
+    ];
+    final availableMembers = widget.participantIds == null
+        ? members
+        : members
+              .where((member) => widget.participantIds!.contains(member.id))
+              .toList();
+    _familyMembers.addAll(availableMembers);
+    _selectedPlayerIds.addAll(availableMembers.map((member) => member.id));
+    _isLoading = false;
   }
 
   @override
@@ -211,13 +234,34 @@ class _DrawAndGuessScreenState extends State<DrawAndGuessScreen> {
         _scores[player.id] = 0;
       }
 
-      final prompts = await _aiService.generatePrompts(
-        count: selectedPlayers.length * _selectedRounds,
-        languageCode: Localizations.localeOf(context).languageCode,
-      );
+      final promptCount = selectedPlayers.length * _selectedRounds;
+      final languageCode = Localizations.localeOf(context).languageCode;
+      List<DrawAndGuessPrompt> prompts;
 
-      if (prompts.isEmpty) {
-        throw Exception('No prompts generated');
+      if (widget.developerPreview) {
+        prompts = DrawAndGuessAiService.offlinePrompts(
+          count: promptCount,
+          languageCode: languageCode,
+        );
+      } else {
+        try {
+          prompts = await _aiService.generatePrompts(
+            count: promptCount,
+            languageCode: languageCode,
+          );
+        } catch (_) {
+          prompts = DrawAndGuessAiService.offlinePrompts(
+            count: promptCount,
+            languageCode: languageCode,
+          );
+        }
+      }
+
+      if (prompts.length < promptCount) {
+        prompts = DrawAndGuessAiService.offlinePrompts(
+          count: promptCount,
+          languageCode: languageCode,
+        );
       }
 
       if (!mounted) {

@@ -3632,5 +3632,121 @@ class AppLocalizationsEn extends AppLocalizations {
   String get nextVote => 'Next Vote';
 
   @override
+  String get couldNotGenerateMissions => 'Could not prepare Secret Missions. Please try again in a moment.';
+
+  @override
+  String get couldNotGenerateNextRound => 'Could not prepare the next round. Please try again.';
+
+  @override
+  String get missionTimeUp => 'Time is up! Time to reveal and judge the missions.';
+
+  @override
+  String get finishRoundEarlyTitle => 'Finish round early?';
+
+  @override
+  String get finishRoundEarlyDescription => 'The timer will stop and everyone will move to mission judging.';
+
+  @override
+  String get keepPlaying => 'Keep Playing';
+
+  @override
+  String get finishRound => 'Finish Round';
+
+  @override
+  String get chooseMissionPlayers => 'Choose the family members playing together on this phone.';
+
+  @override
+  String secretMissionSetupSummary(int rounds) {
+    String _temp0 = intl.Intl.pluralLogic(
+      rounds,
+      locale: localeName,
+      other: '$rounds rounds',
+      one: '1 round',
+    );
+    return '$_temp0 • 10 minutes per round • 1 secret mission per player each round.';
+  }
+
+  @override
+  String get secretMissionSetupInstructions => 'Complete your mission naturally without letting the others figure it out.';
+
+  @override
+  String generatingRound(int number) {
+    return 'Generating Round $number...';
+  }
+
+  @override
+  String playerProgress(int current, int total) {
+    return 'Player $current of $total';
+  }
+
+  @override
+  String get keepScreenPrivate => 'Make sure nobody else can see the screen.';
+
+  @override
+  String get revealMyMission => 'Reveal My Mission';
+
+  @override
+  String get yourSecretMission => 'YOUR SECRET MISSION';
+
+  @override
+  String get rememberMission => 'Remember it. Do not tell anyone.';
+
+  @override
+  String get hideMissionStartRound => 'Hide Mission & Start 10-Minute Round';
+
+  @override
+  String get hideMissionPassPhone => 'Hide Mission & Pass Phone';
+
+  @override
+  String get missionsAreLive => 'Missions are live!';
+
+  @override
+  String get missionsLiveInstructions => 'Put the phone down and act naturally. Complete your mission without making it obvious.';
+
+  @override
+  String get timeRemaining => 'TIME REMAINING';
+
+  @override
+  String get missionAutoJudge => 'The round will automatically move to judging when the timer reaches 00:00.';
+
+  @override
+  String get finishRoundEarly => 'Finish Round Early';
+
+  @override
+  String judgeProgress(int current, int total) {
+    return 'Judge $current of $total';
+  }
+
+  @override
+  String get missionCompletedQuestion => 'Did they successfully complete the mission during this round?';
+
+  @override
+  String get notCompleted => 'Not Completed';
+
+  @override
+  String get completedPlusOne => 'Completed +1';
+
+  @override
+  String roundsRemaining(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count rounds remaining',
+      one: '1 round remaining',
+      zero: 'No rounds remaining',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get missionCompletedThisRound => 'Mission completed this round';
+
+  @override
+  String get missionNotCompletedThisRound => 'Mission not completed this round';
+
+  @override
+  String get previewPlayer => 'Preview Player';
+
+  @override
   String get monthlyInvalidWinner => 'The match returned a winner who was not one of the two selected competitors. Please replay the match.';
 }

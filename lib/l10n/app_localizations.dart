@@ -6539,6 +6539,192 @@ abstract class AppLocalizations {
   /// **'Next Vote'**
   String get nextVote;
 
+  /// No description provided for @couldNotGenerateMissions.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not prepare Secret Missions. Please try again in a moment.'**
+  String get couldNotGenerateMissions;
+
+  /// No description provided for @couldNotGenerateNextRound.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not prepare the next round. Please try again.'**
+  String get couldNotGenerateNextRound;
+
+  /// No description provided for @missionTimeUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Time is up! Time to reveal and judge the missions.'**
+  String get missionTimeUp;
+
+  /// No description provided for @finishRoundEarlyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Finish round early?'**
+  String get finishRoundEarlyTitle;
+
+  /// No description provided for @finishRoundEarlyDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'The timer will stop and everyone will move to mission judging.'**
+  String get finishRoundEarlyDescription;
+
+  /// No description provided for @keepPlaying.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep Playing'**
+  String get keepPlaying;
+
+  /// No description provided for @finishRound.
+  ///
+  /// In en, this message translates to:
+  /// **'Finish Round'**
+  String get finishRound;
+
+  /// No description provided for @chooseMissionPlayers.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the family members playing together on this phone.'**
+  String get chooseMissionPlayers;
+
+  /// No description provided for @secretMissionSetupSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{rounds, plural, =1{1 round} other{{rounds} rounds}} • 10 minutes per round • 1 secret mission per player each round.'**
+  String secretMissionSetupSummary(int rounds);
+
+  /// No description provided for @secretMissionSetupInstructions.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete your mission naturally without letting the others figure it out.'**
+  String get secretMissionSetupInstructions;
+
+  /// No description provided for @generatingRound.
+  ///
+  /// In en, this message translates to:
+  /// **'Generating Round {number}...'**
+  String generatingRound(int number);
+
+  /// No description provided for @playerProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Player {current} of {total}'**
+  String playerProgress(int current, int total);
+
+  /// No description provided for @keepScreenPrivate.
+  ///
+  /// In en, this message translates to:
+  /// **'Make sure nobody else can see the screen.'**
+  String get keepScreenPrivate;
+
+  /// No description provided for @revealMyMission.
+  ///
+  /// In en, this message translates to:
+  /// **'Reveal My Mission'**
+  String get revealMyMission;
+
+  /// No description provided for @yourSecretMission.
+  ///
+  /// In en, this message translates to:
+  /// **'YOUR SECRET MISSION'**
+  String get yourSecretMission;
+
+  /// No description provided for @rememberMission.
+  ///
+  /// In en, this message translates to:
+  /// **'Remember it. Do not tell anyone.'**
+  String get rememberMission;
+
+  /// No description provided for @hideMissionStartRound.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide Mission & Start 10-Minute Round'**
+  String get hideMissionStartRound;
+
+  /// No description provided for @hideMissionPassPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide Mission & Pass Phone'**
+  String get hideMissionPassPhone;
+
+  /// No description provided for @missionsAreLive.
+  ///
+  /// In en, this message translates to:
+  /// **'Missions are live!'**
+  String get missionsAreLive;
+
+  /// No description provided for @missionsLiveInstructions.
+  ///
+  /// In en, this message translates to:
+  /// **'Put the phone down and act naturally. Complete your mission without making it obvious.'**
+  String get missionsLiveInstructions;
+
+  /// No description provided for @timeRemaining.
+  ///
+  /// In en, this message translates to:
+  /// **'TIME REMAINING'**
+  String get timeRemaining;
+
+  /// No description provided for @missionAutoJudge.
+  ///
+  /// In en, this message translates to:
+  /// **'The round will automatically move to judging when the timer reaches 00:00.'**
+  String get missionAutoJudge;
+
+  /// No description provided for @finishRoundEarly.
+  ///
+  /// In en, this message translates to:
+  /// **'Finish Round Early'**
+  String get finishRoundEarly;
+
+  /// No description provided for @judgeProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Judge {current} of {total}'**
+  String judgeProgress(int current, int total);
+
+  /// No description provided for @missionCompletedQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Did they successfully complete the mission during this round?'**
+  String get missionCompletedQuestion;
+
+  /// No description provided for @notCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Not Completed'**
+  String get notCompleted;
+
+  /// No description provided for @completedPlusOne.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed +1'**
+  String get completedPlusOne;
+
+  /// No description provided for @roundsRemaining.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No rounds remaining} =1{1 round remaining} other{{count} rounds remaining}}'**
+  String roundsRemaining(int count);
+
+  /// No description provided for @missionCompletedThisRound.
+  ///
+  /// In en, this message translates to:
+  /// **'Mission completed this round'**
+  String get missionCompletedThisRound;
+
+  /// No description provided for @missionNotCompletedThisRound.
+  ///
+  /// In en, this message translates to:
+  /// **'Mission not completed this round'**
+  String get missionNotCompletedThisRound;
+
+  /// No description provided for @previewPlayer.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview Player'**
+  String get previewPlayer;
+
   /// No description provided for @monthlyInvalidWinner.
   ///
   /// In en, this message translates to:

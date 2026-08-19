@@ -132,14 +132,24 @@ class GamesScreen extends StatelessWidget {
           ),
           'Secret Mission' => SecretMissionScreen(
             participantIds: participantIds,
+            developerPreview: developerPreview,
           ),
           'Caption Battle' => CaptionBattleScreen(
             participantIds: participantIds,
             developerPreview: developerPreview,
           ),
-          'Pass the Bomb' => PassTheBombScreen(participantIds: participantIds),
-          'Draw & Guess' => DrawAndGuessScreen(participantIds: participantIds),
-          'Don\'t Say It' => DontSayItScreen(participantIds: participantIds),
+          'Pass the Bomb' => PassTheBombScreen(
+            participantIds: participantIds,
+            developerPreview: developerPreview,
+          ),
+          'Draw & Guess' => DrawAndGuessScreen(
+            participantIds: participantIds,
+            developerPreview: developerPreview,
+          ),
+          'Don\'t Say It' => DontSayItScreen(
+            participantIds: participantIds,
+            developerPreview: developerPreview,
+          ),
           'Trivia' => TriviaScreen(
             participantIds: participantIds,
             developerPreview: developerPreview,

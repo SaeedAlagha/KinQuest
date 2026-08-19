@@ -43,11 +43,12 @@ void main() {
     expect(find.text('لا توجد أمنيات عائلية بعد'), findsOneWidget);
 
     await tester.scrollUntilVisible(
-      find.text('Monthly Cup Champion'),
+      find.text('بطل الكأس الشهري'),
       300,
       scrollable: scrollable,
     );
-    expect(find.text('Monthly Cup Champion'), findsOneWidget);
+    expect(find.text('بطل الكأس الشهري'), findsOneWidget);
+    expect(find.textContaining('لاعب تجريبي'), findsOneWidget);
     expect(find.textContaining('2026-08'), findsOneWidget);
 
     await tester.scrollUntilVisible(

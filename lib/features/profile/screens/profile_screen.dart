@@ -959,10 +959,10 @@ class _TrophyCabinetSection extends StatelessWidget {
 
     if (developerPreview) {
       return _buildTrophies(context, [
-        const _ProfileTrophy(
-          title: 'Monthly Cup Champion',
+        _ProfileTrophy(
+          title: strings.monthlyCupChampion,
           monthKey: '2026-08',
-          winnerName: 'Preview Player',
+          winnerName: strings.previewPlayer,
         ),
       ]);
     }
@@ -1030,8 +1030,8 @@ class _TrophyCabinetSection extends StatelessWidget {
                   color: colorScheme.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(20),
                 ),
-                child: const Text(
-                  'Could not load trophies right now.',
+                child: Text(
+                  strings.couldNotLoadTrophies,
                   textAlign: TextAlign.center,
                 ),
               );
@@ -1044,13 +1044,17 @@ class _TrophyCabinetSection extends StatelessWidget {
                     )
                     .map((document) {
                       final data = document.data();
+                      final storedTitle = data['title']?.toString();
 
                       return _ProfileTrophy(
                         title:
-                            data['title']?.toString() ?? 'Monthly Cup Champion',
+                            storedTitle == null ||
+                                storedTitle == 'Monthly Cup Champion'
+                            ? strings.monthlyCupChampion
+                            : storedTitle,
                         monthKey: data['monthKey']?.toString() ?? '',
                         winnerName:
-                            data['winnerName']?.toString() ?? 'Champion',
+                            data['winnerName']?.toString() ?? strings.champion,
                       );
                     })
                     .toList() ??
