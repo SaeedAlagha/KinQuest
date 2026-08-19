@@ -16,6 +16,13 @@ const {
 } = require("firebase-admin/firestore");
 const { getMessaging } = require("firebase-admin/messaging");
 const { ensureFirebaseAdmin } = require("./firebase_admin");
+const {
+  DigitalRewardError,
+  digitalRewardCatalog,
+  equipDigitalReward,
+  purchaseDigitalReward,
+  unequipDigitalReward,
+} = require("./digital_rewards");
 
 ensureFirebaseAdmin();
 
@@ -44,6 +51,80 @@ app.get("/", (req, res) => {
     message: "Sila AI service is running",
     authentication: "Firebase ID token required in production",
   });
+});
+
+app.get("/api/digital-rewards", (request, response) => {
+  response.json({ rewards: digitalRewardCatalog });
+});
+
+function requireDigitalRewardUser(request, response) {
+  const userId = request.auth?.uid;
+  if (typeof userId !== "string" || !userId) {
+    response.status(401).json({
+      error: "Sign in is required to manage Digital Rewards.",
+    });
+    return null;
+  }
+  return userId;
+}
+
+function sendDigitalRewardError(error, response) {
+  if (error instanceof DigitalRewardError) {
+    return response.status(error.statusCode).json({ error: error.message });
+  }
+
+  console.error("Digital Reward mutation failed:", error);
+  return response.status(500).json({
+    error: "Digital Reward could not be updated.",
+  });
+}
+
+app.post("/api/digital-rewards/purchase", async (request, response) => {
+  const userId = requireDigitalRewardUser(request, response);
+  if (!userId) return;
+
+  try {
+    const result = await purchaseDigitalReward({
+      database: db,
+      userId,
+      rewardId: request.body?.rewardId,
+    });
+    response.status(201).json(result);
+  } catch (error) {
+    sendDigitalRewardError(error, response);
+  }
+});
+
+app.post("/api/digital-rewards/equip", async (request, response) => {
+  const userId = requireDigitalRewardUser(request, response);
+  if (!userId) return;
+
+  try {
+    const result = await equipDigitalReward({
+      database: db,
+      userId,
+      rewardId: request.body?.rewardId,
+    });
+    response.json(result);
+  } catch (error) {
+    sendDigitalRewardError(error, response);
+  }
+});
+
+app.post("/api/digital-rewards/unequip", async (request, response) => {
+  const userId = requireDigitalRewardUser(request, response);
+  if (!userId) return;
+
+  try {
+    const result = await unequipDigitalReward({
+      database: db,
+      userId,
+      rewardId: request.body?.rewardId,
+    });
+    response.json(result);
+  } catch (error) {
+    sendDigitalRewardError(error, response);
+  }
 });
 
 app.post("/api/would-you-rather", async (req, res) => {

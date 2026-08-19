@@ -136,6 +136,26 @@ test("auth middleware rejects missing tokens and accepts verified users", async 
   assert.deepEqual(request.auth, { uid: "verified-family-token" });
 });
 
+test("development auth verifies a supplied token without requiring one", async () => {
+  const middleware = createFirebaseAuthMiddleware({
+    environment: { NODE_ENV: "development" },
+    verifyToken: async (token) => ({ uid: `optional-${token}` }),
+  });
+
+  const anonymousRequest = { get: () => undefined };
+  let anonymousContinued = false;
+  await middleware(anonymousRequest, createResponse(), () => {
+    anonymousContinued = true;
+  });
+  assert.equal(anonymousContinued, true);
+
+  const authenticatedRequest = { get: () => "Bearer family-token" };
+  await middleware(authenticatedRequest, createResponse(), () => {});
+  assert.deepEqual(authenticatedRequest.auth, {
+    uid: "optional-family-token",
+  });
+});
+
 test("auth middleware never exposes verifier errors", async () => {
   const middleware = createFirebaseAuthMiddleware({
     environment: { KINQUEST_REQUIRE_AUTH: "true" },
