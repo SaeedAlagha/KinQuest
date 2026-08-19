@@ -9,7 +9,7 @@ import 'reward_approval_screen.dart';
 import 'token_history_screen.dart';
 import 'my_reward_requests_screen.dart';
 import 'my_digital_rewards_screen.dart';
-import 'reward_wishlist_screen.dart';
+import 'reward_wishlist_negotiation_screen.dart';
 
 class RewardsHubScreen extends StatefulWidget {
   const RewardsHubScreen({super.key, this.developerPreview = false});
@@ -352,7 +352,8 @@ class _RewardsHubScreenState extends State<RewardsHubScreen> {
                             onPressed: () => Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (_) => const RewardWishlistScreen(),
+                                builder: (_) =>
+                                    const RewardWishlistNegotiationScreen(),
                               ),
                             ),
                             icon: const Icon(Icons.lightbulb_outline),
