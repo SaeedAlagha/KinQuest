@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
+import '../../../l10n/app_localizations.dart';
 import '../../competitions/config/competition_games.dart';
 import '../../competitions/models/competition_game_result.dart';
 import '../../competitions/models/competition_player_result.dart';
@@ -752,6 +753,7 @@ class _PassTheBombScreenState extends State<PassTheBombScreen> {
   }
 
   Widget _buildLeaderboardScreen() {
+    final strings = AppLocalizations.of(context)!;
     final rankedPlayers = List<_BombPlayer>.from(_players);
 
     rankedPlayers.sort(
@@ -765,8 +767,10 @@ class _PassTheBombScreenState extends State<PassTheBombScreen> {
       children: [
         Text(
           isOfficial
-              ? '${widget.playMode.displayName} Results'
-              : 'Quick Play Leaderboard',
+              ? strings.officialResultsTitle(
+                  widget.playMode.localizedName(strings),
+                )
+              : strings.quickPlayLeaderboard,
           textAlign: TextAlign.center,
           style: Theme.of(
             context,
@@ -775,8 +779,8 @@ class _PassTheBombScreenState extends State<PassTheBombScreen> {
         const SizedBox(height: 8),
         Text(
           isOfficial
-              ? 'Official game results are ready.'
-              : 'Session scores only - no Tokens or official ranking changes.',
+              ? strings.officialGameResultsReady
+              : strings.quickPlayResultsOnly,
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 24),
@@ -789,7 +793,7 @@ class _PassTheBombScreenState extends State<PassTheBombScreen> {
               leading: CircleAvatar(child: Text('${index + 1}')),
               title: Text(player.name),
               trailing: Text(
-                '$score pts',
+                strings.pointsAbbreviation(score),
                 style: Theme.of(
                   context,
                 ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
@@ -803,7 +807,7 @@ class _PassTheBombScreenState extends State<PassTheBombScreen> {
           FilledButton.icon(
             onPressed: _playAgain,
             icon: const Icon(Icons.refresh_rounded),
-            label: const Text('Play Again'),
+            label: Text(strings.playAgain),
           ),
           const SizedBox(height: 10),
         ],
@@ -819,8 +823,10 @@ class _PassTheBombScreenState extends State<PassTheBombScreen> {
           },
           child: Text(
             isOfficial
-                ? 'Return to ${widget.playMode.displayName}'
-                : 'Back to Quick Play',
+                ? strings.returnToCompetition(
+                    widget.playMode.localizedName(strings),
+                  )
+                : strings.backToQuickPlay,
           ),
         ),
       ],

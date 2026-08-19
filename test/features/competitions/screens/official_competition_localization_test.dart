@@ -38,11 +38,19 @@ void main() {
 
     final title = find.text('البطولة الأسبوعية');
     expect(title, findsWidgets);
-    expect(find.text('ألعاب هذا الأسبوع'), findsOneWidget);
     expect(
       find.text('أربع ألعاب رسمية، وتتراكم نقاط البطولة عبر كل جولة.'),
       findsOneWidget,
     );
+
+    await tester.scrollUntilVisible(
+      find.text('اكتملت 0 من أصل 4 جولات رسمية'),
+      220,
+    );
+    expect(find.text('اكتملت 0 من أصل 4 جولات رسمية'), findsOneWidget);
+
+    await tester.scrollUntilVisible(find.text('ألعاب هذا الأسبوع'), 220);
+    expect(find.text('ألعاب هذا الأسبوع'), findsOneWidget);
     expect(Directionality.of(tester.element(title.first)), TextDirection.rtl);
     expect(tester.takeException(), isNull);
   });
@@ -54,10 +62,17 @@ void main() {
 
     final title = find.text('الكأس الشهري');
     expect(title, findsWidgets);
+    expect(find.text('تم اختيار 4 من أصل 4 متنافسين'), findsOneWidget);
     expect(find.text('اختر 4 متنافسين بالضبط'), findsOneWidget);
     await tester.drag(find.byType(ListView), const Offset(0, -620));
     await tester.pump();
     expect(find.text('ابدأ الكأس الشهري'), findsOneWidget);
+
+    await tester.tap(find.text('ابدأ الكأس الشهري'));
+    await tester.pump();
+
+    expect(find.text('مخطط الكأس الشهري'), findsOneWidget);
+    expect(find.text('اكتملت 0 من أصل 3 جولات رسمية'), findsOneWidget);
     expect(Directionality.of(tester.element(title.first)), TextDirection.rtl);
     expect(tester.takeException(), isNull);
   });

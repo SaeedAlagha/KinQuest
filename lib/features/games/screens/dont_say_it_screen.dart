@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
+import '../../../l10n/app_localizations.dart';
 import '../../competitions/config/competition_games.dart';
 import '../../competitions/models/competition_game_result.dart';
 import '../../competitions/models/competition_player_result.dart';
@@ -872,6 +873,7 @@ class _DontSayItScreenState extends State<DontSayItScreen> {
   }
 
   Widget _buildFinalLeaderboardScreen() {
+    final strings = AppLocalizations.of(context)!;
     final leaderboard = [..._players];
 
     leaderboard.sort(
@@ -888,7 +890,7 @@ class _DontSayItScreenState extends State<DontSayItScreen> {
           const SizedBox(height: 16),
 
           Text(
-            'Don\'t Say It Complete!',
+            strings.gameCompleteTitle(strings.dontSayIt),
             textAlign: TextAlign.center,
             style: Theme.of(
               context,
@@ -899,8 +901,8 @@ class _DontSayItScreenState extends State<DontSayItScreen> {
 
           Text(
             widget.playMode.isOfficial
-                ? '${widget.playMode.displayName} results are ready.'
-                : 'Quick Play results only — no Tokens or official ranking.',
+                ? strings.officialGameResultsReady
+                : strings.quickPlayResultsOnly,
             textAlign: TextAlign.center,
           ),
 
@@ -921,7 +923,7 @@ class _DontSayItScreenState extends State<DontSayItScreen> {
                     style: const TextStyle(fontWeight: FontWeight.w600),
                   ),
                   trailing: Text(
-                    '$score pts',
+                    strings.pointsAbbreviation(score),
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
@@ -944,8 +946,10 @@ class _DontSayItScreenState extends State<DontSayItScreen> {
             },
             child: Text(
               widget.playMode.isOfficial
-                  ? 'Return to ${widget.playMode.displayName}'
-                  : 'Back to Games',
+                  ? strings.returnToCompetition(
+                      widget.playMode.localizedName(strings),
+                    )
+                  : strings.backToGames,
             ),
           ),
         ],

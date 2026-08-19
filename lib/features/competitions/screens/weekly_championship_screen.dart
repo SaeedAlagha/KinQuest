@@ -13,7 +13,10 @@ import '../models/competition_game_result.dart';
 import '../models/competition_player_result.dart';
 import '../models/game_play_mode.dart';
 import '../services/championship_scoring_service.dart';
+import '../utils/competition_period.dart';
 import 'competition_tie_break_screen.dart';
+
+enum _WeeklyLoadError { signIn, family, load }
 
 class WeeklyChampionshipScreen extends StatefulWidget {
   const WeeklyChampionshipScreen({super.key, this.developerPreview = false});
@@ -37,7 +40,7 @@ class _WeeklyChampionshipScreenState extends State<WeeklyChampionshipScreen> {
   Set<String> _participantIds = {};
   String? _championId;
   String? _championName;
-  String? _errorMessage;
+  _WeeklyLoadError? _loadError;
 
   final List<_WeeklyRoundRecord> _rounds = [];
 
@@ -51,25 +54,7 @@ class _WeeklyChampionshipScreenState extends State<WeeklyChampionshipScreen> {
     return date.subtract(Duration(days: date.weekday - DateTime.monday));
   }
 
-  int get _isoWeekYear {
-    final thursday = _weekMonday.add(const Duration(days: 3));
-    return thursday.year;
-  }
-
-  int get _isoWeekNumber {
-    final thursday = _weekMonday.add(const Duration(days: 3));
-
-    final firstThursday = DateTime(thursday.year, 1, 4);
-
-    final firstWeekThursday = firstThursday.add(
-      Duration(days: DateTime.thursday - firstThursday.weekday),
-    );
-
-    return 1 + thursday.difference(firstWeekThursday).inDays ~/ 7;
-  }
-
-  String get _weekKey =>
-      '$_isoWeekYear-W${_isoWeekNumber.toString().padLeft(2, '0')}';
+  String get _weekKey => CompetitionPeriod.weeklyKey(_today);
 
   String get _competitionId => 'weekly_$_weekKey';
 
@@ -117,7 +102,7 @@ class _WeeklyChampionshipScreenState extends State<WeeklyChampionshipScreen> {
 
       setState(() {
         _isLoading = false;
-        _errorMessage = 'You must be signed in to use Weekly Championship.';
+        _loadError = _WeeklyLoadError.signIn;
       });
 
       return;
@@ -135,8 +120,7 @@ class _WeeklyChampionshipScreenState extends State<WeeklyChampionshipScreen> {
 
         setState(() {
           _isLoading = false;
-          _errorMessage =
-              'Join or create a family before playing Weekly Championship.';
+          _loadError = _WeeklyLoadError.family;
         });
 
         return;
@@ -194,8 +178,7 @@ class _WeeklyChampionshipScreenState extends State<WeeklyChampionshipScreen> {
 
       setState(() {
         _isLoading = false;
-        _errorMessage =
-            'Could not load this week\'s championship. Please try again.';
+        _loadError = _WeeklyLoadError.load;
       });
     }
   }
@@ -225,8 +208,8 @@ class _WeeklyChampionshipScreenState extends State<WeeklyChampionshipScreen> {
 
     if (!result.hasPlayers) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('The game finished without a valid player result.'),
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.gameNoValidResult),
         ),
       );
       return;
@@ -234,10 +217,8 @@ class _WeeklyChampionshipScreenState extends State<WeeklyChampionshipScreen> {
 
     if (result.gameId != game.gameId) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'The returned result does not match this championship round.',
-          ),
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.weeklyResultMismatch),
         ),
       );
       return;
@@ -432,10 +413,8 @@ class _WeeklyChampionshipScreenState extends State<WeeklyChampionshipScreen> {
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Could not save this championship round. Please try again.',
-          ),
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.weeklyRoundSaveError),
         ),
       );
     }
@@ -478,6 +457,16 @@ class _WeeklyChampionshipScreenState extends State<WeeklyChampionshipScreen> {
 
       return a.name.compareTo(b.name);
     });
+
+    final championId = _championId;
+    if (_completed && championId != null) {
+      final championIndex = ranked.indexWhere(
+        (standing) => standing.userId == championId,
+      );
+      if (championIndex > 0) {
+        ranked.insert(0, ranked.removeAt(championIndex));
+      }
+    }
 
     return ranked;
   }
@@ -647,7 +636,7 @@ class _WeeklyChampionshipScreenState extends State<WeeklyChampionshipScreen> {
               'reason': 'Weekly Championship Winner',
               'relatedRewardId': null,
               'relatedRequestId': null,
-              'relatedCompetitionId': null,
+              'relatedCompetitionId': _competitionId,
               'createdAt': FieldValue.serverTimestamp(),
             });
           }
@@ -677,9 +666,11 @@ class _WeeklyChampionshipScreenState extends State<WeeklyChampionshipScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            '${champion.name} is this week\'s Family Champion! '
-            '+${CompetitionRewards.weeklyChampionTokens} Tokens and '
-            '+${CompetitionRewards.weeklyChampionRankingPoints} Ranking Points.',
+            AppLocalizations.of(context)!.weeklyWinnerAnnouncement(
+              champion.name,
+              CompetitionRewards.weeklyChampionTokens,
+              CompetitionRewards.weeklyChampionRankingPoints,
+            ),
           ),
         ),
       );
@@ -691,10 +682,8 @@ class _WeeklyChampionshipScreenState extends State<WeeklyChampionshipScreen> {
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Could not finalize the Weekly Championship. Please try again.',
-          ),
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.weeklyFinalizeError),
         ),
       );
     }
@@ -768,17 +757,26 @@ class _WeeklyChampionshipScreenState extends State<WeeklyChampionshipScreen> {
       body: SafeArea(
         child: _isLoading
             ? const Center(child: CircularProgressIndicator())
-            : _errorMessage != null
+            : _loadError != null
             ? Center(
                 child: Padding(
                   padding: const EdgeInsets.all(24),
-                  child: Text(_errorMessage!, textAlign: TextAlign.center),
+                  child: Text(
+                    _loadErrorMessage(strings),
+                    textAlign: TextAlign.center,
+                  ),
                 ),
               )
             : _buildChampionship(),
       ),
     );
   }
+
+  String _loadErrorMessage(AppLocalizations strings) => switch (_loadError!) {
+    _WeeklyLoadError.signIn => strings.weeklySignInRequired,
+    _WeeklyLoadError.family => strings.weeklyFamilyRequired,
+    _WeeklyLoadError.load => strings.weeklyLoadError,
+  };
 
   Widget _buildChampionship() {
     final strings = AppLocalizations.of(context)!;
@@ -863,6 +861,22 @@ class _WeeklyChampionshipScreenState extends State<WeeklyChampionshipScreen> {
           ),
         ),
         const SizedBox(height: 20),
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                strings.competitionProgress(_rounds.length, _totalGames),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
+              ),
+            ),
+            Text(strings.progressCount(_rounds.length, _totalGames)),
+          ],
+        ),
+        const SizedBox(height: 8),
+        LinearProgressIndicator(value: _rounds.length / _totalGames),
+        const SizedBox(height: 24),
         Text(
           strings.thisWeeksGames,
           style: Theme.of(
@@ -899,9 +913,15 @@ class _WeeklyChampionshipScreenState extends State<WeeklyChampionshipScreen> {
           );
         }),
         const SizedBox(height: 20),
-        if (_completed)
-          _buildCompletedCard()
-        else if (!_allGamesFinished)
+        if (_completed) ...[
+          _buildCompletedCard(),
+          const SizedBox(height: 12),
+          OutlinedButton.icon(
+            onPressed: () => Navigator.of(context).pop(),
+            icon: const Icon(Icons.arrow_back_rounded),
+            label: Text(strings.backToCompetitions),
+          ),
+        ] else if (!_allGamesFinished)
           FilledButton.icon(
             onPressed: _isSavingRound || _isSettling ? null : _playNextGame,
             icon: _isSavingRound
@@ -940,6 +960,9 @@ class _WeeklyChampionshipScreenState extends State<WeeklyChampionshipScreen> {
 
   Widget _buildStandingsCard(List<_WeeklyStanding> standings) {
     final strings = AppLocalizations.of(context)!;
+    final finalPlacements = _completed
+        ? _finalPlacements(standings)
+        : const <_FinalWeeklyStanding>[];
 
     return Card(
       child: Padding(
@@ -956,12 +979,39 @@ class _WeeklyChampionshipScreenState extends State<WeeklyChampionshipScreen> {
             const SizedBox(height: 12),
             ...List.generate(standings.length, (index) {
               final standing = standings[index];
+              final placement = _completed
+                  ? finalPlacements[index].placement
+                  : index + 1;
 
               return ListTile(
                 contentPadding: EdgeInsets.zero,
-                leading: CircleAvatar(child: Text('${index + 1}')),
+                leading: CircleAvatar(child: Text('$placement')),
                 title: Text(standing.name),
-                subtitle: Text(strings.roundsPlayed(standing.roundsPlayed)),
+                subtitle: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(strings.roundsPlayed(standing.roundsPlayed)),
+                    if (_completed && placement == 1)
+                      Text(
+                        strings.championRewardSummary(
+                          CompetitionRewards.weeklyChampionTokens,
+                          CompetitionRewards.weeklyChampionRankingPoints,
+                        ),
+                      )
+                    else if (_completed && placement == 2)
+                      Text(
+                        strings.runnerUpRewardSummary(
+                          CompetitionRewards.weeklyRunnerUpRankingPoints,
+                        ),
+                      )
+                    else if (_completed && placement == 3)
+                      Text(
+                        strings.thirdPlaceRewardSummary(
+                          CompetitionRewards.weeklyThirdPlaceRankingPoints,
+                        ),
+                      ),
+                  ],
+                ),
                 trailing: Text(
                   strings.pointsAbbreviation(standing.championshipPoints),
                   style: const TextStyle(fontWeight: FontWeight.w800),

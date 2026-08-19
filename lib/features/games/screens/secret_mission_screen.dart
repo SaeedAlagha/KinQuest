@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
+import '../../../l10n/app_localizations.dart';
 import '../services/secret_mission_ai_service.dart';
 import '../widgets/game_setup_widgets.dart';
 import '../../competitions/config/competition_games.dart';
@@ -997,6 +998,7 @@ class _SecretMissionScreenState extends State<SecretMissionScreen> {
   }
 
   Widget _buildLeaderboardScreen() {
+    final strings = AppLocalizations.of(context)!;
     final rankedPlayers = List<_MissionPlayer>.from(_players);
 
     rankedPlayers.sort(
@@ -1019,7 +1021,7 @@ class _SecretMissionScreenState extends State<SecretMissionScreen> {
         const Icon(Icons.emoji_events_rounded, size: 72),
         const SizedBox(height: 16),
         Text(
-          'Secret Mission Results',
+          strings.officialResultsTitle(strings.secretMission),
           textAlign: TextAlign.center,
           style: Theme.of(
             context,
@@ -1028,16 +1030,16 @@ class _SecretMissionScreenState extends State<SecretMissionScreen> {
         const SizedBox(height: 8),
         Text(
           winnerCount > 1
-              ? 'It is a tie!'
-              : '${rankedPlayers.first.name} wins!',
+              ? strings.gameTie
+              : strings.playerWins(rankedPlayers.first.name),
           textAlign: TextAlign.center,
           style: Theme.of(context).textTheme.titleLarge,
         ),
         const SizedBox(height: 8),
         Text(
           isOfficial
-              ? '${widget.playMode.displayName} results are ready.'
-              : '$_selectedRounds ${_selectedRounds == 1 ? 'round' : 'rounds'} complete - Quick Play session only - no Tokens or official ranking changes.',
+              ? strings.officialGameResultsReady
+              : strings.quickPlayResultsOnly,
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 24),
@@ -1049,9 +1051,11 @@ class _SecretMissionScreenState extends State<SecretMissionScreen> {
             child: ListTile(
               leading: CircleAvatar(child: Text('${index + 1}')),
               title: Text(player.name),
-              subtitle: Text('$score of $_selectedRounds missions completed'),
+              subtitle: Text(
+                strings.missionProgressSummary(score, _selectedRounds),
+              ),
               trailing: Text(
-                '$score pt${score == 1 ? '' : 's'}',
+                strings.pointsAbbreviation(score),
                 style: Theme.of(
                   context,
                 ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
@@ -1065,7 +1069,7 @@ class _SecretMissionScreenState extends State<SecretMissionScreen> {
           FilledButton.icon(
             onPressed: _playAgain,
             icon: const Icon(Icons.refresh_rounded),
-            label: const Text('Play Again'),
+            label: Text(strings.playAgain),
           ),
           const SizedBox(height: 10),
         ],
@@ -1081,8 +1085,10 @@ class _SecretMissionScreenState extends State<SecretMissionScreen> {
           },
           child: Text(
             isOfficial
-                ? 'Return to ${widget.playMode.displayName}'
-                : 'Back to Quick Play',
+                ? strings.returnToCompetition(
+                    widget.playMode.localizedName(strings),
+                  )
+                : strings.backToQuickPlay,
           ),
         ),
       ],

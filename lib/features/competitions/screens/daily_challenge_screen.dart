@@ -13,7 +13,10 @@ import '../config/official_competition_games.dart';
 import '../models/competition_game_result.dart';
 import '../models/competition_player_result.dart';
 import '../models/game_play_mode.dart';
+import '../utils/competition_period.dart';
 import 'competition_tie_break_screen.dart';
+
+enum _DailyLoadError { signIn, family, load }
 
 class DailyChallengeScreen extends StatefulWidget {
   const DailyChallengeScreen({super.key, this.developerPreview = false});
@@ -33,19 +36,13 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> {
   String? _familyId;
   String? _winnerId;
   String? _winnerName;
-  String? _errorMessage;
+  _DailyLoadError? _loadError;
 
   CompetitionGameResult? _latestResult;
 
   DateTime get _today => DateTime.now();
 
-  String get _dateKey {
-    final now = _today;
-
-    return '${now.year}-'
-        '${now.month.toString().padLeft(2, '0')}-'
-        '${now.day.toString().padLeft(2, '0')}';
-  }
+  String get _dateKey => CompetitionPeriod.dailyKey(_today);
 
   String get _competitionId => 'daily_$_dateKey';
 
@@ -72,7 +69,7 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> {
 
       setState(() {
         _isLoading = false;
-        _errorMessage = 'You must be signed in to use Daily Challenge.';
+        _loadError = _DailyLoadError.signIn;
       });
 
       return;
@@ -90,8 +87,7 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> {
 
         setState(() {
           _isLoading = false;
-          _errorMessage =
-              'Join or create a family before playing Daily Challenge.';
+          _loadError = _DailyLoadError.family;
         });
 
         return;
@@ -132,8 +128,7 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> {
 
       setState(() {
         _isLoading = false;
-        _errorMessage =
-            'Could not load today\'s Daily Challenge. Please try again.';
+        _loadError = _DailyLoadError.load;
       });
     }
   }
@@ -155,8 +150,8 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> {
 
     if (!result.hasPlayers) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('The game finished without a valid player result.'),
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.gameNoValidResult),
         ),
       );
 
@@ -165,10 +160,8 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> {
 
     if (result.gameId != _game.gameId) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'The returned game result does not match today\'s challenge.',
-          ),
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.dailyResultMismatch),
         ),
       );
 
@@ -182,10 +175,8 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> {
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'The top score is tied. No Daily reward has been granted yet.',
-          ),
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.dailyTieRewardPending),
         ),
       );
 
@@ -366,7 +357,7 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> {
               'reason': 'Daily Challenge Winner',
               'relatedRewardId': null,
               'relatedRequestId': null,
-              'relatedCompetitionId': null,
+              'relatedCompetitionId': _competitionId,
               'createdAt': FieldValue.serverTimestamp(),
             });
           }
@@ -383,10 +374,8 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> {
         if (!mounted) return;
 
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-              'Today\'s Daily Challenge has already been completed.',
-            ),
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.dailyAlreadyCompleted),
           ),
         );
 
@@ -410,9 +399,11 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            '$displayedWinnerNames won today\'s Daily Challenge! '
-            '+${CompetitionRewards.dailyWinnerTokens} Tokens and '
-            '+${CompetitionRewards.dailyWinnerRankingPoints} Ranking Points.',
+            AppLocalizations.of(context)!.dailyWinnerAnnouncement(
+              displayedWinnerNames,
+              CompetitionRewards.dailyWinnerTokens,
+              CompetitionRewards.dailyWinnerRankingPoints,
+            ),
           ),
         ),
       );
@@ -424,10 +415,8 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> {
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Could not save today\'s official result. Please try again.',
-          ),
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.dailyOfficialSaveError),
         ),
       );
     }
@@ -443,11 +432,14 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> {
         child: SafeArea(
           child: _isLoading
               ? const Center(child: CircularProgressIndicator())
-              : _errorMessage != null
+              : _loadError != null
               ? Center(
                   child: Padding(
                     padding: const EdgeInsets.all(24),
-                    child: Text(_errorMessage!, textAlign: TextAlign.center),
+                    child: Text(
+                      _loadErrorMessage(strings),
+                      textAlign: TextAlign.center,
+                    ),
                   ),
                 )
               : _buildChallenge(),
@@ -455,6 +447,12 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> {
       ),
     );
   }
+
+  String _loadErrorMessage(AppLocalizations strings) => switch (_loadError!) {
+    _DailyLoadError.signIn => strings.dailyChallengeSignInRequired,
+    _DailyLoadError.family => strings.dailyChallengeFamilyRequired,
+    _DailyLoadError.load => strings.dailyChallengeLoadError,
+  };
 
   Widget _buildChallenge() {
     final strings = AppLocalizations.of(context)!;

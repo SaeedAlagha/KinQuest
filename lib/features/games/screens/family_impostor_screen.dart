@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
+import '../../../l10n/app_localizations.dart';
 import '../../competitions/config/competition_games.dart';
 import '../../competitions/models/competition_game_result.dart';
 import '../../competitions/models/competition_player_result.dart';
@@ -1292,6 +1293,7 @@ class _FamilyImpostorScreenState extends State<FamilyImpostorScreen> {
   }
 
   Widget _buildFinalLeaderboardScreen() {
+    final strings = AppLocalizations.of(context)!;
     final leaderboard = [..._players];
 
     leaderboard.sort(
@@ -1308,7 +1310,7 @@ class _FamilyImpostorScreenState extends State<FamilyImpostorScreen> {
           const Icon(Icons.emoji_events_outlined, size: 72),
           const SizedBox(height: 16),
           Text(
-            'Family Impostor Complete!',
+            strings.gameCompleteTitle(strings.familyImpostor),
             textAlign: TextAlign.center,
             style: Theme.of(
               context,
@@ -1317,8 +1319,8 @@ class _FamilyImpostorScreenState extends State<FamilyImpostorScreen> {
           const SizedBox(height: 8),
           Text(
             isOfficial
-                ? '${widget.playMode.displayName} results ready.'
-                : 'Quick Play results only - no Tokens or official ranking.',
+                ? strings.officialGameResultsReady
+                : strings.quickPlayResultsOnly,
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 28),
@@ -1337,7 +1339,7 @@ class _FamilyImpostorScreenState extends State<FamilyImpostorScreen> {
                     style: const TextStyle(fontWeight: FontWeight.w600),
                   ),
                   trailing: Text(
-                    '$score pts',
+                    strings.pointsAbbreviation(score),
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
@@ -1358,8 +1360,10 @@ class _FamilyImpostorScreenState extends State<FamilyImpostorScreen> {
             },
             child: Text(
               isOfficial
-                  ? 'Return to ${widget.playMode.displayName}'
-                  : 'Back to Games',
+                  ? strings.returnToCompetition(
+                      widget.playMode.localizedName(strings),
+                    )
+                  : strings.backToGames,
             ),
           ),
         ],
