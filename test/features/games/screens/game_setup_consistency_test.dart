@@ -82,4 +82,16 @@ void main() {
     expect(find.text('ابدأ معلومات عامة'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
+
+  test('shared-phone AI game copy is available in Arabic', () {
+    final strings = lookupAppLocalizations(const Locale('ar'));
+
+    expect(strings.drawAndGuess, 'ارسم وخمّن');
+    expect(strings.drawingTurnEachRound, contains('كل رسام'));
+    expect(strings.dontSayIt, 'لا تقلها');
+    expect(strings.dontSayHeading, 'لا تقل:');
+    expect(strings.passTheBomb, 'مرّر القنبلة');
+    expect(strings.submitAndPassPhone, 'إرسال وتمرير الهاتف');
+    expect(strings.couldNotCheckAnswer, contains('تعذر التحقق'));
+  });
 }

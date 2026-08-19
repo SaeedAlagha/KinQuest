@@ -10,6 +10,7 @@ import '../../competitions/models/competition_game_result.dart';
 import '../../competitions/models/competition_player_result.dart';
 import '../../competitions/models/game_play_mode.dart';
 import '../services/family_impostor_ai_service.dart';
+import '../utils/game_localization.dart';
 import '../widgets/game_setup_widgets.dart';
 
 enum _GamePhase {
@@ -25,6 +26,8 @@ enum _GamePhase {
   roundResult,
   finalLeaderboard,
 }
+
+enum _FamilyImpostorLoadError { signedOut, noFamily, loadFailed }
 
 class FamilyImpostorScreen extends StatefulWidget {
   const FamilyImpostorScreen({
@@ -43,7 +46,7 @@ class FamilyImpostorScreen extends StatefulWidget {
 
 class _FamilyImpostorScreenState extends State<FamilyImpostorScreen> {
   bool _isLoading = true;
-  String? _errorMessage;
+  _FamilyImpostorLoadError? _loadError;
 
   final List<_FamilyPlayer> _familyMembers = [];
   final Set<String> _selectedPlayerIds = {};
@@ -118,7 +121,7 @@ class _FamilyImpostorScreenState extends State<FamilyImpostorScreen> {
     if (user == null) {
       setState(() {
         _isLoading = false;
-        _errorMessage = 'You must be logged in to play.';
+        _loadError = _FamilyImpostorLoadError.signedOut;
       });
       return;
     }
@@ -134,7 +137,7 @@ class _FamilyImpostorScreenState extends State<FamilyImpostorScreen> {
       if (familyId == null || familyId.isEmpty) {
         setState(() {
           _isLoading = false;
-          _errorMessage = 'Join or create a family before playing.';
+          _loadError = _FamilyImpostorLoadError.noFamily;
         });
         return;
       }
@@ -144,6 +147,10 @@ class _FamilyImpostorScreenState extends State<FamilyImpostorScreen> {
           .where('familyId', isEqualTo: familyId)
           .get();
 
+      if (!mounted) {
+        return;
+      }
+      final strings = AppLocalizations.of(context)!;
       final members = membersSnapshot.docs.map((document) {
         final data = document.data();
 
@@ -154,7 +161,7 @@ class _FamilyImpostorScreenState extends State<FamilyImpostorScreen> {
           id: document.id,
           name: name?.trim().isNotEmpty == true
               ? name!
-              : email ?? 'Family Member',
+              : email ?? strings.familyMemberFallback,
         );
       }).toList();
 
@@ -191,7 +198,7 @@ class _FamilyImpostorScreenState extends State<FamilyImpostorScreen> {
 
       setState(() {
         _isLoading = false;
-        _errorMessage = 'Could not load your family members.';
+        _loadError = _FamilyImpostorLoadError.loadFailed;
       });
     }
   }
@@ -207,10 +214,13 @@ class _FamilyImpostorScreenState extends State<FamilyImpostorScreen> {
   }
 
   Future<void> _startGame() async {
+    final strings = AppLocalizations.of(context)!;
     if (_selectedPlayerIds.length < 3) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Family Impostor needs at least 3 players.'),
+        SnackBar(
+          content: Text(
+            strings.minimumPlayersForGame(strings.familyImpostor, 3),
+          ),
         ),
       );
       return;
@@ -270,10 +280,8 @@ class _FamilyImpostorScreenState extends State<FamilyImpostorScreen> {
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Could not start Family Impostor. Make sure the AI server is running.',
-          ),
+        SnackBar(
+          content: Text(strings.couldNotStartGame(strings.familyImpostor)),
         ),
       );
     }
@@ -281,13 +289,15 @@ class _FamilyImpostorScreenState extends State<FamilyImpostorScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppBar(title: const Text('Family Impostor')),
+      appBar: AppBar(title: Text(strings.familyImpostor)),
       body: SafeArea(child: _buildBody()),
     );
   }
 
   Widget _buildBody() {
+    final strings = AppLocalizations.of(context)!;
     if (_phase == _GamePhase.passDevice) {
       return _buildPassDeviceScreen();
     }
@@ -328,7 +338,14 @@ class _FamilyImpostorScreenState extends State<FamilyImpostorScreen> {
       return const Center(child: CircularProgressIndicator());
     }
 
-    if (_errorMessage != null) {
+    if (_loadError != null) {
+      final errorMessage = switch (_loadError!) {
+        _FamilyImpostorLoadError.signedOut => strings.mustBeLoggedInToPlay,
+        _FamilyImpostorLoadError.noFamily =>
+          strings.joinOrCreateFamilyBeforeGame(strings.familyImpostor),
+        _FamilyImpostorLoadError.loadFailed =>
+          strings.couldNotLoadFamilyMembers,
+      };
       return Center(
         child: Padding(
           padding: const EdgeInsets.all(24),
@@ -338,7 +355,7 @@ class _FamilyImpostorScreenState extends State<FamilyImpostorScreen> {
               const Icon(Icons.error_outline, size: 64),
               const SizedBox(height: 16),
               Text(
-                _errorMessage!,
+                errorMessage,
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.titleMedium,
               ),
@@ -347,12 +364,12 @@ class _FamilyImpostorScreenState extends State<FamilyImpostorScreen> {
                 onPressed: () {
                   setState(() {
                     _isLoading = true;
-                    _errorMessage = null;
+                    _loadError = null;
                   });
 
                   _loadFamilyMembers();
                 },
-                child: const Text('Try Again'),
+                child: Text(strings.tryAgain),
               ),
             ],
           ),
@@ -365,7 +382,7 @@ class _FamilyImpostorScreenState extends State<FamilyImpostorScreen> {
         child: Padding(
           padding: const EdgeInsets.all(24),
           child: Text(
-            'Family Impostor needs at least 3 family members.',
+            strings.minimumFamilyMembersForGame(strings.familyImpostor, 3),
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.titleMedium,
           ),
@@ -377,14 +394,14 @@ class _FamilyImpostorScreenState extends State<FamilyImpostorScreen> {
       padding: const EdgeInsets.all(24),
       children: [
         Text(
-          'Set up your mystery',
+          strings.impostorSetupTitle,
           style: Theme.of(
             context,
           ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 8),
         Text(
-          'Pick one category for every secret word, or keep everyone guessing with a random mix.',
+          strings.impostorSetupDescription,
           style: Theme.of(context).textTheme.bodyLarge,
         ),
         const SizedBox(height: 20),
@@ -401,14 +418,14 @@ class _FamilyImpostorScreenState extends State<FamilyImpostorScreen> {
         ),
         const SizedBox(height: 28),
         Text(
-          'Who is playing?',
+          strings.whoIsPlaying,
           style: Theme.of(
             context,
           ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 8),
         Text(
-          'Choose at least 3 family members who are together with you.',
+          strings.chooseAtLeastThreePlayers,
           style: Theme.of(context).textTheme.bodyLarge,
         ),
         const SizedBox(height: 16),
@@ -439,7 +456,7 @@ class _FamilyImpostorScreenState extends State<FamilyImpostorScreen> {
         }),
         const SizedBox(height: 6),
         Text(
-          '${_selectedPlayerIds.length} selected',
+          strings.selectedPlayersCount(_selectedPlayerIds.length),
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 12),
@@ -454,7 +471,9 @@ class _FamilyImpostorScreenState extends State<FamilyImpostorScreen> {
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
               : const Icon(Icons.play_arrow),
-          label: Text(_isStartingGame ? 'Preparing Game...' : 'Start Game'),
+          label: Text(
+            _isStartingGame ? strings.preparingGame : strings.startGame,
+          ),
         ),
       ],
     );
@@ -462,6 +481,7 @@ class _FamilyImpostorScreenState extends State<FamilyImpostorScreen> {
 
   Widget _buildCategoryPicker() {
     final colors = Theme.of(context).colorScheme;
+    final strings = AppLocalizations.of(context)!;
 
     return Card(
       margin: EdgeInsets.zero,
@@ -477,7 +497,7 @@ class _FamilyImpostorScreenState extends State<FamilyImpostorScreen> {
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
-                    'Choose a category',
+                    strings.chooseCategory,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
@@ -493,7 +513,7 @@ class _FamilyImpostorScreenState extends State<FamilyImpostorScreen> {
                 ChoiceChip(
                   key: const Key('impostor-category-random'),
                   avatar: const Icon(Icons.shuffle_rounded, size: 18),
-                  label: const Text('Random mix'),
+                  label: Text(strings.randomMix),
                   selected: _selectedCategory == null,
                   onSelected: (_) {
                     setState(() {
@@ -504,7 +524,7 @@ class _FamilyImpostorScreenState extends State<FamilyImpostorScreen> {
                 ...FamilyImpostorAiService.categories.map(
                   (category) => ChoiceChip(
                     key: ValueKey('impostor-category-$category'),
-                    label: Text(category),
+                    label: Text(localizedGameCategory(strings, category)),
                     selected: _selectedCategory == category,
                     onSelected: (_) {
                       setState(() {
@@ -518,8 +538,10 @@ class _FamilyImpostorScreenState extends State<FamilyImpostorScreen> {
             const SizedBox(height: 12),
             Text(
               _selectedCategory == null
-                  ? 'Every round can surprise you with a different category.'
-                  : 'All secret words will come from $_selectedCategory.',
+                  ? strings.randomMixDescription
+                  : strings.selectedCategoryDescription(
+                      localizedGameCategory(strings, _selectedCategory!),
+                    ),
               style: Theme.of(context).textTheme.bodySmall,
             ),
           ],
@@ -530,6 +552,7 @@ class _FamilyImpostorScreenState extends State<FamilyImpostorScreen> {
 
   Widget _buildPassDeviceScreen() {
     final player = _players[_currentRevealPlayerIndex];
+    final strings = AppLocalizations.of(context)!;
 
     return Center(
       child: Padding(
@@ -541,7 +564,7 @@ class _FamilyImpostorScreenState extends State<FamilyImpostorScreen> {
             const SizedBox(height: 24),
 
             Text(
-              'Pass the phone to ${player.name}',
+              strings.passPhoneTo(player.name),
               textAlign: TextAlign.center,
               style: Theme.of(
                 context,
@@ -550,10 +573,7 @@ class _FamilyImpostorScreenState extends State<FamilyImpostorScreen> {
 
             const SizedBox(height: 12),
 
-            const Text(
-              'Everyone else should look away.',
-              textAlign: TextAlign.center,
-            ),
+            Text(strings.everyoneElseLookAway, textAlign: TextAlign.center),
 
             const SizedBox(height: 32),
 
@@ -565,7 +585,7 @@ class _FamilyImpostorScreenState extends State<FamilyImpostorScreen> {
                     _phase = _GamePhase.revealRole;
                   });
                 },
-                child: Text('I\'m ${player.name}'),
+                child: Text(strings.iAmPlayer(player.name)),
               ),
             ),
           ],
@@ -577,6 +597,7 @@ class _FamilyImpostorScreenState extends State<FamilyImpostorScreen> {
   Widget _buildRoleRevealScreen() {
     final player = _players[_currentRevealPlayerIndex];
     final round = _rounds[_currentRoundIndex];
+    final strings = AppLocalizations.of(context)!;
 
     final isImpostor = player.id == _impostorPlayerId;
 
@@ -587,7 +608,7 @@ class _FamilyImpostorScreenState extends State<FamilyImpostorScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              'Round ${_currentRoundIndex + 1}',
+              strings.roundNumber(_currentRoundIndex + 1),
               style: Theme.of(context).textTheme.titleMedium,
             ),
 
@@ -599,7 +620,7 @@ class _FamilyImpostorScreenState extends State<FamilyImpostorScreen> {
               const SizedBox(height: 20),
 
               Text(
-                'You are the IMPOSTOR',
+                strings.youAreTheImpostor,
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                   fontWeight: FontWeight.bold,
@@ -609,15 +630,15 @@ class _FamilyImpostorScreenState extends State<FamilyImpostorScreen> {
               const SizedBox(height: 14),
 
               Text(
-                'Category: ${round.category}',
+                strings.categoryLabel(round.category),
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.titleMedium,
               ),
 
               const SizedBox(height: 10),
 
-              const Text(
-                'You do not know the secret word.\nBlend in and avoid getting caught.',
+              Text(
+                strings.impostorRoleInstructions,
                 textAlign: TextAlign.center,
               ),
             ] else ...[
@@ -625,7 +646,10 @@ class _FamilyImpostorScreenState extends State<FamilyImpostorScreen> {
 
               const SizedBox(height: 20),
 
-              Text('Category', style: Theme.of(context).textTheme.titleMedium),
+              Text(
+                strings.category,
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
 
               const SizedBox(height: 6),
 
@@ -638,7 +662,7 @@ class _FamilyImpostorScreenState extends State<FamilyImpostorScreen> {
 
               const SizedBox(height: 24),
 
-              const Text('Secret word'),
+              Text(strings.secretWord),
 
               const SizedBox(height: 6),
 
@@ -652,10 +676,7 @@ class _FamilyImpostorScreenState extends State<FamilyImpostorScreen> {
 
               const SizedBox(height: 14),
 
-              const Text(
-                'Remember it. Do not show anyone else.',
-                textAlign: TextAlign.center,
-              ),
+              Text(strings.rememberSecretWord, textAlign: TextAlign.center),
             ],
 
             const SizedBox(height: 36),
@@ -664,7 +685,7 @@ class _FamilyImpostorScreenState extends State<FamilyImpostorScreen> {
               width: double.infinity,
               child: FilledButton(
                 onPressed: _finishRoleReveal,
-                child: const Text('Hide My Role'),
+                child: Text(strings.hideMyRole),
               ),
             ),
           ],
@@ -693,6 +714,7 @@ class _FamilyImpostorScreenState extends State<FamilyImpostorScreen> {
 
   Widget _buildClueRoundScreen() {
     final round = _rounds[_currentRoundIndex];
+    final strings = AppLocalizations.of(context)!;
 
     return Center(
       child: Padding(
@@ -704,7 +726,7 @@ class _FamilyImpostorScreenState extends State<FamilyImpostorScreen> {
             const SizedBox(height: 20),
 
             Text(
-              'Clue Round $_clueRoundNumber',
+              strings.clueRoundNumber(_clueRoundNumber),
               style: Theme.of(
                 context,
               ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
@@ -713,28 +735,22 @@ class _FamilyImpostorScreenState extends State<FamilyImpostorScreen> {
             const SizedBox(height: 12),
 
             Text(
-              'Category: ${round.category}',
+              strings.categoryLabel(round.category),
               style: Theme.of(context).textTheme.titleMedium,
             ),
 
             const SizedBox(height: 24),
 
-            const Text(
-              'Take turns giving one clue aloud.',
-              textAlign: TextAlign.center,
-            ),
+            Text(strings.takeTurnsGivingClues, textAlign: TextAlign.center),
 
             const SizedBox(height: 10),
 
-            const Text(
-              'Do not say the secret word.\nDo not make your clue too obvious.',
-              textAlign: TextAlign.center,
-            ),
+            Text(strings.clueRules, textAlign: TextAlign.center),
 
             const SizedBox(height: 10),
 
-            const Text(
-              'The Impostor must bluff and try to blend in.',
+            Text(
+              strings.impostorBluffInstructions,
               textAlign: TextAlign.center,
             ),
 
@@ -748,7 +764,7 @@ class _FamilyImpostorScreenState extends State<FamilyImpostorScreen> {
                     _phase = _GamePhase.clueDecision;
                   });
                 },
-                child: const Text('Everyone Gave a Clue'),
+                child: Text(strings.everyoneGaveClue),
               ),
             ),
           ],
@@ -759,6 +775,7 @@ class _FamilyImpostorScreenState extends State<FamilyImpostorScreen> {
 
   Widget _buildClueDecisionScreen() {
     final canContinue = _clueRoundNumber < 3;
+    final strings = AppLocalizations.of(context)!;
 
     return Center(
       child: Padding(
@@ -770,7 +787,7 @@ class _FamilyImpostorScreenState extends State<FamilyImpostorScreen> {
             const SizedBox(height: 20),
 
             Text(
-              'Do you know who the Impostor is?',
+              strings.knowTheImpostorQuestion,
               textAlign: TextAlign.center,
               style: Theme.of(
                 context,
@@ -780,7 +797,7 @@ class _FamilyImpostorScreenState extends State<FamilyImpostorScreen> {
             const SizedBox(height: 12),
 
             Text(
-              'Clue round $_clueRoundNumber is complete.',
+              strings.clueRoundComplete(_clueRoundNumber),
               textAlign: TextAlign.center,
             ),
 
@@ -797,7 +814,7 @@ class _FamilyImpostorScreenState extends State<FamilyImpostorScreen> {
                     });
                   },
                   icon: const Icon(Icons.refresh),
-                  label: const Text('Another Clue Round'),
+                  label: Text(strings.anotherClueRound),
                 ),
               ),
 
@@ -815,7 +832,7 @@ class _FamilyImpostorScreenState extends State<FamilyImpostorScreen> {
                   });
                 },
                 icon: const Icon(Icons.how_to_vote_outlined),
-                label: const Text('Start Voting'),
+                label: Text(strings.startVoting),
               ),
             ),
           ],
@@ -826,6 +843,7 @@ class _FamilyImpostorScreenState extends State<FamilyImpostorScreen> {
 
   Widget _buildVotePassDeviceScreen() {
     final voter = _players[_currentVoterIndex];
+    final strings = AppLocalizations.of(context)!;
 
     return Center(
       child: Padding(
@@ -836,17 +854,14 @@ class _FamilyImpostorScreenState extends State<FamilyImpostorScreen> {
             const Icon(Icons.lock_outline, size: 72),
             const SizedBox(height: 24),
             Text(
-              'Pass the phone to ${voter.name}',
+              strings.passPhoneTo(voter.name),
               textAlign: TextAlign.center,
               style: Theme.of(
                 context,
               ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 12),
-            const Text(
-              'Your vote is private. Everyone else should look away.',
-              textAlign: TextAlign.center,
-            ),
+            Text(strings.privateVoteInstructions, textAlign: TextAlign.center),
             const SizedBox(height: 32),
             SizedBox(
               width: double.infinity,
@@ -856,7 +871,7 @@ class _FamilyImpostorScreenState extends State<FamilyImpostorScreen> {
                     _phase = _GamePhase.voting;
                   });
                 },
-                child: Text('I\'m ${voter.name}'),
+                child: Text(strings.iAmPlayer(voter.name)),
               ),
             ),
           ],
@@ -867,6 +882,7 @@ class _FamilyImpostorScreenState extends State<FamilyImpostorScreen> {
 
   Widget _buildVotingScreen() {
     final voter = _players[_currentVoterIndex];
+    final strings = AppLocalizations.of(context)!;
 
     final candidates = _players
         .where((player) => player.id != voter.id)
@@ -878,17 +894,14 @@ class _FamilyImpostorScreenState extends State<FamilyImpostorScreen> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
-            '${voter.name}, who is the Impostor?',
+            strings.whoIsTheImpostor(voter.name),
             textAlign: TextAlign.center,
             style: Theme.of(
               context,
             ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 12),
-          const Text(
-            'Choose one family member. You cannot vote for yourself.',
-            textAlign: TextAlign.center,
-          ),
+          Text(strings.votingInstructions, textAlign: TextAlign.center),
           const SizedBox(height: 24),
           Expanded(
             child: ListView.separated(
@@ -935,6 +948,7 @@ class _FamilyImpostorScreenState extends State<FamilyImpostorScreen> {
   }
 
   Widget _buildVoteResultsScreen() {
+    final strings = AppLocalizations.of(context)!;
     final voteCounts = <String, int>{};
 
     for (final votedPlayerId in _votes.values) {
@@ -969,7 +983,7 @@ class _FamilyImpostorScreenState extends State<FamilyImpostorScreen> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
-            'Vote Results',
+            strings.voteResults,
             textAlign: TextAlign.center,
             style: Theme.of(
               context,
@@ -988,7 +1002,7 @@ class _FamilyImpostorScreenState extends State<FamilyImpostorScreen> {
                 return ListTile(
                   leading: CircleAvatar(child: Text('${index + 1}')),
                   title: Text(player.name),
-                  trailing: Text('$votes vote${votes == 1 ? '' : 's'}'),
+                  trailing: Text(strings.voteCount(votes)),
                 );
               },
             ),
@@ -1005,14 +1019,14 @@ class _FamilyImpostorScreenState extends State<FamilyImpostorScreen> {
                   _phase = _GamePhase.votePassDevice;
                 });
               },
-              child: const Text('Tie — Vote Again'),
+              child: Text(strings.tieVoteAgain),
             )
           else
             FilledButton(
               onPressed: () {
                 _revealVotedPlayer(topPlayer);
               },
-              child: Text('Reveal ${topPlayer.name}'),
+              child: Text(strings.revealPlayer(topPlayer.name)),
             ),
         ],
       ),
@@ -1020,6 +1034,7 @@ class _FamilyImpostorScreenState extends State<FamilyImpostorScreen> {
   }
 
   void _revealVotedPlayer(_FamilyPlayer player) {
+    final strings = AppLocalizations.of(context)!;
     final isActuallyImpostor = player.id == _impostorPlayerId;
 
     if (isActuallyImpostor) {
@@ -1040,9 +1055,10 @@ class _FamilyImpostorScreenState extends State<FamilyImpostorScreen> {
 
     setState(() {
       _impostorWonRound = true;
-      _roundResultMessage =
-          '${player.name} was innocent!\n\n'
-          '${impostor.name} was the Impostor and escaped detection.';
+      _roundResultMessage = strings.innocentImpostorEscaped(
+        player.name,
+        impostor.name,
+      );
       _phase = _GamePhase.roundResult;
     });
   }
@@ -1053,6 +1069,7 @@ class _FamilyImpostorScreenState extends State<FamilyImpostorScreen> {
     );
 
     final round = _rounds[_currentRoundIndex];
+    final strings = AppLocalizations.of(context)!;
 
     return Center(
       child: SingleChildScrollView(
@@ -1064,7 +1081,7 @@ class _FamilyImpostorScreenState extends State<FamilyImpostorScreen> {
             const SizedBox(height: 20),
 
             Text(
-              'The Impostor Was Caught!',
+              strings.impostorWasCaught,
               textAlign: TextAlign.center,
               style: Theme.of(
                 context,
@@ -1074,7 +1091,7 @@ class _FamilyImpostorScreenState extends State<FamilyImpostorScreen> {
             const SizedBox(height: 12),
 
             Text(
-              '${impostor.name} is the Impostor.',
+              strings.playerIsImpostor(impostor.name),
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.titleMedium,
             ),
@@ -1082,25 +1099,22 @@ class _FamilyImpostorScreenState extends State<FamilyImpostorScreen> {
             const SizedBox(height: 24),
 
             Text(
-              'Category: ${round.category}',
+              strings.categoryLabel(round.category),
               style: Theme.of(context).textTheme.titleMedium,
             ),
 
             const SizedBox(height: 12),
 
-            const Text(
-              'You have one final chance.\nGuess the secret word to steal the round.',
-              textAlign: TextAlign.center,
-            ),
+            Text(strings.impostorFinalChance, textAlign: TextAlign.center),
 
             const SizedBox(height: 24),
 
             TextField(
               controller: _impostorGuessController,
               textInputAction: TextInputAction.done,
-              decoration: const InputDecoration(
-                labelText: 'Secret word',
-                prefixIcon: Icon(Icons.key_outlined),
+              decoration: InputDecoration(
+                labelText: strings.secretWord,
+                prefixIcon: const Icon(Icons.key_outlined),
               ),
               onSubmitted: (_) => _submitImpostorGuess(),
             ),
@@ -1111,7 +1125,7 @@ class _FamilyImpostorScreenState extends State<FamilyImpostorScreen> {
               width: double.infinity,
               child: FilledButton(
                 onPressed: _submitImpostorGuess,
-                child: const Text('Submit Guess'),
+                child: Text(strings.submitGuess),
               ),
             ),
           ],
@@ -1121,12 +1135,13 @@ class _FamilyImpostorScreenState extends State<FamilyImpostorScreen> {
   }
 
   void _submitImpostorGuess() {
+    final strings = AppLocalizations.of(context)!;
     final guess = _impostorGuessController.text.trim().toLowerCase();
 
     if (guess.isEmpty) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text('Enter your guess first.')));
+      ).showSnackBar(SnackBar(content: Text(strings.enterGuessFirst)));
 
       return;
     }
@@ -1144,9 +1159,10 @@ class _FamilyImpostorScreenState extends State<FamilyImpostorScreen> {
 
       setState(() {
         _impostorWonRound = true;
-        _roundResultMessage =
-            '${impostor.name} was caught, but guessed '
-            '"${round.word}" correctly and stole the round!';
+        _roundResultMessage = strings.caughtButGuessedCorrectly(
+          impostor.name,
+          round.word,
+        );
         _phase = _GamePhase.roundResult;
       });
 
@@ -1161,16 +1177,18 @@ class _FamilyImpostorScreenState extends State<FamilyImpostorScreen> {
 
     setState(() {
       _impostorWonRound = false;
-      _roundResultMessage =
-          '${impostor.name} guessed "$guess".\n\n'
-          'The secret word was "${round.word}".\n\n'
-          'The family wins this round!';
+      _roundResultMessage = strings.incorrectImpostorGuess(
+        impostor.name,
+        guess,
+        round.word,
+      );
       _phase = _GamePhase.roundResult;
     });
   }
 
   Widget _buildRoundResultScreen() {
     final round = _rounds[_currentRoundIndex];
+    final strings = AppLocalizations.of(context)!;
 
     return Center(
       child: SingleChildScrollView(
@@ -1188,7 +1206,9 @@ class _FamilyImpostorScreenState extends State<FamilyImpostorScreen> {
             const SizedBox(height: 20),
 
             Text(
-              _impostorWonRound == true ? 'Impostor Wins!' : 'Family Wins!',
+              _impostorWonRound == true
+                  ? strings.impostorWins
+                  : strings.familyWins,
               textAlign: TextAlign.center,
               style: Theme.of(
                 context,
@@ -1202,7 +1222,7 @@ class _FamilyImpostorScreenState extends State<FamilyImpostorScreen> {
             const SizedBox(height: 24),
 
             Text(
-              'Secret word: ${round.word}',
+              strings.secretWordLabel(round.word),
               style: Theme.of(
                 context,
               ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
@@ -1216,8 +1236,8 @@ class _FamilyImpostorScreenState extends State<FamilyImpostorScreen> {
                 onPressed: _continueAfterRound,
                 child: Text(
                   _currentRoundIndex == _rounds.length - 1
-                      ? 'View Final Leaderboard'
-                      : 'Next Round',
+                      ? strings.viewFinalLeaderboard
+                      : strings.nextRound,
                 ),
               ),
             ),

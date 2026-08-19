@@ -3008,5 +3008,399 @@ class AppLocalizationsAr extends AppLocalizations {
   String get captionFinalLeaderboard => 'تم احتساب كل الأصوات، وهذا هو الترتيب النهائي للجلسة.';
 
   @override
+  String minimumPlayersForGame(String game, int count) {
+    return 'تحتاج لعبة $game إلى $count لاعبين على الأقل.';
+  }
+
+  @override
+  String minimumFamilyMembersForGame(String game, int count) {
+    return 'تحتاج لعبة $game إلى $count أفراد من العائلة على الأقل.';
+  }
+
+  @override
+  String joinOrCreateFamilyBeforeGame(String game) {
+    return 'انضم إلى عائلة أو أنشئ واحدة قبل لعب $game.';
+  }
+
+  @override
+  String couldNotStartGame(String game) {
+    return 'تعذر بدء لعبة $game. حاول مجددًا.';
+  }
+
+  @override
+  String get preparingGame => 'جارٍ تجهيز اللعبة...';
+
+  @override
+  String selectedPlayersCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'تم اختيار $count لاعبين',
+      two: 'تم اختيار لاعبين',
+      one: 'تم اختيار لاعب واحد',
+      zero: 'لم يتم اختيار لاعبين',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get everyoneElseLookAway => 'على الجميع أن ينظروا بعيدًا.';
+
+  @override
+  String iAmPlayer(String name) {
+    return 'أنا $name';
+  }
+
+  @override
+  String roundNumber(int number) {
+    return 'الجولة $number';
+  }
+
+  @override
+  String get viewFinalLeaderboard => 'عرض الترتيب النهائي';
+
+  @override
+  String get impostorSetupTitle => 'جهّزوا لغزكم';
+
+  @override
+  String get impostorSetupDescription => 'اختر فئة واحدة لكل الكلمات السرية، أو أبقِ الجميع في حيرة بمزيج عشوائي.';
+
+  @override
+  String get chooseAtLeastThreePlayers => 'اختر 3 أفراد من العائلة موجودين معك على الأقل.';
+
+  @override
+  String get randomMix => 'مزيج عشوائي';
+
+  @override
+  String get randomMixDescription => 'قد تفاجئكم كل جولة بفئة مختلفة.';
+
+  @override
+  String selectedCategoryDescription(String category) {
+    return 'ستأتي جميع الكلمات السرية من فئة $category.';
+  }
+
+  @override
+  String get youAreTheImpostor => 'أنت الدخيل';
+
+  @override
+  String categoryLabel(String category) {
+    return 'الفئة: $category';
+  }
+
+  @override
+  String get impostorRoleInstructions => 'أنت لا تعرف الكلمة السرية.\nاندمج مع الآخرين وتجنّب انكشافك.';
+
+  @override
+  String get secretWord => 'الكلمة السرية';
+
+  @override
+  String get rememberSecretWord => 'تذكّرها ولا تعرضها على أي شخص آخر.';
+
+  @override
+  String get hideMyRole => 'إخفاء دوري';
+
+  @override
+  String clueRoundNumber(int number) {
+    return 'جولة التلميحات $number';
+  }
+
+  @override
+  String get takeTurnsGivingClues => 'تناوبوا على قول تلميح واحد بصوت عالٍ.';
+
+  @override
+  String get clueRules => 'لا تقل الكلمة السرية.\nولا تجعل تلميحك واضحًا جدًا.';
+
+  @override
+  String get impostorBluffInstructions => 'على الدخيل التظاهر بالمعرفة ومحاولة الاندماج.';
+
+  @override
+  String get everyoneGaveClue => 'قدّم الجميع تلميحًا';
+
+  @override
+  String get knowTheImpostorQuestion => 'هل عرفتم من هو الدخيل؟';
+
+  @override
+  String clueRoundComplete(int number) {
+    return 'اكتملت جولة التلميحات $number.';
+  }
+
+  @override
+  String get anotherClueRound => 'جولة تلميحات أخرى';
+
+  @override
+  String get startVoting => 'بدء التصويت';
+
+  @override
+  String get privateVoteInstructions => 'تصويتك سري، وعلى الجميع أن ينظروا بعيدًا.';
+
+  @override
+  String whoIsTheImpostor(String name) {
+    return '$name، من هو الدخيل؟';
+  }
+
+  @override
+  String get votingInstructions => 'اختر فردًا واحدًا من العائلة، ولا يمكنك التصويت لنفسك.';
+
+  @override
+  String get voteResults => 'نتائج التصويت';
+
+  @override
+  String voteCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count أصوات',
+      two: 'صوتان',
+      one: 'صوت واحد',
+      zero: 'لا أصوات',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get tieVoteAgain => 'تعادل — صوّتوا مجددًا';
+
+  @override
+  String revealPlayer(String name) {
+    return 'اكشف دور $name';
+  }
+
+  @override
+  String innocentImpostorEscaped(String innocent, String impostor) {
+    return 'كان $innocent بريئًا!\n\nكان $impostor هو الدخيل وتمكن من الإفلات.';
+  }
+
+  @override
+  String get impostorWasCaught => 'تم اكتشاف الدخيل!';
+
+  @override
+  String playerIsImpostor(String name) {
+    return '$name هو الدخيل.';
+  }
+
+  @override
+  String get impostorFinalChance => 'لديك فرصة أخيرة.\nخمّن الكلمة السرية لتسرق الجولة.';
+
+  @override
+  String get submitGuess => 'إرسال التخمين';
+
+  @override
+  String get enterGuessFirst => 'أدخل تخمينك أولًا.';
+
+  @override
+  String caughtButGuessedCorrectly(String name, String word) {
+    return 'تم اكتشاف $name، لكنه خمّن «$word» بشكل صحيح وسرق الجولة!';
+  }
+
+  @override
+  String incorrectImpostorGuess(String name, String guess, String word) {
+    return 'خمّن $name «$guess».\n\nكانت الكلمة السرية «$word».\n\nتفوز العائلة بهذه الجولة!';
+  }
+
+  @override
+  String get impostorWins => 'يفوز الدخيل!';
+
+  @override
+  String get familyWins => 'تفوز العائلة!';
+
+  @override
+  String secretWordLabel(String word) {
+    return 'الكلمة السرية: $word';
+  }
+
+  @override
+  String get drawingTurnEachRound => 'يحصل كل رسام مختار على دور رسم واحد في كل جولة.';
+
+  @override
+  String artistDrawingPrompt(String name) {
+    return '$name، المطلوب منك رسم:';
+  }
+
+  @override
+  String get rememberDrawingPrompt => 'تذكّر المطلوب ولا تعرضه على اللاعبين الآخرين.';
+
+  @override
+  String get startDrawing => 'ابدأ الرسم';
+
+  @override
+  String get drawingTimeUp => 'انتهى الوقت!\n\nلم يخمّن أحد الرسمة في هذه الجولة.';
+
+  @override
+  String playerIsDrawing(String name) {
+    return '$name يرسم الآن';
+  }
+
+  @override
+  String get guessAloud => 'على الجميع التخمين بصوت عالٍ!';
+
+  @override
+  String get brush => 'الفرشاة:';
+
+  @override
+  String get thin => 'رفيعة';
+
+  @override
+  String get medium => 'متوسطة';
+
+  @override
+  String get thick => 'سميكة';
+
+  @override
+  String get undo => 'تراجع';
+
+  @override
+  String get eraser => 'ممحاة';
+
+  @override
+  String get eraserOn => 'الممحاة مفعّلة';
+
+  @override
+  String get clear => 'مسح';
+
+  @override
+  String get someoneGuessedIt => 'خمّنها أحدهم';
+
+  @override
+  String get whoGuessedIt => 'من خمّنها؟';
+
+  @override
+  String get chooseCorrectGuesser => 'اختر فرد العائلة الذي خمّن الرسمة بشكل صحيح.';
+
+  @override
+  String drawingCorrectPoints(String guesser, String artist) {
+    return 'خمّن $guesser بشكل صحيح!\n\n$artist +1 نقطة\n$guesser +1 نقطة';
+  }
+
+  @override
+  String promptLabel(String prompt) {
+    return 'المطلوب: $prompt';
+  }
+
+  @override
+  String get nextArtist => 'الرسام التالي';
+
+  @override
+  String officialMatchInvalidPlayers(String game) {
+    return 'لا تحتوي مباراة $game الرسمية هذه على عدد كافٍ من أفراد العائلة الصالحين.';
+  }
+
+  @override
+  String get timePerTurn => 'وقت كل دور';
+
+  @override
+  String playerSecretWord(String name) {
+    return '$name، كلمتك هي:';
+  }
+
+  @override
+  String get dontSayHeading => 'لا تقل:';
+
+  @override
+  String get rememberWordCard => 'تذكّر البطاقة ولا تدع أي شخص آخر يراها.';
+
+  @override
+  String get startTurn => 'ابدأ الدور';
+
+  @override
+  String get turnTimeUp => 'انتهى الوقت! لا نقاط في هذا الدور.';
+
+  @override
+  String playerIsDescribing(String name) {
+    return '$name يصف الكلمة';
+  }
+
+  @override
+  String get skip => 'تخطٍّ';
+
+  @override
+  String get turnSkipped => 'تم تخطي الدور دون منح نقاط.';
+
+  @override
+  String get chooseSecretWordGuesser => 'اختر اللاعب الذي خمّن الكلمة السرية بشكل صحيح.';
+
+  @override
+  String clueGiverPointResult(String guesser, String clueGiver) {
+    return 'خمّن $guesser بشكل صحيح!\n\n$clueGiver +1 نقطة';
+  }
+
+  @override
+  String sharedPointResult(String guesser, String clueGiver) {
+    return 'خمّن $guesser بشكل صحيح!\n\n$clueGiver +1 نقطة\n$guesser +1 نقطة';
+  }
+
+  @override
+  String get turnComplete => 'اكتمل الدور';
+
+  @override
+  String get answerAlreadyUsed => 'استُخدمت هذه الإجابة في الجولة! جرّب إجابة أخرى.';
+
+  @override
+  String get answerDoesNotFitCategory => 'هذه الإجابة لا تناسب الفئة. حاول مجددًا!';
+
+  @override
+  String reasonTryAgain(String reason) {
+    return '$reason حاول مجددًا!';
+  }
+
+  @override
+  String get couldNotCheckAnswer => 'تعذر التحقق من الإجابة. حاول مجددًا.';
+
+  @override
+  String get chooseTogetherPlayers => 'اختر أفراد العائلة الموجودين معك. سيشارك الجميع هذا الهاتف.';
+
+  @override
+  String get bombSetupInstructions => 'أجب بسرعة ومرّر الهاتف ولا تكرر أي إجابة.';
+
+  @override
+  String get generatingCategories => 'جارٍ تجهيز الفئات...';
+
+  @override
+  String playerTurn(String name) {
+    return 'دور $name';
+  }
+
+  @override
+  String get sayTypePass => 'قل إجابتك بصوت عالٍ واكتبها أدناه، ثم مرّر الهاتف فورًا.';
+
+  @override
+  String get yourAnswer => 'إجابتك';
+
+  @override
+  String get checkingAnswer => 'جارٍ التحقق من الإجابة...';
+
+  @override
+  String get typeSpokenAnswer => 'اكتب الإجابة التي قلتها للتو';
+
+  @override
+  String get submitAndPassPhone => 'إرسال وتمرير الهاتف';
+
+  @override
+  String get bombHiddenTimer => 'قد تنفجر القنبلة في أي لحظة، فالمؤقت مخفي!';
+
+  @override
+  String answersUsedThisRound(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'استُخدمت $count إجابات في هذه الجولة',
+      two: 'استُخدمت إجابتان في هذه الجولة',
+      one: 'استُخدمت إجابة واحدة في هذه الجولة',
+      zero: 'لم تُستخدم إجابات في هذه الجولة',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get boom => 'بووم!';
+
+  @override
+  String playerHeldBomb(String name) {
+    return 'كان $name يحمل القنبلة!';
+  }
+
+  @override
+  String get bombSurvivorPoint => 'يحصل كل من نجا في الجولة على نقطة واحدة.';
+
+  @override
   String get monthlyInvalidWinner => 'أعادت المباراة فائزًا ليس أحد المتنافسين المحددين. يُرجى إعادة المباراة.';
 }

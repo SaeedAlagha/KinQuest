@@ -2984,5 +2984,394 @@ class AppLocalizationsEn extends AppLocalizations {
   String get captionFinalLeaderboard => 'Every vote counted. Here is the final local leaderboard.';
 
   @override
+  String minimumPlayersForGame(String game, int count) {
+    return '$game needs at least $count players.';
+  }
+
+  @override
+  String minimumFamilyMembersForGame(String game, int count) {
+    return '$game needs at least $count family members.';
+  }
+
+  @override
+  String joinOrCreateFamilyBeforeGame(String game) {
+    return 'Join or create a family before playing $game.';
+  }
+
+  @override
+  String couldNotStartGame(String game) {
+    return 'Could not start $game. Please try again.';
+  }
+
+  @override
+  String get preparingGame => 'Preparing game...';
+
+  @override
+  String selectedPlayersCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count players selected',
+      one: '1 player selected',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get everyoneElseLookAway => 'Everyone else should look away.';
+
+  @override
+  String iAmPlayer(String name) {
+    return 'I\'m $name';
+  }
+
+  @override
+  String roundNumber(int number) {
+    return 'Round $number';
+  }
+
+  @override
+  String get viewFinalLeaderboard => 'View Final Leaderboard';
+
+  @override
+  String get impostorSetupTitle => 'Set up your mystery';
+
+  @override
+  String get impostorSetupDescription => 'Pick one category for every secret word, or keep everyone guessing with a random mix.';
+
+  @override
+  String get chooseAtLeastThreePlayers => 'Choose at least 3 family members who are together with you.';
+
+  @override
+  String get randomMix => 'Random mix';
+
+  @override
+  String get randomMixDescription => 'Every round can surprise you with a different category.';
+
+  @override
+  String selectedCategoryDescription(String category) {
+    return 'All secret words will come from $category.';
+  }
+
+  @override
+  String get youAreTheImpostor => 'You are the IMPOSTOR';
+
+  @override
+  String categoryLabel(String category) {
+    return 'Category: $category';
+  }
+
+  @override
+  String get impostorRoleInstructions => 'You do not know the secret word.\nBlend in and avoid getting caught.';
+
+  @override
+  String get secretWord => 'Secret word';
+
+  @override
+  String get rememberSecretWord => 'Remember it. Do not show anyone else.';
+
+  @override
+  String get hideMyRole => 'Hide My Role';
+
+  @override
+  String clueRoundNumber(int number) {
+    return 'Clue Round $number';
+  }
+
+  @override
+  String get takeTurnsGivingClues => 'Take turns giving one clue aloud.';
+
+  @override
+  String get clueRules => 'Do not say the secret word.\nDo not make your clue too obvious.';
+
+  @override
+  String get impostorBluffInstructions => 'The Impostor must bluff and try to blend in.';
+
+  @override
+  String get everyoneGaveClue => 'Everyone Gave a Clue';
+
+  @override
+  String get knowTheImpostorQuestion => 'Do you know who the Impostor is?';
+
+  @override
+  String clueRoundComplete(int number) {
+    return 'Clue round $number is complete.';
+  }
+
+  @override
+  String get anotherClueRound => 'Another Clue Round';
+
+  @override
+  String get startVoting => 'Start Voting';
+
+  @override
+  String get privateVoteInstructions => 'Your vote is private. Everyone else should look away.';
+
+  @override
+  String whoIsTheImpostor(String name) {
+    return '$name, who is the Impostor?';
+  }
+
+  @override
+  String get votingInstructions => 'Choose one family member. You cannot vote for yourself.';
+
+  @override
+  String get voteResults => 'Vote Results';
+
+  @override
+  String voteCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count votes',
+      one: '1 vote',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get tieVoteAgain => 'Tie — Vote Again';
+
+  @override
+  String revealPlayer(String name) {
+    return 'Reveal $name';
+  }
+
+  @override
+  String innocentImpostorEscaped(String innocent, String impostor) {
+    return '$innocent was innocent!\n\n$impostor was the Impostor and escaped detection.';
+  }
+
+  @override
+  String get impostorWasCaught => 'The Impostor Was Caught!';
+
+  @override
+  String playerIsImpostor(String name) {
+    return '$name is the Impostor.';
+  }
+
+  @override
+  String get impostorFinalChance => 'You have one final chance.\nGuess the secret word to steal the round.';
+
+  @override
+  String get submitGuess => 'Submit Guess';
+
+  @override
+  String get enterGuessFirst => 'Enter your guess first.';
+
+  @override
+  String caughtButGuessedCorrectly(String name, String word) {
+    return '$name was caught, but guessed “$word” correctly and stole the round!';
+  }
+
+  @override
+  String incorrectImpostorGuess(String name, String guess, String word) {
+    return '$name guessed “$guess”.\n\nThe secret word was “$word”.\n\nThe family wins this round!';
+  }
+
+  @override
+  String get impostorWins => 'Impostor Wins!';
+
+  @override
+  String get familyWins => 'Family Wins!';
+
+  @override
+  String secretWordLabel(String word) {
+    return 'Secret word: $word';
+  }
+
+  @override
+  String get drawingTurnEachRound => 'Every selected artist gets one drawing turn in each round.';
+
+  @override
+  String artistDrawingPrompt(String name) {
+    return '$name, your drawing prompt is:';
+  }
+
+  @override
+  String get rememberDrawingPrompt => 'Remember the prompt. Do not show it to the other players.';
+
+  @override
+  String get startDrawing => 'Start Drawing';
+
+  @override
+  String get drawingTimeUp => 'Time\'s up!\n\nNobody guessed the drawing this round.';
+
+  @override
+  String playerIsDrawing(String name) {
+    return '$name is drawing';
+  }
+
+  @override
+  String get guessAloud => 'Everyone else: guess aloud!';
+
+  @override
+  String get brush => 'Brush:';
+
+  @override
+  String get thin => 'Thin';
+
+  @override
+  String get medium => 'Medium';
+
+  @override
+  String get thick => 'Thick';
+
+  @override
+  String get undo => 'Undo';
+
+  @override
+  String get eraser => 'Eraser';
+
+  @override
+  String get eraserOn => 'Eraser On';
+
+  @override
+  String get clear => 'Clear';
+
+  @override
+  String get someoneGuessedIt => 'Someone Guessed It';
+
+  @override
+  String get whoGuessedIt => 'Who guessed it?';
+
+  @override
+  String get chooseCorrectGuesser => 'Choose the family member who guessed the drawing correctly.';
+
+  @override
+  String drawingCorrectPoints(String guesser, String artist) {
+    return '$guesser guessed correctly!\n\n$artist +1 point\n$guesser +1 point';
+  }
+
+  @override
+  String promptLabel(String prompt) {
+    return 'Prompt: $prompt';
+  }
+
+  @override
+  String get nextArtist => 'Next Artist';
+
+  @override
+  String officialMatchInvalidPlayers(String game) {
+    return 'This official $game match does not have enough valid family members.';
+  }
+
+  @override
+  String get timePerTurn => 'Time per turn';
+
+  @override
+  String playerSecretWord(String name) {
+    return '$name, your word is:';
+  }
+
+  @override
+  String get dontSayHeading => 'DON\'T SAY:';
+
+  @override
+  String get rememberWordCard => 'Remember the card. Don\'t let anyone else see it.';
+
+  @override
+  String get startTurn => 'Start Turn';
+
+  @override
+  String get turnTimeUp => 'Time\'s up! No points this turn.';
+
+  @override
+  String playerIsDescribing(String name) {
+    return '$name is describing';
+  }
+
+  @override
+  String get skip => 'Skip';
+
+  @override
+  String get turnSkipped => 'Turn skipped. No points awarded.';
+
+  @override
+  String get chooseSecretWordGuesser => 'Choose the player who guessed the secret word correctly.';
+
+  @override
+  String clueGiverPointResult(String guesser, String clueGiver) {
+    return '$guesser guessed correctly!\n\n$clueGiver +1 point';
+  }
+
+  @override
+  String sharedPointResult(String guesser, String clueGiver) {
+    return '$guesser guessed correctly!\n\n$clueGiver +1 point\n$guesser +1 point';
+  }
+
+  @override
+  String get turnComplete => 'Turn Complete';
+
+  @override
+  String get answerAlreadyUsed => 'That answer was already used this round! Try another one.';
+
+  @override
+  String get answerDoesNotFitCategory => 'That does not fit the category. Try again!';
+
+  @override
+  String reasonTryAgain(String reason) {
+    return '$reason Try again!';
+  }
+
+  @override
+  String get couldNotCheckAnswer => 'Could not check that answer. Please try again.';
+
+  @override
+  String get chooseTogetherPlayers => 'Choose the family members who are together with you. Everyone will share this phone.';
+
+  @override
+  String get bombSetupInstructions => 'Answer quickly, pass the phone, and do not repeat an answer.';
+
+  @override
+  String get generatingCategories => 'Generating categories...';
+
+  @override
+  String playerTurn(String name) {
+    return '$name\'s turn';
+  }
+
+  @override
+  String get sayTypePass => 'Say your answer aloud, type it below, then immediately pass the phone.';
+
+  @override
+  String get yourAnswer => 'Your answer';
+
+  @override
+  String get checkingAnswer => 'Checking answer...';
+
+  @override
+  String get typeSpokenAnswer => 'Type the answer you just said';
+
+  @override
+  String get submitAndPassPhone => 'Submit & Pass Phone';
+
+  @override
+  String get bombHiddenTimer => 'The bomb can explode at any moment. The timer is hidden!';
+
+  @override
+  String answersUsedThisRound(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count answers used this round',
+      one: '1 answer used this round',
+      zero: 'No answers used this round',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get boom => 'BOOM!';
+
+  @override
+  String playerHeldBomb(String name) {
+    return '$name was holding the bomb!';
+  }
+
+  @override
+  String get bombSurvivorPoint => 'Everyone else earns 1 point for surviving the round.';
+
+  @override
   String get monthlyInvalidWinner => 'The match returned a winner who was not one of the two selected competitors. Please replay the match.';
 }

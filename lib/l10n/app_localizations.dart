@@ -5501,6 +5501,618 @@ abstract class AppLocalizations {
   /// **'Every vote counted. Here is the final local leaderboard.'**
   String get captionFinalLeaderboard;
 
+  /// No description provided for @minimumPlayersForGame.
+  ///
+  /// In en, this message translates to:
+  /// **'{game} needs at least {count} players.'**
+  String minimumPlayersForGame(String game, int count);
+
+  /// No description provided for @minimumFamilyMembersForGame.
+  ///
+  /// In en, this message translates to:
+  /// **'{game} needs at least {count} family members.'**
+  String minimumFamilyMembersForGame(String game, int count);
+
+  /// No description provided for @joinOrCreateFamilyBeforeGame.
+  ///
+  /// In en, this message translates to:
+  /// **'Join or create a family before playing {game}.'**
+  String joinOrCreateFamilyBeforeGame(String game);
+
+  /// No description provided for @couldNotStartGame.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not start {game}. Please try again.'**
+  String couldNotStartGame(String game);
+
+  /// No description provided for @preparingGame.
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing game...'**
+  String get preparingGame;
+
+  /// No description provided for @selectedPlayersCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 player selected} other{{count} players selected}}'**
+  String selectedPlayersCount(int count);
+
+  /// No description provided for @everyoneElseLookAway.
+  ///
+  /// In en, this message translates to:
+  /// **'Everyone else should look away.'**
+  String get everyoneElseLookAway;
+
+  /// No description provided for @iAmPlayer.
+  ///
+  /// In en, this message translates to:
+  /// **'I\'m {name}'**
+  String iAmPlayer(String name);
+
+  /// No description provided for @roundNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Round {number}'**
+  String roundNumber(int number);
+
+  /// No description provided for @viewFinalLeaderboard.
+  ///
+  /// In en, this message translates to:
+  /// **'View Final Leaderboard'**
+  String get viewFinalLeaderboard;
+
+  /// No description provided for @impostorSetupTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Set up your mystery'**
+  String get impostorSetupTitle;
+
+  /// No description provided for @impostorSetupDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick one category for every secret word, or keep everyone guessing with a random mix.'**
+  String get impostorSetupDescription;
+
+  /// No description provided for @chooseAtLeastThreePlayers.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose at least 3 family members who are together with you.'**
+  String get chooseAtLeastThreePlayers;
+
+  /// No description provided for @randomMix.
+  ///
+  /// In en, this message translates to:
+  /// **'Random mix'**
+  String get randomMix;
+
+  /// No description provided for @randomMixDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Every round can surprise you with a different category.'**
+  String get randomMixDescription;
+
+  /// No description provided for @selectedCategoryDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'All secret words will come from {category}.'**
+  String selectedCategoryDescription(String category);
+
+  /// No description provided for @youAreTheImpostor.
+  ///
+  /// In en, this message translates to:
+  /// **'You are the IMPOSTOR'**
+  String get youAreTheImpostor;
+
+  /// No description provided for @categoryLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Category: {category}'**
+  String categoryLabel(String category);
+
+  /// No description provided for @impostorRoleInstructions.
+  ///
+  /// In en, this message translates to:
+  /// **'You do not know the secret word.\nBlend in and avoid getting caught.'**
+  String get impostorRoleInstructions;
+
+  /// No description provided for @secretWord.
+  ///
+  /// In en, this message translates to:
+  /// **'Secret word'**
+  String get secretWord;
+
+  /// No description provided for @rememberSecretWord.
+  ///
+  /// In en, this message translates to:
+  /// **'Remember it. Do not show anyone else.'**
+  String get rememberSecretWord;
+
+  /// No description provided for @hideMyRole.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide My Role'**
+  String get hideMyRole;
+
+  /// No description provided for @clueRoundNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Clue Round {number}'**
+  String clueRoundNumber(int number);
+
+  /// No description provided for @takeTurnsGivingClues.
+  ///
+  /// In en, this message translates to:
+  /// **'Take turns giving one clue aloud.'**
+  String get takeTurnsGivingClues;
+
+  /// No description provided for @clueRules.
+  ///
+  /// In en, this message translates to:
+  /// **'Do not say the secret word.\nDo not make your clue too obvious.'**
+  String get clueRules;
+
+  /// No description provided for @impostorBluffInstructions.
+  ///
+  /// In en, this message translates to:
+  /// **'The Impostor must bluff and try to blend in.'**
+  String get impostorBluffInstructions;
+
+  /// No description provided for @everyoneGaveClue.
+  ///
+  /// In en, this message translates to:
+  /// **'Everyone Gave a Clue'**
+  String get everyoneGaveClue;
+
+  /// No description provided for @knowTheImpostorQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Do you know who the Impostor is?'**
+  String get knowTheImpostorQuestion;
+
+  /// No description provided for @clueRoundComplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Clue round {number} is complete.'**
+  String clueRoundComplete(int number);
+
+  /// No description provided for @anotherClueRound.
+  ///
+  /// In en, this message translates to:
+  /// **'Another Clue Round'**
+  String get anotherClueRound;
+
+  /// No description provided for @startVoting.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Voting'**
+  String get startVoting;
+
+  /// No description provided for @privateVoteInstructions.
+  ///
+  /// In en, this message translates to:
+  /// **'Your vote is private. Everyone else should look away.'**
+  String get privateVoteInstructions;
+
+  /// No description provided for @whoIsTheImpostor.
+  ///
+  /// In en, this message translates to:
+  /// **'{name}, who is the Impostor?'**
+  String whoIsTheImpostor(String name);
+
+  /// No description provided for @votingInstructions.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose one family member. You cannot vote for yourself.'**
+  String get votingInstructions;
+
+  /// No description provided for @voteResults.
+  ///
+  /// In en, this message translates to:
+  /// **'Vote Results'**
+  String get voteResults;
+
+  /// No description provided for @voteCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 vote} other{{count} votes}}'**
+  String voteCount(int count);
+
+  /// No description provided for @tieVoteAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Tie — Vote Again'**
+  String get tieVoteAgain;
+
+  /// No description provided for @revealPlayer.
+  ///
+  /// In en, this message translates to:
+  /// **'Reveal {name}'**
+  String revealPlayer(String name);
+
+  /// No description provided for @innocentImpostorEscaped.
+  ///
+  /// In en, this message translates to:
+  /// **'{innocent} was innocent!\n\n{impostor} was the Impostor and escaped detection.'**
+  String innocentImpostorEscaped(String innocent, String impostor);
+
+  /// No description provided for @impostorWasCaught.
+  ///
+  /// In en, this message translates to:
+  /// **'The Impostor Was Caught!'**
+  String get impostorWasCaught;
+
+  /// No description provided for @playerIsImpostor.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} is the Impostor.'**
+  String playerIsImpostor(String name);
+
+  /// No description provided for @impostorFinalChance.
+  ///
+  /// In en, this message translates to:
+  /// **'You have one final chance.\nGuess the secret word to steal the round.'**
+  String get impostorFinalChance;
+
+  /// No description provided for @submitGuess.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit Guess'**
+  String get submitGuess;
+
+  /// No description provided for @enterGuessFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your guess first.'**
+  String get enterGuessFirst;
+
+  /// No description provided for @caughtButGuessedCorrectly.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} was caught, but guessed “{word}” correctly and stole the round!'**
+  String caughtButGuessedCorrectly(String name, String word);
+
+  /// No description provided for @incorrectImpostorGuess.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} guessed “{guess}”.\n\nThe secret word was “{word}”.\n\nThe family wins this round!'**
+  String incorrectImpostorGuess(String name, String guess, String word);
+
+  /// No description provided for @impostorWins.
+  ///
+  /// In en, this message translates to:
+  /// **'Impostor Wins!'**
+  String get impostorWins;
+
+  /// No description provided for @familyWins.
+  ///
+  /// In en, this message translates to:
+  /// **'Family Wins!'**
+  String get familyWins;
+
+  /// No description provided for @secretWordLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Secret word: {word}'**
+  String secretWordLabel(String word);
+
+  /// No description provided for @drawingTurnEachRound.
+  ///
+  /// In en, this message translates to:
+  /// **'Every selected artist gets one drawing turn in each round.'**
+  String get drawingTurnEachRound;
+
+  /// No description provided for @artistDrawingPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'{name}, your drawing prompt is:'**
+  String artistDrawingPrompt(String name);
+
+  /// No description provided for @rememberDrawingPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Remember the prompt. Do not show it to the other players.'**
+  String get rememberDrawingPrompt;
+
+  /// No description provided for @startDrawing.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Drawing'**
+  String get startDrawing;
+
+  /// No description provided for @drawingTimeUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Time\'s up!\n\nNobody guessed the drawing this round.'**
+  String get drawingTimeUp;
+
+  /// No description provided for @playerIsDrawing.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} is drawing'**
+  String playerIsDrawing(String name);
+
+  /// No description provided for @guessAloud.
+  ///
+  /// In en, this message translates to:
+  /// **'Everyone else: guess aloud!'**
+  String get guessAloud;
+
+  /// No description provided for @brush.
+  ///
+  /// In en, this message translates to:
+  /// **'Brush:'**
+  String get brush;
+
+  /// No description provided for @thin.
+  ///
+  /// In en, this message translates to:
+  /// **'Thin'**
+  String get thin;
+
+  /// No description provided for @medium.
+  ///
+  /// In en, this message translates to:
+  /// **'Medium'**
+  String get medium;
+
+  /// No description provided for @thick.
+  ///
+  /// In en, this message translates to:
+  /// **'Thick'**
+  String get thick;
+
+  /// No description provided for @undo.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo'**
+  String get undo;
+
+  /// No description provided for @eraser.
+  ///
+  /// In en, this message translates to:
+  /// **'Eraser'**
+  String get eraser;
+
+  /// No description provided for @eraserOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Eraser On'**
+  String get eraserOn;
+
+  /// No description provided for @clear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get clear;
+
+  /// No description provided for @someoneGuessedIt.
+  ///
+  /// In en, this message translates to:
+  /// **'Someone Guessed It'**
+  String get someoneGuessedIt;
+
+  /// No description provided for @whoGuessedIt.
+  ///
+  /// In en, this message translates to:
+  /// **'Who guessed it?'**
+  String get whoGuessedIt;
+
+  /// No description provided for @chooseCorrectGuesser.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the family member who guessed the drawing correctly.'**
+  String get chooseCorrectGuesser;
+
+  /// No description provided for @drawingCorrectPoints.
+  ///
+  /// In en, this message translates to:
+  /// **'{guesser} guessed correctly!\n\n{artist} +1 point\n{guesser} +1 point'**
+  String drawingCorrectPoints(String guesser, String artist);
+
+  /// No description provided for @promptLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Prompt: {prompt}'**
+  String promptLabel(String prompt);
+
+  /// No description provided for @nextArtist.
+  ///
+  /// In en, this message translates to:
+  /// **'Next Artist'**
+  String get nextArtist;
+
+  /// No description provided for @officialMatchInvalidPlayers.
+  ///
+  /// In en, this message translates to:
+  /// **'This official {game} match does not have enough valid family members.'**
+  String officialMatchInvalidPlayers(String game);
+
+  /// No description provided for @timePerTurn.
+  ///
+  /// In en, this message translates to:
+  /// **'Time per turn'**
+  String get timePerTurn;
+
+  /// No description provided for @playerSecretWord.
+  ///
+  /// In en, this message translates to:
+  /// **'{name}, your word is:'**
+  String playerSecretWord(String name);
+
+  /// No description provided for @dontSayHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'DON\'T SAY:'**
+  String get dontSayHeading;
+
+  /// No description provided for @rememberWordCard.
+  ///
+  /// In en, this message translates to:
+  /// **'Remember the card. Don\'t let anyone else see it.'**
+  String get rememberWordCard;
+
+  /// No description provided for @startTurn.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Turn'**
+  String get startTurn;
+
+  /// No description provided for @turnTimeUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Time\'s up! No points this turn.'**
+  String get turnTimeUp;
+
+  /// No description provided for @playerIsDescribing.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} is describing'**
+  String playerIsDescribing(String name);
+
+  /// No description provided for @skip.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip'**
+  String get skip;
+
+  /// No description provided for @turnSkipped.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn skipped. No points awarded.'**
+  String get turnSkipped;
+
+  /// No description provided for @chooseSecretWordGuesser.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the player who guessed the secret word correctly.'**
+  String get chooseSecretWordGuesser;
+
+  /// No description provided for @clueGiverPointResult.
+  ///
+  /// In en, this message translates to:
+  /// **'{guesser} guessed correctly!\n\n{clueGiver} +1 point'**
+  String clueGiverPointResult(String guesser, String clueGiver);
+
+  /// No description provided for @sharedPointResult.
+  ///
+  /// In en, this message translates to:
+  /// **'{guesser} guessed correctly!\n\n{clueGiver} +1 point\n{guesser} +1 point'**
+  String sharedPointResult(String guesser, String clueGiver);
+
+  /// No description provided for @turnComplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn Complete'**
+  String get turnComplete;
+
+  /// No description provided for @answerAlreadyUsed.
+  ///
+  /// In en, this message translates to:
+  /// **'That answer was already used this round! Try another one.'**
+  String get answerAlreadyUsed;
+
+  /// No description provided for @answerDoesNotFitCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'That does not fit the category. Try again!'**
+  String get answerDoesNotFitCategory;
+
+  /// No description provided for @reasonTryAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'{reason} Try again!'**
+  String reasonTryAgain(String reason);
+
+  /// No description provided for @couldNotCheckAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not check that answer. Please try again.'**
+  String get couldNotCheckAnswer;
+
+  /// No description provided for @chooseTogetherPlayers.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the family members who are together with you. Everyone will share this phone.'**
+  String get chooseTogetherPlayers;
+
+  /// No description provided for @bombSetupInstructions.
+  ///
+  /// In en, this message translates to:
+  /// **'Answer quickly, pass the phone, and do not repeat an answer.'**
+  String get bombSetupInstructions;
+
+  /// No description provided for @generatingCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'Generating categories...'**
+  String get generatingCategories;
+
+  /// No description provided for @playerTurn.
+  ///
+  /// In en, this message translates to:
+  /// **'{name}\'s turn'**
+  String playerTurn(String name);
+
+  /// No description provided for @sayTypePass.
+  ///
+  /// In en, this message translates to:
+  /// **'Say your answer aloud, type it below, then immediately pass the phone.'**
+  String get sayTypePass;
+
+  /// No description provided for @yourAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'Your answer'**
+  String get yourAnswer;
+
+  /// No description provided for @checkingAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking answer...'**
+  String get checkingAnswer;
+
+  /// No description provided for @typeSpokenAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'Type the answer you just said'**
+  String get typeSpokenAnswer;
+
+  /// No description provided for @submitAndPassPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit & Pass Phone'**
+  String get submitAndPassPhone;
+
+  /// No description provided for @bombHiddenTimer.
+  ///
+  /// In en, this message translates to:
+  /// **'The bomb can explode at any moment. The timer is hidden!'**
+  String get bombHiddenTimer;
+
+  /// No description provided for @answersUsedThisRound.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No answers used this round} =1{1 answer used this round} other{{count} answers used this round}}'**
+  String answersUsedThisRound(int count);
+
+  /// No description provided for @boom.
+  ///
+  /// In en, this message translates to:
+  /// **'BOOM!'**
+  String get boom;
+
+  /// No description provided for @playerHeldBomb.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} was holding the bomb!'**
+  String playerHeldBomb(String name);
+
+  /// No description provided for @bombSurvivorPoint.
+  ///
+  /// In en, this message translates to:
+  /// **'Everyone else earns 1 point for surviving the round.'**
+  String get bombSurvivorPoint;
+
   /// No description provided for @monthlyInvalidWinner.
   ///
   /// In en, this message translates to:

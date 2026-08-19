@@ -48,8 +48,46 @@ void main() {
     await tester.drag(find.byType(ListView), const Offset(0, -700));
     await tester.pump();
 
-    expect(find.text('4 selected'), findsOneWidget);
+    expect(find.text('4 players selected'), findsOneWidget);
     expect(find.text('Start Game'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('preview setup is fully localized and RTL in Arabic', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        locale: Locale('ar'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: FamilyImpostorScreen(developerPreview: true),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.text('الدخيل بين العائلة'), findsOneWidget);
+    expect(find.text('جهّزوا لغزكم'), findsOneWidget);
+    expect(find.text('مزيج عشوائي'), findsOneWidget);
+    expect(find.text('الإمارات والتراث'), findsOneWidget);
+    expect(find.text('جولة واحدة'), findsOneWidget);
+    expect(
+      tester
+          .widget<Directionality>(find.byType(Directionality).first)
+          .textDirection,
+      TextDirection.rtl,
+    );
+
+    await tester.drag(find.byType(ListView), const Offset(0, -900));
+    await tester.pump();
+
+    expect(find.text('تم اختيار 4 لاعبين'), findsOneWidget);
+    expect(find.text('ابدأ اللعبة'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 }
