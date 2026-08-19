@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:kinquest/core/theme/app_theme.dart';
 import 'package:kinquest/core/widgets/sila_brand_mark.dart';
 import 'package:kinquest/features/authentication/screens/login_screen.dart';
+import 'package:kinquest/features/demo/screens/competition_demo_screen.dart';
 import 'package:kinquest/features/home/screens/main_navigation_screen.dart';
 import 'package:kinquest/l10n/app_localizations.dart';
 import 'package:kinquest/main.dart';
@@ -17,6 +18,21 @@ void main() {
     expect(find.text('Closer, one moment at a time.'), findsOneWidget);
     expect(find.text('Log In'), findsOneWidget);
     expect(find.text('Create Account'), findsOneWidget);
+    expect(find.byKey(const ValueKey('competition-demo-cta')), findsOneWidget);
+  });
+
+  testWidgets('welcome screen opens the competition demo in one tap', (
+    tester,
+  ) async {
+    await tester.pumpWidget(const SilaApp());
+
+    final demoButton = find.byKey(const ValueKey('competition-demo-cta'));
+    await tester.ensureVisible(demoButton);
+    await tester.tap(demoButton);
+    await tester.pumpAndSettle();
+
+    expect(find.byType(CompetitionDemoScreen), findsOneWidget);
+    expect(find.text('Share a phone-free family meal'), findsOneWidget);
   });
 
   testWidgets('authentication pages keep the logo without the family banner', (
