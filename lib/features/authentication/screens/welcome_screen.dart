@@ -140,6 +140,7 @@ class _WelcomeHero extends StatelessWidget {
         SizedBox(height: isWide ? 30 : 22),
         Wrap(
           alignment: isWide ? WrapAlignment.start : WrapAlignment.center,
+          textDirection: TextDirection.ltr,
           crossAxisAlignment: WrapCrossAlignment.center,
           spacing: 14,
           runSpacing: 8,
@@ -176,6 +177,7 @@ class _WelcomeHero extends StatelessWidget {
         Text(
           AppBrand.tagline,
           textAlign: isWide ? TextAlign.start : TextAlign.center,
+          textDirection: TextDirection.ltr,
           style: textTheme.headlineSmall?.copyWith(
             color: colorScheme.primary,
             height: 1.35,

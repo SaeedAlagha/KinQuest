@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:kinquest/core/branding/app_brand.dart';
 import 'package:kinquest/core/theme/app_theme.dart';
 import 'package:kinquest/core/validation/form_validators.dart';
 import 'package:kinquest/features/authentication/screens/family_choice_screen.dart';
@@ -25,6 +26,10 @@ void main() {
     );
     expect(description, findsOneWidget);
     expect(Directionality.of(tester.element(description)), TextDirection.rtl);
+    expect(
+      tester.widget<Text>(find.text(AppBrand.tagline)).textDirection,
+      TextDirection.ltr,
+    );
 
     final loginButton = find.widgetWithText(FilledButton, 'تسجيل الدخول');
     await tester.ensureVisible(loginButton);

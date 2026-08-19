@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kinquest/core/theme/appearance_controller.dart';
+import 'package:kinquest/core/theme/app_theme.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
@@ -34,5 +35,14 @@ void main() {
     await controller.load();
 
     expect(controller.appearance, AppAppearance.light);
+  });
+
+  test('every appearance uses the bundled bilingual font', () {
+    for (final appearance in AppAppearance.values) {
+      final theme = AppTheme.forAppearance(appearance);
+
+      expect(theme.textTheme.bodyMedium?.fontFamily, 'NotoSansArabic');
+      expect(theme.textTheme.headlineMedium?.fontFamily, 'NotoSansArabic');
+    }
   });
 }
