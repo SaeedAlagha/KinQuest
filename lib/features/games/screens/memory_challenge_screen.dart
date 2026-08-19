@@ -5,7 +5,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../l10n/app_localizations.dart';
 import '../services/memory_challenge_ai_service.dart';
+
+enum _MemoryChallengeError { signedOut, noFamily, noMemories, createFailed }
 
 class MemoryChallengeScreen extends StatefulWidget {
   const MemoryChallengeScreen({super.key});
@@ -21,7 +24,7 @@ class _MemoryChallengeScreenState extends State<MemoryChallengeScreen> {
   bool _isPlaying = false;
   bool _showResults = false;
 
-  String? _errorMessage;
+  _MemoryChallengeError? _error;
 
   int _currentIndex = 0;
   int _score = 0;
@@ -32,10 +35,11 @@ class _MemoryChallengeScreenState extends State<MemoryChallengeScreen> {
   Future<void> _startChallenge() async {
     final user = FirebaseAuth.instance.currentUser;
     final languageCode = Localizations.localeOf(context).languageCode;
+    final strings = AppLocalizations.of(context)!;
 
     if (user == null) {
       setState(() {
-        _errorMessage = 'You must be signed in to play Memory Challenge.';
+        _error = _MemoryChallengeError.signedOut;
       });
       return;
     }
@@ -44,7 +48,7 @@ class _MemoryChallengeScreenState extends State<MemoryChallengeScreen> {
       _isLoading = true;
       _isPlaying = false;
       _showResults = false;
-      _errorMessage = null;
+      _error = null;
       _currentIndex = 0;
       _score = 0;
       _selectedAnswer = null;
@@ -92,7 +96,7 @@ class _MemoryChallengeScreenState extends State<MemoryChallengeScreen> {
         final data = memory.data();
 
         final imageUrl = data['imageUrl'] as String;
-        final title = data['title'] as String? ?? 'Family Memory';
+        final title = data['title'] as String? ?? strings.familyMemoryFallback;
         final description = data['description'] as String? ?? '';
         final location = data['location'] as String? ?? '';
 
@@ -147,21 +151,19 @@ class _MemoryChallengeScreenState extends State<MemoryChallengeScreen> {
     } catch (error) {
       if (!mounted) return;
 
-      String message;
+      _MemoryChallengeError challengeError;
 
       if (error.toString().contains('NO_FAMILY')) {
-        message = 'Join or create a family before playing Memory Challenge.';
+        challengeError = _MemoryChallengeError.noFamily;
       } else if (error.toString().contains('NO_MEMORIES')) {
-        message =
-            'Your family needs at least one memory with a photo before playing.';
+        challengeError = _MemoryChallengeError.noMemories;
       } else {
-        message =
-            'We could not create a Memory Challenge right now. Make sure the AI server is running and try again.';
+        challengeError = _MemoryChallengeError.createFailed;
       }
 
       setState(() {
         _isLoading = false;
-        _errorMessage = message;
+        _error = challengeError;
       });
     }
   }
@@ -196,8 +198,9 @@ class _MemoryChallengeScreenState extends State<MemoryChallengeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppBar(title: const Text('Memory Challenge')),
+      appBar: AppBar(title: Text(strings.memoryChallenge)),
       body: SafeArea(
         child: _showResults
             ? _buildResults()
@@ -209,6 +212,16 @@ class _MemoryChallengeScreenState extends State<MemoryChallengeScreen> {
   }
 
   Widget _buildSetup() {
+    final strings = AppLocalizations.of(context)!;
+    final errorMessage = switch (_error) {
+      _MemoryChallengeError.signedOut => strings.mustBeLoggedInToPlay,
+      _MemoryChallengeError.noFamily => strings.joinOrCreateFamilyBeforeGame(
+        strings.memoryChallenge,
+      ),
+      _MemoryChallengeError.noMemories => strings.memoryNeedsPhoto,
+      _MemoryChallengeError.createFailed => strings.memoryChallengeCreateError,
+      null => null,
+    };
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
       child: Center(
@@ -243,13 +256,13 @@ class _MemoryChallengeScreenState extends State<MemoryChallengeScreen> {
                     ),
                     const SizedBox(height: 24),
                     Text(
-                      'How well do you remember?',
+                      strings.howWellRemember,
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.headlineMedium,
                     ),
                     const SizedBox(height: 12),
                     Text(
-                      'Sila uses your family photos and stories to create unique questions from moments you shared together.',
+                      strings.memoryChallengeSetupDescription,
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -258,17 +271,17 @@ class _MemoryChallengeScreenState extends State<MemoryChallengeScreen> {
                   ],
                 ),
               ),
-              if (_errorMessage != null) ...[
+              if (errorMessage != null) ...[
                 const SizedBox(height: 24),
-                Text(_errorMessage!, textAlign: TextAlign.center),
+                Text(errorMessage, textAlign: TextAlign.center),
               ],
               const SizedBox(height: 28),
               FilledButton(
                 onPressed: _isLoading ? null : _startChallenge,
                 child: Text(
                   _isLoading
-                      ? 'Creating your challenge...'
-                      : 'Start Memory Challenge',
+                      ? strings.creatingChallenge
+                      : strings.startMemoryChallenge,
                 ),
               ),
             ],
@@ -283,6 +296,7 @@ class _MemoryChallengeScreenState extends State<MemoryChallengeScreen> {
     final question = playableQuestion.question;
 
     final showPhoto = question.type == 'visual' || question.type == 'memory';
+    final strings = AppLocalizations.of(context)!;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
@@ -292,7 +306,9 @@ class _MemoryChallengeScreenState extends State<MemoryChallengeScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text('Question ${_currentIndex + 1} of ${_questions.length}'),
+              Text(
+                strings.questionProgress(_currentIndex + 1, _questions.length),
+              ),
               const SizedBox(height: 12),
               LinearProgressIndicator(
                 value: (_currentIndex + 1) / _questions.length,
@@ -337,8 +353,10 @@ class _MemoryChallengeScreenState extends State<MemoryChallengeScreen> {
                 const SizedBox(height: 12),
                 Text(
                   _selectedAnswer == question.correctIndex
-                      ? 'Correct!'
-                      : 'Correct answer: ${question.options[question.correctIndex]}',
+                      ? strings.correct
+                      : strings.correctAnswerLabel(
+                          question.options[question.correctIndex],
+                        ),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 18),
@@ -346,8 +364,8 @@ class _MemoryChallengeScreenState extends State<MemoryChallengeScreen> {
                   onPressed: _nextQuestion,
                   child: Text(
                     _currentIndex == _questions.length - 1
-                        ? 'See Results'
-                        : 'Next Memory',
+                        ? strings.seeResults
+                        : strings.nextMemory,
                   ),
                 ),
               ],
@@ -359,6 +377,7 @@ class _MemoryChallengeScreenState extends State<MemoryChallengeScreen> {
   }
 
   Widget _buildResults() {
+    final strings = AppLocalizations.of(context)!;
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
@@ -368,19 +387,19 @@ class _MemoryChallengeScreenState extends State<MemoryChallengeScreen> {
             const Icon(Icons.auto_awesome_rounded, size: 80),
             const SizedBox(height: 24),
             Text(
-              'Memory Challenge Complete!',
+              strings.memoryChallengeComplete,
               style: Theme.of(context).textTheme.headlineMedium,
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 16),
             Text(
-              'Score: $_score / ${_questions.length}',
+              strings.scoreProgress(_score, _questions.length),
               style: Theme.of(context).textTheme.headlineSmall,
             ),
             const SizedBox(height: 28),
             FilledButton(
               onPressed: _startChallenge,
-              child: const Text('Play Again'),
+              child: Text(strings.playAgain),
             ),
           ],
         ),

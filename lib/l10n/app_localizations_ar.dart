@@ -3402,5 +3402,266 @@ class AppLocalizationsAr extends AppLocalizations {
   String get bombSurvivorPoint => 'يحصل كل من نجا في الجولة على نقطة واحدة.';
 
   @override
+  String get choosePlayers => 'اختر اللاعبين';
+
+  @override
+  String get chooseQuickPlayMembers => 'اختر أفراد العائلة الموجودين معك في جلسة اللعب السريع هذه.';
+
+  @override
+  String get chooseGame => 'اختر اللعبة';
+
+  @override
+  String get memoryChallenge => 'تحدي الذكريات';
+
+  @override
+  String get memoryNeedsPhoto => 'تحتاج عائلتك إلى ذكرى واحدة تحتوي على صورة على الأقل قبل اللعب.';
+
+  @override
+  String get memoryChallengeCreateError => 'تعذر إنشاء تحدي الذكريات الآن. حاول مجددًا.';
+
+  @override
+  String get familyMemoryFallback => 'ذكرى عائلية';
+
+  @override
+  String get howWellRemember => 'ما مدى قوة ذاكرتك؟';
+
+  @override
+  String get memoryChallengeSetupDescription => 'تستخدم صلة صور عائلتك وقصصها لإنشاء أسئلة فريدة من اللحظات التي شاركتموها معًا.';
+
+  @override
+  String get creatingChallenge => 'جارٍ إنشاء التحدي...';
+
+  @override
+  String get startMemoryChallenge => 'ابدأ تحدي الذكريات';
+
+  @override
+  String questionProgress(int current, int total) {
+    return 'السؤال $current من $total';
+  }
+
+  @override
+  String get correct => 'إجابة صحيحة!';
+
+  @override
+  String correctAnswerLabel(String answer) {
+    return 'الإجابة الصحيحة: $answer';
+  }
+
+  @override
+  String get nextMemory => 'الذكرى التالية';
+
+  @override
+  String get memoryChallengeComplete => 'اكتمل تحدي الذكريات!';
+
+  @override
+  String scoreProgress(int score, int total) {
+    return 'النتيجة: $score / $total';
+  }
+
+  @override
+  String get couldNotLoadCaptionBattle => 'تعذر تحميل معركة التعليقات';
+
+  @override
+  String get unknownError => 'خطأ غير معروف';
+
+  @override
+  String get captionBattleSetupDescription => 'يكتب الجميع تعليقًا على صورة العائلة نفسها، ثم تُخلط التعليقات وتصوّت العائلة بسرية.';
+
+  @override
+  String get howItWorks => 'طريقة اللعب';
+
+  @override
+  String get captionRulePhoto => 'تظهر صورة حقيقية من ذكريات العائلة في كل جولة.';
+
+  @override
+  String get captionRuleWrite => 'يكتب كل لاعب تعليقًا واحدًا بسرية.';
+
+  @override
+  String get captionRuleShuffle => 'تُخلط التعليقات لإخفاء أصحابها.';
+
+  @override
+  String get captionRuleVote => 'يصوّت الجميع، لكن لا يمكن لأي لاعب التصويت لنفسه.';
+
+  @override
+  String get captionRulePoint => 'يمنح كل صوت نقطة محلية واحدة في اللعب السريع.';
+
+  @override
+  String get promptVariety => 'تنوع التحديات';
+
+  @override
+  String get promptVarietyDescription => 'اختر نوع التحدي الإبداعي الذي تريده عائلتك.';
+
+  @override
+  String get captionStyleSurprise => 'فاجئني';
+
+  @override
+  String get captionStyleStorytelling => 'سرد القصص';
+
+  @override
+  String get captionStyleHeadlines => 'عناوين ومنشورات';
+
+  @override
+  String get captionStyleWild => 'أفكار جامحة';
+
+  @override
+  String get familyPhotos => 'صور العائلة';
+
+  @override
+  String get noPhotoMemories => 'لم يتم العثور على ذكريات تحتوي على صور.';
+
+  @override
+  String photoMemoriesAvailable(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'تتوفر $count ذكريات مصورة.',
+      two: 'تتوفر ذكريان مصورتان.',
+      one: 'تتوفر ذكرى مصورة واحدة.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get addPhotoMemoryFirst => 'أضف ذكرى تحتوي على صورة أولًا، ثم عُد إلى هنا.';
+
+  @override
+  String captionBattleRoundCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count جولات.',
+      two: 'جولتين.',
+      one: 'جولة واحدة.',
+    );
+    return 'ستتضمن هذه اللعبة $_temp0';
+  }
+
+  @override
+  String get captionRoundPhotoDescription => 'تستخدم كل جولة صورة عائلية مختلفة. وتفتح الصور الإضافية خيارات 3 و5 جولات.';
+
+  @override
+  String get selectAtLeastTwoFamilyMembers => 'اختر فردين من العائلة على الأقل.';
+
+  @override
+  String get captionBattleNeedsPhoto => 'تحتاج معركة التعليقات إلى ذكرى واحدة تحتوي على صورة على الأقل.';
+
+  @override
+  String get quickPlayNoRanking => 'لعب سريع فقط • من دون رموز أو ترتيب عام';
+
+  @override
+  String takeThePhone(String name) {
+    return '$name، خذ الهاتف';
+  }
+
+  @override
+  String get keepCaptionPrivate => 'تأكد من أن لا أحد يمكنه رؤية تعليقك.';
+
+  @override
+  String get imReady => 'أنا جاهز';
+
+  @override
+  String get yourChallenge => 'تحديك';
+
+  @override
+  String get writeYourCaption => 'اكتب تعليقك';
+
+  @override
+  String get writeCaptionFirst => 'اكتب تعليقًا قبل المتابعة.';
+
+  @override
+  String get submitFinalCaption => 'إرسال التعليق الأخير';
+
+  @override
+  String get privateCaptionVote => 'صوّت بسرية لتعليقك المفضل. لن تتمكن من التصويت لتعليقك.';
+
+  @override
+  String get showCaptions => 'عرض التعليقات';
+
+  @override
+  String chooseFavoriteCaption(String name) {
+    return '$name، اختر تعليقك المفضل';
+  }
+
+  @override
+  String get captionAuthorsHidden => 'يبقى أصحاب التعليقات مخفيين حتى يصوّت الجميع.';
+
+  @override
+  String get cannotVoteOwnCaption => 'لا يمكنك التصويت لتعليقك.';
+
+  @override
+  String get captionReveal => 'كشف التعليقات';
+
+  @override
+  String get finalLeaderboard => 'الترتيب النهائي';
+
+  @override
+  String developerFamilyMemory(int number) {
+    return 'ذكرى عائلية تجريبية $number';
+  }
+
+  @override
+  String subjectPrivateAnswer(String name) {
+    return 'على الجميع أن ينظروا بعيدًا بينما يختار $name إجابة سرية.';
+  }
+
+  @override
+  String guesserPrivateGuess(String guesser, String subject) {
+    return 'سيخمّن $guesser بسرية ما اختاره $subject.';
+  }
+
+  @override
+  String get votesArePrivate => 'الأصوات سرية، وعلى الجميع أن ينظروا بعيدًا.';
+
+  @override
+  String chooseRealAnswer(String name) {
+    return '$name، اختر إجابتك الحقيقية';
+  }
+
+  @override
+  String get predictTheirChoice => 'سيحاول الجميع توقع ما اخترته.';
+
+  @override
+  String whatDidPlayerChoose(String name) {
+    return 'ماذا اختار $name؟';
+  }
+
+  @override
+  String makePrivateGuess(String name) {
+    return '$name، أدخل تخمينك السري.';
+  }
+
+  @override
+  String playerChose(String name) {
+    return 'اختار $name:';
+  }
+
+  @override
+  String get nobodyGuessedCorrectly => 'لم يخمّن أحد بشكل صحيح!';
+
+  @override
+  String playersGuessedCorrectly(String names) {
+    return 'خمّن $names بشكل صحيح!';
+  }
+
+  @override
+  String get onePointEach => '+1 نقطة لكل لاعب';
+
+  @override
+  String choosePrivately(String name) {
+    return '$name، اختر بسرية.';
+  }
+
+  @override
+  String get submitPrivateVote => 'إرسال التصويت السري';
+
+  @override
+  String playerReceivedMostVotes(String name) {
+    return 'حصل $name على أكبر عدد من الأصوات!';
+  }
+
+  @override
+  String get nextVote => 'التصويت التالي';
+
+  @override
   String get monthlyInvalidWinner => 'أعادت المباراة فائزًا ليس أحد المتنافسين المحددين. يُرجى إعادة المباراة.';
 }

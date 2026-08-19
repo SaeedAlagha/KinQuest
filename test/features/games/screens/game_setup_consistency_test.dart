@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kinquest/features/games/screens/charades_screen.dart';
 import 'package:kinquest/features/games/screens/never_have_i_ever_screen.dart';
+import 'package:kinquest/features/games/screens/quick_play_player_selection_screen.dart';
 import 'package:kinquest/features/games/screens/trivia_screen.dart';
 import 'package:kinquest/features/games/screens/truth_or_dare_screen.dart';
 import 'package:kinquest/features/games/screens/would_you_rather_screen.dart';
@@ -93,5 +94,30 @@ void main() {
     expect(strings.passTheBomb, 'مرّر القنبلة');
     expect(strings.submitAndPassPhone, 'إرسال وتمرير الهاتف');
     expect(strings.couldNotCheckAnswer, contains('تعذر التحقق'));
+    expect(strings.memoryChallenge, 'تحدي الذكريات');
+    expect(strings.memoryChallengeCreateError, contains('تعذر إنشاء'));
+  });
+
+  testWidgets('Quick Play player selection is Arabic and RTL', (tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        locale: Locale('ar'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: QuickPlayPlayerSelectionScreen(developerPreview: true),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.text('اختر اللاعبين'), findsOneWidget);
+    expect(find.text('من سيلعب؟'), findsOneWidget);
+    expect(find.text('تم اختيار 4 لاعبين'), findsOneWidget);
+    expect(find.text('اختر اللعبة'), findsOneWidget);
+    expect(
+      tester
+          .widget<Directionality>(find.byType(Directionality).first)
+          .textDirection,
+      TextDirection.rtl,
+    );
   });
 }

@@ -6113,6 +6113,432 @@ abstract class AppLocalizations {
   /// **'Everyone else earns 1 point for surviving the round.'**
   String get bombSurvivorPoint;
 
+  /// No description provided for @choosePlayers.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose Players'**
+  String get choosePlayers;
+
+  /// No description provided for @chooseQuickPlayMembers.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the family members who are together for this Quick Play session.'**
+  String get chooseQuickPlayMembers;
+
+  /// No description provided for @chooseGame.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose Game'**
+  String get chooseGame;
+
+  /// No description provided for @memoryChallenge.
+  ///
+  /// In en, this message translates to:
+  /// **'Memory Challenge'**
+  String get memoryChallenge;
+
+  /// No description provided for @memoryNeedsPhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Your family needs at least one memory with a photo before playing.'**
+  String get memoryNeedsPhoto;
+
+  /// No description provided for @memoryChallengeCreateError.
+  ///
+  /// In en, this message translates to:
+  /// **'We could not create a Memory Challenge right now. Please try again.'**
+  String get memoryChallengeCreateError;
+
+  /// No description provided for @familyMemoryFallback.
+  ///
+  /// In en, this message translates to:
+  /// **'Family Memory'**
+  String get familyMemoryFallback;
+
+  /// No description provided for @howWellRemember.
+  ///
+  /// In en, this message translates to:
+  /// **'How well do you remember?'**
+  String get howWellRemember;
+
+  /// No description provided for @memoryChallengeSetupDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Sila uses your family photos and stories to create unique questions from moments you shared together.'**
+  String get memoryChallengeSetupDescription;
+
+  /// No description provided for @creatingChallenge.
+  ///
+  /// In en, this message translates to:
+  /// **'Creating your challenge...'**
+  String get creatingChallenge;
+
+  /// No description provided for @startMemoryChallenge.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Memory Challenge'**
+  String get startMemoryChallenge;
+
+  /// No description provided for @questionProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Question {current} of {total}'**
+  String questionProgress(int current, int total);
+
+  /// No description provided for @correct.
+  ///
+  /// In en, this message translates to:
+  /// **'Correct!'**
+  String get correct;
+
+  /// No description provided for @correctAnswerLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Correct answer: {answer}'**
+  String correctAnswerLabel(String answer);
+
+  /// No description provided for @nextMemory.
+  ///
+  /// In en, this message translates to:
+  /// **'Next Memory'**
+  String get nextMemory;
+
+  /// No description provided for @memoryChallengeComplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Memory Challenge Complete!'**
+  String get memoryChallengeComplete;
+
+  /// No description provided for @scoreProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Score: {score} / {total}'**
+  String scoreProgress(int score, int total);
+
+  /// No description provided for @couldNotLoadCaptionBattle.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load Caption Battle'**
+  String get couldNotLoadCaptionBattle;
+
+  /// No description provided for @unknownError.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown error'**
+  String get unknownError;
+
+  /// No description provided for @captionBattleSetupDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Everyone captions the same family photo. Then the captions are shuffled and the family votes anonymously.'**
+  String get captionBattleSetupDescription;
+
+  /// No description provided for @howItWorks.
+  ///
+  /// In en, this message translates to:
+  /// **'How it works'**
+  String get howItWorks;
+
+  /// No description provided for @captionRulePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'A real family Memory photo appears each round.'**
+  String get captionRulePhoto;
+
+  /// No description provided for @captionRuleWrite.
+  ///
+  /// In en, this message translates to:
+  /// **'Each player secretly writes one caption.'**
+  String get captionRuleWrite;
+
+  /// No description provided for @captionRuleShuffle.
+  ///
+  /// In en, this message translates to:
+  /// **'Captions are shuffled so authors stay hidden.'**
+  String get captionRuleShuffle;
+
+  /// No description provided for @captionRuleVote.
+  ///
+  /// In en, this message translates to:
+  /// **'Everyone votes, but cannot vote for themselves.'**
+  String get captionRuleVote;
+
+  /// No description provided for @captionRulePoint.
+  ///
+  /// In en, this message translates to:
+  /// **'Each vote is worth 1 local Quick Play point.'**
+  String get captionRulePoint;
+
+  /// No description provided for @promptVariety.
+  ///
+  /// In en, this message translates to:
+  /// **'Prompt variety'**
+  String get promptVariety;
+
+  /// No description provided for @promptVarietyDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the kind of creative challenge your family wants.'**
+  String get promptVarietyDescription;
+
+  /// No description provided for @captionStyleSurprise.
+  ///
+  /// In en, this message translates to:
+  /// **'Surprise Me'**
+  String get captionStyleSurprise;
+
+  /// No description provided for @captionStyleStorytelling.
+  ///
+  /// In en, this message translates to:
+  /// **'Storytelling'**
+  String get captionStyleStorytelling;
+
+  /// No description provided for @captionStyleHeadlines.
+  ///
+  /// In en, this message translates to:
+  /// **'Headlines & Posts'**
+  String get captionStyleHeadlines;
+
+  /// No description provided for @captionStyleWild.
+  ///
+  /// In en, this message translates to:
+  /// **'Wild Ideas'**
+  String get captionStyleWild;
+
+  /// No description provided for @familyPhotos.
+  ///
+  /// In en, this message translates to:
+  /// **'Family photos'**
+  String get familyPhotos;
+
+  /// No description provided for @noPhotoMemories.
+  ///
+  /// In en, this message translates to:
+  /// **'No Memories with photos were found.'**
+  String get noPhotoMemories;
+
+  /// No description provided for @photoMemoriesAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 photo memory available.} other{{count} photo memories available.}}'**
+  String photoMemoriesAvailable(int count);
+
+  /// No description provided for @addPhotoMemoryFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a Memory with a photo first, then return here.'**
+  String get addPhotoMemoryFirst;
+
+  /// No description provided for @captionBattleRoundCount.
+  ///
+  /// In en, this message translates to:
+  /// **'This game will play {count, plural, =1{1 round.} other{{count} rounds.}}'**
+  String captionBattleRoundCount(int count);
+
+  /// No description provided for @captionRoundPhotoDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Each round uses a different family photo. More photos unlock the 3 and 5-round options.'**
+  String get captionRoundPhotoDescription;
+
+  /// No description provided for @selectAtLeastTwoFamilyMembers.
+  ///
+  /// In en, this message translates to:
+  /// **'Select at least 2 family members.'**
+  String get selectAtLeastTwoFamilyMembers;
+
+  /// No description provided for @captionBattleNeedsPhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Caption Battle needs at least one Memory with a photo.'**
+  String get captionBattleNeedsPhoto;
+
+  /// No description provided for @quickPlayNoRanking.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick Play only • No Tokens or global ranking'**
+  String get quickPlayNoRanking;
+
+  /// No description provided for @takeThePhone.
+  ///
+  /// In en, this message translates to:
+  /// **'{name}, take the phone'**
+  String takeThePhone(String name);
+
+  /// No description provided for @keepCaptionPrivate.
+  ///
+  /// In en, this message translates to:
+  /// **'Make sure nobody else can see your caption.'**
+  String get keepCaptionPrivate;
+
+  /// No description provided for @imReady.
+  ///
+  /// In en, this message translates to:
+  /// **'I\'m Ready'**
+  String get imReady;
+
+  /// No description provided for @yourChallenge.
+  ///
+  /// In en, this message translates to:
+  /// **'Your challenge'**
+  String get yourChallenge;
+
+  /// No description provided for @writeYourCaption.
+  ///
+  /// In en, this message translates to:
+  /// **'Write your caption'**
+  String get writeYourCaption;
+
+  /// No description provided for @writeCaptionFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Write a caption before continuing.'**
+  String get writeCaptionFirst;
+
+  /// No description provided for @submitFinalCaption.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit Final Caption'**
+  String get submitFinalCaption;
+
+  /// No description provided for @privateCaptionVote.
+  ///
+  /// In en, this message translates to:
+  /// **'Vote privately for your favorite caption. You will not be able to vote for your own.'**
+  String get privateCaptionVote;
+
+  /// No description provided for @showCaptions.
+  ///
+  /// In en, this message translates to:
+  /// **'Show Captions'**
+  String get showCaptions;
+
+  /// No description provided for @chooseFavoriteCaption.
+  ///
+  /// In en, this message translates to:
+  /// **'{name}, choose your favorite'**
+  String chooseFavoriteCaption(String name);
+
+  /// No description provided for @captionAuthorsHidden.
+  ///
+  /// In en, this message translates to:
+  /// **'Authors stay hidden until everyone votes.'**
+  String get captionAuthorsHidden;
+
+  /// No description provided for @cannotVoteOwnCaption.
+  ///
+  /// In en, this message translates to:
+  /// **'You cannot vote for your own caption.'**
+  String get cannotVoteOwnCaption;
+
+  /// No description provided for @captionReveal.
+  ///
+  /// In en, this message translates to:
+  /// **'Caption reveal'**
+  String get captionReveal;
+
+  /// No description provided for @finalLeaderboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Final Leaderboard'**
+  String get finalLeaderboard;
+
+  /// No description provided for @developerFamilyMemory.
+  ///
+  /// In en, this message translates to:
+  /// **'Developer Family Memory {number}'**
+  String developerFamilyMemory(int number);
+
+  /// No description provided for @subjectPrivateAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'Everyone else should look away while {name} chooses a private answer.'**
+  String subjectPrivateAnswer(String name);
+
+  /// No description provided for @guesserPrivateGuess.
+  ///
+  /// In en, this message translates to:
+  /// **'{guesser} will privately guess what {subject} chose.'**
+  String guesserPrivateGuess(String guesser, String subject);
+
+  /// No description provided for @votesArePrivate.
+  ///
+  /// In en, this message translates to:
+  /// **'Votes are private. Everyone else should look away.'**
+  String get votesArePrivate;
+
+  /// No description provided for @chooseRealAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'{name}, choose your real answer'**
+  String chooseRealAnswer(String name);
+
+  /// No description provided for @predictTheirChoice.
+  ///
+  /// In en, this message translates to:
+  /// **'Everyone else will try to predict what you chose.'**
+  String get predictTheirChoice;
+
+  /// No description provided for @whatDidPlayerChoose.
+  ///
+  /// In en, this message translates to:
+  /// **'What did {name} choose?'**
+  String whatDidPlayerChoose(String name);
+
+  /// No description provided for @makePrivateGuess.
+  ///
+  /// In en, this message translates to:
+  /// **'{name}, make your private guess.'**
+  String makePrivateGuess(String name);
+
+  /// No description provided for @playerChose.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} chose:'**
+  String playerChose(String name);
+
+  /// No description provided for @nobodyGuessedCorrectly.
+  ///
+  /// In en, this message translates to:
+  /// **'Nobody guessed correctly!'**
+  String get nobodyGuessedCorrectly;
+
+  /// No description provided for @playersGuessedCorrectly.
+  ///
+  /// In en, this message translates to:
+  /// **'{names} guessed correctly!'**
+  String playersGuessedCorrectly(String names);
+
+  /// No description provided for @onePointEach.
+  ///
+  /// In en, this message translates to:
+  /// **'+1 point each'**
+  String get onePointEach;
+
+  /// No description provided for @choosePrivately.
+  ///
+  /// In en, this message translates to:
+  /// **'{name}, choose privately.'**
+  String choosePrivately(String name);
+
+  /// No description provided for @submitPrivateVote.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit Private Vote'**
+  String get submitPrivateVote;
+
+  /// No description provided for @playerReceivedMostVotes.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} received the most votes!'**
+  String playerReceivedMostVotes(String name);
+
+  /// No description provided for @nextVote.
+  ///
+  /// In en, this message translates to:
+  /// **'Next Vote'**
+  String get nextVote;
+
   /// No description provided for @monthlyInvalidWinner.
   ///
   /// In en, this message translates to:

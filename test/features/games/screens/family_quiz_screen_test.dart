@@ -110,6 +110,8 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(useMaterial3: true),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
           home: const FamilyQuizScreen(),
         ),
       );
@@ -135,6 +137,28 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(startButton, findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('Arabic AI failure uses Arabic offline questions and RTL', (
+      tester,
+    ) async {
+      final service = _FailingFamilyQuizAiService();
+      await _pumpQuiz(tester, service, locale: const Locale('ar'));
+      await _selectPlayer(tester, 'Amal');
+      await _selectPlayer(tester, 'Omar');
+
+      await _tapText(tester, 'ابدأ اختبار العائلة');
+
+      expect(find.text('مرر الهاتف إلى Amal'), findsOneWidget);
+      await _tapText(tester, 'أنا Amal');
+      expect(find.textContaining('أي'), findsWidgets);
+      expect(
+        tester
+            .widget<Directionality>(find.byType(Directionality).first)
+            .textDirection,
+        TextDirection.rtl,
+      );
       expect(tester.takeException(), isNull);
     });
   });
@@ -209,9 +233,14 @@ class _FailingFamilyQuizAiService extends FamilyQuizAiService {
   }
 }
 
-Future<void> _pumpQuiz(WidgetTester tester, FamilyQuizAiService service) async {
+Future<void> _pumpQuiz(
+  WidgetTester tester,
+  FamilyQuizAiService service, {
+  Locale? locale,
+}) async {
   await tester.pumpWidget(
     MaterialApp(
+      locale: locale,
       theme: ThemeData(useMaterial3: true),
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,

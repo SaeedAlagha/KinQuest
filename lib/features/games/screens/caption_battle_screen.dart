@@ -24,6 +24,8 @@ enum _CaptionBattlePhase {
   finalResults,
 }
 
+enum _CaptionBattleLoadError { signedOut, noFamily, loadFailed }
+
 class CaptionBattleScreen extends StatefulWidget {
   const CaptionBattleScreen({
     super.key,
@@ -53,7 +55,7 @@ class _CaptionBattleScreenState extends State<CaptionBattleScreen> {
   bool _isStarting = false;
   bool _captionVisible = false;
 
-  String? _errorMessage;
+  _CaptionBattleLoadError? _loadError;
 
   List<_CaptionPlayer> _familyMembers = [];
   final Set<String> _selectedPlayerIds = {};
@@ -124,14 +126,18 @@ class _CaptionBattleScreenState extends State<CaptionBattleScreen> {
   Future<void> _loadGameData() async {
     setState(() {
       _isLoading = true;
-      _errorMessage = null;
+      _loadError = null;
     });
 
     try {
       final user = FirebaseAuth.instance.currentUser;
 
       if (user == null) {
-        throw Exception('You must be signed in to play.');
+        setState(() {
+          _isLoading = false;
+          _loadError = _CaptionBattleLoadError.signedOut;
+        });
+        return;
       }
 
       final userDoc = await FirebaseFirestore.instance
@@ -143,7 +149,12 @@ class _CaptionBattleScreenState extends State<CaptionBattleScreen> {
       final familyId = userData?['familyId'] as String?;
 
       if (familyId == null || familyId.isEmpty) {
-        throw Exception('Join or create a family before playing.');
+        if (!mounted) return;
+        setState(() {
+          _isLoading = false;
+          _loadError = _CaptionBattleLoadError.noFamily;
+        });
+        return;
       }
 
       final membersSnapshot = await FirebaseFirestore.instance
@@ -151,6 +162,8 @@ class _CaptionBattleScreenState extends State<CaptionBattleScreen> {
           .where('familyId', isEqualTo: familyId)
           .get();
 
+      if (!mounted) return;
+      final strings = AppLocalizations.of(context)!;
       final members = membersSnapshot.docs
           .where(
             (doc) =>
@@ -167,7 +180,7 @@ class _CaptionBattleScreenState extends State<CaptionBattleScreen> {
                 ? (data['displayName'] as String).trim()
                 : (data['email'] as String?)?.trim().isNotEmpty == true
                 ? (data['email'] as String).trim()
-                : 'Family Member';
+                : strings.familyMemberFallback;
 
             return _CaptionPlayer(id: doc.id, name: displayName);
           })
@@ -210,7 +223,7 @@ class _CaptionBattleScreenState extends State<CaptionBattleScreen> {
             id: doc.id,
             title: (data['title'] as String?)?.trim().isNotEmpty == true
                 ? (data['title'] as String).trim()
-                : 'Family Memory',
+                : strings.familyMemoryFallback,
             imageBytes: imageBytes,
             imageUrl: imageUrl,
           ),
@@ -239,7 +252,7 @@ class _CaptionBattleScreenState extends State<CaptionBattleScreen> {
 
       setState(() {
         _isLoading = false;
-        _errorMessage = error.toString().replaceFirst('Exception: ', '');
+        _loadError = _CaptionBattleLoadError.loadFailed;
       });
     }
   }
@@ -271,16 +284,17 @@ class _CaptionBattleScreenState extends State<CaptionBattleScreen> {
   }
 
   Future<void> _startGame() async {
+    final strings = AppLocalizations.of(context)!;
     final languageCode = Localizations.localeOf(context).languageCode;
     final players = _selectedPlayers;
 
     if (players.length < 2) {
-      _showMessage('Select at least 2 family members.');
+      _showMessage(strings.selectAtLeastTwoFamilyMembers);
       return;
     }
 
     if (_memories.isEmpty) {
-      _showMessage('Caption Battle needs at least one Memory with a photo.');
+      _showMessage(strings.captionBattleNeedsPhoto);
       return;
     }
 
@@ -347,7 +361,7 @@ class _CaptionBattleScreenState extends State<CaptionBattleScreen> {
         _isStarting = false;
       });
 
-      _showMessage('Could not start Caption Battle.');
+      _showMessage(strings.couldNotStartGame(strings.captionBattle));
     }
   }
 
@@ -359,10 +373,11 @@ class _CaptionBattleScreenState extends State<CaptionBattleScreen> {
   }
 
   void _submitCaption() {
+    final strings = AppLocalizations.of(context)!;
     final caption = _captionController.text.trim();
 
     if (caption.isEmpty) {
-      _showMessage('Write a caption before continuing.');
+      _showMessage(strings.writeCaptionFirst);
       return;
     }
 
@@ -405,10 +420,11 @@ class _CaptionBattleScreenState extends State<CaptionBattleScreen> {
   }
 
   void _submitVote(String authorId) {
+    final strings = AppLocalizations.of(context)!;
     final voter = _currentVoter;
 
     if (authorId == voter.id) {
-      _showMessage('You cannot vote for your own caption.');
+      _showMessage(strings.cannotVoteOwnCaption);
       return;
     }
 
@@ -482,8 +498,9 @@ class _CaptionBattleScreenState extends State<CaptionBattleScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppBar(title: const Text('Caption Battle')),
+      appBar: AppBar(title: Text(strings.captionBattle)),
       body: SafeArea(
         top: false,
         child: AnimatedSwitcher(
@@ -502,7 +519,7 @@ class _CaptionBattleScreenState extends State<CaptionBattleScreen> {
       );
     }
 
-    if (_errorMessage != null) {
+    if (_loadError != null) {
       return _buildError();
     }
 
@@ -517,6 +534,14 @@ class _CaptionBattleScreenState extends State<CaptionBattleScreen> {
   }
 
   Widget _buildError() {
+    final strings = AppLocalizations.of(context)!;
+    final errorMessage = switch (_loadError!) {
+      _CaptionBattleLoadError.signedOut => strings.mustBeLoggedInToPlay,
+      _CaptionBattleLoadError.noFamily => strings.joinOrCreateFamilyBeforeGame(
+        strings.captionBattle,
+      ),
+      _CaptionBattleLoadError.loadFailed => strings.unknownError,
+    };
     return Center(
       key: const ValueKey('error'),
       child: SingleChildScrollView(
@@ -533,20 +558,17 @@ class _CaptionBattleScreenState extends State<CaptionBattleScreen> {
               ),
               const SizedBox(height: 20),
               Text(
-                'Could not load Caption Battle',
+                strings.couldNotLoadCaptionBattle,
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.headlineSmall,
               ),
               const SizedBox(height: 10),
-              Text(
-                _errorMessage ?? 'Unknown error',
-                textAlign: TextAlign.center,
-              ),
+              Text(errorMessage, textAlign: TextAlign.center),
               const SizedBox(height: 24),
               FilledButton.icon(
                 onPressed: _loadGameData,
                 icon: const Icon(Icons.refresh_rounded),
-                label: const Text('Try Again'),
+                label: Text(strings.tryAgain),
               ),
             ],
           ),
@@ -555,7 +577,17 @@ class _CaptionBattleScreenState extends State<CaptionBattleScreen> {
     );
   }
 
+  String _localizedPromptStyle(AppLocalizations strings, String style) {
+    return switch (style) {
+      'Storytelling' => strings.captionStyleStorytelling,
+      'Headlines & Posts' => strings.captionStyleHeadlines,
+      'Wild Ideas' => strings.captionStyleWild,
+      _ => strings.captionStyleSurprise,
+    };
+  }
+
   Widget _buildSetup() {
+    final strings = AppLocalizations.of(context)!;
     return SingleChildScrollView(
       key: const ValueKey('setup'),
       padding: const EdgeInsets.fromLTRB(20, 20, 20, 36),
@@ -567,9 +599,8 @@ class _CaptionBattleScreenState extends State<CaptionBattleScreen> {
             children: [
               _heroCard(
                 icon: Icons.add_comment_rounded,
-                title: 'Caption Battle',
-                description:
-                    'Everyone captions the same family photo. Then the captions are shuffled and the family votes anonymously.',
+                title: strings.captionBattle,
+                description: strings.captionBattleSetupDescription,
               ),
               const SizedBox(height: 22),
               _sectionCard(
@@ -577,29 +608,29 @@ class _CaptionBattleScreenState extends State<CaptionBattleScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'How it works',
+                      strings.howItWorks,
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
                     const SizedBox(height: 14),
-                    const _RuleRow(
+                    _RuleRow(
                       icon: Icons.photo_rounded,
-                      text: 'A real family Memory photo appears each round.',
+                      text: strings.captionRulePhoto,
                     ),
-                    const _RuleRow(
+                    _RuleRow(
                       icon: Icons.edit_rounded,
-                      text: 'Each player secretly writes one caption.',
+                      text: strings.captionRuleWrite,
                     ),
-                    const _RuleRow(
+                    _RuleRow(
                       icon: Icons.shuffle_rounded,
-                      text: 'Captions are shuffled so authors stay hidden.',
+                      text: strings.captionRuleShuffle,
                     ),
-                    const _RuleRow(
+                    _RuleRow(
                       icon: Icons.how_to_vote_rounded,
-                      text: 'Everyone votes, but cannot vote for themselves.',
+                      text: strings.captionRuleVote,
                     ),
-                    const _RuleRow(
+                    _RuleRow(
                       icon: Icons.star_rounded,
-                      text: 'Each vote is worth 1 local Quick Play point.',
+                      text: strings.captionRulePoint,
                     ),
                   ],
                 ),
@@ -610,12 +641,12 @@ class _CaptionBattleScreenState extends State<CaptionBattleScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Prompt variety',
+                      strings.promptVariety,
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      'Choose the kind of creative challenge your family wants.',
+                      strings.promptVarietyDescription,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
@@ -629,7 +660,7 @@ class _CaptionBattleScreenState extends State<CaptionBattleScreen> {
                       ) {
                         return ChoiceChip(
                           key: ValueKey('caption-style-$style'),
-                          label: Text(style),
+                          label: Text(_localizedPromptStyle(strings, style)),
                           selected: _selectedPromptStyle == style,
                           onSelected: (_) {
                             setState(() {
@@ -671,20 +702,20 @@ class _CaptionBattleScreenState extends State<CaptionBattleScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Family photos',
+                      strings.familyPhotos,
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
                     const SizedBox(height: 8),
                     Text(
                       _memories.isEmpty
-                          ? 'No Memories with photos were found.'
-                          : '${_memories.length} photo ${_memories.length == 1 ? 'memory' : 'memories'} available.',
+                          ? strings.noPhotoMemories
+                          : strings.photoMemoriesAvailable(_memories.length),
                       style: Theme.of(context).textTheme.bodyLarge,
                     ),
                     if (_memories.isEmpty) ...[
                       const SizedBox(height: 10),
                       Text(
-                        'Add a Memory with a photo first, then return here.',
+                        strings.addPhotoMemoryFirst,
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
@@ -692,7 +723,7 @@ class _CaptionBattleScreenState extends State<CaptionBattleScreen> {
                     ] else ...[
                       const SizedBox(height: 10),
                       Text(
-                        'This game will play $_selectedRounds ${_selectedRounds == 1 ? 'round' : 'rounds'}.',
+                        strings.captionBattleRoundCount(_selectedRounds),
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
@@ -712,8 +743,7 @@ class _CaptionBattleScreenState extends State<CaptionBattleScreen> {
                     });
                   },
                   keyPrefix: 'caption-round-option',
-                  description:
-                      'Each round uses a different family photo. More photos unlock the 3 and 5-round options.',
+                  description: strings.captionRoundPhotoDescription,
                 ),
                 const SizedBox(height: 18),
               ],
@@ -722,12 +752,12 @@ class _CaptionBattleScreenState extends State<CaptionBattleScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Choose players',
+                      strings.choosePlayers,
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      'Select at least 2 family members.',
+                      strings.selectAtLeastTwoFamilyMembers,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
@@ -769,13 +799,13 @@ class _CaptionBattleScreenState extends State<CaptionBattleScreen> {
                     : const Icon(Icons.play_arrow_rounded),
                 label: Text(
                   _isStarting
-                      ? 'Preparing Caption Battle...'
-                      : 'Start Caption Battle',
+                      ? strings.preparingNamedGame(strings.captionBattle)
+                      : strings.startNamedGame(strings.captionBattle),
                 ),
               ),
               const SizedBox(height: 8),
               Text(
-                'Quick Play only • No Tokens or global ranking',
+                strings.quickPlayNoRanking,
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -790,6 +820,7 @@ class _CaptionBattleScreenState extends State<CaptionBattleScreen> {
 
   Widget _buildPrivateCaption() {
     final player = _currentCaptionPlayer;
+    final strings = AppLocalizations.of(context)!;
 
     return SingleChildScrollView(
       key: ValueKey(
@@ -815,13 +846,13 @@ class _CaptionBattleScreenState extends State<CaptionBattleScreen> {
                       ),
                       const SizedBox(height: 18),
                       Text(
-                        '${player.name}, take the phone',
+                        strings.takeThePhone(player.name),
                         textAlign: TextAlign.center,
                         style: Theme.of(context).textTheme.headlineSmall,
                       ),
                       const SizedBox(height: 10),
                       Text(
-                        'Make sure nobody else can see your caption.',
+                        strings.keepCaptionPrivate,
                         textAlign: TextAlign.center,
                         style: Theme.of(context).textTheme.bodyLarge,
                       ),
@@ -829,7 +860,7 @@ class _CaptionBattleScreenState extends State<CaptionBattleScreen> {
                       FilledButton.icon(
                         onPressed: _revealCaptionEntry,
                         icon: const Icon(Icons.visibility_rounded),
-                        label: const Text('I\'m Ready'),
+                        label: Text(strings.imReady),
                       ),
                     ],
                   ),
@@ -842,7 +873,7 @@ class _CaptionBattleScreenState extends State<CaptionBattleScreen> {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       Text(
-                        'Your challenge',
+                        strings.yourChallenge,
                         style: Theme.of(context).textTheme.labelLarge?.copyWith(
                           color: AppTheme.primaryColor,
                           fontWeight: FontWeight.w800,
@@ -873,7 +904,7 @@ class _CaptionBattleScreenState extends State<CaptionBattleScreen> {
                         maxLines: 3,
                         textInputAction: TextInputAction.done,
                         decoration: InputDecoration(
-                          labelText: 'Write your caption',
+                          labelText: strings.writeYourCaption,
                           hintText: CaptionBattleAiService.hintForMode(
                             _currentMode,
                             languageCode: Localizations.localeOf(
@@ -889,8 +920,8 @@ class _CaptionBattleScreenState extends State<CaptionBattleScreen> {
                         icon: const Icon(Icons.check_rounded),
                         label: Text(
                           _captionPlayerIndex < _selectedPlayers.length - 1
-                              ? 'Submit & Pass Phone'
-                              : 'Submit Final Caption',
+                              ? strings.submitAndPassPhone
+                              : strings.submitFinalCaption,
                         ),
                       ),
                     ],
@@ -906,6 +937,7 @@ class _CaptionBattleScreenState extends State<CaptionBattleScreen> {
 
   Widget _buildPrepareVoting() {
     final voter = _currentVoter;
+    final strings = AppLocalizations.of(context)!;
 
     return Center(
       key: ValueKey('prepare-vote-$_roundIndex-$_voterIndex'),
@@ -923,20 +955,17 @@ class _CaptionBattleScreenState extends State<CaptionBattleScreen> {
                 ),
                 const SizedBox(height: 18),
                 Text(
-                  '${voter.name}, take the phone',
+                  strings.takeThePhone(voter.name),
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.headlineSmall,
                 ),
                 const SizedBox(height: 10),
-                const Text(
-                  'Vote privately for your favorite caption. You will not be able to vote for your own.',
-                  textAlign: TextAlign.center,
-                ),
+                Text(strings.privateCaptionVote, textAlign: TextAlign.center),
                 const SizedBox(height: 24),
                 FilledButton.icon(
                   onPressed: _startVoting,
                   icon: const Icon(Icons.visibility_rounded),
-                  label: const Text('Show Captions'),
+                  label: Text(strings.showCaptions),
                 ),
               ],
             ),
@@ -948,6 +977,7 @@ class _CaptionBattleScreenState extends State<CaptionBattleScreen> {
 
   Widget _buildVoting() {
     final voter = _currentVoter;
+    final strings = AppLocalizations.of(context)!;
 
     final availableAuthorIds = _shuffledCaptionPlayerIds
         .where((authorId) => authorId != voter.id)
@@ -967,12 +997,12 @@ class _CaptionBattleScreenState extends State<CaptionBattleScreen> {
               _photoCard(),
               const SizedBox(height: 18),
               Text(
-                '${voter.name}, choose your favorite',
+                strings.chooseFavoriteCaption(voter.name),
                 style: Theme.of(context).textTheme.headlineSmall,
               ),
               const SizedBox(height: 6),
               Text(
-                'Authors stay hidden until everyone votes.',
+                strings.captionAuthorsHidden,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
@@ -994,6 +1024,7 @@ class _CaptionBattleScreenState extends State<CaptionBattleScreen> {
   }
 
   Widget _buildRoundResults() {
+    final strings = AppLocalizations.of(context)!;
     final resultIds = _roundVotes.keys.toList()
       ..sort((a, b) => (_roundVotes[b] ?? 0).compareTo(_roundVotes[a] ?? 0));
 
@@ -1013,7 +1044,7 @@ class _CaptionBattleScreenState extends State<CaptionBattleScreen> {
               _photoCard(),
               const SizedBox(height: 20),
               Text(
-                'Caption reveal',
+                strings.captionReveal,
                 style: Theme.of(context).textTheme.headlineSmall,
               ),
               const SizedBox(height: 16),
@@ -1038,8 +1069,8 @@ class _CaptionBattleScreenState extends State<CaptionBattleScreen> {
                 ),
                 label: Text(
                   _roundIndex < _roundMemories.length - 1
-                      ? 'Next Round'
-                      : 'Final Leaderboard',
+                      ? strings.nextRound
+                      : strings.finalLeaderboard,
                 ),
               ),
             ],
@@ -1160,6 +1191,7 @@ class _CaptionBattleScreenState extends State<CaptionBattleScreen> {
   }
 
   Widget _roundHeader() {
+    final strings = AppLocalizations.of(context)!;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
@@ -1170,7 +1202,7 @@ class _CaptionBattleScreenState extends State<CaptionBattleScreen> {
         children: [
           Expanded(
             child: Text(
-              'Round ${_roundIndex + 1} of ${_roundMemories.length}',
+              strings.roundProgress(_roundIndex + 1, _roundMemories.length),
               style: Theme.of(context).textTheme.titleMedium,
             ),
           ),
@@ -1187,6 +1219,10 @@ class _CaptionBattleScreenState extends State<CaptionBattleScreen> {
   }
 
   Widget _photoCard() {
+    final strings = AppLocalizations.of(context)!;
+    final memoryTitle = _currentMemory.id.startsWith('preview-memory-')
+        ? strings.developerFamilyMemory(_roundIndex + 1)
+        : _currentMemory.title;
     return ClipRRect(
       borderRadius: BorderRadius.circular(26),
       child: Container(
@@ -1224,7 +1260,7 @@ class _CaptionBattleScreenState extends State<CaptionBattleScreen> {
             Padding(
               padding: const EdgeInsets.all(14),
               child: Text(
-                _currentMemory.title,
+                memoryTitle,
                 style: Theme.of(context).textTheme.titleMedium,
               ),
             ),
@@ -1278,6 +1314,7 @@ class _CaptionBattleScreenState extends State<CaptionBattleScreen> {
     required int votes,
     required bool isWinner,
   }) {
+    final strings = AppLocalizations.of(context)!;
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -1310,7 +1347,7 @@ class _CaptionBattleScreenState extends State<CaptionBattleScreen> {
                 ),
               ),
               Text(
-                '$votes ${votes == 1 ? 'vote' : 'votes'}',
+                strings.voteCount(votes),
                 style: Theme.of(context).textTheme.labelLarge,
               ),
             ],
