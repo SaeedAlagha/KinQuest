@@ -42,7 +42,93 @@ class AppLocalizationsEn extends AppLocalizations {
   String get uaeFamilyYearTheme => 'UAE Family Year 2026';
 
   @override
-  String get uaeFamilyYearThemeDescription => 'Warm family colors inspired by the UAE';
+  String get uaeFamilyYearThemeDescription => 'Heritage arches, majlis warmth, and colors of unity';
+
+  @override
+  String get spaceTheme => 'Cosmic Family';
+
+  @override
+  String get spaceThemeDescription => 'Starlit adventures, glowing orbits, and deep-space wonder';
+
+  @override
+  String get khalifaUniversityTheme => 'KU Future Lab';
+
+  @override
+  String get khalifaUniversityThemeDescription => 'A precise blue innovation system inspired by Khalifa University';
+
+  @override
+  String get desertNightsTheme => 'Desert Nights';
+
+  @override
+  String get desertNightsThemeDescription => 'Moonlit dunes, copper sunsets, and luxurious night skies';
+
+  @override
+  String get pearlLagoonTheme => 'Pearl Lagoon';
+
+  @override
+  String get pearlLagoonThemeDescription => 'Luminous pearls, coral accents, and calm Gulf waters';
+
+  @override
+  String get themeStudio => 'Theme Studio';
+
+  @override
+  String get themeStudioDescription => 'Earn Family Tokens together and unlock a look the whole family loves.';
+
+  @override
+  String themeTokenBalance(int tokens) {
+    return '$tokens Family Tokens';
+  }
+
+  @override
+  String get themeIncluded => 'Included';
+
+  @override
+  String get themeOwned => 'Owned';
+
+  @override
+  String themeTokenPrice(int tokens) {
+    return '$tokens Tokens';
+  }
+
+  @override
+  String unlockThemeTitle(String theme) {
+    return 'Unlock $theme?';
+  }
+
+  @override
+  String unlockThemeMessage(int tokens) {
+    return 'Spend $tokens Family Tokens for a permanent family theme unlock?';
+  }
+
+  @override
+  String unlockForTokens(int tokens) {
+    return 'Unlock for $tokens';
+  }
+
+  @override
+  String get notEnoughTokensTitle => 'Keep playing together';
+
+  @override
+  String notEnoughTokensMessage(int cost, int balance) {
+    return 'This theme costs $cost Tokens. Your family currently has $balance.';
+  }
+
+  @override
+  String themeUnlocked(String theme) {
+    return '$theme is now yours!';
+  }
+
+  @override
+  String get themeUnlockFailed => 'The theme could not be unlocked. Your Tokens were not spent.';
+
+  @override
+  String get signInToUnlockThemes => 'Sign in and join a family to unlock reward themes.';
+
+  @override
+  String get themeUnlockBenefit => 'One-time unlock • Yours across signed-in devices';
+
+  @override
+  String get close => 'Close';
 
   @override
   String get language => 'Language';

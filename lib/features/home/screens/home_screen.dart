@@ -394,7 +394,7 @@ class _FamilyOverviewCard extends StatelessWidget {
       constraints: const BoxConstraints(minHeight: 300),
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
-        gradient: AppTheme.brandGradient,
+        gradient: AppTheme.heroGradientFor(context),
         borderRadius: BorderRadius.circular(30),
         boxShadow: [
           BoxShadow(

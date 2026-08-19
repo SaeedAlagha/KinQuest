@@ -814,7 +814,7 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
         Container(
           padding: const EdgeInsets.all(26),
           decoration: BoxDecoration(
-            gradient: AppTheme.brandGradient,
+            gradient: AppTheme.heroGradientFor(context),
             borderRadius: BorderRadius.circular(28),
           ),
           child: Column(

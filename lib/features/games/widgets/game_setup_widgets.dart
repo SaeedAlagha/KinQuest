@@ -67,7 +67,7 @@ class GameSetupHero extends StatelessWidget {
     return Container(
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
-        gradient: AppTheme.brandGradient,
+        gradient: AppTheme.heroGradientFor(context),
         borderRadius: BorderRadius.circular(30),
         boxShadow: [
           BoxShadow(

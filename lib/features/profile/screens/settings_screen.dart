@@ -5,11 +5,80 @@ import 'package:flutter/material.dart';
 import '../../../core/localization/locale_controller.dart';
 import '../../../core/theme/appearance_controller.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_theme_catalog.dart';
+import '../../../core/theme/theme_unlock_service.dart';
 import '../../../core/widgets/sila_page_backdrop.dart';
 import '../../../l10n/app_localizations.dart';
 
-class SettingsScreen extends StatelessWidget {
-  const SettingsScreen({super.key});
+class SettingsScreen extends StatefulWidget {
+  const SettingsScreen({super.key, this.developerPreview = false});
+
+  final bool developerPreview;
+
+  @override
+  State<SettingsScreen> createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends State<SettingsScreen> {
+  int _tokenBalance = 0;
+  bool _isLoadingThemeAccess = true;
+  bool _isUnlockingTheme = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadThemeAccess();
+  }
+
+  Future<void> _loadThemeAccess() async {
+    if (widget.developerPreview) {
+      if (mounted) {
+        setState(() {
+          _tokenBalance = 2400;
+          _isLoadingThemeAccess = false;
+        });
+      }
+      return;
+    }
+
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      if (mounted) {
+        setState(() => _isLoadingThemeAccess = false);
+      }
+      return;
+    }
+
+    try {
+      await AppearanceController.instance.load(ownershipScope: user.uid);
+      final snapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
+      final data = snapshot.data();
+      final unlockedNames =
+          (data?['unlockedAppearances'] as List<dynamic>?)
+              ?.map((value) => value.toString())
+              .toSet() ??
+          const <String>{};
+      final unlocked = AppAppearance.values.where(
+        (appearance) => unlockedNames.contains(appearance.name),
+      );
+
+      await AppearanceController.instance.registerUnlocked(unlocked);
+
+      if (mounted) {
+        setState(() {
+          _tokenBalance = (data?['tokens'] as num?)?.toInt() ?? 0;
+          _isLoadingThemeAccess = false;
+        });
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(() => _isLoadingThemeAccess = false);
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -41,6 +110,11 @@ class SettingsScreen extends StatelessWidget {
                         style: Theme.of(context).textTheme.titleLarge,
                       ),
                     ),
+                    _ThemeStudioCard(
+                      tokenBalance: _tokenBalance,
+                      isLoading: _isLoadingThemeAccess,
+                    ),
+                    const SizedBox(height: 12),
                     Card(
                       child: Column(
                         children: [
@@ -132,37 +206,49 @@ class SettingsScreen extends StatelessWidget {
       context: context,
       isScrollControlled: true,
       builder: (sheetContext) {
-        return SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
+        return FractionallySizedBox(
+          heightFactor: 0.92,
+          child: SafeArea(
+            child: ListView(
+              padding: const EdgeInsets.fromLTRB(20, 4, 20, 28),
               children: [
-                Text(
-                  strings.selectAppearance,
-                  style: Theme.of(sheetContext).textTheme.headlineSmall,
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        strings.themeStudio,
+                        style: Theme.of(sheetContext).textTheme.headlineSmall,
+                      ),
+                    ),
+                    _TokenPill(label: strings.themeTokenBalance(_tokenBalance)),
+                  ],
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  strings.appearanceDescription,
+                  strings.themeStudioDescription,
                   style: Theme.of(sheetContext).textTheme.bodyMedium,
                 ),
                 const SizedBox(height: 18),
-                for (final appearance in AppAppearance.values) ...[
+                for (final offer in AppThemeCatalog.offers) ...[
                   _AppearanceOption(
-                    appearance: appearance,
-                    title: _appearanceName(strings, appearance),
-                    description: _appearanceDescription(strings, appearance),
-                    icon: _appearanceIcon(appearance),
-                    selected: selectedAppearance == appearance,
-                    onTap: () {
-                      Navigator.pop(sheetContext);
-                      AppearanceController.instance.setAppearance(appearance);
-                    },
+                    offer: offer,
+                    title: _appearanceName(strings, offer.appearance),
+                    description: _appearanceDescription(
+                      strings,
+                      offer.appearance,
+                    ),
+                    icon: _appearanceIcon(offer.appearance),
+                    selected: selectedAppearance == offer.appearance,
+                    unlocked: AppearanceController.instance.isUnlocked(
+                      offer.appearance,
+                    ),
+                    priceLabel: _themePriceLabel(strings, offer),
+                    onTap: _isUnlockingTheme
+                        ? null
+                        : () => _handleThemeTap(sheetContext, offer),
                   ),
-                  if (appearance != AppAppearance.values.last)
-                    const SizedBox(height: 10),
+                  if (offer != AppThemeCatalog.offers.last)
+                    const SizedBox(height: 12),
                 ],
               ],
             ),
@@ -216,6 +302,10 @@ class SettingsScreen extends StatelessWidget {
       AppAppearance.light => strings.silaLightTheme,
       AppAppearance.dark => strings.darkTheme,
       AppAppearance.familyYear2026 => strings.uaeFamilyYearTheme,
+      AppAppearance.space => strings.spaceTheme,
+      AppAppearance.khalifaUniversity => strings.khalifaUniversityTheme,
+      AppAppearance.desertNights => strings.desertNightsTheme,
+      AppAppearance.pearlLagoon => strings.pearlLagoonTheme,
     };
   }
 
@@ -227,6 +317,11 @@ class SettingsScreen extends StatelessWidget {
       AppAppearance.light => strings.silaLightThemeDescription,
       AppAppearance.dark => strings.darkThemeDescription,
       AppAppearance.familyYear2026 => strings.uaeFamilyYearThemeDescription,
+      AppAppearance.space => strings.spaceThemeDescription,
+      AppAppearance.khalifaUniversity =>
+        strings.khalifaUniversityThemeDescription,
+      AppAppearance.desertNights => strings.desertNightsThemeDescription,
+      AppAppearance.pearlLagoon => strings.pearlLagoonThemeDescription,
     };
   }
 
@@ -235,35 +330,283 @@ class SettingsScreen extends StatelessWidget {
       AppAppearance.light => Icons.light_mode_rounded,
       AppAppearance.dark => Icons.dark_mode_rounded,
       AppAppearance.familyYear2026 => Icons.family_restroom_rounded,
+      AppAppearance.space => Icons.rocket_launch_rounded,
+      AppAppearance.khalifaUniversity => Icons.science_rounded,
+      AppAppearance.desertNights => Icons.nights_stay_rounded,
+      AppAppearance.pearlLagoon => Icons.water_rounded,
     };
+  }
+
+  String _themePriceLabel(AppLocalizations strings, AppThemeOffer offer) {
+    if (AppearanceController.instance.isUnlocked(offer.appearance)) {
+      return offer.isIncluded ? strings.themeIncluded : strings.themeOwned;
+    }
+
+    return strings.themeTokenPrice(offer.tokenCost!);
+  }
+
+  Future<void> _handleThemeTap(
+    BuildContext sheetContext,
+    AppThemeOffer offer,
+  ) async {
+    if (AppearanceController.instance.isUnlocked(offer.appearance)) {
+      Navigator.pop(sheetContext);
+      await AppearanceController.instance.setAppearance(offer.appearance);
+      return;
+    }
+
+    Navigator.pop(sheetContext);
+    await _confirmThemeUnlock(offer);
+  }
+
+  Future<void> _confirmThemeUnlock(AppThemeOffer offer) async {
+    final strings = AppLocalizations.of(context)!;
+    final themeName = _appearanceName(strings, offer.appearance);
+    final cost = offer.tokenCost!;
+
+    if (!widget.developerPreview && FirebaseAuth.instance.currentUser == null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(strings.signInToUnlockThemes)));
+      return;
+    }
+
+    if (_tokenBalance < cost) {
+      await showDialog<void>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          scrollable: true,
+          icon: const Icon(Icons.stars_rounded),
+          title: Text(strings.notEnoughTokensTitle),
+          content: Text(strings.notEnoughTokensMessage(cost, _tokenBalance)),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: Text(strings.close),
+            ),
+          ],
+        ),
+      );
+      return;
+    }
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        scrollable: true,
+        icon: const Icon(Icons.auto_awesome_rounded),
+        title: Text(strings.unlockThemeTitle(themeName)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(strings.unlockThemeMessage(cost)),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Icon(
+                  Icons.verified_rounded,
+                  size: 18,
+                  color: Theme.of(dialogContext).colorScheme.primary,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    strings.themeUnlockBenefit,
+                    style: Theme.of(dialogContext).textTheme.bodySmall,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: Text(strings.cancel),
+          ),
+          FilledButton.icon(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            icon: const Icon(Icons.stars_rounded),
+            label: Text(strings.unlockForTokens(cost)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true || !mounted) {
+      return;
+    }
+
+    setState(() => _isUnlockingTheme = true);
+
+    try {
+      final remainingBalance = widget.developerPreview
+          ? _tokenBalance - cost
+          : (await ThemeUnlockService().unlockWithTokens(
+              userId: FirebaseAuth.instance.currentUser!.uid,
+              offer: offer,
+            )).remainingTokens;
+
+      await AppearanceController.instance.registerUnlocked([
+        offer.appearance,
+      ], persist: !widget.developerPreview);
+      await AppearanceController.instance.setAppearance(
+        offer.appearance,
+        persist: !widget.developerPreview,
+      );
+
+      if (!mounted) {
+        return;
+      }
+
+      setState(() => _tokenBalance = remainingBalance);
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(strings.themeUnlocked(themeName))));
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(strings.themeUnlockFailed)));
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isUnlockingTheme = false);
+      }
+    }
+  }
+}
+
+class _ThemeStudioCard extends StatelessWidget {
+  const _ThemeStudioCard({required this.tokenBalance, required this.isLoading});
+
+  final int tokenBalance;
+  final bool isLoading;
+
+  @override
+  Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context)!;
+    final colorScheme = Theme.of(context).colorScheme;
+    final gradient = Theme.of(
+      context,
+    ).extension<SilaThemeTokens>()?.heroGradient;
+
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        gradient: gradient,
+        borderRadius: BorderRadius.circular(26),
+        boxShadow: [
+          BoxShadow(
+            color: colorScheme.primary.withValues(alpha: 0.2),
+            blurRadius: 24,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.18),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
+            ),
+            child: const Icon(Icons.auto_awesome_rounded, color: Colors.white),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  strings.themeStudio,
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleLarge?.copyWith(color: Colors.white),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  isLoading ? '•••' : strings.themeTokenBalance(tokenBalance),
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Colors.white.withValues(alpha: 0.88),
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const Icon(Icons.stars_rounded, color: Color(0xFFFFD66B)),
+        ],
+      ),
+    );
+  }
+}
+
+class _TokenPill extends StatelessWidget {
+  const _TokenPill({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 7),
+      decoration: BoxDecoration(
+        color: colorScheme.tertiaryContainer,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.stars_rounded, size: 16, color: colorScheme.tertiary),
+          const SizedBox(width: 5),
+          Text(
+            label,
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(
+              color: colorScheme.onTertiaryContainer,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 
 class _AppearanceOption extends StatelessWidget {
   const _AppearanceOption({
-    required this.appearance,
+    required this.offer,
     required this.title,
     required this.description,
     required this.icon,
     required this.selected,
+    required this.unlocked,
+    required this.priceLabel,
     required this.onTap,
   });
 
-  final AppAppearance appearance;
+  final AppThemeOffer offer;
   final String title;
   final String description;
   final IconData icon;
   final bool selected;
-  final VoidCallback onTap;
+  final bool unlocked;
+  final String priceLabel;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final accent = switch (appearance) {
-      AppAppearance.light => AppTheme.goldColor,
-      AppAppearance.dark => const Color(0xFF45C98D),
-      AppAppearance.familyYear2026 => AppTheme.uaeRed,
-    };
+    final previewTheme = AppTheme.forAppearance(offer.appearance);
+    final previewScheme = previewTheme.colorScheme;
+    final previewGradient = previewTheme
+        .extension<SilaThemeTokens>()!
+        .heroGradient;
 
     return Material(
       color: selected
@@ -284,21 +627,81 @@ class _AppearanceOption extends StatelessWidget {
           child: Row(
             children: [
               Container(
-                width: 48,
-                height: 48,
+                width: 68,
+                height: 64,
                 decoration: BoxDecoration(
-                  color: accent.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(15),
+                  gradient: previewGradient,
+                  borderRadius: BorderRadius.circular(18),
+                  boxShadow: [
+                    BoxShadow(
+                      color: previewScheme.primary.withValues(alpha: 0.24),
+                      blurRadius: 12,
+                      offset: const Offset(0, 5),
+                    ),
+                  ],
                 ),
-                child: Icon(icon, color: accent),
+                child: Stack(
+                  children: [
+                    PositionedDirectional(
+                      top: 8,
+                      start: 9,
+                      child: Icon(icon, color: Colors.white, size: 22),
+                    ),
+                    PositionedDirectional(
+                      end: 8,
+                      bottom: 8,
+                      child: Row(
+                        children: [
+                          _ColorDot(color: previewScheme.tertiary),
+                          const SizedBox(width: 4),
+                          _ColorDot(color: previewScheme.secondary),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
               const SizedBox(width: 14),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(title, style: Theme.of(context).textTheme.titleMedium),
-                    const SizedBox(height: 2),
+                    Text(
+                      title,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        color: colorScheme.onSurface,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const SizedBox(height: 5),
+                    Align(
+                      alignment: AlignmentDirectional.centerStart,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: unlocked
+                              ? colorScheme.primaryContainer
+                              : colorScheme.tertiaryContainer,
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                        child: Text(
+                          priceLabel,
+                          style: Theme.of(context).textTheme.labelSmall
+                              ?.copyWith(
+                                color: unlocked
+                                    ? colorScheme.onPrimaryContainer
+                                    : colorScheme.onTertiaryContainer,
+                                fontWeight: FontWeight.w800,
+                              ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
                     Text(
                       description,
                       style: Theme.of(context).textTheme.bodyMedium,
@@ -308,12 +711,39 @@ class _AppearanceOption extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               Icon(
-                selected ? Icons.check_circle_rounded : Icons.circle_outlined,
-                color: selected ? colorScheme.primary : colorScheme.outline,
+                selected
+                    ? Icons.check_circle_rounded
+                    : unlocked
+                    ? Icons.chevron_right_rounded
+                    : Icons.lock_rounded,
+                color: selected
+                    ? colorScheme.primary
+                    : unlocked
+                    ? colorScheme.outline
+                    : colorScheme.tertiary,
               ),
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _ColorDot extends StatelessWidget {
+  const _ColorDot({required this.color});
+
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 10,
+      height: 10,
+      decoration: BoxDecoration(
+        color: color,
+        shape: BoxShape.circle,
+        border: Border.all(color: Colors.white.withValues(alpha: 0.7)),
       ),
     );
   }

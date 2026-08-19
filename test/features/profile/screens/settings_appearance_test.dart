@@ -14,7 +14,7 @@ void main() {
     await AppearanceController.instance.load();
   });
 
-  testWidgets('Settings switches between Dark and UAE Family Year themes', (
+  testWidgets('Settings unlocks UAE Family Year with preview Tokens', (
     tester,
   ) async {
     tester.view.physicalSize = const Size(390, 844);
@@ -50,6 +50,12 @@ void main() {
     await tester.tap(find.text('UAE Family Year 2026'));
     await tester.pumpAndSettle();
 
+    expect(find.text('Unlock UAE Family Year 2026?'), findsOneWidget);
+    expect(find.text('Unlock for 450'), findsOneWidget);
+
+    await tester.tap(find.text('Unlock for 450'));
+    await tester.pumpAndSettle();
+
     final theme = Theme.of(tester.element(find.byType(SettingsScreen)));
     expect(
       AppearanceController.instance.appearance,
@@ -58,6 +64,7 @@ void main() {
     expect(theme.brightness, Brightness.light);
     expect(theme.extension<SilaThemeTokens>()?.isFamilyYear, isTrue);
     expect(find.text('UAE Family Year 2026'), findsOneWidget);
+    expect(find.text('1950 Family Tokens'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
@@ -75,6 +82,45 @@ void main() {
 
     expect(find.text('الوضع الداكن'), findsOneWidget);
     expect(find.text('عام الأسرة الإماراتي 2026'), findsOneWidget);
+    expect(find.text('العائلة الكونية'), findsOneWidget);
+
+    await tester.scrollUntilVisible(
+      find.text('مختبر جامعة خليفة للمستقبل'),
+      260,
+      scrollable: find.byType(Scrollable).last,
+    );
+    expect(find.text('مختبر جامعة خليفة للمستقبل'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Theme Studio reaches every premium theme on a narrow screen', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(320, 568);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(const _AppearanceTestApp());
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Appearance'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('2400 Family Tokens'), findsWidgets);
+    await tester.scrollUntilVisible(
+      find.text('Pearl Lagoon'),
+      280,
+      scrollable: find.byType(Scrollable).last,
+    );
+    await tester.drag(find.byType(Scrollable).last, const Offset(0, -120));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Pearl Lagoon'), findsOneWidget);
+    expect(find.text('1100 Tokens'), findsOneWidget);
+    await tester.tap(find.text('Pearl Lagoon'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Unlock Pearl Lagoon?'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 }
@@ -96,7 +142,7 @@ class _AppearanceTestApp extends StatelessWidget {
           locale: locale,
           supportedLocales: AppLocalizations.supportedLocales,
           localizationsDelegates: AppLocalizations.localizationsDelegates,
-          home: const SettingsScreen(),
+          home: const SettingsScreen(developerPreview: true),
         );
       },
     );

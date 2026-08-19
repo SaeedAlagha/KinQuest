@@ -42,7 +42,93 @@ class AppLocalizationsAr extends AppLocalizations {
   String get uaeFamilyYearTheme => 'عام الأسرة الإماراتي 2026';
 
   @override
-  String get uaeFamilyYearThemeDescription => 'ألوان عائلية دافئة مستوحاة من الإمارات';
+  String get uaeFamilyYearThemeDescription => 'أقواس تراثية ودفء المجلس وألوان تجسّد وحدتنا';
+
+  @override
+  String get spaceTheme => 'العائلة الكونية';
+
+  @override
+  String get spaceThemeDescription => 'مغامرات بين النجوم ومدارات مضيئة وسحر الفضاء';
+
+  @override
+  String get khalifaUniversityTheme => 'مختبر جامعة خليفة للمستقبل';
+
+  @override
+  String get khalifaUniversityThemeDescription => 'هوية ابتكار زرقاء ودقيقة مستوحاة من جامعة خليفة';
+
+  @override
+  String get desertNightsTheme => 'ليالي الصحراء';
+
+  @override
+  String get desertNightsThemeDescription => 'كثبان تحت ضوء القمر وغروب نحاسي وسماء ليلية فاخرة';
+
+  @override
+  String get pearlLagoonTheme => 'بحيرة اللؤلؤ';
+
+  @override
+  String get pearlLagoonThemeDescription => 'لآلئ مضيئة ولمسات مرجانية ومياه خليجية هادئة';
+
+  @override
+  String get themeStudio => 'استوديو السمات';
+
+  @override
+  String get themeStudioDescription => 'اجمعوا رموز العائلة معًا وافتحوا المظهر الذي تحبه العائلة كلها.';
+
+  @override
+  String themeTokenBalance(int tokens) {
+    return '$tokens من رموز العائلة';
+  }
+
+  @override
+  String get themeIncluded => 'متضمنة';
+
+  @override
+  String get themeOwned => 'مملوكة';
+
+  @override
+  String themeTokenPrice(int tokens) {
+    return '$tokens رمزًا';
+  }
+
+  @override
+  String unlockThemeTitle(String theme) {
+    return 'فتح $theme؟';
+  }
+
+  @override
+  String unlockThemeMessage(int tokens) {
+    return 'هل تريد إنفاق $tokens من رموز العائلة لفتح هذه السمة بشكل دائم؟';
+  }
+
+  @override
+  String unlockForTokens(int tokens) {
+    return 'فتح مقابل $tokens';
+  }
+
+  @override
+  String get notEnoughTokensTitle => 'واصلوا اللعب معًا';
+
+  @override
+  String notEnoughTokensMessage(int cost, int balance) {
+    return 'تكلفة هذه السمة $cost رمزًا، ورصيد عائلتك الحالي $balance.';
+  }
+
+  @override
+  String themeUnlocked(String theme) {
+    return 'أصبحت سمة $theme ملككم الآن!';
+  }
+
+  @override
+  String get themeUnlockFailed => 'تعذر فتح السمة، ولم يتم خصم أي رمز.';
+
+  @override
+  String get signInToUnlockThemes => 'سجّل الدخول وانضم إلى عائلة لفتح سمات المكافآت.';
+
+  @override
+  String get themeUnlockBenefit => 'فتح لمرة واحدة • وتبقى مع حسابك على أجهزتك';
+
+  @override
+  String get close => 'إغلاق';
 
   @override
   String get language => 'اللغة';

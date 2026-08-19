@@ -93,7 +93,7 @@ class ProfileScreen extends StatelessWidget {
           const SizedBox(height: 24),
           _SectionTitle(title: strings.settings),
           const SizedBox(height: 12),
-          const _SettingsSection(),
+          _SettingsSection(developerPreview: developerPreview),
           const SizedBox(height: 28),
 
           if (!developerPreview)
@@ -1138,7 +1138,9 @@ class _ProfileTrophy {
 }
 
 class _SettingsSection extends StatelessWidget {
-  const _SettingsSection();
+  const _SettingsSection({required this.developerPreview});
+
+  final bool developerPreview;
 
   @override
   Widget build(BuildContext context) {
@@ -1158,7 +1160,10 @@ class _SettingsSection extends StatelessWidget {
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (_) => const SettingsScreen()),
+                MaterialPageRoute(
+                  builder: (_) =>
+                      SettingsScreen(developerPreview: developerPreview),
+                ),
               );
             },
           ),

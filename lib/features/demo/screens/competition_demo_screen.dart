@@ -208,7 +208,7 @@ class _DemoHeader extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(compact ? 20 : 26),
       decoration: BoxDecoration(
-        gradient: AppTheme.brandGradient,
+        gradient: AppTheme.heroGradientFor(context),
         borderRadius: BorderRadius.circular(28),
         boxShadow: [
           BoxShadow(

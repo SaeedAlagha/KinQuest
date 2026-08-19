@@ -788,7 +788,7 @@ class _WeeklyChampionshipScreenState extends State<WeeklyChampionshipScreen> {
         Container(
           padding: const EdgeInsets.all(26),
           decoration: BoxDecoration(
-            gradient: AppTheme.brandGradient,
+            gradient: AppTheme.heroGradientFor(context),
             borderRadius: BorderRadius.circular(30),
           ),
           child: Column(

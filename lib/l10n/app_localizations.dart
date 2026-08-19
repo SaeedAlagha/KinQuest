@@ -164,8 +164,152 @@ abstract class AppLocalizations {
   /// No description provided for @uaeFamilyYearThemeDescription.
   ///
   /// In en, this message translates to:
-  /// **'Warm family colors inspired by the UAE'**
+  /// **'Heritage arches, majlis warmth, and colors of unity'**
   String get uaeFamilyYearThemeDescription;
+
+  /// No description provided for @spaceTheme.
+  ///
+  /// In en, this message translates to:
+  /// **'Cosmic Family'**
+  String get spaceTheme;
+
+  /// No description provided for @spaceThemeDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Starlit adventures, glowing orbits, and deep-space wonder'**
+  String get spaceThemeDescription;
+
+  /// No description provided for @khalifaUniversityTheme.
+  ///
+  /// In en, this message translates to:
+  /// **'KU Future Lab'**
+  String get khalifaUniversityTheme;
+
+  /// No description provided for @khalifaUniversityThemeDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'A precise blue innovation system inspired by Khalifa University'**
+  String get khalifaUniversityThemeDescription;
+
+  /// No description provided for @desertNightsTheme.
+  ///
+  /// In en, this message translates to:
+  /// **'Desert Nights'**
+  String get desertNightsTheme;
+
+  /// No description provided for @desertNightsThemeDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Moonlit dunes, copper sunsets, and luxurious night skies'**
+  String get desertNightsThemeDescription;
+
+  /// No description provided for @pearlLagoonTheme.
+  ///
+  /// In en, this message translates to:
+  /// **'Pearl Lagoon'**
+  String get pearlLagoonTheme;
+
+  /// No description provided for @pearlLagoonThemeDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Luminous pearls, coral accents, and calm Gulf waters'**
+  String get pearlLagoonThemeDescription;
+
+  /// No description provided for @themeStudio.
+  ///
+  /// In en, this message translates to:
+  /// **'Theme Studio'**
+  String get themeStudio;
+
+  /// No description provided for @themeStudioDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Earn Family Tokens together and unlock a look the whole family loves.'**
+  String get themeStudioDescription;
+
+  /// No description provided for @themeTokenBalance.
+  ///
+  /// In en, this message translates to:
+  /// **'{tokens} Family Tokens'**
+  String themeTokenBalance(int tokens);
+
+  /// No description provided for @themeIncluded.
+  ///
+  /// In en, this message translates to:
+  /// **'Included'**
+  String get themeIncluded;
+
+  /// No description provided for @themeOwned.
+  ///
+  /// In en, this message translates to:
+  /// **'Owned'**
+  String get themeOwned;
+
+  /// No description provided for @themeTokenPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'{tokens} Tokens'**
+  String themeTokenPrice(int tokens);
+
+  /// No description provided for @unlockThemeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock {theme}?'**
+  String unlockThemeTitle(String theme);
+
+  /// No description provided for @unlockThemeMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Spend {tokens} Family Tokens for a permanent family theme unlock?'**
+  String unlockThemeMessage(int tokens);
+
+  /// No description provided for @unlockForTokens.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock for {tokens}'**
+  String unlockForTokens(int tokens);
+
+  /// No description provided for @notEnoughTokensTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep playing together'**
+  String get notEnoughTokensTitle;
+
+  /// No description provided for @notEnoughTokensMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This theme costs {cost} Tokens. Your family currently has {balance}.'**
+  String notEnoughTokensMessage(int cost, int balance);
+
+  /// No description provided for @themeUnlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'{theme} is now yours!'**
+  String themeUnlocked(String theme);
+
+  /// No description provided for @themeUnlockFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The theme could not be unlocked. Your Tokens were not spent.'**
+  String get themeUnlockFailed;
+
+  /// No description provided for @signInToUnlockThemes.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in and join a family to unlock reward themes.'**
+  String get signInToUnlockThemes;
+
+  /// No description provided for @themeUnlockBenefit.
+  ///
+  /// In en, this message translates to:
+  /// **'One-time unlock • Yours across signed-in devices'**
+  String get themeUnlockBenefit;
+
+  /// No description provided for @close.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get close;
 
   /// No description provided for @language.
   ///
