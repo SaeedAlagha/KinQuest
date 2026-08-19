@@ -370,6 +370,7 @@ class _FamilyQuizScreenState extends State<FamilyQuizScreen> {
         category: _selectedCategory,
         count: totalQuestions,
         familyMembers: selectedPlayers.map((player) => player.name).toList(),
+        languageCode: Localizations.localeOf(context).languageCode,
       );
 
       if (generated.length < totalQuestions) {

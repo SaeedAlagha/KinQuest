@@ -21,12 +21,17 @@ class TruthOrDareAiService {
   Future<List<TruthOrDarePrompt>> generatePrompts({
     required String category,
     required int count,
+    required String languageCode,
   }) async {
     final response = await http
         .post(
           ApiConfig.endpoint('/api/truth-or-dare'),
           headers: await ApiConfig.authenticatedJsonHeaders(),
-          body: jsonEncode({'category': category, 'count': count}),
+          body: jsonEncode({
+            'category': category,
+            'count': count,
+            'language': languageCode,
+          }),
         )
         .timeout(const Duration(seconds: 20));
 

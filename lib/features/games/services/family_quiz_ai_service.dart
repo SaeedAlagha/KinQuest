@@ -24,6 +24,7 @@ class FamilyQuizAiService {
     required String category,
     required int count,
     required List<String> familyMembers,
+    required String languageCode,
   }) async {
     final response = await http
         .post(
@@ -33,6 +34,7 @@ class FamilyQuizAiService {
             'category': category,
             'count': count,
             'familyMembers': familyMembers,
+            'language': languageCode,
           }),
         )
         .timeout(const Duration(seconds: 20));

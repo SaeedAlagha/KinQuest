@@ -3520,6 +3520,330 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Start Tie-Break Round {number}'**
   String startTieBreakRound(int number);
+
+  /// No description provided for @gameFamilyEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'SILA FAMILY GAME'**
+  String get gameFamilyEyebrow;
+
+  /// No description provided for @rounds.
+  ///
+  /// In en, this message translates to:
+  /// **'Rounds'**
+  String get rounds;
+
+  /// No description provided for @roundsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a quick round or play a longer 3 or 5-round game.'**
+  String get roundsDescription;
+
+  /// No description provided for @roundCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{{count} round} other{{count} rounds}}'**
+  String roundCount(int count);
+
+  /// No description provided for @mustBeLoggedInToPlay.
+  ///
+  /// In en, this message translates to:
+  /// **'You must be logged in to play.'**
+  String get mustBeLoggedInToPlay;
+
+  /// No description provided for @emojiFamilyRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Join or create a family before playing Emoji Guess.'**
+  String get emojiFamilyRequired;
+
+  /// No description provided for @couldNotLoadFamilyMembers.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load your family members.'**
+  String get couldNotLoadFamilyMembers;
+
+  /// No description provided for @familyMemberFallback.
+  ///
+  /// In en, this message translates to:
+  /// **'Family Member'**
+  String get familyMemberFallback;
+
+  /// No description provided for @emojiGuessSetupDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Build two teams and decode playful emoji clues before time runs out.'**
+  String get emojiGuessSetupDescription;
+
+  /// No description provided for @whoIsPlaying.
+  ///
+  /// In en, this message translates to:
+  /// **'Who is playing?'**
+  String get whoIsPlaying;
+
+  /// No description provided for @chooseAtLeastTwoPlayers.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose at least 2 players for the family match.'**
+  String get chooseAtLeastTwoPlayers;
+
+  /// No description provided for @chooseTeams.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose teams'**
+  String get chooseTeams;
+
+  /// No description provided for @assignPlayersToTeams.
+  ///
+  /// In en, this message translates to:
+  /// **'Assign every selected player to Team A or Team B.'**
+  String get assignPlayersToTeams;
+
+  /// No description provided for @teamA.
+  ///
+  /// In en, this message translates to:
+  /// **'Team A'**
+  String get teamA;
+
+  /// No description provided for @teamB.
+  ///
+  /// In en, this message translates to:
+  /// **'Team B'**
+  String get teamB;
+
+  /// No description provided for @shuffleTeams.
+  ///
+  /// In en, this message translates to:
+  /// **'Shuffle Teams'**
+  String get shuffleTeams;
+
+  /// No description provided for @category.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get category;
+
+  /// No description provided for @categoryMovies.
+  ///
+  /// In en, this message translates to:
+  /// **'Movies'**
+  String get categoryMovies;
+
+  /// No description provided for @categoryAnimals.
+  ///
+  /// In en, this message translates to:
+  /// **'Animals'**
+  String get categoryAnimals;
+
+  /// No description provided for @categoryFood.
+  ///
+  /// In en, this message translates to:
+  /// **'Food'**
+  String get categoryFood;
+
+  /// No description provided for @categoryPlaces.
+  ///
+  /// In en, this message translates to:
+  /// **'Places'**
+  String get categoryPlaces;
+
+  /// No description provided for @categoryMixed.
+  ///
+  /// In en, this message translates to:
+  /// **'Mixed'**
+  String get categoryMixed;
+
+  /// No description provided for @matchPace.
+  ///
+  /// In en, this message translates to:
+  /// **'Match pace'**
+  String get matchPace;
+
+  /// No description provided for @puzzlesPerRound.
+  ///
+  /// In en, this message translates to:
+  /// **'Puzzles per round'**
+  String get puzzlesPerRound;
+
+  /// No description provided for @timePerPuzzle.
+  ///
+  /// In en, this message translates to:
+  /// **'Time per puzzle'**
+  String get timePerPuzzle;
+
+  /// No description provided for @secondsShort.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} sec'**
+  String secondsShort(int count);
+
+  /// No description provided for @preparingNamedGame.
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing {game}...'**
+  String preparingNamedGame(String game);
+
+  /// No description provided for @startNamedGame.
+  ///
+  /// In en, this message translates to:
+  /// **'Start {game}'**
+  String startNamedGame(String game);
+
+  /// No description provided for @teamTurn.
+  ///
+  /// In en, this message translates to:
+  /// **'{team}\'s turn'**
+  String teamTurn(String team);
+
+  /// No description provided for @stealTeam.
+  ///
+  /// In en, this message translates to:
+  /// **'Steal — {team}'**
+  String stealTeam(String team);
+
+  /// No description provided for @roundPuzzleProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Round {round} of {totalRounds} • Puzzle {puzzle} of {totalPuzzles}'**
+  String roundPuzzleProgress(int round, int totalRounds, int puzzle, int totalPuzzles);
+
+  /// No description provided for @secondsRemaining.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} s'**
+  String secondsRemaining(int count);
+
+  /// No description provided for @hintLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Hint: {hint}'**
+  String hintLabel(String hint);
+
+  /// No description provided for @typeYourAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'Type your answer'**
+  String get typeYourAnswer;
+
+  /// No description provided for @checking.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking...'**
+  String get checking;
+
+  /// No description provided for @submitAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit Answer'**
+  String get submitAnswer;
+
+  /// No description provided for @teamScore.
+  ///
+  /// In en, this message translates to:
+  /// **'{team}: {score}'**
+  String teamScore(String team, int score);
+
+  /// No description provided for @puzzleComplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Puzzle Complete'**
+  String get puzzleComplete;
+
+  /// No description provided for @answerLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Answer: {answer}'**
+  String answerLabel(String answer);
+
+  /// No description provided for @roundResults.
+  ///
+  /// In en, this message translates to:
+  /// **'Round Results'**
+  String get roundResults;
+
+  /// No description provided for @nextPuzzle.
+  ///
+  /// In en, this message translates to:
+  /// **'Next Puzzle'**
+  String get nextPuzzle;
+
+  /// No description provided for @roundNumberComplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Round {number} Complete'**
+  String roundNumberComplete(int number);
+
+  /// No description provided for @startTieBreaker.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Tie-Breaker'**
+  String get startTieBreaker;
+
+  /// No description provided for @seeFinalResults.
+  ///
+  /// In en, this message translates to:
+  /// **'See Final Results'**
+  String get seeFinalResults;
+
+  /// No description provided for @startRound.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Round {number}'**
+  String startRound(int number);
+
+  /// No description provided for @tieBreakerTeam.
+  ///
+  /// In en, this message translates to:
+  /// **'Tie-Breaker — {team}'**
+  String tieBreakerTeam(String team);
+
+  /// No description provided for @teamWins.
+  ///
+  /// In en, this message translates to:
+  /// **'{team} Wins!'**
+  String teamWins(String team);
+
+  /// No description provided for @returnToCompetition.
+  ///
+  /// In en, this message translates to:
+  /// **'Return to {competition}'**
+  String returnToCompetition(String competition);
+
+  /// No description provided for @playAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Play Again'**
+  String get playAgain;
+
+  /// No description provided for @backToGames.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to Games'**
+  String get backToGames;
+
+  /// No description provided for @noStealAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'No steal.\n\nAnswer: {answer}'**
+  String noStealAnswer(String answer);
+
+  /// No description provided for @teamGuessedCorrectly.
+  ///
+  /// In en, this message translates to:
+  /// **'{team} guessed correctly!\n\n+{points} points'**
+  String teamGuessedCorrectly(String team, int points);
+
+  /// No description provided for @teamStolePuzzle.
+  ///
+  /// In en, this message translates to:
+  /// **'{team} stole the puzzle!\n\n+{points} point'**
+  String teamStolePuzzle(String team, int points);
+
+  /// No description provided for @stealMissedAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'Steal missed.\n\nAnswer: {answer}'**
+  String stealMissedAnswer(String answer);
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

@@ -232,6 +232,7 @@ class _FamilyImpostorScreenState extends State<FamilyImpostorScreen> {
       final rounds = await _aiService.generateRounds(
         count: _selectedRounds,
         category: _selectedCategory,
+        languageCode: Localizations.localeOf(context).languageCode,
       );
 
       if (rounds.isEmpty) {

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/family_year_banner.dart';
 import '../../../core/widgets/sila_page_backdrop.dart';
+import '../../../l10n/app_localizations.dart';
 
 const List<int> gameRoundOptions = [1, 3, 5];
 
@@ -61,6 +62,8 @@ class GameSetupHero extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context)!;
+
     return Container(
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
@@ -128,7 +131,7 @@ class GameSetupHero extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'SILA FAMILY GAME',
+                            strings.gameFamilyEyebrow,
                             style: Theme.of(context).textTheme.labelSmall
                                 ?.copyWith(
                                   color: Colors.white.withValues(alpha: 0.72),
@@ -207,29 +210,33 @@ class GameRoundSelector extends StatelessWidget {
     required this.value,
     required this.onChanged,
     this.maximum,
-    this.title = 'Rounds',
-    this.description =
-        'Choose a quick round or play a longer 3 or 5-round game.',
+    this.title,
+    this.description,
     this.keyPrefix = 'round-option',
   });
 
   final int value;
   final ValueChanged<int> onChanged;
   final int? maximum;
-  final String title;
-  final String description;
+  final String? title;
+  final String? description;
   final String keyPrefix;
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context)!;
+
     return GameSetupSectionCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title, style: Theme.of(context).textTheme.titleLarge),
+          Text(
+            title ?? strings.rounds,
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
           const SizedBox(height: 6),
           Text(
-            description,
+            description ?? strings.roundsDescription,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
@@ -251,7 +258,7 @@ class GameRoundSelector extends StatelessWidget {
                       : Icons.emoji_events_rounded,
                   size: 18,
                 ),
-                label: Text('$rounds ${rounds == 1 ? 'round' : 'rounds'}'),
+                label: Text(strings.roundCount(rounds)),
                 selected: value == rounds,
                 onSelected: available ? (_) => onChanged(rounds) : null,
               );

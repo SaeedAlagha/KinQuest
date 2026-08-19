@@ -209,9 +209,198 @@ class FamilyImpostorAiService {
     ],
   };
 
+  static const Map<String, String> _arabicCategoryLabels = {
+    'Food': 'طعام',
+    'Places': 'أماكن',
+    'Animals': 'حيوانات',
+    'Objects': 'أشياء',
+    'Activities': 'أنشطة',
+    'Movies': 'أفلام',
+    'Sports': 'رياضة',
+    'Travel': 'سفر',
+    'Nature': 'طبيعة',
+    'School': 'مدرسة',
+    'Home': 'المنزل',
+    'Music': 'موسيقى',
+    'Technology': 'تقنية',
+    'UAE & Heritage': 'الإمارات والتراث',
+  };
+
+  static const Map<String, List<String>> _offlineArabicWords = {
+    'Food': [
+      'مجبوس',
+      'بيتزا',
+      'تمر',
+      'فطائر',
+      'شاورما',
+      'معكرونة',
+      'مانجو',
+      'فشار',
+      'مثلجات',
+      'فلافل',
+    ],
+    'Places': [
+      'شاطئ',
+      'متحف',
+      'مكتبة',
+      'حديقة',
+      'مطار',
+      'حديقة حيوانات',
+      'مدرسة',
+      'مركز تجاري',
+      'صحراء',
+      'مزرعة',
+    ],
+    'Animals': [
+      'جمل',
+      'دلفين',
+      'قطة',
+      'صقر',
+      'سلحفاة',
+      'فيل',
+      'بطريق',
+      'أرنب',
+      'حصان',
+      'أسد',
+    ],
+    'Objects': [
+      'مظلة',
+      'حقيبة ظهر',
+      'فانوس',
+      'كاميرا',
+      'وسادة',
+      'ملعقة',
+      'دراجة',
+      'ساعة',
+      'مفتاح',
+      'بالون',
+    ],
+    'Activities': [
+      'سباحة',
+      'خبز',
+      'رسم',
+      'تخييم',
+      'بستنة',
+      'رقص',
+      'قراءة',
+      'ركوب الدراجة',
+      'صيد',
+      'مشي جبلي',
+    ],
+    'Movies': [
+      'بطل خارق',
+      'أميرة',
+      'روبوت',
+      'قرصان',
+      'تنين',
+      'محقق',
+      'رائد فضاء',
+      'ساحر',
+      'ديناصور',
+      'مستكشف',
+    ],
+    'Sports': [
+      'كرة القدم',
+      'كرة السلة',
+      'سباحة',
+      'تنس',
+      'دراجات',
+      'كرة الطائرة',
+      'كريكيت',
+      'جري',
+      'رماية',
+      'بولينغ',
+    ],
+    'Travel': [
+      'جواز سفر',
+      'حقيبة سفر',
+      'طائرة',
+      'خريطة',
+      'فندق',
+      'قطار',
+      'سيارة أجرة',
+      'تذكار',
+      'تذكرة',
+      'مغامرة',
+    ],
+    'Nature': [
+      'قوس قزح',
+      'جبل',
+      'محيط',
+      'سحابة',
+      'شلال',
+      'قمر',
+      'غابة',
+      'زهرة',
+      'نجمة',
+      'نهر',
+    ],
+    'School': [
+      'قلم رصاص',
+      'معلم',
+      'واجب منزلي',
+      'استراحة',
+      'دفتر',
+      'فصل دراسي',
+      'حافلة',
+      'فن',
+      'علوم',
+      'مكتبة',
+    ],
+    'Home': [
+      'أريكة',
+      'مطبخ',
+      'غرفة نوم',
+      'حديقة',
+      'جرس الباب',
+      'ثلاجة',
+      'شرفة',
+      'طاولة',
+      'دش',
+      'تلفاز',
+    ],
+    'Music': [
+      'طبول',
+      'بيانو',
+      'غيتار',
+      'ميكروفون',
+      'مغنٍ',
+      'حفل موسيقي',
+      'إيقاع',
+      'كمان',
+      'أغنية',
+      'سماعات',
+    ],
+    'Technology': [
+      'روبوت',
+      'جهاز لوحي',
+      'لوحة مفاتيح',
+      'طائرة مسيرة',
+      'مكالمة فيديو',
+      'شاحن',
+      'ساعة ذكية',
+      'كاميرا',
+      'جهاز ألعاب',
+      'حاسوب محمول',
+    ],
+    'UAE & Heritage': [
+      'صقر',
+      'محمل شراعي',
+      'مجلس',
+      'تمر',
+      'برج خليفة',
+      'صحراء',
+      'جمل',
+      'السدو',
+      'دلة',
+      'واحة',
+    ],
+  };
+
   Future<List<FamilyImpostorRound>> generateRounds({
     int count = 5,
     String? category,
+    required String languageCode,
   }) async {
     final roundCount = count.clamp(1, 10);
     final selectedCategory = categories.contains(category) ? category : null;
@@ -224,6 +413,7 @@ class FamilyImpostorAiService {
             body: jsonEncode({
               'rounds': roundCount,
               'category': ?selectedCategory,
+              'language': languageCode,
             }),
           )
           .timeout(const Duration(seconds: 20));
@@ -254,31 +444,48 @@ class FamilyImpostorAiService {
       // A local round bank keeps family play available when the AI is offline.
     }
 
-    return offlineRounds(count: roundCount, category: selectedCategory);
+    return offlineRounds(
+      count: roundCount,
+      category: selectedCategory,
+      languageCode: languageCode,
+    );
   }
 
   static List<FamilyImpostorRound> offlineRounds({
     int count = 5,
     String? category,
     Random? random,
+    String languageCode = 'en',
   }) {
     final roundCount = count.clamp(1, 10);
     final selectedCategory = categories.contains(category) ? category : null;
     final candidates = <FamilyImpostorRound>[];
+    final isArabic = languageCode == 'ar';
+    final wordBank = isArabic ? _offlineArabicWords : _offlineWords;
+
+    String displayCategory(String canonicalCategory) => isArabic
+        ? _arabicCategoryLabels[canonicalCategory] ?? canonicalCategory
+        : canonicalCategory;
 
     if (selectedCategory != null) {
       candidates.addAll(
-        _offlineWords[selectedCategory]!.map(
-          (word) => FamilyImpostorRound(category: selectedCategory, word: word),
+        wordBank[selectedCategory]!.map(
+          (word) => FamilyImpostorRound(
+            category: displayCategory(selectedCategory),
+            word: word,
+          ),
         ),
       );
     } else {
       final seenWords = <String>{};
-      for (final categoryEntry in _offlineWords.entries) {
+      for (final categoryEntry in wordBank.entries) {
         for (final word in categoryEntry.value) {
           if (seenWords.add(word.toLowerCase())) {
             candidates.add(
-              FamilyImpostorRound(category: categoryEntry.key, word: word),
+              FamilyImpostorRound(
+                category: displayCategory(categoryEntry.key),
+                word: word,
+              ),
             );
           }
         }

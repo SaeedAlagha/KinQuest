@@ -31,6 +31,7 @@ class _MemoryChallengeScreenState extends State<MemoryChallengeScreen> {
 
   Future<void> _startChallenge() async {
     final user = FirebaseAuth.instance.currentUser;
+    final languageCode = Localizations.localeOf(context).languageCode;
 
     if (user == null) {
       setState(() {
@@ -112,6 +113,7 @@ class _MemoryChallengeScreenState extends State<MemoryChallengeScreen> {
             location: location,
             date: formattedDate,
             count: 1,
+            languageCode: languageCode,
           );
 
           if (questions.isEmpty) {

@@ -1883,4 +1883,213 @@ class AppLocalizationsAr extends AppLocalizations {
   String startTieBreakRound(int number) {
     return 'ابدأ جولة كسر التعادل $number';
   }
+
+  @override
+  String get gameFamilyEyebrow => 'لعبة عائلية من صلة';
+
+  @override
+  String get rounds => 'الجولات';
+
+  @override
+  String get roundsDescription => 'اختر جولة سريعة أو العب مباراة أطول من 3 أو 5 جولات.';
+
+  @override
+  String roundCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count جولات',
+      two: 'جولتان',
+      one: 'جولة واحدة',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get mustBeLoggedInToPlay => 'يجب تسجيل الدخول للعب.';
+
+  @override
+  String get emojiFamilyRequired => 'انضم إلى عائلة أو أنشئ واحدة قبل لعب خمن الإيموجي.';
+
+  @override
+  String get couldNotLoadFamilyMembers => 'تعذر تحميل أفراد عائلتك.';
+
+  @override
+  String get familyMemberFallback => 'فرد من العائلة';
+
+  @override
+  String get emojiGuessSetupDescription => 'كوّن فريقين وفك رموز الإيموجي المرحة قبل انتهاء الوقت.';
+
+  @override
+  String get whoIsPlaying => 'من سيلعب؟';
+
+  @override
+  String get chooseAtLeastTwoPlayers => 'اختر لاعبين اثنين على الأقل للمباراة العائلية.';
+
+  @override
+  String get chooseTeams => 'اختر الفريقين';
+
+  @override
+  String get assignPlayersToTeams => 'وزّع كل لاعب محدد على الفريق أ أو الفريق ب.';
+
+  @override
+  String get teamA => 'الفريق أ';
+
+  @override
+  String get teamB => 'الفريق ب';
+
+  @override
+  String get shuffleTeams => 'توزيع عشوائي';
+
+  @override
+  String get category => 'الفئة';
+
+  @override
+  String get categoryMovies => 'أفلام';
+
+  @override
+  String get categoryAnimals => 'حيوانات';
+
+  @override
+  String get categoryFood => 'طعام';
+
+  @override
+  String get categoryPlaces => 'أماكن';
+
+  @override
+  String get categoryMixed => 'متنوع';
+
+  @override
+  String get matchPace => 'إيقاع المباراة';
+
+  @override
+  String get puzzlesPerRound => 'الألغاز في كل جولة';
+
+  @override
+  String get timePerPuzzle => 'وقت كل لغز';
+
+  @override
+  String secondsShort(int count) {
+    return '$count ث';
+  }
+
+  @override
+  String preparingNamedGame(String game) {
+    return 'جارٍ تجهيز $game...';
+  }
+
+  @override
+  String startNamedGame(String game) {
+    return 'ابدأ $game';
+  }
+
+  @override
+  String teamTurn(String team) {
+    return 'دور $team';
+  }
+
+  @override
+  String stealTeam(String team) {
+    return 'فرصة السرقة — $team';
+  }
+
+  @override
+  String roundPuzzleProgress(int round, int totalRounds, int puzzle, int totalPuzzles) {
+    return 'الجولة $round من $totalRounds • اللغز $puzzle من $totalPuzzles';
+  }
+
+  @override
+  String secondsRemaining(int count) {
+    return '$count ث';
+  }
+
+  @override
+  String hintLabel(String hint) {
+    return 'تلميح: $hint';
+  }
+
+  @override
+  String get typeYourAnswer => 'اكتب إجابتك';
+
+  @override
+  String get checking => 'جارٍ التحقق...';
+
+  @override
+  String get submitAnswer => 'إرسال الإجابة';
+
+  @override
+  String teamScore(String team, int score) {
+    return '$team: $score';
+  }
+
+  @override
+  String get puzzleComplete => 'اكتمل اللغز';
+
+  @override
+  String answerLabel(String answer) {
+    return 'الإجابة: $answer';
+  }
+
+  @override
+  String get roundResults => 'نتائج الجولة';
+
+  @override
+  String get nextPuzzle => 'اللغز التالي';
+
+  @override
+  String roundNumberComplete(int number) {
+    return 'اكتملت الجولة $number';
+  }
+
+  @override
+  String get startTieBreaker => 'ابدأ جولة كسر التعادل';
+
+  @override
+  String get seeFinalResults => 'عرض النتائج النهائية';
+
+  @override
+  String startRound(int number) {
+    return 'ابدأ الجولة $number';
+  }
+
+  @override
+  String tieBreakerTeam(String team) {
+    return 'كسر التعادل — $team';
+  }
+
+  @override
+  String teamWins(String team) {
+    return 'يفوز $team!';
+  }
+
+  @override
+  String returnToCompetition(String competition) {
+    return 'العودة إلى $competition';
+  }
+
+  @override
+  String get playAgain => 'العب مجددًا';
+
+  @override
+  String get backToGames => 'العودة إلى الألعاب';
+
+  @override
+  String noStealAnswer(String answer) {
+    return 'لم تتم السرقة.\n\nالإجابة: $answer';
+  }
+
+  @override
+  String teamGuessedCorrectly(String team, int points) {
+    return 'أجاب $team بشكل صحيح!\n\n+$points نقطتان';
+  }
+
+  @override
+  String teamStolePuzzle(String team, int points) {
+    return 'نجح $team في سرقة اللغز!\n\n+$points نقطة';
+  }
+
+  @override
+  String stealMissedAnswer(String answer) {
+    return 'لم تنجح السرقة.\n\nالإجابة: $answer';
+  }
 }

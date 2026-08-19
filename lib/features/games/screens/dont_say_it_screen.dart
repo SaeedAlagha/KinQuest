@@ -218,7 +218,10 @@ class _DontSayItScreenState extends State<DontSayItScreen> {
 
       final totalTurns = selectedPlayers.length * _selectedRounds;
 
-      final cards = await _aiService.generateCards(count: totalTurns);
+      final cards = await _aiService.generateCards(
+        count: totalTurns,
+        languageCode: Localizations.localeOf(context).languageCode,
+      );
 
       if (cards.length < totalTurns) {
         throw Exception('Not enough cards generated');

@@ -33,6 +33,7 @@ class MemoryChallengeAiService {
     required String description,
     required String location,
     required String date,
+    required String languageCode,
     int count = 1,
   }) async {
     final response = await http
@@ -46,6 +47,7 @@ class MemoryChallengeAiService {
             'location': location,
             'date': date,
             'count': count,
+            'language': languageCode,
           }),
         )
         .timeout(const Duration(seconds: 40));

@@ -229,6 +229,7 @@ class _WouldYouRatherScreenState extends State<WouldYouRatherScreen> {
           .generateWouldYouRatherQuestions(
             category: _selectedCategory,
             count: _selectedRounds,
+            languageCode: Localizations.localeOf(context).languageCode,
           );
 
       final generatedQuestions = aiQuestions

@@ -53,6 +53,7 @@ class _CharadesScreenState extends State<CharadesScreen> {
       final generated = await _aiService.generatePrompts(
         category: _selectedCategory,
         count: _selectedRounds,
+        languageCode: Localizations.localeOf(context).languageCode,
       );
 
       if (!mounted) return;

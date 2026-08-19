@@ -6,12 +6,15 @@ import 'package:kinquest/core/config/api_config.dart';
 class PassTheBombAiService {
   const PassTheBombAiService();
 
-  Future<List<String>> generateCategories({int count = 5}) async {
+  Future<List<String>> generateCategories({
+    int count = 5,
+    required String languageCode,
+  }) async {
     final response = await http
         .post(
           ApiConfig.endpoint('/api/pass-the-bomb'),
           headers: await ApiConfig.authenticatedJsonHeaders(),
-          body: jsonEncode({'count': count}),
+          body: jsonEncode({'count': count, 'language': languageCode}),
         )
         .timeout(const Duration(seconds: 20));
 
@@ -28,12 +31,17 @@ class PassTheBombAiService {
   Future<PassTheBombValidationResult> validateAnswer({
     required String category,
     required String answer,
+    required String languageCode,
   }) async {
     final response = await http
         .post(
           ApiConfig.endpoint('/api/pass-the-bomb/validate'),
           headers: await ApiConfig.authenticatedJsonHeaders(),
-          body: jsonEncode({'category': category, 'answer': answer}),
+          body: jsonEncode({
+            'category': category,
+            'answer': answer,
+            'language': languageCode,
+          }),
         )
         .timeout(const Duration(seconds: 8));
 
