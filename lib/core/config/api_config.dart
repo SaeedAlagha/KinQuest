@@ -7,13 +7,55 @@ abstract final class ApiConfig {
   );
 
   static String get baseUrl {
-    final configuredBaseUrl = _configuredBaseUrl.trim();
+    return resolveBaseUrl(
+      configuredBaseUrl: _configuredBaseUrl,
+      isRelease: kReleaseMode,
+      isWeb: kIsWeb,
+      platform: defaultTargetPlatform,
+    );
+  }
 
-    if (configuredBaseUrl.isNotEmpty) {
-      return configuredBaseUrl.replaceFirst(RegExp(r'/+$'), '');
+  @visibleForTesting
+  static String resolveBaseUrl({
+    required String configuredBaseUrl,
+    required bool isRelease,
+    required bool isWeb,
+    required TargetPlatform platform,
+  }) {
+    final normalizedBaseUrl = configuredBaseUrl.trim().replaceFirst(
+      RegExp(r'/+$'),
+      '',
+    );
+
+    if (normalizedBaseUrl.isNotEmpty) {
+      final uri = Uri.tryParse(normalizedBaseUrl);
+
+      if (uri == null || !uri.hasScheme || uri.host.isEmpty) {
+        throw StateError(
+          'KINQUEST_API_BASE_URL must be an absolute HTTP(S) URL.',
+        );
+      }
+
+      if (isRelease && uri.scheme != 'https') {
+        throw StateError(
+          'KINQUEST_API_BASE_URL must use HTTPS in release builds.',
+        );
+      }
+
+      if (uri.scheme != 'http' && uri.scheme != 'https') {
+        throw StateError(
+          'KINQUEST_API_BASE_URL must use the HTTP or HTTPS scheme.',
+        );
+      }
+
+      return normalizedBaseUrl;
     }
 
-    if (kIsWeb || defaultTargetPlatform != TargetPlatform.android) {
+    if (isRelease) {
+      throw StateError('KINQUEST_API_BASE_URL is required in release builds.');
+    }
+
+    if (isWeb || platform != TargetPlatform.android) {
       return 'http://localhost:3000';
     }
 
