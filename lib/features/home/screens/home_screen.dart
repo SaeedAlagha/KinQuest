@@ -243,9 +243,8 @@ class HomeDashboard extends StatelessWidget {
                                 child: _QuickActionCard(
                                   icon: Icons.redeem_rounded,
                                   accent: AppTheme.goldColor,
-                                  title: 'Rewards',
-                                  subtitle:
-                                      'Spend Tokens on family and digital rewards.',
+                                  title: strings.homeRewards,
+                                  subtitle: strings.homeRewardsDescription,
                                   onTap: () => Navigator.push(
                                     context,
                                     MaterialPageRoute(
@@ -292,9 +291,8 @@ class HomeDashboard extends StatelessWidget {
                           _QuickActionCard(
                             icon: Icons.redeem_rounded,
                             accent: AppTheme.goldColor,
-                            title: 'Rewards',
-                            subtitle:
-                                'Spend Tokens on family and digital rewards.',
+                            title: strings.homeRewards,
+                            subtitle: strings.homeRewardsDescription,
                             onTap: () => Navigator.push(
                               context,
                               MaterialPageRoute(

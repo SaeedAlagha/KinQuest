@@ -1588,23 +1588,299 @@ class AppLocalizationsAr extends AppLocalizations {
   String get missionFamilyKindnessProjectProofHint => 'أرسل إثباتًا آمنًا ومحترمًا لما صنعته عائلتك أو فعلته.';
 
   @override
-  String get officialWins => 'Official Wins';
+  String get officialWins => 'الانتصارات الرسمية';
 
   @override
-  String get dailyWins => 'Daily Wins';
+  String get dailyWins => 'انتصارات التحدي اليومي';
 
   @override
-  String get weeklyWins => 'Weekly Wins';
+  String get weeklyWins => 'انتصارات البطولة الأسبوعية';
 
   @override
-  String get monthlyWins => 'Monthly Wins';
+  String get monthlyWins => 'انتصارات الكأس الشهري';
 
   @override
-  String get missionsCompleted => 'Missions Completed';
+  String get missionsCompleted => 'المهام المكتملة';
 
   @override
-  String get memoriesAdded => 'Memories Added';
+  String get memoriesAdded => 'الذكريات المضافة';
 
   @override
-  String get rankingPoints => 'Ranking Points';
+  String get rankingPoints => 'نقاط الترتيب';
+
+  @override
+  String get homeRewards => 'المكافآت';
+
+  @override
+  String get homeRewardsDescription => 'استخدم الرموز للحصول على مكافآت عائلية ورقمية.';
+
+  @override
+  String get officialCompetitionRule => 'نتيجة رسمية واحدة لكل عائلة يوميًا. نتائج اللعب السريع لا تؤثر في هذه المكافآت.';
+
+  @override
+  String dailyWinnerRewardSummary(int tokens, int points) {
+    return 'الفائز: +$tokens رمزًا + $points نقطة ترتيب';
+  }
+
+  @override
+  String dailyRunnerUpRewardSummary(int points) {
+    return 'الوصيف: +$points نقطة ترتيب';
+  }
+
+  @override
+  String get savingOfficialResult => 'جارٍ حفظ النتيجة الرسمية...';
+
+  @override
+  String get dailyOfficialCompleteEyebrow => 'اكتمل التحدي اليومي';
+
+  @override
+  String get familyChallengeCompleteTitle => 'اكتمل التحدي العائلي';
+
+  @override
+  String get dailyCompleteWithoutWinner => 'اجتمعت عائلتك ولعبت معًا وأكملت التحدي الرسمي لليوم.';
+
+  @override
+  String dailyCompleteWithWinner(String name) {
+    return 'يتوج $name اليوم بلقب العائلة. عودوا غدًا لتحدٍ جديد.';
+  }
+
+  @override
+  String tokenBonus(int count) {
+    return '+$count رمزًا';
+  }
+
+  @override
+  String rankingPointBonus(int count) {
+    return '+$count نقطة ترتيب';
+  }
+
+  @override
+  String get familyMoment => 'لحظة عائلية';
+
+  @override
+  String get tieDetected => 'تعادل في النتيجة';
+
+  @override
+  String get tieRewardPendingDescription => 'لم تُمنح أي رموز أو نقاط ترتيب. يتأهل المتصدرون المتعادلون فقط إلى الجولة الحاسمة، ولا تُمنح المكافأة حتى يتبقى فائز واحد.';
+
+  @override
+  String get startSuddenDeathTieBreak => 'ابدأ جولة كسر التعادل';
+
+  @override
+  String get latestResult => 'أحدث نتيجة';
+
+  @override
+  String pointsAbbreviation(int count) {
+    return '$count نقطة';
+  }
+
+  @override
+  String get weeklyCompetitionDescription => 'أربع ألعاب رسمية، وتتراكم نقاط البطولة عبر كل جولة.';
+
+  @override
+  String get championshipRewards => 'مكافآت البطولة';
+
+  @override
+  String championRewardSummary(int tokens, int points) {
+    return 'البطل: +$tokens رمزًا + $points نقطة ترتيب';
+  }
+
+  @override
+  String runnerUpRewardSummary(int points) {
+    return 'الوصيف: +$points نقطة ترتيب';
+  }
+
+  @override
+  String thirdPlaceRewardSummary(int points) {
+    return 'المركز الثالث: +$points نقطة ترتيب';
+  }
+
+  @override
+  String get championshipScoringDescription => 'الجولات الفردية: الأول 10 • الثاني 7 • الثالث 5 • الرابع 3 • المشاركة 1\nجولات الفرق: أعضاء الفريق الفائز +1 • أعضاء الفريق الآخر +0';
+
+  @override
+  String get thisWeeksGames => 'ألعاب هذا الأسبوع';
+
+  @override
+  String get roundComplete => 'اكتملت الجولة';
+
+  @override
+  String get upNext => 'التالي';
+
+  @override
+  String get roundLocked => 'مقفلة حتى تكتمل الجولة السابقة';
+
+  @override
+  String get savingRound => 'جارٍ حفظ الجولة...';
+
+  @override
+  String playGameNumber(int number, String name) {
+    return 'العب اللعبة $number: $name';
+  }
+
+  @override
+  String get finalizingChampionship => 'جارٍ اعتماد نتيجة البطولة...';
+
+  @override
+  String get finalizeWeeklyChampionship => 'اعتماد البطولة الأسبوعية';
+
+  @override
+  String get championshipStandings => 'ترتيب البطولة';
+
+  @override
+  String roundsPlayed(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count جولات',
+      two: 'جولتان',
+      one: 'جولة واحدة',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get weeklyOfficialCompleteEyebrow => 'اكتملت البطولة الأسبوعية';
+
+  @override
+  String get newFamilyChampion => 'بطل جديد للعائلة';
+
+  @override
+  String get weeklyCompleteWithoutChampion => 'أربع ألعاب وأسبوع مشترك وقصة عائلية تستحق أن تُحفظ.';
+
+  @override
+  String weeklyCompleteWithChampion(String name) {
+    return 'يتوج $name بطلاً للعائلة هذا الأسبوع بعد أربع ألعاب معًا.';
+  }
+
+  @override
+  String get weeklyCrown => 'لقب الأسبوع';
+
+  @override
+  String get monthlyCompetitionDescription => 'أربعة أفراد، ونصفا نهائي، ونهائي واحد، وبطل واحد.';
+
+  @override
+  String get monthlyRewards => 'مكافآت الشهر';
+
+  @override
+  String monthlyChampionRewardSummary(int tokens, int points) {
+    return 'البطل: +$tokens رمزًا + $points نقطة ترتيب + كأس';
+  }
+
+  @override
+  String semifinalistRewardSummary(int points) {
+    return 'المتأهلون لنصف النهائي: +$points نقطة ترتيب';
+  }
+
+  @override
+  String get chooseFourCompetitors => 'اختر 4 متنافسين بالضبط';
+
+  @override
+  String get startingMonthlyCup => 'جارٍ بدء الكأس الشهري...';
+
+  @override
+  String get startMonthlyCup => 'ابدأ الكأس الشهري';
+
+  @override
+  String get monthlyParticipantIncomplete => 'بيانات المشاركين في الكأس الشهري غير مكتملة.';
+
+  @override
+  String get monthlyCupBracket => 'مخطط الكأس الشهري';
+
+  @override
+  String semifinalNumber(int number) {
+    return 'نصف النهائي $number';
+  }
+
+  @override
+  String get finalRound => 'النهائي';
+
+  @override
+  String gameNameLabel(String name) {
+    return 'اللعبة: $name';
+  }
+
+  @override
+  String versusPlayers(String first, String second) {
+    return '$first ضد $second';
+  }
+
+  @override
+  String winnerNameLabel(String name) {
+    return 'الفائز: $name';
+  }
+
+  @override
+  String playNamedRound(String round) {
+    return 'العب $round';
+  }
+
+  @override
+  String get monthlyCupChampion => 'بطل الكأس الشهري';
+
+  @override
+  String get champion => 'البطل';
+
+  @override
+  String get monthlyCompleteDescription => 'تنتهي أكبر منافسات العائلة بكأس وذكرى جديدة في خزانة الإنجازات.';
+
+  @override
+  String get cupTrophy => 'كأس البطولة';
+
+  @override
+  String get tieBreak => 'كسر التعادل';
+
+  @override
+  String suddenDeathRound(int number) {
+    return 'الجولة الحاسمة • الجولة $number';
+  }
+
+  @override
+  String get counting => 'جارٍ العد...';
+
+  @override
+  String passPhoneTo(String name) {
+    return 'مرر الهاتف إلى $name';
+  }
+
+  @override
+  String get stopAtFiveSeconds => 'أوقف العد عندما تظن أن 5 ثوانٍ مرت بالضبط.';
+
+  @override
+  String get goalFiveSeconds => 'هدفك هو التوقف في أقرب وقت ممكن من 5 ثوانٍ بالضبط.';
+
+  @override
+  String get hiddenTimerDescription => 'يبقى المؤقت مخفيًا، ويفوز الأقرب.';
+
+  @override
+  String get start => 'ابدأ';
+
+  @override
+  String get stop => 'توقف';
+
+  @override
+  String tieBreakWinner(String name) {
+    return 'يفوز $name بجولة كسر التعادل!';
+  }
+
+  @override
+  String secondsFromTarget(String seconds) {
+    return 'الفارق $seconds ثانية فقط عن 5.000 ثوانٍ بالضبط.';
+  }
+
+  @override
+  String get confirmWinner => 'اعتماد الفائز';
+
+  @override
+  String get stillTied => 'التعادل مستمر!';
+
+  @override
+  String tiedPlayersContinue(int count, int round) {
+    return 'تعادل $count لاعبين في القرب من الهدف. يتابع هؤلاء فقط إلى الجولة $round.';
+  }
+
+  @override
+  String startTieBreakRound(int number) {
+    return 'ابدأ جولة كسر التعادل $number';
+  }
 }

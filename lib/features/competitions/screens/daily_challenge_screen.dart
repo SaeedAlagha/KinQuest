@@ -485,7 +485,7 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> {
                     ),
                     const SizedBox(height: 20),
                     Text(
-                      _game.name,
+                      _game.localizedName(strings),
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.headlineMedium
                           ?.copyWith(
@@ -495,7 +495,7 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> {
                     ),
                     const SizedBox(height: 10),
                     Text(
-                      _game.description,
+                      _game.localizedDescription(strings),
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                         color: Colors.white.withValues(alpha: 0.88),
@@ -529,14 +529,17 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> {
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
-                                  'Winner: '
-                                  '+${CompetitionRewards.dailyWinnerTokens} Tokens '
-                                  '+ ${CompetitionRewards.dailyWinnerRankingPoints} Ranking Points',
+                                  strings.dailyWinnerRewardSummary(
+                                    CompetitionRewards.dailyWinnerTokens,
+                                    CompetitionRewards.dailyWinnerRankingPoints,
+                                  ),
                                 ),
                                 const SizedBox(height: 2),
                                 Text(
-                                  'Runner-up: '
-                                  '+${CompetitionRewards.dailyRunnerUpRankingPoints} Ranking Points',
+                                  strings.dailyRunnerUpRewardSummary(
+                                    CompetitionRewards
+                                        .dailyRunnerUpRankingPoints,
+                                  ),
                                 ),
                               ],
                             ),
@@ -546,9 +549,8 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> {
                       const SizedBox(height: 14),
                       const Divider(),
                       const SizedBox(height: 10),
-                      const Text(
-                        'One official result per family per day. '
-                        'Quick Play results do not affect these rewards.',
+                      Text(
+                        strings.officialCompetitionRule,
                         textAlign: TextAlign.center,
                       ),
                     ],
@@ -572,7 +574,7 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> {
                       : const Icon(Icons.play_arrow_rounded),
                   label: Text(
                     _isSettling
-                        ? 'Saving official result...'
+                        ? strings.savingOfficialResult
                         : strings.playTodaysChallenge,
                   ),
                 ),
@@ -588,33 +590,38 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> {
   }
 
   Widget _buildCompletedCard() {
+    final strings = AppLocalizations.of(context)!;
     final winner = _winnerName;
 
     return SilaCelebrationCard(
       key: const ValueKey('daily-challenge-celebration'),
-      eyebrow: 'Daily Challenge complete',
-      title: winner ?? 'Family challenge complete',
+      eyebrow: strings.dailyOfficialCompleteEyebrow,
+      title: winner ?? strings.familyChallengeCompleteTitle,
       subtitle: winner == null
-          ? 'Your family showed up, played together, and completed today\'s official challenge.'
-          : '$winner takes today\'s family crown. Come back tomorrow for a fresh challenge.',
-      rewards: const [
+          ? strings.dailyCompleteWithoutWinner
+          : strings.dailyCompleteWithWinner(winner),
+      rewards: [
         SilaCelebrationReward(
           icon: Icons.stars_rounded,
-          label: '+${CompetitionRewards.dailyWinnerTokens} Tokens',
+          label: strings.tokenBonus(CompetitionRewards.dailyWinnerTokens),
         ),
         SilaCelebrationReward(
           icon: Icons.trending_up_rounded,
-          label: '+${CompetitionRewards.dailyWinnerRankingPoints} RP',
+          label: strings.rankingPointBonus(
+            CompetitionRewards.dailyWinnerRankingPoints,
+          ),
         ),
         SilaCelebrationReward(
           icon: Icons.favorite_rounded,
-          label: 'Family moment',
+          label: strings.familyMoment,
         ),
       ],
     );
   }
 
   Widget _buildTieCard() {
+    final strings = AppLocalizations.of(context)!;
+
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -630,23 +637,21 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> {
           ),
           const SizedBox(height: 12),
           Text(
-            'Tie detected',
+            strings.tieDetected,
             style: Theme.of(
               context,
             ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
           ),
           const SizedBox(height: 8),
-          const Text(
-            'No Tokens or Ranking Points have been awarded. '
-            'Only the tied leaders advance to sudden death. '
-            'No reward is granted until one winner remains.',
+          Text(
+            strings.tieRewardPendingDescription,
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 16),
           FilledButton.icon(
             onPressed: _isSettling ? null : _runTieBreak,
             icon: const Icon(Icons.bolt_rounded),
-            label: const Text('Start Sudden-Death Tie-Break'),
+            label: Text(strings.startSuddenDeathTieBreak),
           ),
         ],
       ),
@@ -654,6 +659,7 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> {
   }
 
   Widget _buildLatestResult() {
+    final strings = AppLocalizations.of(context)!;
     final result = _latestResult!;
 
     final rankedPlayers = List<CompetitionPlayerResult>.from(result.players);
@@ -667,7 +673,7 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              'Latest Result',
+              strings.latestResult,
               style: Theme.of(
                 context,
               ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
@@ -681,7 +687,7 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> {
                 leading: CircleAvatar(child: Text('${index + 1}')),
                 title: Text(player.name),
                 trailing: Text(
-                  '${player.gameScore} pts',
+                  strings.pointsAbbreviation(player.gameScore),
                   style: const TextStyle(fontWeight: FontWeight.w700),
                 ),
               );

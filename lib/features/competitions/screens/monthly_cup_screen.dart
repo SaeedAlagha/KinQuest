@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/sila_celebration_card.dart';
+import '../../../l10n/app_localizations.dart';
 import '../config/competition_rewards.dart';
 import '../config/official_competition_games.dart';
 import '../models/competition_game_result.dart';
@@ -709,8 +710,10 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context)!;
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Monthly Cup')),
+      appBar: AppBar(title: Text(strings.monthlyCup)),
       body: SafeArea(
         child: _isLoading
             ? const Center(child: CircularProgressIndicator())
@@ -722,6 +725,8 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
   }
 
   Widget _buildError() {
+    final strings = AppLocalizations.of(context)!;
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
@@ -732,7 +737,7 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
             const SizedBox(height: 16),
             Text(_errorMessage!, textAlign: TextAlign.center),
             const SizedBox(height: 20),
-            FilledButton(onPressed: _loadData, child: const Text('Try Again')),
+            FilledButton(onPressed: _loadData, child: Text(strings.tryAgain)),
           ],
         ),
       ),
@@ -752,6 +757,8 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
   }
 
   Widget _buildSetup() {
+    final strings = AppLocalizations.of(context)!;
+
     return ListView(
       padding: const EdgeInsets.all(24),
       children: [
@@ -769,8 +776,8 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
                 color: Colors.white,
               ),
               const SizedBox(height: 14),
-              const Text(
-                'MONTHLY CUP',
+              Text(
+                strings.monthlyCup.toUpperCase(),
                 style: TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.w900,
@@ -786,8 +793,8 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
                 ),
               ),
               const SizedBox(height: 10),
-              const Text(
-                'Four family members. Two semifinals. One final. One champion.',
+              Text(
+                strings.monthlyCompetitionDescription,
                 textAlign: TextAlign.center,
                 style: TextStyle(color: Colors.white),
               ),
@@ -802,21 +809,27 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Monthly rewards',
+                  strings.monthlyRewards,
                   style: Theme.of(
                     context,
                   ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  'Champion: +${CompetitionRewards.monthlyChampionTokens} Tokens '
-                  '+ ${CompetitionRewards.monthlyChampionRankingPoints} RP + Trophy',
+                  strings.monthlyChampionRewardSummary(
+                    CompetitionRewards.monthlyChampionTokens,
+                    CompetitionRewards.monthlyChampionRankingPoints,
+                  ),
                 ),
                 Text(
-                  'Runner-up: +${CompetitionRewards.monthlyRunnerUpRankingPoints} RP',
+                  strings.runnerUpRewardSummary(
+                    CompetitionRewards.monthlyRunnerUpRankingPoints,
+                  ),
                 ),
                 Text(
-                  'Semifinalists: +${CompetitionRewards.monthlySemifinalistRankingPoints} RP',
+                  strings.semifinalistRewardSummary(
+                    CompetitionRewards.monthlySemifinalistRankingPoints,
+                  ),
                 ),
               ],
             ),
@@ -824,7 +837,7 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
         ),
         const SizedBox(height: 20),
         Text(
-          'Choose exactly 4 competitors',
+          strings.chooseFourCompetitors,
           style: Theme.of(
             context,
           ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
@@ -861,7 +874,7 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
                 )
               : const Icon(Icons.emoji_events_rounded),
           label: Text(
-            _isSaving ? 'Starting Monthly Cup...' : 'Start Monthly Cup',
+            _isSaving ? strings.startingMonthlyCup : strings.startMonthlyCup,
           ),
         ),
       ],
@@ -869,12 +882,11 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
   }
 
   Widget _buildBracket() {
+    final strings = AppLocalizations.of(context)!;
     final players = _selectedPlayers;
 
     if (players.length != 4) {
-      return const Center(
-        child: Text('Monthly Cup participant data is incomplete.'),
-      );
+      return Center(child: Text(strings.monthlyParticipantIncomplete));
     }
 
     final semifinal1 = _matchByIndex(0);
@@ -893,7 +905,7 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
       padding: const EdgeInsets.all(24),
       children: [
         Text(
-          'Monthly Cup Bracket',
+          strings.monthlyCupBracket,
           style: Theme.of(
             context,
           ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
@@ -901,7 +913,8 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
         const SizedBox(height: 20),
 
         _buildMatchCard(
-          title: 'Semifinal 1',
+          matchIndex: 0,
+          title: strings.semifinalNumber(1),
           player1: players[0],
           player2: players[1],
           match: semifinal1,
@@ -916,7 +929,8 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
         const SizedBox(height: 14),
 
         _buildMatchCard(
-          title: 'Semifinal 2',
+          matchIndex: 1,
+          title: strings.semifinalNumber(2),
           player1: players[2],
           player2: players[3],
           match: semifinal2,
@@ -932,7 +946,8 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
 
         if (finalist1 != null && finalist2 != null)
           _buildMatchCard(
-            title: 'FINAL',
+            matchIndex: 2,
+            title: strings.finalRound,
             player1: finalist1,
             player2: finalist2,
             match: finalMatch,
@@ -953,6 +968,7 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
   }
 
   Widget _buildMatchCard({
+    required int matchIndex,
     required String title,
     required _MonthlyPlayer player1,
     required _MonthlyPlayer player2,
@@ -960,13 +976,8 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
     required VoidCallback onPlay,
     required bool enabled,
   }) {
-    final game = _gameForMatch(
-      title == 'Semifinal 1'
-          ? 0
-          : title == 'Semifinal 2'
-          ? 1
-          : 2,
-    );
+    final strings = AppLocalizations.of(context)!;
+    final game = _gameForMatch(matchIndex);
 
     return Card(
       child: Padding(
@@ -981,10 +992,10 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
               ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 6),
-            Text('Game: ${game.name}'),
+            Text(strings.gameNameLabel(game.localizedName(strings))),
             const SizedBox(height: 18),
             Text(
-              '${player1.name}  VS  ${player2.name}',
+              strings.versusPlayers(player1.name, player2.name),
               textAlign: TextAlign.center,
               style: Theme.of(
                 context,
@@ -1001,7 +1012,7 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
-                      'Winner: ${match.winnerName}',
+                      strings.winnerNameLabel(match.winnerName),
                       style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
                   ),
@@ -1011,7 +1022,7 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
               FilledButton.icon(
                 onPressed: enabled && !_isSaving ? onPlay : null,
                 icon: const Icon(Icons.play_arrow_rounded),
-                label: Text('Play $title'),
+                label: Text(strings.playNamedRound(title)),
               ),
           ],
         ),
@@ -1020,28 +1031,33 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
   }
 
   Widget _buildCompletedCup() {
+    final strings = AppLocalizations.of(context)!;
+
     return ListView(
       padding: const EdgeInsets.all(24),
       children: [
         SilaCelebrationCard(
           key: const ValueKey('monthly-cup-celebration'),
-          eyebrow: 'Monthly Cup Champion',
-          title: _championName ?? 'Champion',
-          subtitle:
-              'The family\'s biggest competition ends with a trophy and a memory for the cabinet.',
+          eyebrow: strings.monthlyCupChampion,
+          title: _championName ?? strings.champion,
+          subtitle: strings.monthlyCompleteDescription,
           icon: Icons.workspace_premium_rounded,
-          rewards: const [
+          rewards: [
             SilaCelebrationReward(
               icon: Icons.stars_rounded,
-              label: '+${CompetitionRewards.monthlyChampionTokens} Tokens',
+              label: strings.tokenBonus(
+                CompetitionRewards.monthlyChampionTokens,
+              ),
             ),
             SilaCelebrationReward(
               icon: Icons.trending_up_rounded,
-              label: '+${CompetitionRewards.monthlyChampionRankingPoints} RP',
+              label: strings.rankingPointBonus(
+                CompetitionRewards.monthlyChampionRankingPoints,
+              ),
             ),
             SilaCelebrationReward(
               icon: Icons.emoji_events_rounded,
-              label: 'Cup trophy',
+              label: strings.cupTrophy,
             ),
           ],
         ),
@@ -1050,7 +1066,9 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
           (match) => ListTile(
             leading: const Icon(Icons.sports_esports_rounded),
             title: Text(match.gameName),
-            subtitle: Text('${match.player1Name} vs ${match.player2Name}'),
+            subtitle: Text(
+              strings.versusPlayers(match.player1Name, match.player2Name),
+            ),
             trailing: Text(
               match.winnerName,
               style: const TextStyle(fontWeight: FontWeight.bold),
