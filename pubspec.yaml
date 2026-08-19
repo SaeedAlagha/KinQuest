@@ -42,6 +42,7 @@ dependencies:
   firebase_storage: ^13.4.6
   image_picker: ^1.2.3
   shared_preferences: ^2.5.5
+  firebase_messaging: ^16.5.0
 
 dev_dependencies:
   fake_cloud_firestore: ^4.2.0
