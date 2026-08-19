@@ -5,6 +5,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/family_year_banner.dart';
 import '../../../core/widgets/sila_brand_mark.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../demo/screens/competition_demo_screen.dart';
 import 'login_screen.dart';
 import 'signup_screen.dart';
 
@@ -22,6 +23,13 @@ class WelcomeScreen extends StatelessWidget {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (_) => const SignupScreen()),
+    );
+  }
+
+  void _openCompetitionDemo(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const CompetitionDemoScreen()),
     );
   }
 
@@ -55,9 +63,13 @@ class WelcomeScreen extends StatelessWidget {
                           child: isWide
                               ? Row(
                                   children: [
-                                    const Expanded(
+                                    Expanded(
                                       flex: 6,
-                                      child: _WelcomeHero(isWide: true),
+                                      child: _WelcomeHero(
+                                        isWide: true,
+                                        onDemo: () =>
+                                            _openCompetitionDemo(context),
+                                      ),
                                     ),
                                     const SizedBox(width: 64),
                                     Expanded(
@@ -71,7 +83,11 @@ class WelcomeScreen extends StatelessWidget {
                                 )
                               : Column(
                                   children: [
-                                    const _WelcomeHero(isWide: false),
+                                    _WelcomeHero(
+                                      isWide: false,
+                                      onDemo: () =>
+                                          _openCompetitionDemo(context),
+                                    ),
                                     const SizedBox(height: 36),
                                     _WelcomeActions(
                                       onLogin: () => _openLogin(context),
@@ -94,9 +110,10 @@ class WelcomeScreen extends StatelessWidget {
 }
 
 class _WelcomeHero extends StatelessWidget {
-  const _WelcomeHero({required this.isWide});
+  const _WelcomeHero({required this.isWide, required this.onDemo});
 
   final bool isWide;
+  final VoidCallback onDemo;
 
   @override
   Widget build(BuildContext context) {
@@ -186,7 +203,20 @@ class _WelcomeHero extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(height: 26),
+        const SizedBox(height: 20),
+        ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 420),
+          child: SizedBox(
+            width: isWide ? null : double.infinity,
+            child: FilledButton.tonalIcon(
+              key: const ValueKey('competition-demo-cta'),
+              onPressed: onDemo,
+              icon: const Icon(Icons.play_circle_fill_rounded),
+              label: Text(CompetitionDemoCopy.launchLabel(context)),
+            ),
+          ),
+        ),
+        const SizedBox(height: 20),
         Wrap(
           alignment: isWide ? WrapAlignment.start : WrapAlignment.center,
           spacing: 10,
