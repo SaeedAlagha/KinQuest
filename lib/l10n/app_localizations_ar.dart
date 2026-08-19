@@ -676,6 +676,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get couldNotCreateFamily => 'تعذر إنشاء العائلة. يرجى المحاولة مجددًا.';
 
   @override
+  String get alreadyInFamily => 'غادر عائلتك الحالية قبل إنشاء عائلة أخرى.';
+
+  @override
   String get familyImageComing => 'ستتم إضافة رفع صورة العائلة لاحقًا.';
 
   @override
@@ -719,6 +722,12 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get invitationCodeNotFound => 'لم يتم العثور على رمز الدعوة.';
+
+  @override
+  String get alreadyFamilyMember => 'أنت فرد في هذه العائلة بالفعل.';
+
+  @override
+  String get leaveCurrentFamilyFirst => 'غادر عائلتك الحالية قبل الانضمام إلى عائلة أخرى.';
 
   @override
   String get couldNotJoinFamily => 'تعذر الانضمام إلى العائلة. يرجى المحاولة مجددًا.';
@@ -995,6 +1004,39 @@ class AppLocalizationsAr extends AppLocalizations {
   String get profileTitle => 'الملف الشخصي';
 
   @override
+  String get editProfile => 'تعديل الملف الشخصي';
+
+  @override
+  String get editProfileTooltip => 'تعديل الملف الشخصي';
+
+  @override
+  String get personalDetails => 'بياناتك الشخصية';
+
+  @override
+  String get personalDetailsDescription => 'اجعل اسمك واضحًا لتعرف عائلتك من يلعب ويساهم.';
+
+  @override
+  String get emailManagedSecurely => 'تتم إدارة بريد تسجيل الدخول من خلال أمان الحساب.';
+
+  @override
+  String get saveProfile => 'حفظ الملف الشخصي';
+
+  @override
+  String get savingProfile => 'جارٍ حفظ الملف الشخصي...';
+
+  @override
+  String get profileUpdated => 'تم تحديث الملف الشخصي بنجاح.';
+
+  @override
+  String get couldNotLoadProfile => 'تعذر تحميل ملفك الشخصي. يرجى المحاولة مرة أخرى.';
+
+  @override
+  String get couldNotSaveProfile => 'تعذر حفظ ملفك الشخصي. يرجى المحاولة مرة أخرى.';
+
+  @override
+  String get developerPreviewReadOnly => 'معاينة المطوّر للقراءة فقط. لم يتم تغيير أي بيانات.';
+
+  @override
   String get profileFamilySection => 'العائلة';
 
   @override
@@ -1081,6 +1123,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get trophiesEmptyDescription => 'ستظهر هنا كؤوس البطولات الأسبوعية والشهرية.';
 
   @override
+  String get couldNotLoadTrophies => 'تعذر تحميل كؤوس العائلة. يرجى المحاولة مرة أخرى.';
+
+  @override
   String get appSettings => 'إعدادات التطبيق';
 
   @override
@@ -1115,6 +1160,162 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get shareFamilyInviteCode => 'شارك هذا الرمز مع أقاربك ليتمكنوا من الانضمام إلى هذه العائلة.';
+
+  @override
+  String get manageFamily => 'إدارة العائلة';
+
+  @override
+  String get familyManagement => 'إدارة العائلة';
+
+  @override
+  String get familyManagementDescription => 'ادعُ أقاربك وتعرّف على الصلاحيات وحافظ على تنظيم مجموعتك العائلية.';
+
+  @override
+  String get familyLoadError => 'تعذر تحميل عائلتك. يرجى المحاولة مرة أخرى.';
+
+  @override
+  String get familyMembersLoadError => 'تعذر تحميل أفراد العائلة. يرجى المحاولة مرة أخرى.';
+
+  @override
+  String get createOrJoinFamilyAction => 'إنشاء عائلة أو الانضمام إليها';
+
+  @override
+  String get inviteRelatives => 'دعوة الأقارب';
+
+  @override
+  String get familyInviteDescription => 'شارك هذا الرمز الخاص فقط مع الأقارب الذين تريد ضمهم إلى مساحة عائلتك.';
+
+  @override
+  String get familyMembersTitle => 'أفراد العائلة';
+
+  @override
+  String get familyMembersDescription => 'توضّح الأدوار ما يمكن لكل شخص إدارته في مساحة العائلة.';
+
+  @override
+  String get familyRoles => 'أدوار العائلة';
+
+  @override
+  String get familyRoleOwner => 'المالك';
+
+  @override
+  String get familyRoleAdmin => 'مسؤول المكافآت';
+
+  @override
+  String get familyRoleMember => 'فرد';
+
+  @override
+  String get familyOwnerDescription => 'يدير بيانات العائلة وأفرادها وأدوارها وملكيتها.';
+
+  @override
+  String get familyAdminDescription => 'يمكنه مراجعة طلبات مكافآت العائلة والموافقة عليها.';
+
+  @override
+  String get familyMemberDescription => 'يمكنه المشاركة في ألعاب العائلة ومهامها وذكرياتها وأنشطتها المشتركة.';
+
+  @override
+  String familyMemberYou(String name) {
+    return '$name (أنت)';
+  }
+
+  @override
+  String get memberActions => 'إجراءات الفرد';
+
+  @override
+  String get editFamily => 'تعديل العائلة';
+
+  @override
+  String get editFamilyDetails => 'تعديل بيانات العائلة';
+
+  @override
+  String get saveFamily => 'حفظ العائلة';
+
+  @override
+  String get familyUpdated => 'تم تحديث بيانات العائلة.';
+
+  @override
+  String get couldNotUpdateFamily => 'تعذر تحديث العائلة. يرجى المحاولة مرة أخرى.';
+
+  @override
+  String get makeAdmin => 'تعيين مسؤول للمكافآت';
+
+  @override
+  String get removeAdmin => 'إزالة صلاحية مسؤول المكافآت';
+
+  @override
+  String get adminRoleUpdated => 'تم تحديث دور الفرد في العائلة.';
+
+  @override
+  String get couldNotUpdateAdminRole => 'تعذر تحديث هذا الدور. يرجى المحاولة مرة أخرى.';
+
+  @override
+  String get transferOwnership => 'نقل الملكية';
+
+  @override
+  String transferOwnershipQuestion(String name) {
+    return 'تعيين $name مالكًا للعائلة؟';
+  }
+
+  @override
+  String get transferOwnershipWarning => 'سيحصل هذا الفرد على جميع صلاحيات إدارة العائلة وستصبح أنت فردًا عاديًا. ويمكن للمالك الجديد تغيير ذلك لاحقًا.';
+
+  @override
+  String get ownershipTransferred => 'تم نقل ملكية العائلة.';
+
+  @override
+  String get couldNotTransferOwnership => 'تعذر نقل الملكية. يرجى المحاولة مرة أخرى.';
+
+  @override
+  String get removeMember => 'إزالة الفرد';
+
+  @override
+  String removeMemberQuestion(String name) {
+    return 'إزالة $name؟';
+  }
+
+  @override
+  String get removeMemberWarning => 'سيفقد هذا الفرد الوصول إلى محتوى العائلة الخاص ويمكنه الانضمام إلى عائلة أخرى أو إنشاء واحدة.';
+
+  @override
+  String get familyMemberRemoved => 'تمت إزالة فرد العائلة.';
+
+  @override
+  String get couldNotRemoveMember => 'تعذرت إزالة فرد العائلة. يرجى المحاولة مرة أخرى.';
+
+  @override
+  String get leaveFamily => 'مغادرة العائلة';
+
+  @override
+  String get leaveFamilyQuestion => 'مغادرة هذه العائلة؟';
+
+  @override
+  String get leaveFamilyWarning => 'ستفقد الوصول إلى محتوى هذه العائلة الخاص. ويمكنك الانضمام مجددًا لاحقًا باستخدام رمز دعوة.';
+
+  @override
+  String get leftFamilySuccessfully => 'لقد غادرت العائلة.';
+
+  @override
+  String get couldNotLeaveFamily => 'تعذرت مغادرة العائلة. يرجى المحاولة مرة أخرى.';
+
+  @override
+  String get transferBeforeLeaving => 'انقل الملكية للمغادرة';
+
+  @override
+  String get ownerCannotLeave => 'انقل الملكية أولًا';
+
+  @override
+  String get ownerCannotLeaveDescription => 'يحمي المالك مساحة العائلة. انقل الملكية إلى فرد آخر قبل المغادرة. وإذا كنت الفرد الوحيد، فادعُ قريبًا موثوقًا أولًا.';
+
+  @override
+  String get gotIt => 'حسنًا';
+
+  @override
+  String get developerFamilyDescription => 'مساحة خاصة ودافئة للعب والمشاركة والنمو معًا.';
+
+  @override
+  String get developerFamilyMemberName => 'مريم';
+
+  @override
+  String get developerFamilyMemberTwoName => 'عمر';
 
   @override
   String get missionsSignInRequired => 'يجب تسجيل الدخول لعرض المهام.';

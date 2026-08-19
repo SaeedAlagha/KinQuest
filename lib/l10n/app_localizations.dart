@@ -266,7 +266,7 @@ abstract class AppLocalizations {
   /// No description provided for @accountEmail.
   ///
   /// In en, this message translates to:
-  /// **'Account Email'**
+  /// **'Account email'**
   String get accountEmail;
 
   /// No description provided for @changePassword.
@@ -1373,6 +1373,12 @@ abstract class AppLocalizations {
   /// **'Could not create the family. Please try again.'**
   String get couldNotCreateFamily;
 
+  /// No description provided for @alreadyInFamily.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave your current family before creating another one.'**
+  String get alreadyInFamily;
+
   /// No description provided for @familyImageComing.
   ///
   /// In en, this message translates to:
@@ -1462,6 +1468,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Invitation code not found.'**
   String get invitationCodeNotFound;
+
+  /// No description provided for @alreadyFamilyMember.
+  ///
+  /// In en, this message translates to:
+  /// **'You are already a member of this family.'**
+  String get alreadyFamilyMember;
+
+  /// No description provided for @leaveCurrentFamilyFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave your current family before joining another one.'**
+  String get leaveCurrentFamilyFirst;
 
   /// No description provided for @couldNotJoinFamily.
   ///
@@ -2003,6 +2021,72 @@ abstract class AppLocalizations {
   /// **'Profile'**
   String get profileTitle;
 
+  /// No description provided for @editProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Profile'**
+  String get editProfile;
+
+  /// No description provided for @editProfileTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit profile'**
+  String get editProfileTooltip;
+
+  /// No description provided for @personalDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Your personal details'**
+  String get personalDetails;
+
+  /// No description provided for @personalDetailsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep your name recognizable so your family knows who is playing and contributing.'**
+  String get personalDetailsDescription;
+
+  /// No description provided for @emailManagedSecurely.
+  ///
+  /// In en, this message translates to:
+  /// **'Your sign-in email is managed through account security.'**
+  String get emailManagedSecurely;
+
+  /// No description provided for @saveProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Save Profile'**
+  String get saveProfile;
+
+  /// No description provided for @savingProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving Profile...'**
+  String get savingProfile;
+
+  /// No description provided for @profileUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile updated successfully.'**
+  String get profileUpdated;
+
+  /// No description provided for @couldNotLoadProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load your profile. Please try again.'**
+  String get couldNotLoadProfile;
+
+  /// No description provided for @couldNotSaveProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save your profile. Please try again.'**
+  String get couldNotSaveProfile;
+
+  /// No description provided for @developerPreviewReadOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Developer preview is read-only. No data was changed.'**
+  String get developerPreviewReadOnly;
+
   /// No description provided for @profileFamilySection.
   ///
   /// In en, this message translates to:
@@ -2147,6 +2231,12 @@ abstract class AppLocalizations {
   /// **'Weekly and monthly championship trophies will appear here.'**
   String get trophiesEmptyDescription;
 
+  /// No description provided for @couldNotLoadTrophies.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load family trophies. Please try again.'**
+  String get couldNotLoadTrophies;
+
   /// No description provided for @appSettings.
   ///
   /// In en, this message translates to:
@@ -2194,6 +2284,306 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Share this code with relatives so they can join this family.'**
   String get shareFamilyInviteCode;
+
+  /// No description provided for @manageFamily.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage Family'**
+  String get manageFamily;
+
+  /// No description provided for @familyManagement.
+  ///
+  /// In en, this message translates to:
+  /// **'Family Management'**
+  String get familyManagement;
+
+  /// No description provided for @familyManagementDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite relatives, understand roles, and keep your family group organized.'**
+  String get familyManagementDescription;
+
+  /// No description provided for @familyLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load your family. Please try again.'**
+  String get familyLoadError;
+
+  /// No description provided for @familyMembersLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load family members. Please try again.'**
+  String get familyMembersLoadError;
+
+  /// No description provided for @createOrJoinFamilyAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Create or Join a Family'**
+  String get createOrJoinFamilyAction;
+
+  /// No description provided for @inviteRelatives.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite relatives'**
+  String get inviteRelatives;
+
+  /// No description provided for @familyInviteDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Share this private code only with relatives you want in your family space.'**
+  String get familyInviteDescription;
+
+  /// No description provided for @familyMembersTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Family members'**
+  String get familyMembersTitle;
+
+  /// No description provided for @familyMembersDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Roles explain what each person can manage in your family space.'**
+  String get familyMembersDescription;
+
+  /// No description provided for @familyRoles.
+  ///
+  /// In en, this message translates to:
+  /// **'Family roles'**
+  String get familyRoles;
+
+  /// No description provided for @familyRoleOwner.
+  ///
+  /// In en, this message translates to:
+  /// **'Owner'**
+  String get familyRoleOwner;
+
+  /// No description provided for @familyRoleAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'Reward Admin'**
+  String get familyRoleAdmin;
+
+  /// No description provided for @familyRoleMember.
+  ///
+  /// In en, this message translates to:
+  /// **'Member'**
+  String get familyRoleMember;
+
+  /// No description provided for @familyOwnerDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Manages family details, members, roles, and ownership.'**
+  String get familyOwnerDescription;
+
+  /// No description provided for @familyAdminDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Can review and approve family reward requests.'**
+  String get familyAdminDescription;
+
+  /// No description provided for @familyMemberDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Can join family games, missions, memories, and shared activities.'**
+  String get familyMemberDescription;
+
+  /// No description provided for @familyMemberYou.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} (You)'**
+  String familyMemberYou(String name);
+
+  /// No description provided for @memberActions.
+  ///
+  /// In en, this message translates to:
+  /// **'Member actions'**
+  String get memberActions;
+
+  /// No description provided for @editFamily.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit family'**
+  String get editFamily;
+
+  /// No description provided for @editFamilyDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Family Details'**
+  String get editFamilyDetails;
+
+  /// No description provided for @saveFamily.
+  ///
+  /// In en, this message translates to:
+  /// **'Save Family'**
+  String get saveFamily;
+
+  /// No description provided for @familyUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Family details updated.'**
+  String get familyUpdated;
+
+  /// No description provided for @couldNotUpdateFamily.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not update the family. Please try again.'**
+  String get couldNotUpdateFamily;
+
+  /// No description provided for @makeAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'Make Reward Admin'**
+  String get makeAdmin;
+
+  /// No description provided for @removeAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove Reward Admin'**
+  String get removeAdmin;
+
+  /// No description provided for @adminRoleUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Family role updated.'**
+  String get adminRoleUpdated;
+
+  /// No description provided for @couldNotUpdateAdminRole.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not update this family role. Please try again.'**
+  String get couldNotUpdateAdminRole;
+
+  /// No description provided for @transferOwnership.
+  ///
+  /// In en, this message translates to:
+  /// **'Transfer Ownership'**
+  String get transferOwnership;
+
+  /// No description provided for @transferOwnershipQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Make {name} the owner?'**
+  String transferOwnershipQuestion(String name);
+
+  /// No description provided for @transferOwnershipWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'They will receive full family controls and you will become a regular member. This can be changed again by the new owner.'**
+  String get transferOwnershipWarning;
+
+  /// No description provided for @ownershipTransferred.
+  ///
+  /// In en, this message translates to:
+  /// **'Family ownership transferred.'**
+  String get ownershipTransferred;
+
+  /// No description provided for @couldNotTransferOwnership.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not transfer ownership. Please try again.'**
+  String get couldNotTransferOwnership;
+
+  /// No description provided for @removeMember.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove Member'**
+  String get removeMember;
+
+  /// No description provided for @removeMemberQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove {name}?'**
+  String removeMemberQuestion(String name);
+
+  /// No description provided for @removeMemberWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'They will lose access to this family\'s private content and can join or create another family.'**
+  String get removeMemberWarning;
+
+  /// No description provided for @familyMemberRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'Family member removed.'**
+  String get familyMemberRemoved;
+
+  /// No description provided for @couldNotRemoveMember.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not remove this family member. Please try again.'**
+  String get couldNotRemoveMember;
+
+  /// No description provided for @leaveFamily.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave Family'**
+  String get leaveFamily;
+
+  /// No description provided for @leaveFamilyQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave this family?'**
+  String get leaveFamilyQuestion;
+
+  /// No description provided for @leaveFamilyWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'You will lose access to this family\'s private content. You can join again later with an invitation code.'**
+  String get leaveFamilyWarning;
+
+  /// No description provided for @leftFamilySuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'You left the family.'**
+  String get leftFamilySuccessfully;
+
+  /// No description provided for @couldNotLeaveFamily.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not leave the family. Please try again.'**
+  String get couldNotLeaveFamily;
+
+  /// No description provided for @transferBeforeLeaving.
+  ///
+  /// In en, this message translates to:
+  /// **'Transfer Ownership to Leave'**
+  String get transferBeforeLeaving;
+
+  /// No description provided for @ownerCannotLeave.
+  ///
+  /// In en, this message translates to:
+  /// **'Transfer ownership first'**
+  String get ownerCannotLeave;
+
+  /// No description provided for @ownerCannotLeaveDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'The owner protects the family space. Transfer ownership to another member before leaving. If you are the only member, invite a trusted relative first.'**
+  String get ownerCannotLeaveDescription;
+
+  /// No description provided for @gotIt.
+  ///
+  /// In en, this message translates to:
+  /// **'Got It'**
+  String get gotIt;
+
+  /// No description provided for @developerFamilyDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'A warm private space for playing, sharing, and growing together.'**
+  String get developerFamilyDescription;
+
+  /// No description provided for @developerFamilyMemberName.
+  ///
+  /// In en, this message translates to:
+  /// **'Mariam'**
+  String get developerFamilyMemberName;
+
+  /// No description provided for @developerFamilyMemberTwoName.
+  ///
+  /// In en, this message translates to:
+  /// **'Omar'**
+  String get developerFamilyMemberTwoName;
 
   /// No description provided for @missionsSignInRequired.
   ///

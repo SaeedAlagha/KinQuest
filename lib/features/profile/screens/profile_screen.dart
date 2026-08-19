@@ -4,9 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../../l10n/app_localizations.dart';
+import '../../authentication/screens/family_choice_screen.dart';
 import '../../authentication/screens/welcome_screen.dart';
 import '../../rewards/digital/digital_reward_visuals.dart';
 import '../../rewards/digital/equipped_digital_rewards.dart';
+import 'edit_profile_screen.dart';
+import 'family_management_screen.dart';
 import 'settings_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
@@ -20,7 +23,25 @@ class ProfileScreen extends StatelessWidget {
     final strings = AppLocalizations.of(context)!;
 
     return Scaffold(
-      appBar: AppBar(title: Text(strings.profileTitle), centerTitle: true),
+      appBar: AppBar(
+        title: Text(strings.profileTitle),
+        centerTitle: true,
+        actions: [
+          IconButton(
+            tooltip: strings.editProfileTooltip,
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) =>
+                      EditProfileScreen(developerPreview: developerPreview),
+                ),
+              );
+            },
+            icon: const Icon(Icons.edit_outlined),
+          ),
+        ],
+      ),
       body: ListView(
         padding: const EdgeInsets.all(20),
         children: [
@@ -298,6 +319,15 @@ class _ProfileHeader extends StatelessWidget {
           );
         }
 
+        if (snapshot.hasError) {
+          return Card(
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Text(strings.couldNotLoadProfile),
+            ),
+          );
+        }
+
         final data = snapshot.data?.data();
 
         final name = data?['name'] as String? ?? strings.silaMember;
@@ -349,6 +379,15 @@ class _ProfileHeader extends StatelessWidget {
                           .doc(familyId)
                           .snapshots(),
                       builder: (context, familySnapshot) {
+                        if (familySnapshot.hasError) {
+                          return Text(
+                            strings.familyLoadError,
+                            textAlign: TextAlign.center,
+                            style: Theme.of(context).textTheme.bodyMedium
+                                ?.copyWith(color: secondaryColor),
+                          );
+                        }
+
                         final familyData = familySnapshot.data?.data();
                         final familyName =
                             familyData?['name'] as String? ??
@@ -949,6 +988,15 @@ class _TrophyCabinetSection extends StatelessWidget {
           );
         }
 
+        if (userSnapshot.hasError) {
+          return Card(
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Text(strings.couldNotLoadTrophies),
+            ),
+          );
+        }
+
         final familyId = userSnapshot.data
             ?.data()?['familyId']
             ?.toString()
@@ -1220,6 +1268,15 @@ class _FamilyDetailsCard extends StatelessWidget {
           );
         }
 
+        if (userSnapshot.hasError) {
+          return Card(
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Text(strings.familyLoadError),
+            ),
+          );
+        }
+
         final userData = userSnapshot.data?.data();
         final familyId = userData?['familyId'] as String?;
 
@@ -1227,7 +1284,29 @@ class _FamilyDetailsCard extends StatelessWidget {
           return Card(
             child: Padding(
               padding: const EdgeInsets.all(20),
-              child: Text(strings.youHaveNotJoinedFamily),
+              child: Column(
+                children: [
+                  const Icon(Icons.group_add_outlined, size: 46),
+                  const SizedBox(height: 12),
+                  Text(
+                    strings.youHaveNotJoinedFamily,
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  FilledButton.icon(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const FamilyChoiceScreen(),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.family_restroom_rounded),
+                    label: Text(strings.createOrJoinFamilyAction),
+                  ),
+                ],
+              ),
             ),
           );
         }
@@ -1243,6 +1322,16 @@ class _FamilyDetailsCard extends StatelessWidget {
                 child: Padding(
                   padding: EdgeInsets.all(24),
                   child: Center(child: CircularProgressIndicator()),
+                ),
+              );
+            }
+
+            if (familySnapshot.hasError ||
+                familySnapshot.data?.exists != true) {
+              return Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Text(strings.familyLoadError),
                 ),
               );
             }
@@ -1331,6 +1420,22 @@ class _FamilyDetailsCard extends StatelessWidget {
                       strings.shareFamilyInviteCode,
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
+                    const SizedBox(height: 16),
+                    SizedBox(
+                      width: double.infinity,
+                      child: FilledButton.tonalIcon(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const FamilyManagementScreen(),
+                            ),
+                          );
+                        },
+                        icon: const Icon(Icons.manage_accounts_outlined),
+                        label: Text(strings.manageFamily),
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -1375,6 +1480,23 @@ class _DeveloperFamilyCard extends StatelessWidget {
             ),
             const SizedBox(height: 10),
             Text(strings.profileFamilyMemberCount(5)),
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton.tonalIcon(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) =>
+                          const FamilyManagementScreen(developerPreview: true),
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.manage_accounts_outlined),
+                label: Text(strings.manageFamily),
+              ),
+            ),
           ],
         ),
       ),
