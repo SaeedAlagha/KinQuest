@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/sila_celebration_card.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../rewards/digital/digital_reward_visuals.dart';
+import '../../rewards/digital/equipped_digital_rewards.dart';
 import '../config/competition_rewards.dart';
 import '../config/official_competition_games.dart';
 import '../models/competition_game_result.dart';
@@ -34,6 +36,7 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
   final Set<String> _selectedIds = {};
   final List<_MonthlyMatch> _matches = [];
 
+  String? _championId;
   String? _championName;
 
   DateTime get _today => DateTime.now();
@@ -189,6 +192,7 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
             data?['completed'] == true;
 
         _completed = data?['completed'] == true;
+        _championId = data?['winnerId'] as String?;
         _championName = data?['winnerName'] as String?;
 
         _isLoading = false;
@@ -528,6 +532,7 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
 
     if (widget.developerPreview) {
       setState(() {
+        _championId = championId;
         _championName = championName;
         _completed = true;
         _isSaving = false;
@@ -667,6 +672,7 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
       }
 
       setState(() {
+        _championId = championId;
         _championName = championName;
         _completed = true;
         _isSaving = false;
@@ -1036,30 +1042,37 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
     return ListView(
       padding: const EdgeInsets.all(24),
       children: [
-        SilaCelebrationCard(
-          key: const ValueKey('monthly-cup-celebration'),
-          eyebrow: strings.monthlyCupChampion,
-          title: _championName ?? strings.champion,
-          subtitle: strings.monthlyCompleteDescription,
-          icon: Icons.workspace_premium_rounded,
-          rewards: [
-            SilaCelebrationReward(
-              icon: Icons.stars_rounded,
-              label: strings.tokenBonus(
-                CompetitionRewards.monthlyChampionTokens,
+        DigitalRewardStyleBuilder(
+          userId: widget.developerPreview ? null : _championId,
+          preview: widget.developerPreview
+              ? const EquippedDigitalRewards(celebrationEffect: 'stars')
+              : null,
+          builder: (context, digitalRewards) => SilaCelebrationCard(
+            key: const ValueKey('monthly-cup-celebration'),
+            eyebrow: strings.monthlyCupChampion,
+            title: _championName ?? strings.champion,
+            subtitle: strings.monthlyCompleteDescription,
+            icon: Icons.workspace_premium_rounded,
+            effect: digitalRewards.celebrationEffect,
+            rewards: [
+              SilaCelebrationReward(
+                icon: Icons.stars_rounded,
+                label: strings.tokenBonus(
+                  CompetitionRewards.monthlyChampionTokens,
+                ),
               ),
-            ),
-            SilaCelebrationReward(
-              icon: Icons.trending_up_rounded,
-              label: strings.rankingPointBonus(
-                CompetitionRewards.monthlyChampionRankingPoints,
+              SilaCelebrationReward(
+                icon: Icons.trending_up_rounded,
+                label: strings.rankingPointBonus(
+                  CompetitionRewards.monthlyChampionRankingPoints,
+                ),
               ),
-            ),
-            SilaCelebrationReward(
-              icon: Icons.emoji_events_rounded,
-              label: strings.cupTrophy,
-            ),
-          ],
+              SilaCelebrationReward(
+                icon: Icons.emoji_events_rounded,
+                label: strings.cupTrophy,
+              ),
+            ],
+          ),
         ),
         const SizedBox(height: 24),
         ..._matches.map(

@@ -6,6 +6,8 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/sila_celebration_card.dart';
 import '../../../core/widgets/sila_page_backdrop.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../rewards/digital/digital_reward_visuals.dart';
+import '../../rewards/digital/equipped_digital_rewards.dart';
 import '../config/competition_rewards.dart';
 import '../config/official_competition_games.dart';
 import '../models/competition_game_result.dart';
@@ -29,6 +31,7 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> {
   bool _tieDetected = false;
 
   String? _familyId;
+  String? _winnerId;
   String? _winnerName;
   String? _errorMessage;
 
@@ -111,11 +114,17 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> {
           storedWinnerNames is List && storedWinnerNames.isNotEmpty
           ? storedWinnerNames.whereType<String>().join(', ')
           : data?['winnerName'] as String?;
+      final storedWinnerIds = data?['winnerIds'];
+      final loadedWinnerId =
+          storedWinnerIds is List && storedWinnerIds.isNotEmpty
+          ? storedWinnerIds.whereType<String>().firstOrNull
+          : data?['winnerId'] as String?;
 
       setState(() {
         _familyId = familyId;
         _completedToday = competitionDoc.exists && data?['completed'] == true;
         _winnerName = loadedWinnerName;
+        _winnerId = loadedWinnerId;
         _isLoading = false;
       });
     } catch (_) {
@@ -264,6 +273,7 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> {
 
       setState(() {
         _latestResult = result;
+        _winnerId = winner.userId;
         _winnerName = result.sharedWin
             ? winners.map((player) => player.name).join(', ')
             : winner.name;
@@ -385,6 +395,7 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> {
 
       setState(() {
         _latestResult = result;
+        _winnerId = winner.userId;
         _winnerName = result.sharedWin
             ? winners.map((player) => player.name).join(', ')
             : winner.name;
@@ -593,29 +604,36 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> {
     final strings = AppLocalizations.of(context)!;
     final winner = _winnerName;
 
-    return SilaCelebrationCard(
-      key: const ValueKey('daily-challenge-celebration'),
-      eyebrow: strings.dailyOfficialCompleteEyebrow,
-      title: winner ?? strings.familyChallengeCompleteTitle,
-      subtitle: winner == null
-          ? strings.dailyCompleteWithoutWinner
-          : strings.dailyCompleteWithWinner(winner),
-      rewards: [
-        SilaCelebrationReward(
-          icon: Icons.stars_rounded,
-          label: strings.tokenBonus(CompetitionRewards.dailyWinnerTokens),
-        ),
-        SilaCelebrationReward(
-          icon: Icons.trending_up_rounded,
-          label: strings.rankingPointBonus(
-            CompetitionRewards.dailyWinnerRankingPoints,
+    return DigitalRewardStyleBuilder(
+      userId: widget.developerPreview ? null : _winnerId,
+      preview: widget.developerPreview
+          ? const EquippedDigitalRewards(celebrationEffect: 'confetti')
+          : null,
+      builder: (context, digitalRewards) => SilaCelebrationCard(
+        key: const ValueKey('daily-challenge-celebration'),
+        eyebrow: strings.dailyOfficialCompleteEyebrow,
+        title: winner ?? strings.familyChallengeCompleteTitle,
+        subtitle: winner == null
+            ? strings.dailyCompleteWithoutWinner
+            : strings.dailyCompleteWithWinner(winner),
+        effect: digitalRewards.celebrationEffect,
+        rewards: [
+          SilaCelebrationReward(
+            icon: Icons.stars_rounded,
+            label: strings.tokenBonus(CompetitionRewards.dailyWinnerTokens),
           ),
-        ),
-        SilaCelebrationReward(
-          icon: Icons.favorite_rounded,
-          label: strings.familyMoment,
-        ),
-      ],
+          SilaCelebrationReward(
+            icon: Icons.trending_up_rounded,
+            label: strings.rankingPointBonus(
+              CompetitionRewards.dailyWinnerRankingPoints,
+            ),
+          ),
+          SilaCelebrationReward(
+            icon: Icons.favorite_rounded,
+            label: strings.familyMoment,
+          ),
+        ],
+      ),
     );
   }
 

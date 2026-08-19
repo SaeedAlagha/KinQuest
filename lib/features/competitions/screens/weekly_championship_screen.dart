@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/sila_celebration_card.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../rewards/digital/digital_reward_visuals.dart';
+import '../../rewards/digital/equipped_digital_rewards.dart';
 import '../config/competition_rewards.dart';
 import '../config/official_competition_games.dart';
 import '../models/competition_game_result.dart';
@@ -33,6 +35,7 @@ class _WeeklyChampionshipScreenState extends State<WeeklyChampionshipScreen> {
 
   String? _familyId;
   Set<String> _participantIds = {};
+  String? _championId;
   String? _championName;
   String? _errorMessage;
 
@@ -182,6 +185,7 @@ class _WeeklyChampionshipScreenState extends State<WeeklyChampionshipScreen> {
 
         _completed = competitionDoc.exists && data?['completed'] == true;
 
+        _championId = data?['winnerId'] as String?;
         _championName = data?['winnerName'] as String?;
         _isLoading = false;
       });
@@ -558,6 +562,7 @@ class _WeeklyChampionshipScreenState extends State<WeeklyChampionshipScreen> {
       if (!mounted) return;
 
       setState(() {
+        _championId = champion.userId;
         _championName = champion.name;
         _completed = true;
         _isSettling = false;
@@ -663,6 +668,7 @@ class _WeeklyChampionshipScreenState extends State<WeeklyChampionshipScreen> {
       }
 
       setState(() {
+        _championId = champion.userId;
         _championName = champion.name;
         _completed = true;
         _isSettling = false;
@@ -972,29 +978,36 @@ class _WeeklyChampionshipScreenState extends State<WeeklyChampionshipScreen> {
     final strings = AppLocalizations.of(context)!;
     final champion = _championName;
 
-    return SilaCelebrationCard(
-      key: const ValueKey('weekly-championship-celebration'),
-      eyebrow: strings.weeklyOfficialCompleteEyebrow,
-      title: champion ?? strings.newFamilyChampion,
-      subtitle: champion == null
-          ? strings.weeklyCompleteWithoutChampion
-          : strings.weeklyCompleteWithChampion(champion),
-      rewards: [
-        SilaCelebrationReward(
-          icon: Icons.stars_rounded,
-          label: strings.tokenBonus(CompetitionRewards.weeklyChampionTokens),
-        ),
-        SilaCelebrationReward(
-          icon: Icons.trending_up_rounded,
-          label: strings.rankingPointBonus(
-            CompetitionRewards.weeklyChampionRankingPoints,
+    return DigitalRewardStyleBuilder(
+      userId: widget.developerPreview ? null : _championId,
+      preview: widget.developerPreview
+          ? const EquippedDigitalRewards(celebrationEffect: 'fireworks')
+          : null,
+      builder: (context, digitalRewards) => SilaCelebrationCard(
+        key: const ValueKey('weekly-championship-celebration'),
+        eyebrow: strings.weeklyOfficialCompleteEyebrow,
+        title: champion ?? strings.newFamilyChampion,
+        subtitle: champion == null
+            ? strings.weeklyCompleteWithoutChampion
+            : strings.weeklyCompleteWithChampion(champion),
+        effect: digitalRewards.celebrationEffect,
+        rewards: [
+          SilaCelebrationReward(
+            icon: Icons.stars_rounded,
+            label: strings.tokenBonus(CompetitionRewards.weeklyChampionTokens),
           ),
-        ),
-        SilaCelebrationReward(
-          icon: Icons.military_tech_rounded,
-          label: strings.weeklyCrown,
-        ),
-      ],
+          SilaCelebrationReward(
+            icon: Icons.trending_up_rounded,
+            label: strings.rankingPointBonus(
+              CompetitionRewards.weeklyChampionRankingPoints,
+            ),
+          ),
+          SilaCelebrationReward(
+            icon: Icons.military_tech_rounded,
+            label: strings.weeklyCrown,
+          ),
+        ],
+      ),
     );
   }
 }

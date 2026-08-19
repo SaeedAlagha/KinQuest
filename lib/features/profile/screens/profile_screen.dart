@@ -5,6 +5,8 @@ import 'package:flutter/services.dart';
 
 import '../../../l10n/app_localizations.dart';
 import '../../authentication/screens/welcome_screen.dart';
+import '../../rewards/digital/digital_reward_visuals.dart';
+import '../../rewards/digital/equipped_digital_rewards.dart';
 import 'settings_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
@@ -112,52 +114,50 @@ class ProfileScreen extends StatelessWidget {
 class _DeveloperProfileHeader extends StatelessWidget {
   const _DeveloperProfileHeader();
 
+  static const _previewRewards = EquippedDigitalRewards(
+    profileFrame: 'gold',
+    profileBadge: 'family_star',
+    profileTheme: 'sunset',
+    nameplate: 'champion',
+  );
+
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     final strings = AppLocalizations.of(context)!;
 
-    return Card(
-      margin: EdgeInsets.zero,
-      elevation: 1,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-      child: Padding(
-        padding: const EdgeInsets.all(22),
-        child: Column(
-          children: [
-            CircleAvatar(
-              radius: 44,
-              backgroundColor: colorScheme.primaryContainer,
-              child: Icon(
-                Icons.developer_mode_rounded,
-                size: 48,
-                color: colorScheme.onPrimaryContainer,
-              ),
+    return DigitalRewardProfileSurface(
+      rewards: _previewRewards,
+      child: Column(
+        children: [
+          const DigitalRewardAvatar(
+            rewards: _previewRewards,
+            radius: 44,
+            icon: Icons.developer_mode_rounded,
+          ),
+          const SizedBox(height: 14),
+          DigitalRewardNameplate(
+            name: strings.silaDeveloper,
+            rewards: _previewRewards,
+            style: Theme.of(
+              context,
+            ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'preview@sila.local',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: Colors.white.withValues(alpha: 0.82),
             ),
-            const SizedBox(height: 14),
-            Text(
-              strings.silaDeveloper,
-              style: Theme.of(
-                context,
-              ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            strings.familyNameLabel(strings.developerFamilyName),
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+              color: Colors.white,
+              fontWeight: FontWeight.w700,
             ),
-            const SizedBox(height: 4),
-            Text(
-              'preview@sila.local',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: colorScheme.onSurfaceVariant,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              strings.familyNameLabel(strings.developerFamilyName),
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                color: colorScheme.primary,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -304,71 +304,70 @@ class _ProfileHeader extends StatelessWidget {
         final email = data?['email'] as String? ?? user.email ?? '';
         final familyId = data?['familyId'] as String?;
 
-        return Card(
-          margin: EdgeInsets.zero,
-          elevation: 1,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(24),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(22),
-            child: Column(
-              children: [
-                CircleAvatar(
-                  radius: 44,
-                  backgroundColor: colorScheme.primaryContainer,
-                  child: Icon(
-                    Icons.person,
-                    size: 48,
-                    color: colorScheme.onPrimaryContainer,
-                  ),
-                ),
-                const SizedBox(height: 14),
-                Text(
-                  name,
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  email,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: colorScheme.onSurfaceVariant,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                if (familyId == null || familyId.isEmpty)
-                  Text(
-                    strings.noFamilyJoinedYet,
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: colorScheme.primary,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  )
-                else
-                  StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-                    stream: FirebaseFirestore.instance
-                        .collection('families')
-                        .doc(familyId)
-                        .snapshots(),
-                    builder: (context, familySnapshot) {
-                      final familyData = familySnapshot.data?.data();
-                      final familyName =
-                          familyData?['name'] as String? ?? strings.yourFamily;
+        return DigitalRewardStyleBuilder(
+          userId: user.uid,
+          builder: (context, rewards) {
+            final themed = rewards.profileTheme != 'default';
+            final secondaryColor = themed
+                ? Colors.white.withValues(alpha: 0.82)
+                : colorScheme.onSurfaceVariant;
+            final accentColor = themed ? Colors.white : colorScheme.primary;
 
-                      return Text(
-                        strings.familyNameLabel(familyName),
-                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          color: colorScheme.primary,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      );
-                    },
+            return DigitalRewardProfileSurface(
+              rewards: rewards,
+              child: Column(
+                children: [
+                  DigitalRewardAvatar(rewards: rewards, radius: 44),
+                  const SizedBox(height: 14),
+                  DigitalRewardNameplate(
+                    name: name,
+                    rewards: rewards,
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-              ],
-            ),
-          ),
+                  const SizedBox(height: 8),
+                  Text(
+                    email,
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodyMedium?.copyWith(color: secondaryColor),
+                  ),
+                  const SizedBox(height: 4),
+                  if (familyId == null || familyId.isEmpty)
+                    Text(
+                      strings.noFamilyJoinedYet,
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        color: accentColor,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    )
+                  else
+                    StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+                      stream: FirebaseFirestore.instance
+                          .collection('families')
+                          .doc(familyId)
+                          .snapshots(),
+                      builder: (context, familySnapshot) {
+                        final familyData = familySnapshot.data?.data();
+                        final familyName =
+                            familyData?['name'] as String? ??
+                            strings.yourFamily;
+
+                        return Text(
+                          strings.familyNameLabel(familyName),
+                          style: Theme.of(context).textTheme.bodyLarge
+                              ?.copyWith(
+                                color: accentColor,
+                                fontWeight: FontWeight.w600,
+                              ),
+                        );
+                      },
+                    ),
+                ],
+              ),
+            );
+          },
         );
       },
     );

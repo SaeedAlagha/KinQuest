@@ -26,6 +26,7 @@ class SilaCelebrationCard extends StatefulWidget {
     this.icon = Icons.emoji_events_rounded,
     this.rewards = const [],
     this.footer,
+    this.effect = 'default',
   });
 
   final String eyebrow;
@@ -34,6 +35,7 @@ class SilaCelebrationCard extends StatefulWidget {
   final IconData icon;
   final List<SilaCelebrationReward> rewards;
   final Widget? footer;
+  final String effect;
 
   @override
   State<SilaCelebrationCard> createState() => _SilaCelebrationCardState();
@@ -92,7 +94,11 @@ class _SilaCelebrationCardState extends State<SilaCelebrationCard>
                 child: AnimatedBuilder(
                   animation: _controller,
                   builder: (context, child) => CustomPaint(
-                    painter: _CelebrationPainter(progress: _controller.value),
+                    key: ValueKey('celebration-effect-${widget.effect}'),
+                    painter: _CelebrationPainter(
+                      progress: _controller.value,
+                      effect: widget.effect,
+                    ),
                   ),
                 ),
               ),
@@ -234,9 +240,10 @@ class _RewardPill extends StatelessWidget {
 }
 
 class _CelebrationPainter extends CustomPainter {
-  const _CelebrationPainter({required this.progress});
+  const _CelebrationPainter({required this.progress, required this.effect});
 
   final double progress;
+  final String effect;
 
   static const _colors = [
     AppTheme.uaeRed,
@@ -248,8 +255,9 @@ class _CelebrationPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final eased = Curves.easeOutCubic.transform(progress);
+    final particleCount = effect == 'confetti' ? 44 : 22;
 
-    for (var index = 0; index < 22; index += 1) {
+    for (var index = 0; index < particleCount; index += 1) {
       final column = ((index * 47) % 101) / 100;
       final startY = -0.12 - ((index * 19) % 32) / 100;
       final travel = 0.42 + ((index * 13) % 36) / 100;
@@ -280,6 +288,12 @@ class _CelebrationPainter extends CustomPainter {
       canvas.restore();
     }
 
+    if (effect == 'fireworks') {
+      _paintFireworks(canvas, size, eased);
+    } else if (effect == 'stars') {
+      _paintStars(canvas, size, eased);
+    }
+
     final ringPaint = Paint()
       ..color = Colors.white.withValues(alpha: 0.055)
       ..style = PaintingStyle.stroke
@@ -298,6 +312,60 @@ class _CelebrationPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _CelebrationPainter oldDelegate) {
-    return oldDelegate.progress != progress;
+    return oldDelegate.progress != progress || oldDelegate.effect != effect;
+  }
+
+  void _paintFireworks(Canvas canvas, Size size, double eased) {
+    final centers = [
+      Offset(size.width * 0.2, size.height * 0.28),
+      Offset(size.width * 0.8, size.height * 0.22),
+    ];
+
+    for (var burst = 0; burst < centers.length; burst += 1) {
+      final paint = Paint()
+        ..color = _colors[(burst + 2) % _colors.length].withValues(
+          alpha: 0.78 * (1 - progress * 0.35),
+        )
+        ..strokeWidth = 2.2
+        ..strokeCap = StrokeCap.round;
+      for (var ray = 0; ray < 12; ray += 1) {
+        final angle = (math.pi * 2 * ray) / 12;
+        final inner = 8 + eased * 9;
+        final outer = 14 + eased * 34;
+        canvas.drawLine(
+          centers[burst] +
+              Offset(math.cos(angle) * inner, math.sin(angle) * inner),
+          centers[burst] +
+              Offset(math.cos(angle) * outer, math.sin(angle) * outer),
+          paint,
+        );
+      }
+    }
+  }
+
+  void _paintStars(Canvas canvas, Size size, double eased) {
+    final paint = Paint()
+      ..color = const Color(0xFFFFD77A).withValues(alpha: 0.82);
+    for (var index = 0; index < 14; index += 1) {
+      final x = size.width * (((index * 31) % 97) / 100);
+      final y = size.height * (0.08 + (((index * 23) % 52) / 100) * eased);
+      final radius = 3.0 + (index % 3);
+      final path = Path();
+      for (var point = 0; point < 8; point += 1) {
+        final angle = -math.pi / 2 + (math.pi * point / 4);
+        final pointRadius = point.isEven ? radius : radius * 0.42;
+        final offset = Offset(
+          x + math.cos(angle) * pointRadius,
+          y + math.sin(angle) * pointRadius,
+        );
+        if (point == 0) {
+          path.moveTo(offset.dx, offset.dy);
+        } else {
+          path.lineTo(offset.dx, offset.dy);
+        }
+      }
+      path.close();
+      canvas.drawPath(path, paint);
+    }
   }
 }

@@ -39,4 +39,35 @@ class EquippedDigitalRewards {
       DigitalRewardCategory.nameplate => nameplate,
     };
   }
+
+  EquippedDigitalRewards copyWith({
+    String? profileFrame,
+    String? profileBadge,
+    String? profileTheme,
+    String? celebrationEffect,
+    String? nameplate,
+  }) {
+    return EquippedDigitalRewards(
+      profileFrame: profileFrame ?? this.profileFrame,
+      profileBadge: profileBadge ?? this.profileBadge,
+      profileTheme: profileTheme ?? this.profileTheme,
+      celebrationEffect: celebrationEffect ?? this.celebrationEffect,
+      nameplate: nameplate ?? this.nameplate,
+    );
+  }
+
+  EquippedDigitalRewards withAsset(
+    DigitalRewardCategory category,
+    String assetKey,
+  ) {
+    return switch (category) {
+      DigitalRewardCategory.profileFrame => copyWith(profileFrame: assetKey),
+      DigitalRewardCategory.profileBadge => copyWith(profileBadge: assetKey),
+      DigitalRewardCategory.profileTheme => copyWith(profileTheme: assetKey),
+      DigitalRewardCategory.celebrationEffect => copyWith(
+        celebrationEffect: assetKey,
+      ),
+      DigitalRewardCategory.nameplate => copyWith(nameplate: assetKey),
+    };
+  }
 }

@@ -7,6 +7,7 @@ import '../../../core/widgets/family_year_banner.dart';
 import '../../../core/widgets/sila_page_backdrop.dart';
 import 'daily_challenge_screen.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../rewards/digital/digital_reward_visuals.dart';
 import '../../games/screens/quick_play_player_selection_screen.dart';
 import 'weekly_championship_screen.dart';
 import 'monthly_cup_screen.dart';
@@ -454,14 +455,24 @@ class _FamilyLeaderboard extends StatelessWidget {
                           data['name'] as String? ?? strings.familyMember;
                       final tokens = data['tokens'] as num? ?? 0;
 
-                      return ListTile(
-                        contentPadding: EdgeInsets.zero,
-                        leading: CircleAvatar(child: Text('${index + 1}')),
-                        title: Text(name),
-                        trailing: Text(
-                          strings.tokenCount(tokens),
-                          style: Theme.of(context).textTheme.labelLarge
-                              ?.copyWith(fontWeight: FontWeight.bold),
+                      return DigitalRewardStyleBuilder(
+                        userId: members[index].id,
+                        builder: (context, rewards) => ListTile(
+                          contentPadding: EdgeInsets.zero,
+                          leading: DigitalRewardAvatar(
+                            rewards: rewards,
+                            initials: '${index + 1}',
+                          ),
+                          title: DigitalRewardNameplate(
+                            name: name,
+                            rewards: rewards,
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
+                          trailing: Text(
+                            strings.tokenCount(tokens),
+                            style: Theme.of(context).textTheme.labelLarge
+                                ?.copyWith(fontWeight: FontWeight.bold),
+                          ),
                         ),
                       );
                     }),
