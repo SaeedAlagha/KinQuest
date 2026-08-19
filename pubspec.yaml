@@ -44,6 +44,7 @@ dependencies:
   shared_preferences: ^2.5.5
 
 dev_dependencies:
+  fake_cloud_firestore: ^4.2.0
   flutter_test:
     sdk: flutter
 

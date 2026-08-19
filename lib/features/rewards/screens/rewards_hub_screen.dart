@@ -21,7 +21,9 @@ class RewardsHubScreen extends StatefulWidget {
 }
 
 class _RewardsHubScreenState extends State<RewardsHubScreen> {
-  final RewardsService _rewardsService = RewardsService();
+  RewardsService? _rewardsService;
+
+  RewardsService get _service => _rewardsService ??= RewardsService();
 
   bool _isProcessing = false;
 
@@ -62,7 +64,7 @@ class _RewardsHubScreenState extends State<RewardsHubScreen> {
     });
 
     try {
-      await _rewardsService.createRewardRequest(
+      await _service.createRewardRequest(
         familyId: familyId,
         userId: userId,
         reward: reward,
@@ -129,7 +131,7 @@ class _RewardsHubScreenState extends State<RewardsHubScreen> {
     });
 
     try {
-      await _rewardsService.purchaseDigitalReward(
+      await _service.purchaseDigitalReward(
         familyId: familyId,
         userId: userId,
         reward: reward,
