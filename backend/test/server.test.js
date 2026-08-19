@@ -18,6 +18,10 @@ test("server wires health, privacy headers, and JSON validation", async (t) => {
   assert.equal(health.headers.get("x-content-type-options"), "nosniff");
   assert.equal(health.headers.has("x-powered-by"), false);
 
+  const catalog = await fetch(`${baseUrl}/api/digital-rewards`);
+  assert.equal(catalog.status, 200);
+  assert.equal((await catalog.json()).rewards.length, 15);
+
   const invalidJson = await fetch(`${baseUrl}/api/trivia`, {
     method: "POST",
     headers: { "content-type": "application/json" },
@@ -27,5 +31,18 @@ test("server wires health, privacy headers, and JSON validation", async (t) => {
   assert.equal(invalidJson.status, 400);
   assert.deepEqual(await invalidJson.json(), {
     error: "Request body must be valid JSON.",
+  });
+
+  const anonymousPurchase = await fetch(
+    `${baseUrl}/api/digital-rewards/purchase`,
+    {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ rewardId: "frame_gold" }),
+    },
+  );
+  assert.equal(anonymousPurchase.status, 401);
+  assert.deepEqual(await anonymousPurchase.json(), {
+    error: "Sign in is required to manage Digital Rewards.",
   });
 });

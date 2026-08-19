@@ -130,11 +130,13 @@ function createFirebaseAuthMiddleware({
   verifyToken = defaultTokenVerifier,
 } = {}) {
   return async function firebaseAuth(request, response, next) {
-    if (!authenticationRequired(environment)) {
+    const required = authenticationRequired(environment);
+    const authorization = request.get?.("authorization") || "";
+
+    if (!required && !authorization) {
       return next();
     }
 
-    const authorization = request.get?.("authorization") || "";
     const match = authorization.match(/^Bearer ([^\s]+)$/);
 
     if (!match || match[1].length > 4_096) {
