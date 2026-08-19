@@ -22,6 +22,8 @@ enum _DrawGamePhase {
   finalLeaderboard,
 }
 
+enum _DrawLoadError { signedOut, noFamily, loadFailed }
+
 class DrawAndGuessScreen extends StatefulWidget {
   const DrawAndGuessScreen({
     super.key,
@@ -64,7 +66,7 @@ class _DrawAndGuessScreenState extends State<DrawAndGuessScreen> {
 
   _DrawGamePhase _phase = _DrawGamePhase.setup;
   bool _isLoading = true;
-  String? _errorMessage;
+  _DrawLoadError? _loadError;
 
   final List<_DrawPlayer> _familyMembers = [];
   final Set<String> _selectedPlayerIds = {};
@@ -87,7 +89,7 @@ class _DrawAndGuessScreenState extends State<DrawAndGuessScreen> {
     if (user == null) {
       setState(() {
         _isLoading = false;
-        _errorMessage = 'You must be logged in to play.';
+        _loadError = _DrawLoadError.signedOut;
       });
       return;
     }
@@ -107,8 +109,7 @@ class _DrawAndGuessScreenState extends State<DrawAndGuessScreen> {
 
         setState(() {
           _isLoading = false;
-          _errorMessage =
-              'Join or create a family before playing Draw & Guess.';
+          _loadError = _DrawLoadError.noFamily;
         });
 
         return;
@@ -119,6 +120,10 @@ class _DrawAndGuessScreenState extends State<DrawAndGuessScreen> {
           .where('familyId', isEqualTo: familyId)
           .get();
 
+      if (!mounted) {
+        return;
+      }
+      final strings = AppLocalizations.of(context)!;
       final members = membersSnapshot.docs
           .where(
             (document) =>
@@ -135,7 +140,7 @@ class _DrawAndGuessScreenState extends State<DrawAndGuessScreen> {
               id: document.id,
               name: name?.trim().isNotEmpty == true
                   ? name!
-                  : email ?? 'Family Member',
+                  : email ?? strings.familyMemberFallback,
             );
           })
           .toList();
@@ -166,7 +171,7 @@ class _DrawAndGuessScreenState extends State<DrawAndGuessScreen> {
 
       setState(() {
         _isLoading = false;
-        _errorMessage = 'Could not load your family members.';
+        _loadError = _DrawLoadError.loadFailed;
       });
     }
   }
@@ -182,9 +187,12 @@ class _DrawAndGuessScreenState extends State<DrawAndGuessScreen> {
   }
 
   Future<void> _continueToGame() async {
+    final strings = AppLocalizations.of(context)!;
     if (_selectedPlayerIds.length < 2) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Draw & Guess needs at least 2 players.')),
+        SnackBar(
+          content: Text(strings.minimumPlayersForGame(strings.drawAndGuess, 2)),
+        ),
       );
       return;
     }
@@ -237,10 +245,8 @@ class _DrawAndGuessScreenState extends State<DrawAndGuessScreen> {
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Could not prepare Draw & Guess. Make sure the AI server is running.',
-          ),
+        SnackBar(
+          content: Text(strings.couldNotStartGame(strings.drawAndGuess)),
         ),
       );
     }
@@ -248,13 +254,15 @@ class _DrawAndGuessScreenState extends State<DrawAndGuessScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppBar(title: const Text('Draw & Guess')),
+      appBar: AppBar(title: Text(strings.drawAndGuess)),
       body: SafeArea(child: _buildBody()),
     );
   }
 
   Widget _buildBody() {
+    final strings = AppLocalizations.of(context)!;
     if (_phase == _DrawGamePhase.passToArtist) {
       return _buildPassToArtistScreen();
     }
@@ -280,7 +288,14 @@ class _DrawAndGuessScreenState extends State<DrawAndGuessScreen> {
       return const Center(child: CircularProgressIndicator());
     }
 
-    if (_errorMessage != null) {
+    if (_loadError != null) {
+      final errorMessage = switch (_loadError!) {
+        _DrawLoadError.signedOut => strings.mustBeLoggedInToPlay,
+        _DrawLoadError.noFamily => strings.joinOrCreateFamilyBeforeGame(
+          strings.drawAndGuess,
+        ),
+        _DrawLoadError.loadFailed => strings.couldNotLoadFamilyMembers,
+      };
       return Center(
         child: Padding(
           padding: const EdgeInsets.all(24),
@@ -290,7 +305,7 @@ class _DrawAndGuessScreenState extends State<DrawAndGuessScreen> {
               const Icon(Icons.error_outline, size: 64),
               const SizedBox(height: 16),
               Text(
-                _errorMessage!,
+                errorMessage,
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.titleMedium,
               ),
@@ -299,12 +314,12 @@ class _DrawAndGuessScreenState extends State<DrawAndGuessScreen> {
                 onPressed: () {
                   setState(() {
                     _isLoading = true;
-                    _errorMessage = null;
+                    _loadError = null;
                   });
 
                   _loadFamilyMembers();
                 },
-                child: const Text('Try Again'),
+                child: Text(strings.tryAgain),
               ),
             ],
           ),
@@ -317,7 +332,7 @@ class _DrawAndGuessScreenState extends State<DrawAndGuessScreen> {
         child: Padding(
           padding: const EdgeInsets.all(24),
           child: Text(
-            'Draw & Guess needs at least 2 family members.',
+            strings.minimumFamilyMembersForGame(strings.drawAndGuess, 2),
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.titleMedium,
           ),
@@ -331,14 +346,14 @@ class _DrawAndGuessScreenState extends State<DrawAndGuessScreen> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
-            'Who is playing?',
+            strings.whoIsPlaying,
             style: Theme.of(
               context,
             ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
           Text(
-            'Choose at least 2 family members. ',
+            strings.chooseAtLeastTwoPlayers,
             style: Theme.of(context).textTheme.bodyLarge,
           ),
           const SizedBox(height: 18),
@@ -350,8 +365,7 @@ class _DrawAndGuessScreenState extends State<DrawAndGuessScreen> {
               });
             },
             keyPrefix: 'drawing-round-option',
-            description:
-                'Every selected artist gets one drawing turn in each round.',
+            description: strings.drawingTurnEachRound,
           ),
           const SizedBox(height: 24),
 
@@ -391,7 +405,7 @@ class _DrawAndGuessScreenState extends State<DrawAndGuessScreen> {
           const SizedBox(height: 16),
 
           Text(
-            '${_selectedPlayerIds.length} selected',
+            strings.selectedPlayersCount(_selectedPlayerIds.length),
             textAlign: TextAlign.center,
           ),
 
@@ -402,7 +416,9 @@ class _DrawAndGuessScreenState extends State<DrawAndGuessScreen> {
                 ? _continueToGame
                 : null,
             icon: const Icon(Icons.arrow_forward),
-            label: Text(_isPreparingGame ? 'Preparing Game...' : 'Continue'),
+            label: Text(
+              _isPreparingGame ? strings.preparingGame : strings.continueLabel,
+            ),
           ),
         ],
       ),
@@ -411,6 +427,7 @@ class _DrawAndGuessScreenState extends State<DrawAndGuessScreen> {
 
   Widget _buildPassToArtistScreen() {
     final artist = _players[_currentArtistIndex];
+    final strings = AppLocalizations.of(context)!;
 
     return Center(
       child: Padding(
@@ -419,24 +436,21 @@ class _DrawAndGuessScreenState extends State<DrawAndGuessScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              'Round $_currentRound of $_selectedRounds',
+              strings.roundProgress(_currentRound, _selectedRounds),
               style: Theme.of(context).textTheme.labelLarge,
             ),
             const SizedBox(height: 12),
             const Icon(Icons.lock_outline, size: 72),
             const SizedBox(height: 24),
             Text(
-              'Pass the phone to ${artist.name}',
+              strings.passPhoneTo(artist.name),
               textAlign: TextAlign.center,
               style: Theme.of(
                 context,
               ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 12),
-            const Text(
-              'Everyone else should look away.',
-              textAlign: TextAlign.center,
-            ),
+            Text(strings.everyoneElseLookAway, textAlign: TextAlign.center),
             const SizedBox(height: 32),
             SizedBox(
               width: double.infinity,
@@ -446,7 +460,7 @@ class _DrawAndGuessScreenState extends State<DrawAndGuessScreen> {
                     _phase = _DrawGamePhase.revealPrompt;
                   });
                 },
-                child: Text('I\'m ${artist.name}'),
+                child: Text(strings.iAmPlayer(artist.name)),
               ),
             ),
           ],
@@ -458,6 +472,7 @@ class _DrawAndGuessScreenState extends State<DrawAndGuessScreen> {
   Widget _buildRevealPromptScreen() {
     final artist = _players[_currentArtistIndex];
     final prompt = _prompts[_currentPromptIndex];
+    final strings = AppLocalizations.of(context)!;
 
     return Center(
       child: Padding(
@@ -468,7 +483,7 @@ class _DrawAndGuessScreenState extends State<DrawAndGuessScreen> {
             const Icon(Icons.draw_outlined, size: 72),
             const SizedBox(height: 20),
             Text(
-              '${artist.name}, your drawing prompt is:',
+              strings.artistDrawingPrompt(artist.name),
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.titleMedium,
             ),
@@ -481,17 +496,14 @@ class _DrawAndGuessScreenState extends State<DrawAndGuessScreen> {
               ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
-            const Text(
-              'Remember the prompt. Do not show it to the other players.',
-              textAlign: TextAlign.center,
-            ),
+            Text(strings.rememberDrawingPrompt, textAlign: TextAlign.center),
             const SizedBox(height: 32),
             SizedBox(
               width: double.infinity,
               child: FilledButton.icon(
                 onPressed: _startDrawing,
                 icon: const Icon(Icons.brush_outlined),
-                label: const Text('Start Drawing'),
+                label: Text(strings.startDrawing),
               ),
             ),
           ],
@@ -501,6 +513,7 @@ class _DrawAndGuessScreenState extends State<DrawAndGuessScreen> {
   }
 
   void _startDrawing() {
+    final strings = AppLocalizations.of(context)!;
     _drawingTimer?.cancel();
 
     setState(() {
@@ -521,9 +534,7 @@ class _DrawAndGuessScreenState extends State<DrawAndGuessScreen> {
 
         setState(() {
           _secondsRemaining = 0;
-          _roundResultMessage =
-              'Time\'s up!\n\n'
-              'Nobody guessed the drawing this round.';
+          _roundResultMessage = strings.drawingTimeUp;
           _phase = _DrawGamePhase.roundResult;
         });
 
@@ -538,6 +549,7 @@ class _DrawAndGuessScreenState extends State<DrawAndGuessScreen> {
 
   Widget _buildDrawingScreen() {
     final artist = _players[_currentArtistIndex];
+    final strings = AppLocalizations.of(context)!;
 
     return Padding(
       padding: const EdgeInsets.all(16),
@@ -548,14 +560,14 @@ class _DrawAndGuessScreenState extends State<DrawAndGuessScreen> {
             children: [
               Expanded(
                 child: Text(
-                  '${artist.name} is drawing',
+                  strings.playerIsDrawing(artist.name),
                   style: Theme.of(
                     context,
                   ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
                 ),
               ),
               Text(
-                '$_secondsRemaining s',
+                strings.secondsRemaining(_secondsRemaining),
                 style: Theme.of(
                   context,
                 ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
@@ -565,10 +577,7 @@ class _DrawAndGuessScreenState extends State<DrawAndGuessScreen> {
 
           const SizedBox(height: 12),
 
-          const Text(
-            'Everyone else: guess aloud!',
-            textAlign: TextAlign.center,
-          ),
+          Text(strings.guessAloud, textAlign: TextAlign.center),
 
           const SizedBox(height: 16),
 
@@ -679,7 +688,7 @@ class _DrawAndGuessScreenState extends State<DrawAndGuessScreen> {
 
           Row(
             children: [
-              const Text('Brush:'),
+              Text(strings.brush),
               const SizedBox(width: 12),
 
               for (final size in [2.0, 4.0, 8.0])
@@ -688,10 +697,10 @@ class _DrawAndGuessScreenState extends State<DrawAndGuessScreen> {
                   child: ChoiceChip(
                     label: Text(
                       size == 2
-                          ? 'Thin'
+                          ? strings.thin
                           : size == 4
-                          ? 'Medium'
-                          : 'Thick',
+                          ? strings.medium
+                          : strings.thick,
                     ),
                     selected: _selectedStrokeWidth == size,
                     onSelected: (_) {
@@ -719,7 +728,7 @@ class _DrawAndGuessScreenState extends State<DrawAndGuessScreen> {
                         });
                       },
                 icon: const Icon(Icons.undo),
-                label: const Text('Undo'),
+                label: Text(strings.undo),
               ),
 
               OutlinedButton.icon(
@@ -729,7 +738,7 @@ class _DrawAndGuessScreenState extends State<DrawAndGuessScreen> {
                   });
                 },
                 icon: const Icon(Icons.cleaning_services_outlined),
-                label: Text(_isEraser ? 'Eraser On' : 'Eraser'),
+                label: Text(_isEraser ? strings.eraserOn : strings.eraser),
               ),
 
               OutlinedButton.icon(
@@ -740,13 +749,13 @@ class _DrawAndGuessScreenState extends State<DrawAndGuessScreen> {
                   });
                 },
                 icon: const Icon(Icons.delete_outline),
-                label: const Text('Clear'),
+                label: Text(strings.clear),
               ),
 
               FilledButton.icon(
                 onPressed: _secondsRemaining > 0 ? _someoneGuessedIt : null,
                 icon: const Icon(Icons.check_circle_outline),
-                label: const Text('Someone Guessed It'),
+                label: Text(strings.someoneGuessedIt),
               ),
             ],
           ),
@@ -765,6 +774,7 @@ class _DrawAndGuessScreenState extends State<DrawAndGuessScreen> {
 
   Widget _buildChooseGuesserScreen() {
     final artist = _players[_currentArtistIndex];
+    final strings = AppLocalizations.of(context)!;
 
     final possibleGuessers = _players
         .where((player) => player.id != artist.id)
@@ -776,17 +786,14 @@ class _DrawAndGuessScreenState extends State<DrawAndGuessScreen> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
-            'Who guessed it?',
+            strings.whoGuessedIt,
             textAlign: TextAlign.center,
             style: Theme.of(
               context,
             ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 12),
-          const Text(
-            'Choose the family member who guessed the drawing correctly.',
-            textAlign: TextAlign.center,
-          ),
+          Text(strings.chooseCorrectGuesser, textAlign: TextAlign.center),
           const SizedBox(height: 24),
 
           Expanded(
@@ -813,15 +820,16 @@ class _DrawAndGuessScreenState extends State<DrawAndGuessScreen> {
 
   void _awardCorrectGuess(_DrawPlayer guesser) {
     final artist = _players[_currentArtistIndex];
+    final strings = AppLocalizations.of(context)!;
 
     _scores[artist.id] = (_scores[artist.id] ?? 0) + 1;
     _scores[guesser.id] = (_scores[guesser.id] ?? 0) + 1;
 
     setState(() {
-      _roundResultMessage =
-          '${guesser.name} guessed correctly!\n\n'
-          '${artist.name} +1 point\n'
-          '${guesser.name} +1 point';
+      _roundResultMessage = strings.drawingCorrectPoints(
+        guesser.name,
+        artist.name,
+      );
 
       _phase = _DrawGamePhase.roundResult;
     });
@@ -829,6 +837,7 @@ class _DrawAndGuessScreenState extends State<DrawAndGuessScreen> {
 
   Widget _buildRoundResultScreen() {
     final prompt = _prompts[_currentPromptIndex];
+    final strings = AppLocalizations.of(context)!;
 
     return Center(
       child: Padding(
@@ -840,7 +849,7 @@ class _DrawAndGuessScreenState extends State<DrawAndGuessScreen> {
             const SizedBox(height: 20),
 
             Text(
-              'Round Complete',
+              strings.roundComplete,
               style: Theme.of(
                 context,
               ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
@@ -853,7 +862,7 @@ class _DrawAndGuessScreenState extends State<DrawAndGuessScreen> {
             const SizedBox(height: 24),
 
             Text(
-              'Prompt: ${prompt.text}',
+              strings.promptLabel(prompt.text),
               textAlign: TextAlign.center,
               style: Theme.of(
                 context,
@@ -869,10 +878,10 @@ class _DrawAndGuessScreenState extends State<DrawAndGuessScreen> {
                 child: Text(
                   _currentRound == _selectedRounds &&
                           _currentArtistIndex == _players.length - 1
-                      ? 'View Final Leaderboard'
+                      ? strings.viewFinalLeaderboard
                       : _currentArtistIndex == _players.length - 1
-                      ? 'Start Round ${_currentRound + 1}'
-                      : 'Next Artist',
+                      ? strings.startRound(_currentRound + 1)
+                      : strings.nextArtist,
                 ),
               ),
             ),

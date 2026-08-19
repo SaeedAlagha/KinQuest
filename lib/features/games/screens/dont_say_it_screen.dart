@@ -22,6 +22,8 @@ enum _DontSayItPhase {
   finalLeaderboard,
 }
 
+enum _DontSayItLoadError { signedOut, noFamily, invalidPlayers, loadFailed }
+
 class DontSayItScreen extends StatefulWidget {
   const DontSayItScreen({
     super.key,
@@ -38,7 +40,7 @@ class DontSayItScreen extends StatefulWidget {
 
 class _DontSayItScreenState extends State<DontSayItScreen> {
   bool _isLoading = true;
-  String? _errorMessage;
+  _DontSayItLoadError? _loadError;
   bool get _hasLockedParticipants => widget.participantIds != null;
 
   bool get _isLockedHeadToHead =>
@@ -90,7 +92,7 @@ class _DontSayItScreenState extends State<DontSayItScreen> {
     if (user == null) {
       setState(() {
         _isLoading = false;
-        _errorMessage = 'You must be logged in to play.';
+        _loadError = _DontSayItLoadError.signedOut;
       });
       return;
     }
@@ -110,8 +112,7 @@ class _DontSayItScreenState extends State<DontSayItScreen> {
 
         setState(() {
           _isLoading = false;
-          _errorMessage =
-              'Join or create a family before playing Don\'t Say It.';
+          _loadError = _DontSayItLoadError.noFamily;
         });
 
         return;
@@ -122,6 +123,10 @@ class _DontSayItScreenState extends State<DontSayItScreen> {
           .where('familyId', isEqualTo: familyId)
           .get();
 
+      if (!mounted) {
+        return;
+      }
+      final strings = AppLocalizations.of(context)!;
       final members = membersSnapshot.docs.map((document) {
         final data = document.data();
 
@@ -132,7 +137,7 @@ class _DontSayItScreenState extends State<DontSayItScreen> {
           id: document.id,
           name: name?.trim().isNotEmpty == true
               ? name!
-              : email ?? 'Family Member',
+              : email ?? strings.familyMemberFallback,
         );
       }).toList();
 
@@ -164,10 +169,9 @@ class _DontSayItScreenState extends State<DontSayItScreen> {
         _isLoading = false;
 
         if (_hasLockedParticipants && availableMembers.length < 2) {
-          _errorMessage =
-              'This official Don\'t Say It match does not have enough valid family members.';
+          _loadError = _DontSayItLoadError.invalidPlayers;
         } else {
-          _errorMessage = null;
+          _loadError = null;
         }
       });
     } catch (_) {
@@ -177,7 +181,7 @@ class _DontSayItScreenState extends State<DontSayItScreen> {
 
       setState(() {
         _isLoading = false;
-        _errorMessage = 'Could not load your family members.';
+        _loadError = _DontSayItLoadError.loadFailed;
       });
     }
   }
@@ -193,14 +197,15 @@ class _DontSayItScreenState extends State<DontSayItScreen> {
   }
 
   Future<void> _continueToGame() async {
+    final strings = AppLocalizations.of(context)!;
     final selectedPlayers = _familyMembers
         .where((player) => _selectedPlayerIds.contains(player.id))
         .toList();
 
     if (selectedPlayers.length < 2) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Don\'t Say It needs at least 2 players.'),
+        SnackBar(
+          content: Text(strings.minimumPlayersForGame(strings.dontSayIt, 2)),
         ),
       );
       return;
@@ -244,12 +249,6 @@ class _DontSayItScreenState extends State<DontSayItScreen> {
         _isPreparingGame = false;
       });
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('${cards.length} AI cards generated successfully.'),
-        ),
-      );
-
       // Private turn reveal comes next.
     } catch (_) {
       if (!mounted) {
@@ -261,24 +260,22 @@ class _DontSayItScreenState extends State<DontSayItScreen> {
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Could not prepare Don\'t Say It. Make sure the AI server is running.',
-          ),
-        ),
+        SnackBar(content: Text(strings.couldNotStartGame(strings.dontSayIt))),
       );
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppBar(title: const Text('Don\'t Say It')),
+      appBar: AppBar(title: Text(strings.dontSayIt)),
       body: SafeArea(child: _buildBody()),
     );
   }
 
   Widget _buildBody() {
+    final strings = AppLocalizations.of(context)!;
     if (_phase == _DontSayItPhase.passToClueGiver) {
       return _buildPassToClueGiverScreen();
     }
@@ -305,7 +302,16 @@ class _DontSayItScreenState extends State<DontSayItScreen> {
       return const Center(child: CircularProgressIndicator());
     }
 
-    if (_errorMessage != null) {
+    if (_loadError != null) {
+      final errorMessage = switch (_loadError!) {
+        _DontSayItLoadError.signedOut => strings.mustBeLoggedInToPlay,
+        _DontSayItLoadError.noFamily => strings.joinOrCreateFamilyBeforeGame(
+          strings.dontSayIt,
+        ),
+        _DontSayItLoadError.invalidPlayers =>
+          strings.officialMatchInvalidPlayers(strings.dontSayIt),
+        _DontSayItLoadError.loadFailed => strings.couldNotLoadFamilyMembers,
+      };
       return Center(
         child: Padding(
           padding: const EdgeInsets.all(24),
@@ -315,7 +321,7 @@ class _DontSayItScreenState extends State<DontSayItScreen> {
               const Icon(Icons.error_outline, size: 64),
               const SizedBox(height: 16),
               Text(
-                _errorMessage!,
+                errorMessage,
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.titleMedium,
               ),
@@ -324,12 +330,12 @@ class _DontSayItScreenState extends State<DontSayItScreen> {
                 onPressed: () {
                   setState(() {
                     _isLoading = true;
-                    _errorMessage = null;
+                    _loadError = null;
                   });
 
                   _loadFamilyMembers();
                 },
-                child: const Text('Try Again'),
+                child: Text(strings.tryAgain),
               ),
             ],
           ),
@@ -343,14 +349,14 @@ class _DontSayItScreenState extends State<DontSayItScreen> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
-            'Who is playing?',
+            strings.whoIsPlaying,
             style: Theme.of(
               context,
             ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
           Text(
-            'Choose at least 2 players.',
+            strings.chooseAtLeastTwoPlayers,
             style: Theme.of(context).textTheme.bodyLarge,
           ),
           const SizedBox(height: 20),
@@ -395,7 +401,7 @@ class _DontSayItScreenState extends State<DontSayItScreen> {
           const SizedBox(height: 28),
 
           Text(
-            'Time per turn',
+            strings.timePerTurn,
             style: Theme.of(
               context,
             ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
@@ -407,7 +413,7 @@ class _DontSayItScreenState extends State<DontSayItScreen> {
             runSpacing: 10,
             children: [30, 45, 60].map((seconds) {
               return ChoiceChip(
-                label: Text('$seconds sec'),
+                label: Text(strings.secondsShort(seconds)),
                 selected: _secondsPerTurn == seconds,
                 onSelected: (_) {
                   setState(() {
@@ -425,7 +431,9 @@ class _DontSayItScreenState extends State<DontSayItScreen> {
                 ? _continueToGame
                 : null,
             icon: const Icon(Icons.play_arrow),
-            label: Text(_isPreparingGame ? 'Preparing Game...' : 'Continue'),
+            label: Text(
+              _isPreparingGame ? strings.preparingGame : strings.continueLabel,
+            ),
           ),
         ],
       ),
@@ -434,6 +442,7 @@ class _DontSayItScreenState extends State<DontSayItScreen> {
 
   Widget _buildPassToClueGiverScreen() {
     final player = _players[_currentPlayerIndex];
+    final strings = AppLocalizations.of(context)!;
 
     return Center(
       child: Padding(
@@ -445,7 +454,7 @@ class _DontSayItScreenState extends State<DontSayItScreen> {
             const SizedBox(height: 24),
 
             Text(
-              'Pass the phone to ${player.name}',
+              strings.passPhoneTo(player.name),
               textAlign: TextAlign.center,
               style: Theme.of(
                 context,
@@ -455,16 +464,13 @@ class _DontSayItScreenState extends State<DontSayItScreen> {
             const SizedBox(height: 12),
 
             Text(
-              'Round $_currentRound of $_selectedRounds',
+              strings.roundProgress(_currentRound, _selectedRounds),
               style: Theme.of(context).textTheme.titleMedium,
             ),
 
             const SizedBox(height: 12),
 
-            const Text(
-              'Everyone else should look away.',
-              textAlign: TextAlign.center,
-            ),
+            Text(strings.everyoneElseLookAway, textAlign: TextAlign.center),
 
             const SizedBox(height: 32),
 
@@ -476,7 +482,7 @@ class _DontSayItScreenState extends State<DontSayItScreen> {
                     _phase = _DontSayItPhase.revealCard;
                   });
                 },
-                child: Text('I\'m ${player.name}'),
+                child: Text(strings.iAmPlayer(player.name)),
               ),
             ),
           ],
@@ -488,6 +494,7 @@ class _DontSayItScreenState extends State<DontSayItScreen> {
   Widget _buildRevealCardScreen() {
     final player = _players[_currentPlayerIndex];
     final card = _cards[_currentCardIndex];
+    final strings = AppLocalizations.of(context)!;
 
     return Center(
       child: SingleChildScrollView(
@@ -496,7 +503,7 @@ class _DontSayItScreenState extends State<DontSayItScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              '${player.name}, your word is:',
+              strings.playerSecretWord(player.name),
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.titleMedium,
             ),
@@ -514,7 +521,7 @@ class _DontSayItScreenState extends State<DontSayItScreen> {
             const SizedBox(height: 28),
 
             Text(
-              'DON\'T SAY:',
+              strings.dontSayHeading,
               style: Theme.of(
                 context,
               ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
@@ -548,10 +555,7 @@ class _DontSayItScreenState extends State<DontSayItScreen> {
 
             const SizedBox(height: 28),
 
-            const Text(
-              'Remember the card. Don\'t let anyone else see it.',
-              textAlign: TextAlign.center,
-            ),
+            Text(strings.rememberWordCard, textAlign: TextAlign.center),
 
             const SizedBox(height: 28),
 
@@ -560,7 +564,7 @@ class _DontSayItScreenState extends State<DontSayItScreen> {
               child: FilledButton.icon(
                 onPressed: _startTurn,
                 icon: const Icon(Icons.timer_outlined),
-                label: const Text('Start Turn'),
+                label: Text(strings.startTurn),
               ),
             ),
           ],
@@ -570,6 +574,7 @@ class _DontSayItScreenState extends State<DontSayItScreen> {
   }
 
   void _startTurn() {
+    final strings = AppLocalizations.of(context)!;
     _turnTimer?.cancel();
 
     setState(() {
@@ -588,7 +593,7 @@ class _DontSayItScreenState extends State<DontSayItScreen> {
 
         setState(() {
           _secondsRemaining = 0;
-          _turnResultMessage = 'Time\'s up! No points this turn.';
+          _turnResultMessage = strings.turnTimeUp;
           _phase = _DontSayItPhase.turnResult;
         });
 
@@ -603,6 +608,7 @@ class _DontSayItScreenState extends State<DontSayItScreen> {
 
   Widget _buildPlayingTurnScreen() {
     final player = _players[_currentPlayerIndex];
+    final strings = AppLocalizations.of(context)!;
 
     return Center(
       child: Padding(
@@ -611,7 +617,7 @@ class _DontSayItScreenState extends State<DontSayItScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              '${player.name} is describing',
+              strings.playerIsDescribing(player.name),
               textAlign: TextAlign.center,
               style: Theme.of(
                 context,
@@ -621,7 +627,7 @@ class _DontSayItScreenState extends State<DontSayItScreen> {
             const SizedBox(height: 16),
 
             Text(
-              '$_secondsRemaining s',
+              strings.secondsRemaining(_secondsRemaining),
               style: Theme.of(
                 context,
               ).textTheme.displaySmall?.copyWith(fontWeight: FontWeight.bold),
@@ -629,10 +635,7 @@ class _DontSayItScreenState extends State<DontSayItScreen> {
 
             const SizedBox(height: 24),
 
-            const Text(
-              'Everyone else: guess aloud!',
-              textAlign: TextAlign.center,
-            ),
+            Text(strings.guessAloud, textAlign: TextAlign.center),
 
             const SizedBox(height: 32),
 
@@ -641,7 +644,7 @@ class _DontSayItScreenState extends State<DontSayItScreen> {
               child: FilledButton.icon(
                 onPressed: _someoneGuessedIt,
                 icon: const Icon(Icons.check_circle_outline),
-                label: const Text('Someone Guessed It'),
+                label: Text(strings.someoneGuessedIt),
               ),
             ),
 
@@ -652,7 +655,7 @@ class _DontSayItScreenState extends State<DontSayItScreen> {
               child: OutlinedButton.icon(
                 onPressed: _skipTurn,
                 icon: const Icon(Icons.skip_next),
-                label: const Text('Skip'),
+                label: Text(strings.skip),
               ),
             ),
           ],
@@ -670,16 +673,18 @@ class _DontSayItScreenState extends State<DontSayItScreen> {
   }
 
   void _skipTurn() {
+    final strings = AppLocalizations.of(context)!;
     _turnTimer?.cancel();
 
     setState(() {
-      _turnResultMessage = 'Turn skipped. No points awarded.';
+      _turnResultMessage = strings.turnSkipped;
       _phase = _DontSayItPhase.turnResult;
     });
   }
 
   Widget _buildChooseGuesserScreen() {
     final clueGiver = _players[_currentPlayerIndex];
+    final strings = AppLocalizations.of(context)!;
 
     final possibleGuessers = _players
         .where((player) => player.id != clueGiver.id)
@@ -691,7 +696,7 @@ class _DontSayItScreenState extends State<DontSayItScreen> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
-            'Who guessed it?',
+            strings.whoGuessedIt,
             textAlign: TextAlign.center,
             style: Theme.of(
               context,
@@ -700,10 +705,7 @@ class _DontSayItScreenState extends State<DontSayItScreen> {
 
           const SizedBox(height: 12),
 
-          const Text(
-            'Choose the player who guessed the secret word correctly.',
-            textAlign: TextAlign.center,
-          ),
+          Text(strings.chooseSecretWordGuesser, textAlign: TextAlign.center),
 
           const SizedBox(height: 24),
 
@@ -731,14 +733,16 @@ class _DontSayItScreenState extends State<DontSayItScreen> {
 
   void _awardCorrectGuess(_DontSayItPlayer guesser) {
     final clueGiver = _players[_currentPlayerIndex];
+    final strings = AppLocalizations.of(context)!;
 
     if (_isLockedHeadToHead) {
       _scores[clueGiver.id] = (_scores[clueGiver.id] ?? 0) + 1;
 
       setState(() {
-        _turnResultMessage =
-            '${guesser.name} guessed correctly!\n\n'
-            '${clueGiver.name} +1 point';
+        _turnResultMessage = strings.clueGiverPointResult(
+          guesser.name,
+          clueGiver.name,
+        );
 
         _phase = _DontSayItPhase.turnResult;
       });
@@ -751,10 +755,10 @@ class _DontSayItScreenState extends State<DontSayItScreen> {
     _scores[guesser.id] = (_scores[guesser.id] ?? 0) + 1;
 
     setState(() {
-      _turnResultMessage =
-          '${guesser.name} guessed correctly!\n\n'
-          '${clueGiver.name} +1 point\n'
-          '${guesser.name} +1 point';
+      _turnResultMessage = strings.sharedPointResult(
+        guesser.name,
+        clueGiver.name,
+      );
 
       _phase = _DontSayItPhase.turnResult;
     });
@@ -762,6 +766,7 @@ class _DontSayItScreenState extends State<DontSayItScreen> {
 
   Widget _buildTurnResultScreen() {
     final card = _cards[_currentCardIndex];
+    final strings = AppLocalizations.of(context)!;
 
     return Center(
       child: Padding(
@@ -774,7 +779,7 @@ class _DontSayItScreenState extends State<DontSayItScreen> {
             const SizedBox(height: 20),
 
             Text(
-              'Turn Complete',
+              strings.turnComplete,
               style: Theme.of(
                 context,
               ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
@@ -787,7 +792,7 @@ class _DontSayItScreenState extends State<DontSayItScreen> {
             const SizedBox(height: 24),
 
             Text(
-              'Secret word: ${card.word}',
+              strings.secretWordLabel(card.word),
               style: Theme.of(
                 context,
               ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
@@ -799,7 +804,7 @@ class _DontSayItScreenState extends State<DontSayItScreen> {
               width: double.infinity,
               child: FilledButton(
                 onPressed: _continueAfterTurn,
-                child: const Text('Continue'),
+                child: Text(strings.continueLabel),
               ),
             ),
           ],

@@ -15,6 +15,8 @@ import '../widgets/game_setup_widgets.dart';
 
 enum _BombPhase { setup, playing, roundResult, finalLeaderboard }
 
+enum _BombLoadError { signedOut, noFamily, loadFailed }
+
 class PassTheBombScreen extends StatefulWidget {
   const PassTheBombScreen({
     super.key,
@@ -48,7 +50,7 @@ class _PassTheBombScreenState extends State<PassTheBombScreen> {
   bool _isLoading = true;
   bool _isStartingGame = false;
   bool _isValidatingAnswer = false;
-  String? _errorMessage;
+  _BombLoadError? _loadError;
 
   int _currentRoundIndex = 0;
   int _currentPlayerIndex = 0;
@@ -78,7 +80,7 @@ class _PassTheBombScreenState extends State<PassTheBombScreen> {
     if (user == null) {
       setState(() {
         _isLoading = false;
-        _errorMessage = 'You must be logged in to play.';
+        _loadError = _BombLoadError.signedOut;
       });
 
       return;
@@ -97,7 +99,7 @@ class _PassTheBombScreenState extends State<PassTheBombScreen> {
 
         setState(() {
           _isLoading = false;
-          _errorMessage = 'Join or create a family before playing.';
+          _loadError = _BombLoadError.noFamily;
         });
 
         return;
@@ -108,6 +110,10 @@ class _PassTheBombScreenState extends State<PassTheBombScreen> {
           .where('familyId', isEqualTo: familyId)
           .get();
 
+      if (!mounted) {
+        return;
+      }
+      final strings = AppLocalizations.of(context)!;
       final members = membersSnapshot.docs
           .where(
             (document) =>
@@ -124,7 +130,7 @@ class _PassTheBombScreenState extends State<PassTheBombScreen> {
               id: document.id,
               name: name?.trim().isNotEmpty == true
                   ? name!
-                  : email ?? 'Family Member',
+                  : email ?? strings.familyMemberFallback,
             );
           })
           .toList();
@@ -151,7 +157,7 @@ class _PassTheBombScreenState extends State<PassTheBombScreen> {
 
       setState(() {
         _isLoading = false;
-        _errorMessage = 'Could not load your family members.';
+        _loadError = _BombLoadError.loadFailed;
       });
     }
   }
@@ -167,10 +173,11 @@ class _PassTheBombScreenState extends State<PassTheBombScreen> {
   }
 
   Future<void> _startGame() async {
+    final strings = AppLocalizations.of(context)!;
     if (_selectedPlayerIds.length < 2) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Pass the Bomb needs at least 2 players.'),
+        SnackBar(
+          content: Text(strings.minimumPlayersForGame(strings.passTheBomb, 2)),
         ),
       );
 
@@ -229,11 +236,7 @@ class _PassTheBombScreenState extends State<PassTheBombScreen> {
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Could not start Pass the Bomb. Make sure the AI server is running.',
-          ),
-        ),
+        SnackBar(content: Text(strings.couldNotStartGame(strings.passTheBomb))),
       );
     }
   }
@@ -271,6 +274,7 @@ class _PassTheBombScreenState extends State<PassTheBombScreen> {
   }
 
   Future<void> _submitAnswer() async {
+    final strings = AppLocalizations.of(context)!;
     if (_isValidatingAnswer ||
         _phase != _BombPhase.playing ||
         _players.isEmpty ||
@@ -287,13 +291,9 @@ class _PassTheBombScreenState extends State<PassTheBombScreen> {
     final normalizedAnswer = answer.toLowerCase();
 
     if (_usedAnswers.contains(normalizedAnswer)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'That answer was already used this round! Try another one.',
-          ),
-        ),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(strings.answerAlreadyUsed)));
 
       return;
     }
@@ -333,8 +333,8 @@ class _PassTheBombScreenState extends State<PassTheBombScreen> {
           SnackBar(
             content: Text(
               result.reason.isEmpty
-                  ? 'That does not fit the category. Try again!'
-                  : '${result.reason} Try again!',
+                  ? strings.answerDoesNotFitCategory
+                  : strings.reasonTryAgain(result.reason),
             ),
           ),
         );
@@ -363,11 +363,9 @@ class _PassTheBombScreenState extends State<PassTheBombScreen> {
           _isValidatingAnswer = false;
         });
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Could not check that answer. Please try again.'),
-          ),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(strings.couldNotCheckAnswer)));
       }
     }
   }
@@ -418,8 +416,9 @@ class _PassTheBombScreenState extends State<PassTheBombScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppBar(title: const Text('Pass the Bomb')),
+      appBar: AppBar(title: Text(strings.passTheBomb)),
       body: SafeArea(child: _buildBody()),
     );
   }
@@ -441,11 +440,19 @@ class _PassTheBombScreenState extends State<PassTheBombScreen> {
   }
 
   Widget _buildSetupScreen() {
+    final strings = AppLocalizations.of(context)!;
     if (_isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
 
-    if (_errorMessage != null) {
+    if (_loadError != null) {
+      final errorMessage = switch (_loadError!) {
+        _BombLoadError.signedOut => strings.mustBeLoggedInToPlay,
+        _BombLoadError.noFamily => strings.joinOrCreateFamilyBeforeGame(
+          strings.passTheBomb,
+        ),
+        _BombLoadError.loadFailed => strings.couldNotLoadFamilyMembers,
+      };
       return Center(
         child: Padding(
           padding: const EdgeInsets.all(24),
@@ -455,7 +462,7 @@ class _PassTheBombScreenState extends State<PassTheBombScreen> {
               const Icon(Icons.error_outline_rounded, size: 64),
               const SizedBox(height: 16),
               Text(
-                _errorMessage!,
+                errorMessage,
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.titleMedium,
               ),
@@ -464,12 +471,12 @@ class _PassTheBombScreenState extends State<PassTheBombScreen> {
                 onPressed: () {
                   setState(() {
                     _isLoading = true;
-                    _errorMessage = null;
+                    _loadError = null;
                   });
 
                   _loadFamilyMembers();
                 },
-                child: const Text('Try Again'),
+                child: Text(strings.tryAgain),
               ),
             ],
           ),
@@ -482,7 +489,7 @@ class _PassTheBombScreenState extends State<PassTheBombScreen> {
         child: Padding(
           padding: const EdgeInsets.all(24),
           child: Text(
-            'Pass the Bomb needs at least 2 family members.',
+            strings.minimumFamilyMembersForGame(strings.passTheBomb, 2),
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.titleMedium,
           ),
@@ -496,19 +503,15 @@ class _PassTheBombScreenState extends State<PassTheBombScreen> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
-            'Who is playing?',
+            strings.whoIsPlaying,
             style: Theme.of(
               context,
             ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
-          const Text(
-            'Choose the family members who are together with you. Everyone will share this phone.',
-          ),
+          Text(strings.chooseTogetherPlayers),
           const SizedBox(height: 10),
-          const Text(
-            'Answer quickly, pass the phone, and do not repeat an answer.',
-          ),
+          Text(strings.bombSetupInstructions),
           const SizedBox(height: 18),
           GameRoundSelector(
             value: _selectedRounds,
@@ -560,8 +563,8 @@ class _PassTheBombScreenState extends State<PassTheBombScreen> {
                 : const Icon(Icons.timer_rounded),
             label: Text(
               _isStartingGame
-                  ? 'Generating categories...'
-                  : 'Start Pass the Bomb',
+                  ? strings.generatingCategories
+                  : strings.startNamedGame(strings.passTheBomb),
             ),
           ),
         ],
@@ -571,8 +574,8 @@ class _PassTheBombScreenState extends State<PassTheBombScreen> {
 
   Widget _buildPlayingScreen() {
     final currentPlayer = _players[_currentPlayerIndex];
-
     final category = _categories[_currentRoundIndex];
+    final strings = AppLocalizations.of(context)!;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
@@ -583,7 +586,7 @@ class _PassTheBombScreenState extends State<PassTheBombScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
-                'Round ${_currentRoundIndex + 1} of $_selectedRounds',
+                strings.roundProgress(_currentRoundIndex + 1, _selectedRounds),
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.titleMedium,
               ),
@@ -607,27 +610,24 @@ class _PassTheBombScreenState extends State<PassTheBombScreen> {
               ),
               const SizedBox(height: 24),
               Text(
-                '${currentPlayer.name}\'s turn',
+                strings.playerTurn(currentPlayer.name),
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
               ),
               const SizedBox(height: 8),
-              const Text(
-                'Say your answer aloud, type it below, then immediately pass the phone.',
-                textAlign: TextAlign.center,
-              ),
+              Text(strings.sayTypePass, textAlign: TextAlign.center),
               const SizedBox(height: 22),
               TextField(
                 controller: _answerController,
                 textInputAction: TextInputAction.done,
                 enabled: !_isValidatingAnswer,
                 decoration: InputDecoration(
-                  labelText: 'Your answer',
+                  labelText: strings.yourAnswer,
                   hintText: _isValidatingAnswer
-                      ? 'Checking answer...'
-                      : 'Type the answer you just said',
+                      ? strings.checkingAnswer
+                      : strings.typeSpokenAnswer,
                   border: const OutlineInputBorder(),
                 ),
                 onSubmitted: (_) => _submitAnswer(),
@@ -644,8 +644,8 @@ class _PassTheBombScreenState extends State<PassTheBombScreen> {
                     : const Icon(Icons.arrow_forward_rounded),
                 label: Text(
                   _isValidatingAnswer
-                      ? 'Checking answer...'
-                      : 'Submit & Pass Phone',
+                      ? strings.checkingAnswer
+                      : strings.submitAndPassPhone,
                 ),
               ),
               const SizedBox(height: 22),
@@ -658,7 +658,7 @@ class _PassTheBombScreenState extends State<PassTheBombScreen> {
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
-                          'The bomb can explode at any moment. The timer is hidden!',
+                          strings.bombHiddenTimer,
                           style: Theme.of(context).textTheme.bodyMedium,
                         ),
                       ),
@@ -668,7 +668,7 @@ class _PassTheBombScreenState extends State<PassTheBombScreen> {
               ),
               const SizedBox(height: 12),
               Text(
-                '${_usedAnswers.length} answers used this round',
+                strings.answersUsedThisRound(_usedAnswers.length),
                 textAlign: TextAlign.center,
               ),
             ],
@@ -680,6 +680,7 @@ class _PassTheBombScreenState extends State<PassTheBombScreen> {
 
   Widget _buildRoundResultScreen() {
     final loser = _players.firstWhere((player) => player.id == _roundLoserId);
+    final strings = AppLocalizations.of(context)!;
 
     return Center(
       child: SingleChildScrollView(
@@ -691,29 +692,26 @@ class _PassTheBombScreenState extends State<PassTheBombScreen> {
               const Text('💥', style: TextStyle(fontSize: 90)),
               const SizedBox(height: 16),
               Text(
-                'BOOM!',
+                strings.boom,
                 style: Theme.of(
                   context,
                 ).textTheme.displaySmall?.copyWith(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 16),
               Text(
-                '${loser.name} was holding the bomb!',
+                strings.playerHeldBomb(loser.name),
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.headlineSmall,
               ),
               const SizedBox(height: 12),
-              const Text(
-                'Everyone else earns 1 point for surviving the round.',
-                textAlign: TextAlign.center,
-              ),
+              Text(strings.bombSurvivorPoint, textAlign: TextAlign.center),
               const SizedBox(height: 28),
               FilledButton(
                 onPressed: _nextRound,
                 child: Text(
                   _currentRoundIndex + 1 >= _selectedRounds
-                      ? 'View Final Leaderboard'
-                      : 'Next Round',
+                      ? strings.viewFinalLeaderboard
+                      : strings.nextRound,
                 ),
               ),
             ],
