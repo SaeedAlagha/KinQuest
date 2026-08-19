@@ -188,6 +188,7 @@ class AppTheme {
       useMaterial3: true,
       brightness: brightness,
       colorScheme: colorScheme,
+      fontFamily: 'NotoSansArabic',
       scaffoldBackgroundColor: background,
       extensions: [
         SilaThemeTokens(pageGradient: pageGradient, isFamilyYear: isFamilyYear),
@@ -195,55 +196,61 @@ class AppTheme {
     );
 
     return baseTheme.copyWith(
-      textTheme: baseTheme.textTheme.copyWith(
-        displaySmall: TextStyle(
-          fontSize: 44,
-          height: 1.08,
-          fontWeight: FontWeight.w700,
-          letterSpacing: -1.4,
-          color: text,
-        ),
-        headlineLarge: TextStyle(
-          fontSize: 36,
-          height: 1.12,
-          fontWeight: FontWeight.w700,
-          letterSpacing: -1,
-          color: text,
-        ),
-        headlineMedium: TextStyle(
-          fontSize: 30,
-          height: 1.16,
-          fontWeight: FontWeight.w700,
-          letterSpacing: -0.7,
-          color: text,
-        ),
-        headlineSmall: TextStyle(
-          fontSize: 24,
-          height: 1.2,
-          fontWeight: FontWeight.w700,
-          letterSpacing: -0.35,
-          color: text,
-        ),
-        titleLarge: TextStyle(
-          fontSize: 20,
-          height: 1.3,
-          fontWeight: FontWeight.w700,
-          color: text,
-        ),
-        titleMedium: TextStyle(
-          fontSize: 16,
-          height: 1.4,
-          fontWeight: FontWeight.w600,
-          color: secondaryText,
-        ),
-        bodyLarge: TextStyle(fontSize: 16, height: 1.5, color: text),
-        bodyMedium: TextStyle(fontSize: 14, height: 1.45, color: secondaryText),
-        labelLarge: const TextStyle(
-          fontSize: 14,
-          fontWeight: FontWeight.w700,
-          letterSpacing: 0.1,
-        ),
-      ),
+      textTheme: baseTheme.textTheme
+          .copyWith(
+            displaySmall: TextStyle(
+              fontSize: 44,
+              height: 1.08,
+              fontWeight: FontWeight.w700,
+              letterSpacing: -1.4,
+              color: text,
+            ),
+            headlineLarge: TextStyle(
+              fontSize: 36,
+              height: 1.12,
+              fontWeight: FontWeight.w700,
+              letterSpacing: -1,
+              color: text,
+            ),
+            headlineMedium: TextStyle(
+              fontSize: 30,
+              height: 1.16,
+              fontWeight: FontWeight.w700,
+              letterSpacing: -0.7,
+              color: text,
+            ),
+            headlineSmall: TextStyle(
+              fontSize: 24,
+              height: 1.2,
+              fontWeight: FontWeight.w700,
+              letterSpacing: -0.35,
+              color: text,
+            ),
+            titleLarge: TextStyle(
+              fontSize: 20,
+              height: 1.3,
+              fontWeight: FontWeight.w700,
+              color: text,
+            ),
+            titleMedium: TextStyle(
+              fontSize: 16,
+              height: 1.4,
+              fontWeight: FontWeight.w600,
+              color: secondaryText,
+            ),
+            bodyLarge: TextStyle(fontSize: 16, height: 1.5, color: text),
+            bodyMedium: TextStyle(
+              fontSize: 14,
+              height: 1.45,
+              color: secondaryText,
+            ),
+            labelLarge: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.1,
+            ),
+          )
+          .apply(fontFamily: 'NotoSansArabic'),
       appBarTheme: AppBarTheme(
         backgroundColor: appBar,
         foregroundColor: text,
