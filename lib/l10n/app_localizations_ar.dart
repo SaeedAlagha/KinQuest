@@ -2092,4 +2092,258 @@ class AppLocalizationsAr extends AppLocalizations {
   String stealMissedAnswer(String answer) {
     return 'لم تنجح السرقة.\n\nالإجابة: $answer';
   }
+
+  @override
+  String get categoryFamily => 'العائلة';
+
+  @override
+  String get categoryFamilyFun => 'مرح عائلي';
+
+  @override
+  String get categoryFavorites => 'المفضلات';
+
+  @override
+  String get categoryHabits => 'العادات';
+
+  @override
+  String get categoryMemories => 'الذكريات';
+
+  @override
+  String get categoryMostLikelyTo => 'الأكثر احتمالًا';
+
+  @override
+  String get categoryTravel => 'السفر';
+
+  @override
+  String get categoryAtHome => 'في المنزل';
+
+  @override
+  String get categorySchool => 'المدرسة';
+
+  @override
+  String get categoryActions => 'حركات';
+
+  @override
+  String get categoryObjects => 'أشياء';
+
+  @override
+  String get categorySports => 'رياضة';
+
+  @override
+  String get categoryFunny => 'مضحك';
+
+  @override
+  String get categoryFriends => 'الأصدقاء';
+
+  @override
+  String get categoryScience => 'العلوم';
+
+  @override
+  String get categoryGeography => 'الجغرافيا';
+
+  @override
+  String get categoryHistory => 'التاريخ';
+
+  @override
+  String get categoryGeneralKnowledge => 'معلومات عامة';
+
+  @override
+  String get categoryActivities => 'أنشطة';
+
+  @override
+  String get categoryNature => 'الطبيعة';
+
+  @override
+  String get categoryHome => 'المنزل';
+
+  @override
+  String get categoryMusic => 'الموسيقى';
+
+  @override
+  String get categoryTechnology => 'التقنية';
+
+  @override
+  String get categoryUaeHeritage => 'الإمارات والتراث';
+
+  @override
+  String get chooseCategory => 'اختر فئة';
+
+  @override
+  String get pickCategory => 'اختر فئة';
+
+  @override
+  String get couldNotReachAiOfflinePrompts => 'تعذر الوصول إلى الذكاء الاصطناعي. سنستخدم تلميحات محفوظة بدلًا منه.';
+
+  @override
+  String get couldNotReachAiOfflineQuestions => 'تعذر الوصول إلى الذكاء الاصطناعي. سنستخدم أسئلة محفوظة بدلًا منه.';
+
+  @override
+  String get generatingPrompts => 'جارٍ تجهيز التلميحات...';
+
+  @override
+  String get generatingQuestions => 'جارٍ تجهيز الأسئلة...';
+
+  @override
+  String get startGame => 'ابدأ اللعبة';
+
+  @override
+  String get startCharades => 'ابدأ التمثيل الصامت';
+
+  @override
+  String promptProgress(int current, int total) {
+    return 'التلميح $current من $total';
+  }
+
+  @override
+  String roundProgress(int current, int total) {
+    return 'الجولة $current من $total';
+  }
+
+  @override
+  String get gameProgress => 'تقدم اللعبة';
+
+  @override
+  String get nextPrompt => 'التلميح التالي';
+
+  @override
+  String get charadesRoundComplete => 'اكتملت جولة التمثيل الصامت!';
+
+  @override
+  String get never => 'لم أفعل';
+
+  @override
+  String get iHave => 'فعلتها';
+
+  @override
+  String get roundCompleteCelebration => 'اكتملت الجولة!';
+
+  @override
+  String iHaveCount(int count) {
+    return 'فعلتها: $count';
+  }
+
+  @override
+  String neverCount(int count) {
+    return 'لم أفعل: $count';
+  }
+
+  @override
+  String get changeCategory => 'تغيير الفئة';
+
+  @override
+  String get truth => 'صراحة';
+
+  @override
+  String get dare => 'تحدٍّ';
+
+  @override
+  String get done => 'تم';
+
+  @override
+  String truthsCompleted(int count) {
+    return 'أسئلة الصراحة المكتملة: $count';
+  }
+
+  @override
+  String daresCompleted(int count) {
+    return 'التحديات المكتملة: $count';
+  }
+
+  @override
+  String get charadesSetupDescription => 'اختر موضوعًا ومباراة من جولة أو 3 أو 5 جولات، ثم مثّل كل تلميح من دون نطق الإجابة.';
+
+  @override
+  String get neverSetupDescription => 'اختر موضوعًا عائليًا لطيفًا وجولة من تلميح واحد أو 3 أو 5 تلميحات لقصص مفاجئة.';
+
+  @override
+  String get truthDareSetupDescription => 'اختر موضوعًا مرحًا ومباراة من جولة أو 3 أو 5 جولات من أسئلة الصراحة والتحديات العائلية الآمنة.';
+
+  @override
+  String get wouldRatherSetupDescription => 'اختر فئة وجولة أو 3 أو 5 جولات، ثم اكتشف الخيارات المرحة التي تفضلها عائلتك.';
+
+  @override
+  String get wouldYouRatherPrompt => 'ماذا تفضّل؟';
+
+  @override
+  String get chooseMostFunAnswer => 'اختر الإجابة التي تبدو أكثر متعة لك.';
+
+  @override
+  String get tapAnswerToLock => 'اضغط على إجابة لاعتمادها.';
+
+  @override
+  String youSelectedAnswer(String answer) {
+    return 'اخترت: $answer';
+  }
+
+  @override
+  String get seeResults => 'عرض النتائج';
+
+  @override
+  String get nextRound => 'الجولة التالية';
+
+  @override
+  String get greatJob => 'أحسنت!';
+
+  @override
+  String completedRoundsCategory(int rounds, String category) {
+    return 'أكملت $rounds جولات ضمن فئة $category.';
+  }
+
+  @override
+  String get changeSettings => 'تغيير الإعدادات';
+
+  @override
+  String get triviaFamilyRequired => 'انضم إلى عائلة أو أنشئ واحدة قبل لعب المعلومات العامة.';
+
+  @override
+  String get couldNotPrepareTrivia => 'تعذر تجهيز لعبة المعلومات العامة. حاول مجددًا.';
+
+  @override
+  String get triviaSetupDescription => 'كوّن فريقين واختر فئة وتسابقوا عبر أسئلة عائلية ممتعة.';
+
+  @override
+  String get questionsPerRound => 'الأسئلة في كل جولة';
+
+  @override
+  String get timePerQuestion => 'وقت كل سؤال';
+
+  @override
+  String questionRoundProgress(int round, int totalRounds, int question, int totalQuestions) {
+    return 'الجولة $round من $totalRounds • السؤال $question من $totalQuestions';
+  }
+
+  @override
+  String get questionComplete => 'اكتمل السؤال';
+
+  @override
+  String get nextQuestion => 'السؤال التالي';
+
+  @override
+  String noStealCorrectAnswer(String answer) {
+    return 'لم تتم السرقة.\n\nالإجابة الصحيحة: $answer';
+  }
+
+  @override
+  String teamAnsweredCorrectly(String team, int points) {
+    return 'أجاب $team بشكل صحيح!\n\n+$points نقطتان';
+  }
+
+  @override
+  String teamStoleQuestion(String team, int points) {
+    return 'نجح $team في سرقة السؤال!\n\n+$points نقطة';
+  }
+
+  @override
+  String stealMissedCorrectAnswer(String answer) {
+    return 'لم تنجح السرقة.\n\nالإجابة الصحيحة: $answer';
+  }
+
+  @override
+  String get triviaTie => 'تعادل في المعلومات العامة!';
+
+  @override
+  String get tieBreaker => 'كسر التعادل';
+
+  @override
+  String get oneFinalQuestion => 'سؤال أخير واحد يحدد الفائز.';
 }

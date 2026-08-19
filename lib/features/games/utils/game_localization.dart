@@ -1,0 +1,36 @@
+import '../../../l10n/app_localizations.dart';
+
+String localizedGameCategory(AppLocalizations strings, String category) {
+  return switch (category) {
+    'Family' => strings.categoryFamily,
+    'Family Fun' => strings.categoryFamilyFun,
+    'Favorites' => strings.categoryFavorites,
+    'Habits' => strings.categoryHabits,
+    'Memories' => strings.categoryMemories,
+    'Most Likely To' => strings.categoryMostLikelyTo,
+    'Travel' => strings.categoryTravel,
+    'At Home' => strings.categoryAtHome,
+    'Food' => strings.categoryFood,
+    'School' => strings.categorySchool,
+    'Animals' => strings.categoryAnimals,
+    'Actions' => strings.categoryActions,
+    'Movies' => strings.categoryMovies,
+    'Objects' => strings.categoryObjects,
+    'Sports' => strings.categorySports,
+    'Funny' => strings.categoryFunny,
+    'Friends' => strings.categoryFriends,
+    'Mixed' => strings.categoryMixed,
+    'Science' => strings.categoryScience,
+    'Geography' => strings.categoryGeography,
+    'History' => strings.categoryHistory,
+    'General Knowledge' => strings.categoryGeneralKnowledge,
+    'Places' => strings.categoryPlaces,
+    'Activities' => strings.categoryActivities,
+    'Nature' => strings.categoryNature,
+    'Home' => strings.categoryHome,
+    'Music' => strings.categoryMusic,
+    'Technology' => strings.categoryTechnology,
+    'UAE & Heritage' => strings.categoryUaeHeritage,
+    _ => category,
+  };
+}

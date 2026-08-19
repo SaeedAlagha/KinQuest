@@ -2,7 +2,9 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 
+import '../../../l10n/app_localizations.dart';
 import '../services/charades_ai_service.dart';
+import '../utils/game_localization.dart';
 import '../widgets/game_setup_widgets.dart';
 
 class CharadesScreen extends StatefulWidget {
@@ -37,6 +39,14 @@ class _CharadesScreenState extends State<CharadesScreen> {
     'Sports': ['Basketball', 'Football', 'Tennis', 'Swimming', 'Boxing'],
   };
 
+  final Map<String, List<String>> _arabicFallbackPrompts = {
+    'Animals': ['فيل', 'بطريق', 'كنغر', 'قرد', 'زرافة'],
+    'Actions': ['تنظيف الأسنان', 'السباحة', 'الرقص', 'الطبخ', 'النوم'],
+    'Movies': ['بطل خارق', 'قرصان', 'روبوت', 'محقق', 'أميرة'],
+    'Objects': ['مظلة', 'كاميرا', 'حقيبة ظهر', 'هاتف', 'دراجة'],
+    'Sports': ['كرة السلة', 'كرة القدم', 'التنس', 'السباحة', 'الملاكمة'],
+  };
+
   String _selectedCategory = 'Animals';
   int _selectedRounds = 3;
   bool _isLoading = false;
@@ -65,7 +75,10 @@ class _CharadesScreenState extends State<CharadesScreen> {
         _isLoading = false;
       });
     } catch (error) {
-      final fallback = List<String>.from(_fallbackPrompts[_selectedCategory]!)
+      final fallbackBank = Localizations.localeOf(context).languageCode == 'ar'
+          ? _arabicFallbackPrompts
+          : _fallbackPrompts;
+      final fallback = List<String>.from(fallbackBank[_selectedCategory]!)
         ..shuffle(Random());
 
       if (!mounted) return;
@@ -78,8 +91,10 @@ class _CharadesScreenState extends State<CharadesScreen> {
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Could not reach AI. Using offline prompts instead.'),
+        SnackBar(
+          content: Text(
+            AppLocalizations.of(context)!.couldNotReachAiOfflinePrompts,
+          ),
         ),
       );
     }
@@ -95,16 +110,20 @@ class _CharadesScreenState extends State<CharadesScreen> {
         _isPlaying = false;
       });
 
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Charades round complete!')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.charadesRoundComplete),
+        ),
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context)!;
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Charades')),
+      appBar: AppBar(title: Text(strings.charades)),
       body: _isPlaying
           ? Padding(padding: const EdgeInsets.all(24), child: _buildGame())
           : _buildSetup(),
@@ -112,18 +131,19 @@ class _CharadesScreenState extends State<CharadesScreen> {
   }
 
   Widget _buildSetup() {
+    final strings = AppLocalizations.of(context)!;
+
     return GameSetupView(
       icon: Icons.theater_comedy_rounded,
-      title: 'Charades',
-      description:
-          'Choose a theme and a 1, 3, or 5-round game, then act out each prompt without saying the answer.',
+      title: strings.charades,
+      description: strings.charadesSetupDescription,
       children: [
         GameSetupSectionCard(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Choose a category',
+                strings.chooseCategory,
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               const SizedBox(height: 14),
@@ -134,7 +154,7 @@ class _CharadesScreenState extends State<CharadesScreen> {
                   final selected = category == _selectedCategory;
 
                   return ChoiceChip(
-                    label: Text(category),
+                    label: Text(localizedGameCategory(strings, category)),
                     selected: selected,
                     onSelected: (_) {
                       setState(() {
@@ -160,30 +180,32 @@ class _CharadesScreenState extends State<CharadesScreen> {
         ElevatedButton(
           onPressed: _isLoading ? null : _startGame,
           child: _isLoading
-              ? const Row(
+              ? Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    SizedBox(
+                    const SizedBox(
                       width: 20,
                       height: 20,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     ),
-                    SizedBox(width: 12),
-                    Text('Generating prompts...'),
+                    const SizedBox(width: 12),
+                    Text(strings.generatingPrompts),
                   ],
                 )
-              : const Text('Start Charades'),
+              : Text(strings.startCharades),
         ),
       ],
     );
   }
 
   Widget _buildGame() {
+    final strings = AppLocalizations.of(context)!;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(
-          'Prompt ${_currentIndex + 1} of ${_prompts.length}',
+          strings.promptProgress(_currentIndex + 1, _prompts.length),
           style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
         ),
         const SizedBox(height: 30),
@@ -205,10 +227,7 @@ class _CharadesScreenState extends State<CharadesScreen> {
           ),
         ),
         const SizedBox(height: 24),
-        ElevatedButton(
-          onPressed: _nextPrompt,
-          child: const Text('Next Prompt'),
-        ),
+        ElevatedButton(onPressed: _nextPrompt, child: Text(strings.nextPrompt)),
       ],
     );
   }

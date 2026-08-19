@@ -1,7 +1,10 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+
+import '../../../l10n/app_localizations.dart';
 import '../services/ai_question_service.dart';
+import '../utils/game_localization.dart';
 import '../widgets/game_setup_widgets.dart';
 
 class WouldYouRatherScreen extends StatefulWidget {
@@ -194,6 +197,98 @@ class _WouldYouRatherScreenState extends State<WouldYouRatherScreen> {
     ],
   };
 
+  static const Map<String, List<WouldYouRatherQuestion>> _arabicQuestionBank = {
+    'Family': [
+      WouldYouRatherQuestion(
+        optionA: 'تناول فطور الفطائر مع الجميع',
+        optionB: 'قضاء ليلة أفلام مع الجميع',
+      ),
+      WouldYouRatherQuestion(
+        optionA: 'تنظيم نزهة عائلية',
+        optionB: 'تنظيم ليلة ألعاب عائلية',
+      ),
+      WouldYouRatherQuestion(
+        optionA: 'طبخ وجبة مع العائلة',
+        optionB: 'تزيين المنزل مع العائلة',
+      ),
+      WouldYouRatherQuestion(
+        optionA: 'سماع قصة عائلية قديمة',
+        optionB: 'صنع ذكرى عائلية جديدة',
+      ),
+      WouldYouRatherQuestion(
+        optionA: 'زيارة الأقارب',
+        optionB: 'استضافة الأقارب في المنزل',
+      ),
+    ],
+    'Travel': [
+      WouldYouRatherQuestion(
+        optionA: 'السفر إلى الجبال',
+        optionB: 'السفر إلى الشاطئ',
+      ),
+      WouldYouRatherQuestion(optionA: 'ركوب القطار', optionB: 'ركوب الطائرة'),
+      WouldYouRatherQuestion(
+        optionA: 'استكشاف مدينة جديدة',
+        optionB: 'استكشاف محمية طبيعية',
+      ),
+      WouldYouRatherQuestion(
+        optionA: 'التخييم تحت النجوم',
+        optionB: 'الإقامة في فندق مريح',
+      ),
+      WouldYouRatherQuestion(
+        optionA: 'التقاط صور الرحلة',
+        optionB: 'كتابة يوميات الرحلة',
+      ),
+    ],
+    'At Home': [
+      WouldYouRatherQuestion(
+        optionA: 'بناء حصن من الوسائد',
+        optionB: 'إعداد ركن للقراءة',
+      ),
+      WouldYouRatherQuestion(optionA: 'خبز كعكة', optionB: 'إعداد بيتزا'),
+      WouldYouRatherQuestion(
+        optionA: 'لعب لعبة جماعية',
+        optionB: 'مشاهدة فيلم',
+      ),
+      WouldYouRatherQuestion(
+        optionA: 'ترتيب الغرفة مع الموسيقى',
+        optionB: 'تزيين الغرفة بالصور',
+      ),
+      WouldYouRatherQuestion(optionA: 'زراعة نبتة', optionB: 'صنع عمل فني'),
+    ],
+    'Food': [
+      WouldYouRatherQuestion(optionA: 'تناول البيتزا', optionB: 'تناول البرغر'),
+      WouldYouRatherQuestion(
+        optionA: 'اختيار حلوى باردة',
+        optionB: 'اختيار حلوى دافئة',
+      ),
+      WouldYouRatherQuestion(
+        optionA: 'تجربة فاكهة جديدة',
+        optionB: 'تجربة طبق جديد',
+      ),
+      WouldYouRatherQuestion(optionA: 'إعداد الفطور', optionB: 'إعداد العشاء'),
+      WouldYouRatherQuestion(
+        optionA: 'تناول الفطور وقت العشاء',
+        optionB: 'تناول الحلوى أولًا',
+      ),
+    ],
+    'School': [
+      WouldYouRatherQuestion(
+        optionA: 'التعلم عن الفضاء',
+        optionB: 'التعلم عن الحيوانات',
+      ),
+      WouldYouRatherQuestion(optionA: 'كتابة قصة', optionB: 'رسم صورة'),
+      WouldYouRatherQuestion(optionA: 'حل لغز', optionB: 'بناء شيء جديد'),
+      WouldYouRatherQuestion(
+        optionA: 'اختيار وقت الرياضة',
+        optionB: 'اختيار وقت الفن',
+      ),
+      WouldYouRatherQuestion(
+        optionA: 'القراءة بهدوء',
+        optionB: 'إجراء تجربة علمية',
+      ),
+    ],
+  };
+
   static const List<String> _categories = [
     'Family',
     'Travel',
@@ -256,8 +351,11 @@ class _WouldYouRatherScreenState extends State<WouldYouRatherScreen> {
         _isLoadingQuestions = false;
       });
     } catch (error) {
+      final bank = Localizations.localeOf(context).languageCode == 'ar'
+          ? _arabicQuestionBank
+          : _questionBank;
       final fallbackQuestions = List<WouldYouRatherQuestion>.from(
-        _questionBank[_selectedCategory]!,
+        bank[_selectedCategory]!,
       )..shuffle(Random());
 
       if (!mounted) return;
@@ -276,8 +374,10 @@ class _WouldYouRatherScreenState extends State<WouldYouRatherScreen> {
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Could not reach AI. Using offline questions instead.'),
+        SnackBar(
+          content: Text(
+            AppLocalizations.of(context)!.couldNotReachAiOfflineQuestions,
+          ),
         ),
       );
     }
@@ -326,9 +426,10 @@ class _WouldYouRatherScreenState extends State<WouldYouRatherScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
+    final strings = AppLocalizations.of(context)!;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Would You Rather')),
+      appBar: AppBar(title: Text(strings.wouldYouRather)),
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
@@ -347,19 +448,20 @@ class _WouldYouRatherScreenState extends State<WouldYouRatherScreen> {
   }
 
   Widget _buildSetupView(BuildContext context, ColorScheme colors) {
+    final strings = AppLocalizations.of(context)!;
+
     return GameSetupView(
       key: const ValueKey(_GamePhase.setup),
       icon: Icons.compare_arrows_rounded,
-      title: 'Would You Rather',
-      description:
-          'Pick a category, choose 1, 3, or 5 rounds, then discover which playful choices your family makes.',
+      title: strings.wouldYouRather,
+      description: strings.wouldRatherSetupDescription,
       children: [
         GameSetupSectionCard(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Pick a category',
+                strings.pickCategory,
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               const SizedBox(height: 14),
@@ -368,7 +470,7 @@ class _WouldYouRatherScreenState extends State<WouldYouRatherScreen> {
                 runSpacing: 10,
                 children: _categories.map((category) {
                   return ChoiceChip(
-                    label: Text(category),
+                    label: Text(localizedGameCategory(strings, category)),
                     selected: category == _selectedCategory,
                     selectedColor: colors.primary.withValues(alpha: 0.15),
                     labelStyle: TextStyle(
@@ -398,19 +500,19 @@ class _WouldYouRatherScreenState extends State<WouldYouRatherScreen> {
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 16),
             child: _isLoadingQuestions
-                ? const Row(
+                ? Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      SizedBox(
+                      const SizedBox(
                         width: 20,
                         height: 20,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       ),
-                      SizedBox(width: 12),
-                      Text('Generating questions...'),
+                      const SizedBox(width: 12),
+                      Text(strings.generatingQuestions),
                     ],
                   )
-                : const Text('Start Game'),
+                : Text(strings.startGame),
           ),
         ),
       ],
@@ -422,6 +524,7 @@ class _WouldYouRatherScreenState extends State<WouldYouRatherScreen> {
     ColorScheme colors,
     BoxConstraints constraints,
   ) {
+    final strings = AppLocalizations.of(context)!;
     final question = _selectedQuestions[_currentRound];
     final bool isWide = constraints.maxWidth >= 560;
     final selected = _selectedChoiceIndex;
@@ -438,7 +541,10 @@ class _WouldYouRatherScreenState extends State<WouldYouRatherScreen> {
                 header: true,
                 liveRegion: true,
                 child: Text(
-                  'Round ${_currentRound + 1} of ${_selectedQuestions.length}',
+                  strings.roundProgress(
+                    _currentRound + 1,
+                    _selectedQuestions.length,
+                  ),
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
               ),
@@ -447,9 +553,11 @@ class _WouldYouRatherScreenState extends State<WouldYouRatherScreen> {
                 value: (_currentRound + 1) / _selectedQuestions.length,
                 color: colors.primary,
                 backgroundColor: colors.primary.withValues(alpha: 0.2),
-                semanticsLabel: 'Game progress',
-                semanticsValue:
-                    'Round ${_currentRound + 1} of ${_selectedQuestions.length}',
+                semanticsLabel: strings.gameProgress,
+                semanticsValue: strings.roundProgress(
+                  _currentRound + 1,
+                  _selectedQuestions.length,
+                ),
               ),
             ],
           ),
@@ -470,7 +578,7 @@ class _WouldYouRatherScreenState extends State<WouldYouRatherScreen> {
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           Text(
-                            'Would you rather...',
+                            strings.wouldYouRatherPrompt,
                             style: Theme.of(context).textTheme.titleLarge,
                           ),
                           const SizedBox(height: 16),
@@ -485,7 +593,7 @@ class _WouldYouRatherScreenState extends State<WouldYouRatherScreen> {
                               ),
                             ),
                             child: Text(
-                              'Choose the answer that sounds the most fun to you.',
+                              strings.chooseMostFunAnswer,
                               style: Theme.of(context).textTheme.bodyMedium,
                             ),
                           ),
@@ -532,8 +640,12 @@ class _WouldYouRatherScreenState extends State<WouldYouRatherScreen> {
                           const SizedBox(height: 16),
                           Text(
                             selected == null
-                                ? 'Tap one answer to lock it in.'
-                                : 'You selected: ${selected == 0 ? question.optionA : question.optionB}',
+                                ? strings.tapAnswerToLock
+                                : strings.youSelectedAnswer(
+                                    selected == 0
+                                        ? question.optionA
+                                        : question.optionB,
+                                  ),
                             style: Theme.of(context).textTheme.bodyMedium,
                           ),
                           const SizedBox(height: 12),
@@ -544,8 +656,8 @@ class _WouldYouRatherScreenState extends State<WouldYouRatherScreen> {
                               padding: const EdgeInsets.symmetric(vertical: 16),
                               child: Text(
                                 _currentRound + 1 >= _selectedQuestions.length
-                                    ? 'See Results'
-                                    : 'Next Round',
+                                    ? strings.seeResults
+                                    : strings.nextRound,
                               ),
                             ),
                           ),
@@ -619,6 +731,7 @@ class _WouldYouRatherScreenState extends State<WouldYouRatherScreen> {
     ColorScheme colors,
     BoxConstraints constraints,
   ) {
+    final strings = AppLocalizations.of(context)!;
     final totalRounds = _selectedQuestions.length;
     return SingleChildScrollView(
       key: const ValueKey(_GamePhase.results),
@@ -631,12 +744,15 @@ class _WouldYouRatherScreenState extends State<WouldYouRatherScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              'Great job!',
+              strings.greatJob,
               style: Theme.of(context).textTheme.headlineSmall,
             ),
             const SizedBox(height: 12),
             Text(
-              'You completed $totalRounds rounds in the $_selectedCategory category.',
+              strings.completedRoundsCategory(
+                totalRounds,
+                localizedGameCategory(strings, _selectedCategory),
+              ),
               style: Theme.of(context).textTheme.bodyMedium,
             ),
             const SizedBox(height: 20),
@@ -679,17 +795,17 @@ class _WouldYouRatherScreenState extends State<WouldYouRatherScreen> {
             const SizedBox(height: 24),
             ElevatedButton(
               onPressed: _playAgain,
-              child: const Padding(
-                padding: EdgeInsets.symmetric(vertical: 16),
-                child: Text('Play Again'),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                child: Text(strings.playAgain),
               ),
             ),
             const SizedBox(height: 12),
             OutlinedButton(
               onPressed: _resetToSetup,
-              child: const Padding(
-                padding: EdgeInsets.symmetric(vertical: 16),
-                child: Text('Change Settings'),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                child: Text(strings.changeSettings),
               ),
             ),
           ],
