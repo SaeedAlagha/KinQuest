@@ -39,6 +39,22 @@ jobs:
       - name: Run Flutter tests
         run: flutter test
 
+      - name: Build production web bundle
+        run: >-
+          flutter build web --release
+          --dart-define=KINQUEST_API_BASE_URL=https://api.sila.invalid
+
+      - name: Verify configured production API endpoint
+        run: grep --fixed-strings --quiet "https://api.sila.invalid" build/web/main.dart.js
+
+      - name: Upload production web bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: sila-web-release
+          path: build/web
+          if-no-files-found: error
+          retention-days: 7
+
   backend:
     name: Backend validation
     runs-on: ubuntu-latest
