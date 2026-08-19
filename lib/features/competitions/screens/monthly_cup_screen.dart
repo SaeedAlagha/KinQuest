@@ -12,7 +12,10 @@ import '../config/official_competition_games.dart';
 import '../models/competition_game_result.dart';
 import '../models/competition_player_result.dart';
 import '../models/game_play_mode.dart';
+import '../utils/competition_period.dart';
 import 'competition_tie_break_screen.dart';
+
+enum _MonthlyLoadError { signIn, family, load }
 
 class MonthlyCupScreen extends StatefulWidget {
   const MonthlyCupScreen({super.key, this.developerPreview = false});
@@ -30,7 +33,7 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
   bool _completed = false;
 
   String? _familyId;
-  String? _errorMessage;
+  _MonthlyLoadError? _loadError;
 
   final List<_MonthlyPlayer> _familyMembers = [];
   final Set<String> _selectedIds = {};
@@ -38,11 +41,12 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
 
   String? _championId;
   String? _championName;
+  String? _runnerUpName;
+  final List<String> _semifinalistNames = [];
 
   DateTime get _today => DateTime.now();
 
-  String get _monthKey =>
-      '${_today.year}-${_today.month.toString().padLeft(2, '0')}';
+  String get _monthKey => CompetitionPeriod.monthlyKey(_today);
 
   String get _competitionId => 'monthly_$_monthKey';
 
@@ -89,7 +93,7 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
     if (user == null) {
       setState(() {
         _isLoading = false;
-        _errorMessage = 'You must be signed in to use Monthly Cup.';
+        _loadError = _MonthlyLoadError.signIn;
       });
 
       return;
@@ -107,8 +111,7 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
 
         setState(() {
           _isLoading = false;
-          _errorMessage =
-              'Join or create a family before starting Monthly Cup.';
+          _loadError = _MonthlyLoadError.family;
         });
 
         return;
@@ -118,6 +121,10 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
           .collection('users')
           .where('familyId', isEqualTo: familyId)
           .get();
+
+      if (!mounted) return;
+
+      final strings = AppLocalizations.of(context)!;
 
       final members = membersSnapshot.docs.map((document) {
         final data = document.data();
@@ -131,7 +138,7 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
               ? name!
               : email?.isNotEmpty == true
               ? email!
-              : 'Family Member',
+              : strings.familyMemberFallback,
         );
       }).toList();
 
@@ -194,16 +201,24 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
         _completed = data?['completed'] == true;
         _championId = data?['winnerId'] as String?;
         _championName = data?['winnerName'] as String?;
+        _runnerUpName = data?['runnerUpName'] as String?;
+        _semifinalistNames
+          ..clear()
+          ..addAll(
+            storedMatches
+                .where((match) => match.matchIndex < 2)
+                .map((match) => match.loserName),
+          );
 
         _isLoading = false;
-        _errorMessage = null;
+        _loadError = null;
       });
     } catch (_) {
       if (!mounted) return;
 
       setState(() {
         _isLoading = false;
-        _errorMessage = 'Could not load this month\'s cup.';
+        _loadError = _MonthlyLoadError.load;
       });
     }
   }
@@ -222,7 +237,7 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
 
   Future<void> _startTournament() async {
     if (_selectedIds.length != 4) {
-      _showMessage('Select exactly 4 family members.');
+      _showMessage(AppLocalizations.of(context)!.selectExactlyFourMembers);
       return;
     }
 
@@ -302,6 +317,7 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
       if (!mounted) return;
 
       setState(() {
+        _started = true;
         _isSaving = false;
       });
     } catch (_) {
@@ -311,7 +327,7 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
         _isSaving = false;
       });
 
-      _showMessage('Could not start Monthly Cup. Please try again.');
+      _showMessage(AppLocalizations.of(context)!.monthlyStartError);
     }
   }
 
@@ -348,14 +364,12 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
     }
 
     if (!result.hasPlayers) {
-      _showMessage('The game finished without a valid result.');
+      _showMessage(AppLocalizations.of(context)!.gameNoValidResult);
       return;
     }
 
     if (result.gameId != game.gameId) {
-      _showMessage(
-        'The returned result does not match this Monthly Cup match.',
-      );
+      _showMessage(AppLocalizations.of(context)!.monthlyResultMismatch);
       return;
     }
 
@@ -377,6 +391,11 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
       winner = tieBreakWinner;
     } else {
       winner = result.leaders.first;
+    }
+
+    if (!participantIds.contains(winner.userId)) {
+      _showMessage(AppLocalizations.of(context)!.monthlyInvalidWinner);
+      return;
     }
 
     final loserId = winner.userId == player1.id ? player2.id : player1.id;
@@ -505,7 +524,7 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
         _isSaving = false;
       });
 
-      _showMessage('Could not save this Monthly Cup match.');
+      _showMessage(AppLocalizations.of(context)!.monthlyMatchSaveError);
     }
   }
 
@@ -534,6 +553,14 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
       setState(() {
         _championId = championId;
         _championName = championName;
+        _runnerUpName = runnerUpName;
+        _semifinalistNames
+          ..clear()
+          ..addAll(
+            _matches
+                .where((match) => match.matchIndex < 2)
+                .map((match) => match.loserName),
+          );
         _completed = true;
         _isSaving = false;
       });
@@ -674,14 +701,24 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
       setState(() {
         _championId = championId;
         _championName = championName;
+        _runnerUpName = runnerUpName;
+        _semifinalistNames
+          ..clear()
+          ..addAll(
+            _matches
+                .where((match) => match.matchIndex < 2)
+                .map((match) => match.loserName),
+          );
         _completed = true;
         _isSaving = false;
       });
 
       _showMessage(
-        '$championName won the Monthly Cup! '
-        '+${CompetitionRewards.monthlyChampionTokens} Tokens and '
-        '+${CompetitionRewards.monthlyChampionRankingPoints} Ranking Points.',
+        AppLocalizations.of(context)!.monthlyWinnerAnnouncement(
+          championName,
+          CompetitionRewards.monthlyChampionTokens,
+          CompetitionRewards.monthlyChampionRankingPoints,
+        ),
       );
     } catch (_) {
       if (!mounted) return;
@@ -690,7 +727,7 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
         _isSaving = false;
       });
 
-      _showMessage('Could not finalize Monthly Cup.');
+      _showMessage(AppLocalizations.of(context)!.monthlyFinalizeError);
     }
   }
 
@@ -723,7 +760,7 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
       body: SafeArea(
         child: _isLoading
             ? const Center(child: CircularProgressIndicator())
-            : _errorMessage != null
+            : _loadError != null
             ? _buildError()
             : _buildContent(),
       ),
@@ -741,7 +778,7 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
           children: [
             const Icon(Icons.error_outline_rounded, size: 56),
             const SizedBox(height: 16),
-            Text(_errorMessage!, textAlign: TextAlign.center),
+            Text(_loadErrorMessage(strings), textAlign: TextAlign.center),
             const SizedBox(height: 20),
             FilledButton(onPressed: _loadData, child: Text(strings.tryAgain)),
           ],
@@ -749,6 +786,12 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
       ),
     );
   }
+
+  String _loadErrorMessage(AppLocalizations strings) => switch (_loadError!) {
+    _MonthlyLoadError.signIn => strings.monthlySignInRequired,
+    _MonthlyLoadError.family => strings.monthlyFamilyRequired,
+    _MonthlyLoadError.load => strings.monthlyLoadError,
+  };
 
   Widget _buildContent() {
     if (_completed) {
@@ -843,6 +886,15 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
         ),
         const SizedBox(height: 20),
         Text(
+          strings.competitorsSelected(_selectedIds.length, 4),
+          style: Theme.of(
+            context,
+          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+        ),
+        const SizedBox(height: 8),
+        LinearProgressIndicator(value: _selectedIds.length / 4),
+        const SizedBox(height: 20),
+        Text(
           strings.chooseFourCompetitors,
           style: Theme.of(
             context,
@@ -916,6 +968,10 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
             context,
           ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
         ),
+        const SizedBox(height: 8),
+        Text(strings.competitionProgress(_matches.length, 3)),
+        const SizedBox(height: 8),
+        LinearProgressIndicator(value: _matches.length / 3),
         const SizedBox(height: 20),
 
         _buildMatchCard(
@@ -1075,10 +1131,64 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
           ),
         ),
         const SizedBox(height: 24),
+        Text(
+          strings.finalStandings,
+          style: Theme.of(
+            context,
+          ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
+        ),
+        const SizedBox(height: 12),
+        _CupPlacementCard(
+          icon: Icons.workspace_premium_rounded,
+          placement: strings.champion,
+          name: _championName ?? strings.champion,
+          reward: strings.monthlyChampionRewardSummary(
+            CompetitionRewards.monthlyChampionTokens,
+            CompetitionRewards.monthlyChampionRankingPoints,
+          ),
+          emphasized: true,
+        ),
+        if (_runnerUpName != null) ...[
+          const SizedBox(height: 10),
+          _CupPlacementCard(
+            icon: Icons.military_tech_rounded,
+            placement: strings.runnerUp,
+            name: _runnerUpName!,
+            reward: strings.runnerUpRewardSummary(
+              CompetitionRewards.monthlyRunnerUpRankingPoints,
+            ),
+          ),
+        ],
+        ..._semifinalistNames.map(
+          (name) => Padding(
+            padding: const EdgeInsets.only(top: 10),
+            child: _CupPlacementCard(
+              icon: Icons.shield_outlined,
+              placement: strings.semifinalist,
+              name: name,
+              reward: strings.semifinalistRewardSummary(
+                CompetitionRewards.monthlySemifinalistRankingPoints,
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 28),
+        Text(
+          strings.matchHistory,
+          style: Theme.of(
+            context,
+          ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
+        ),
+        const SizedBox(height: 8),
         ..._matches.map(
           (match) => ListTile(
             leading: const Icon(Icons.sports_esports_rounded),
-            title: Text(match.gameName),
+            title: Text(
+              OfficialCompetitionGames.byId(
+                    match.gameId,
+                  )?.localizedName(strings) ??
+                  match.gameName,
+            ),
             subtitle: Text(
               strings.versusPlayers(match.player1Name, match.player2Name),
             ),
@@ -1088,7 +1198,50 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
             ),
           ),
         ),
+        const SizedBox(height: 16),
+        OutlinedButton.icon(
+          onPressed: () => Navigator.of(context).pop(),
+          icon: const Icon(Icons.arrow_back_rounded),
+          label: Text(strings.backToCompetitions),
+        ),
       ],
+    );
+  }
+}
+
+class _CupPlacementCard extends StatelessWidget {
+  const _CupPlacementCard({
+    required this.icon,
+    required this.placement,
+    required this.name,
+    required this.reward,
+    this.emphasized = false,
+  });
+
+  final IconData icon;
+  final String placement;
+  final String name;
+  final String reward;
+  final bool emphasized;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Card(
+      color: emphasized ? colorScheme.primaryContainer : null,
+      child: ListTile(
+        leading: CircleAvatar(child: Icon(icon)),
+        title: Text(name, style: const TextStyle(fontWeight: FontWeight.w800)),
+        subtitle: Text(reward),
+        trailing: Text(
+          placement,
+          style: TextStyle(
+            color: emphasized ? colorScheme.primary : null,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+      ),
     );
   }
 }

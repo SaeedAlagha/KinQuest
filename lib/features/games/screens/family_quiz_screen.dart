@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
+import '../../../l10n/app_localizations.dart';
 import '../services/family_quiz_ai_service.dart';
 import '../widgets/game_setup_widgets.dart';
 import '../../competitions/config/competition_games.dart';
@@ -1252,6 +1253,7 @@ class _FamilyQuizScreenState extends State<FamilyQuizScreen> {
   }
 
   Widget _buildFinalResults() {
+    final strings = AppLocalizations.of(context)!;
     final leaderboard = [..._players];
 
     leaderboard.sort(
@@ -1275,12 +1277,21 @@ class _FamilyQuizScreenState extends State<FamilyQuizScreen> {
 
           Text(
             winners.length == 1
-                ? '${winners.first.name} Wins!'
-                : 'It\'s a Tie!',
+                ? strings.playerWins(winners.first.name)
+                : strings.gameTie,
             textAlign: TextAlign.center,
             style: Theme.of(
               context,
             ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
+          ),
+
+          const SizedBox(height: 8),
+
+          Text(
+            widget.playMode.isOfficial
+                ? strings.officialGameResultsReady
+                : strings.quickPlayResultsOnly,
+            textAlign: TextAlign.center,
           ),
 
           const SizedBox(height: 28),
@@ -1299,7 +1310,7 @@ class _FamilyQuizScreenState extends State<FamilyQuizScreen> {
                     style: const TextStyle(fontWeight: FontWeight.w600),
                   ),
                   trailing: Text(
-                    '${_scores[player.id] ?? 0} pts',
+                    strings.pointsAbbreviation(_scores[player.id] ?? 0),
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                 );
@@ -1320,8 +1331,10 @@ class _FamilyQuizScreenState extends State<FamilyQuizScreen> {
             },
             child: Text(
               widget.playMode.isOfficial
-                  ? 'Return to ${widget.playMode.displayName}'
-                  : 'Play Again',
+                  ? strings.returnToCompetition(
+                      widget.playMode.localizedName(strings),
+                    )
+                  : strings.playAgain,
             ),
           ),
           const SizedBox(height: 12),
@@ -1330,7 +1343,7 @@ class _FamilyQuizScreenState extends State<FamilyQuizScreen> {
             onPressed: () {
               Navigator.of(context).pop();
             },
-            child: const Text('Back to Games'),
+            child: Text(strings.backToGames),
           ),
         ],
       ),

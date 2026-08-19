@@ -4804,6 +4804,246 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Earn Tokens from competitions and family missions, then use them for family experiences or digital unlocks.'**
   String get rewardsIntroDescription;
+
+  /// No description provided for @gameNoValidResult.
+  ///
+  /// In en, this message translates to:
+  /// **'The game finished without a valid player result.'**
+  String get gameNoValidResult;
+
+  /// No description provided for @dailyResultMismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'The returned game result does not match today\'s challenge.'**
+  String get dailyResultMismatch;
+
+  /// No description provided for @dailyTieRewardPending.
+  ///
+  /// In en, this message translates to:
+  /// **'The top score is tied. No Daily reward has been granted yet.'**
+  String get dailyTieRewardPending;
+
+  /// No description provided for @dailyAlreadyCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Today\'s Daily Challenge has already been completed.'**
+  String get dailyAlreadyCompleted;
+
+  /// No description provided for @dailyWinnerAnnouncement.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} won today\'s Daily Challenge! +{tokens} Tokens and +{points} Ranking Points.'**
+  String dailyWinnerAnnouncement(String name, int tokens, int points);
+
+  /// No description provided for @dailyOfficialSaveError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save today\'s official result. Please try again.'**
+  String get dailyOfficialSaveError;
+
+  /// No description provided for @weeklySignInRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'You must be signed in to use Weekly Championship.'**
+  String get weeklySignInRequired;
+
+  /// No description provided for @weeklyFamilyRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Join or create a family before playing Weekly Championship.'**
+  String get weeklyFamilyRequired;
+
+  /// No description provided for @weeklyLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load this week\'s championship. Please try again.'**
+  String get weeklyLoadError;
+
+  /// No description provided for @weeklyResultMismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'The returned result does not match this championship round.'**
+  String get weeklyResultMismatch;
+
+  /// No description provided for @weeklyRoundSaveError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save this championship round. Please try again.'**
+  String get weeklyRoundSaveError;
+
+  /// No description provided for @weeklyWinnerAnnouncement.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} is this week\'s Family Champion! +{tokens} Tokens and +{points} Ranking Points.'**
+  String weeklyWinnerAnnouncement(String name, int tokens, int points);
+
+  /// No description provided for @weeklyFinalizeError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not finalize the Weekly Championship. Please try again.'**
+  String get weeklyFinalizeError;
+
+  /// No description provided for @competitionProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'{completed} of {total} official rounds complete'**
+  String competitionProgress(int completed, int total);
+
+  /// No description provided for @backToCompetitions.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to Competitions'**
+  String get backToCompetitions;
+
+  /// No description provided for @monthlySignInRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'You must be signed in to use Monthly Cup.'**
+  String get monthlySignInRequired;
+
+  /// No description provided for @monthlyFamilyRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Join or create a family before starting Monthly Cup.'**
+  String get monthlyFamilyRequired;
+
+  /// No description provided for @monthlyLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load this month\'s cup. Please try again.'**
+  String get monthlyLoadError;
+
+  /// No description provided for @selectExactlyFourMembers.
+  ///
+  /// In en, this message translates to:
+  /// **'Select exactly 4 family members.'**
+  String get selectExactlyFourMembers;
+
+  /// No description provided for @monthlyStartError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not start Monthly Cup. Please try again.'**
+  String get monthlyStartError;
+
+  /// No description provided for @monthlyResultMismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'The returned result does not match this Monthly Cup match.'**
+  String get monthlyResultMismatch;
+
+  /// No description provided for @monthlyMatchSaveError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save this Monthly Cup match. Please try again.'**
+  String get monthlyMatchSaveError;
+
+  /// No description provided for @monthlyWinnerAnnouncement.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} won the Monthly Cup! +{tokens} Tokens and +{points} Ranking Points.'**
+  String monthlyWinnerAnnouncement(String name, int tokens, int points);
+
+  /// No description provided for @monthlyFinalizeError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not finalize Monthly Cup. Please try again.'**
+  String get monthlyFinalizeError;
+
+  /// No description provided for @competitorsSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'{selected} of {total} competitors selected'**
+  String competitorsSelected(int selected, int total);
+
+  /// No description provided for @finalStandings.
+  ///
+  /// In en, this message translates to:
+  /// **'Final Standings'**
+  String get finalStandings;
+
+  /// No description provided for @runnerUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Runner-up'**
+  String get runnerUp;
+
+  /// No description provided for @semifinalist.
+  ///
+  /// In en, this message translates to:
+  /// **'Semifinalist'**
+  String get semifinalist;
+
+  /// No description provided for @matchHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Match History'**
+  String get matchHistory;
+
+  /// No description provided for @officialResultsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{competition} Results'**
+  String officialResultsTitle(String competition);
+
+  /// No description provided for @officialGameResultsReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Official game results are ready. Return to the competition to continue.'**
+  String get officialGameResultsReady;
+
+  /// No description provided for @quickPlayLeaderboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick Play Leaderboard'**
+  String get quickPlayLeaderboard;
+
+  /// No description provided for @quickPlayResultsOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Session scores only — no Tokens or official Ranking Points change.'**
+  String get quickPlayResultsOnly;
+
+  /// No description provided for @gameCompleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{game} Complete!'**
+  String gameCompleteTitle(String game);
+
+  /// No description provided for @backToQuickPlay.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to Quick Play'**
+  String get backToQuickPlay;
+
+  /// No description provided for @playerWins.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} Wins!'**
+  String playerWins(String name);
+
+  /// No description provided for @gameTie.
+  ///
+  /// In en, this message translates to:
+  /// **'It\'s a tie!'**
+  String get gameTie;
+
+  /// No description provided for @missionProgressSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{completed} of {total} missions completed'**
+  String missionProgressSummary(int completed, int total);
+
+  /// No description provided for @captionFinalLeaderboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Every vote counted. Here is the final local leaderboard.'**
+  String get captionFinalLeaderboard;
+
+  /// No description provided for @monthlyInvalidWinner.
+  ///
+  /// In en, this message translates to:
+  /// **'The match returned a winner who was not one of the two selected competitors. Please replay the match.'**
+  String get monthlyInvalidWinner;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

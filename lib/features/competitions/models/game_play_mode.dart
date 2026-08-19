@@ -1,3 +1,5 @@
+import '../../../l10n/app_localizations.dart';
+
 enum GamePlayMode { quickPlay, dailyChallenge, weeklyChampionship, monthlyCup }
 
 extension GamePlayModeX on GamePlayMode {
@@ -17,5 +19,14 @@ extension GamePlayModeX on GamePlayMode {
       case GamePlayMode.monthlyCup:
         return 'Monthly Cup';
     }
+  }
+
+  String localizedName(AppLocalizations strings) {
+    return switch (this) {
+      GamePlayMode.quickPlay => strings.quickPlay,
+      GamePlayMode.dailyChallenge => strings.dailyChallenge,
+      GamePlayMode.weeklyChampionship => strings.weeklyChampionship,
+      GamePlayMode.monthlyCup => strings.monthlyCup,
+    };
   }
 }

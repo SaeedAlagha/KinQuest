@@ -7,6 +7,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../competitions/config/competition_games.dart';
 import '../../competitions/models/competition_game_result.dart';
 import '../../competitions/models/competition_player_result.dart';
@@ -1080,6 +1081,7 @@ class _CaptionBattleScreenState extends State<CaptionBattleScreen> {
   }
 
   Widget _buildFinalResults() {
+    final strings = AppLocalizations.of(context)!;
     final players = List<_CaptionPlayer>.from(_selectedPlayers)
       ..sort((a, b) => (_scores[b.id] ?? 0).compareTo(_scores[a.id] ?? 0));
 
@@ -1094,10 +1096,10 @@ class _CaptionBattleScreenState extends State<CaptionBattleScreen> {
             children: [
               _heroCard(
                 icon: Icons.emoji_events_rounded,
-                title: 'Caption Battle Results',
+                title: strings.officialResultsTitle(strings.captionBattle),
                 description: widget.playMode.isOfficial
-                    ? '${widget.playMode.displayName} results are ready.'
-                    : 'Every vote counted. Here is the final local leaderboard.',
+                    ? strings.officialGameResultsReady
+                    : strings.captionFinalLeaderboard,
               ),
               const SizedBox(height: 20),
               for (var i = 0; i < players.length; i++) ...[
@@ -1125,8 +1127,10 @@ class _CaptionBattleScreenState extends State<CaptionBattleScreen> {
                 ),
                 label: Text(
                   widget.playMode.isOfficial
-                      ? 'Return to ${widget.playMode.displayName}'
-                      : 'Play Again',
+                      ? strings.returnToCompetition(
+                          widget.playMode.localizedName(strings),
+                        )
+                      : strings.playAgain,
                 ),
               ),
 
@@ -1135,17 +1139,19 @@ class _CaptionBattleScreenState extends State<CaptionBattleScreen> {
                 OutlinedButton.icon(
                   onPressed: () => Navigator.of(context).pop(),
                   icon: const Icon(Icons.arrow_back_rounded),
-                  label: const Text('Back to Quick Play'),
+                  label: Text(strings.backToQuickPlay),
                 ),
               ],
-              const SizedBox(height: 12),
-              Text(
-                'Quick Play scores are local to this game and do not affect Tokens or global rankings.',
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+              if (!widget.playMode.isOfficial) ...[
+                const SizedBox(height: 12),
+                Text(
+                  strings.quickPlayResultsOnly,
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
                 ),
-              ),
+              ],
             ],
           ),
         ),
@@ -1345,7 +1351,7 @@ class _CaptionBattleScreenState extends State<CaptionBattleScreen> {
             ),
           ),
           Text(
-            '$score ${score == 1 ? 'pt' : 'pts'}',
+            AppLocalizations.of(context)!.pointsAbbreviation(score),
             style: Theme.of(
               context,
             ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),

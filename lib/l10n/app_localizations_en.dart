@@ -2604,4 +2604,142 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get rewardsIntroDescription => 'Earn Tokens from competitions and family missions, then use them for family experiences or digital unlocks.';
+
+  @override
+  String get gameNoValidResult => 'The game finished without a valid player result.';
+
+  @override
+  String get dailyResultMismatch => 'The returned game result does not match today\'s challenge.';
+
+  @override
+  String get dailyTieRewardPending => 'The top score is tied. No Daily reward has been granted yet.';
+
+  @override
+  String get dailyAlreadyCompleted => 'Today\'s Daily Challenge has already been completed.';
+
+  @override
+  String dailyWinnerAnnouncement(String name, int tokens, int points) {
+    return '$name won today\'s Daily Challenge! +$tokens Tokens and +$points Ranking Points.';
+  }
+
+  @override
+  String get dailyOfficialSaveError => 'Could not save today\'s official result. Please try again.';
+
+  @override
+  String get weeklySignInRequired => 'You must be signed in to use Weekly Championship.';
+
+  @override
+  String get weeklyFamilyRequired => 'Join or create a family before playing Weekly Championship.';
+
+  @override
+  String get weeklyLoadError => 'Could not load this week\'s championship. Please try again.';
+
+  @override
+  String get weeklyResultMismatch => 'The returned result does not match this championship round.';
+
+  @override
+  String get weeklyRoundSaveError => 'Could not save this championship round. Please try again.';
+
+  @override
+  String weeklyWinnerAnnouncement(String name, int tokens, int points) {
+    return '$name is this week\'s Family Champion! +$tokens Tokens and +$points Ranking Points.';
+  }
+
+  @override
+  String get weeklyFinalizeError => 'Could not finalize the Weekly Championship. Please try again.';
+
+  @override
+  String competitionProgress(int completed, int total) {
+    return '$completed of $total official rounds complete';
+  }
+
+  @override
+  String get backToCompetitions => 'Back to Competitions';
+
+  @override
+  String get monthlySignInRequired => 'You must be signed in to use Monthly Cup.';
+
+  @override
+  String get monthlyFamilyRequired => 'Join or create a family before starting Monthly Cup.';
+
+  @override
+  String get monthlyLoadError => 'Could not load this month\'s cup. Please try again.';
+
+  @override
+  String get selectExactlyFourMembers => 'Select exactly 4 family members.';
+
+  @override
+  String get monthlyStartError => 'Could not start Monthly Cup. Please try again.';
+
+  @override
+  String get monthlyResultMismatch => 'The returned result does not match this Monthly Cup match.';
+
+  @override
+  String get monthlyMatchSaveError => 'Could not save this Monthly Cup match. Please try again.';
+
+  @override
+  String monthlyWinnerAnnouncement(String name, int tokens, int points) {
+    return '$name won the Monthly Cup! +$tokens Tokens and +$points Ranking Points.';
+  }
+
+  @override
+  String get monthlyFinalizeError => 'Could not finalize Monthly Cup. Please try again.';
+
+  @override
+  String competitorsSelected(int selected, int total) {
+    return '$selected of $total competitors selected';
+  }
+
+  @override
+  String get finalStandings => 'Final Standings';
+
+  @override
+  String get runnerUp => 'Runner-up';
+
+  @override
+  String get semifinalist => 'Semifinalist';
+
+  @override
+  String get matchHistory => 'Match History';
+
+  @override
+  String officialResultsTitle(String competition) {
+    return '$competition Results';
+  }
+
+  @override
+  String get officialGameResultsReady => 'Official game results are ready. Return to the competition to continue.';
+
+  @override
+  String get quickPlayLeaderboard => 'Quick Play Leaderboard';
+
+  @override
+  String get quickPlayResultsOnly => 'Session scores only — no Tokens or official Ranking Points change.';
+
+  @override
+  String gameCompleteTitle(String game) {
+    return '$game Complete!';
+  }
+
+  @override
+  String get backToQuickPlay => 'Back to Quick Play';
+
+  @override
+  String playerWins(String name) {
+    return '$name Wins!';
+  }
+
+  @override
+  String get gameTie => 'It\'s a tie!';
+
+  @override
+  String missionProgressSummary(int completed, int total) {
+    return '$completed of $total missions completed';
+  }
+
+  @override
+  String get captionFinalLeaderboard => 'Every vote counted. Here is the final local leaderboard.';
+
+  @override
+  String get monthlyInvalidWinner => 'The match returned a winner who was not one of the two selected competitors. Please replay the match.';
 }

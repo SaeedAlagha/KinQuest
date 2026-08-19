@@ -2628,4 +2628,142 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get rewardsIntroDescription => 'اكسب الرموز من المنافسات والمهام العائلية، ثم استخدمها للحصول على تجارب عائلية أو عناصر رقمية.';
+
+  @override
+  String get gameNoValidResult => 'انتهت اللعبة دون نتيجة صالحة للاعبين.';
+
+  @override
+  String get dailyResultMismatch => 'لا تتطابق نتيجة اللعبة مع تحدي اليوم.';
+
+  @override
+  String get dailyTieRewardPending => 'تعادل أعلى رصيد، ولم تُمنح مكافأة التحدي اليومي بعد.';
+
+  @override
+  String get dailyAlreadyCompleted => 'اكتمل تحدي اليوم بالفعل.';
+
+  @override
+  String dailyWinnerAnnouncement(String name, int tokens, int points) {
+    return 'فاز $name بتحدي اليوم! +$tokens رمزًا و+$points نقطة ترتيب.';
+  }
+
+  @override
+  String get dailyOfficialSaveError => 'تعذر حفظ النتيجة الرسمية لليوم. حاول مجددًا.';
+
+  @override
+  String get weeklySignInRequired => 'يجب تسجيل الدخول لاستخدام البطولة الأسبوعية.';
+
+  @override
+  String get weeklyFamilyRequired => 'انضم إلى عائلة أو أنشئ واحدة قبل لعب البطولة الأسبوعية.';
+
+  @override
+  String get weeklyLoadError => 'تعذر تحميل بطولة هذا الأسبوع. حاول مجددًا.';
+
+  @override
+  String get weeklyResultMismatch => 'لا تتطابق النتيجة مع جولة البطولة الحالية.';
+
+  @override
+  String get weeklyRoundSaveError => 'تعذر حفظ جولة البطولة. حاول مجددًا.';
+
+  @override
+  String weeklyWinnerAnnouncement(String name, int tokens, int points) {
+    return 'تُوّج $name بطلًا للعائلة هذا الأسبوع! +$tokens رمزًا و+$points نقطة ترتيب.';
+  }
+
+  @override
+  String get weeklyFinalizeError => 'تعذر اعتماد نتيجة البطولة الأسبوعية. حاول مجددًا.';
+
+  @override
+  String competitionProgress(int completed, int total) {
+    return 'اكتملت $completed من أصل $total جولات رسمية';
+  }
+
+  @override
+  String get backToCompetitions => 'العودة إلى المنافسات';
+
+  @override
+  String get monthlySignInRequired => 'يجب تسجيل الدخول لاستخدام الكأس الشهري.';
+
+  @override
+  String get monthlyFamilyRequired => 'انضم إلى عائلة أو أنشئ واحدة قبل بدء الكأس الشهري.';
+
+  @override
+  String get monthlyLoadError => 'تعذر تحميل كأس هذا الشهر. حاول مجددًا.';
+
+  @override
+  String get selectExactlyFourMembers => 'اختر 4 أفراد من العائلة بالضبط.';
+
+  @override
+  String get monthlyStartError => 'تعذر بدء الكأس الشهري. حاول مجددًا.';
+
+  @override
+  String get monthlyResultMismatch => 'لا تتطابق النتيجة مع مباراة الكأس الشهري الحالية.';
+
+  @override
+  String get monthlyMatchSaveError => 'تعذر حفظ مباراة الكأس الشهري. حاول مجددًا.';
+
+  @override
+  String monthlyWinnerAnnouncement(String name, int tokens, int points) {
+    return 'فاز $name بالكأس الشهري! +$tokens رمزًا و+$points نقطة ترتيب.';
+  }
+
+  @override
+  String get monthlyFinalizeError => 'تعذر اعتماد نتيجة الكأس الشهري. حاول مجددًا.';
+
+  @override
+  String competitorsSelected(int selected, int total) {
+    return 'تم اختيار $selected من أصل $total متنافسين';
+  }
+
+  @override
+  String get finalStandings => 'الترتيب النهائي';
+
+  @override
+  String get runnerUp => 'الوصيف';
+
+  @override
+  String get semifinalist => 'متأهل لنصف النهائي';
+
+  @override
+  String get matchHistory => 'سجل المباريات';
+
+  @override
+  String officialResultsTitle(String competition) {
+    return 'نتائج $competition';
+  }
+
+  @override
+  String get officialGameResultsReady => 'النتائج الرسمية جاهزة. عُد إلى المنافسة للمتابعة.';
+
+  @override
+  String get quickPlayLeaderboard => 'ترتيب اللعب السريع';
+
+  @override
+  String get quickPlayResultsOnly => 'نتائج هذه الجلسة فقط — لا تتغير الرموز أو نقاط الترتيب الرسمية.';
+
+  @override
+  String gameCompleteTitle(String game) {
+    return 'اكتملت $game!';
+  }
+
+  @override
+  String get backToQuickPlay => 'العودة إلى اللعب السريع';
+
+  @override
+  String playerWins(String name) {
+    return 'يفوز $name!';
+  }
+
+  @override
+  String get gameTie => 'تعادل!';
+
+  @override
+  String missionProgressSummary(int completed, int total) {
+    return 'اكتملت $completed من أصل $total مهام';
+  }
+
+  @override
+  String get captionFinalLeaderboard => 'تم احتساب كل الأصوات، وهذا هو الترتيب النهائي للجلسة.';
+
+  @override
+  String get monthlyInvalidWinner => 'أعادت المباراة فائزًا ليس أحد المتنافسين المحددين. يُرجى إعادة المباراة.';
 }

@@ -1136,7 +1136,9 @@ class _EmojiGuessScreenState extends State<EmojiGuessScreen> {
             },
             child: Text(
               widget.playMode.isOfficial
-                  ? strings.returnToCompetition(widget.playMode.displayName)
+                  ? strings.returnToCompetition(
+                      widget.playMode.localizedName(strings),
+                    )
                   : strings.playAgain,
             ),
           ),
