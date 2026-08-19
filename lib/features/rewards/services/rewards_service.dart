@@ -486,13 +486,11 @@ class RewardsService {
     required String requestId,
     required String approverId,
   }) async {
-    final familyRef = FirebaseFirestore.instance
-        .collection('families')
-        .doc(familyId);
+    final familyRef = _firestore.collection('families').doc(familyId);
 
     final requestRef = familyRef.collection('rewardRequests').doc(requestId);
 
-    await FirebaseFirestore.instance.runTransaction((transaction) async {
+    await _firestore.runTransaction((transaction) async {
       final familySnapshot = await transaction.get(familyRef);
 
       if (!familySnapshot.exists) {
@@ -765,13 +763,11 @@ class RewardsService {
     required RewardAvailability availability,
     required bool approvalRequired,
   }) async {
-    final familyRef = FirebaseFirestore.instance
-        .collection('families')
-        .doc(familyId);
+    final familyRef = _firestore.collection('families').doc(familyId);
 
     final rewardRef = familyRef.collection('rewards').doc(rewardId);
 
-    await FirebaseFirestore.instance.runTransaction((transaction) async {
+    await _firestore.runTransaction((transaction) async {
       final familySnapshot = await transaction.get(familyRef);
 
       if (!familySnapshot.exists) {
@@ -816,13 +812,11 @@ class RewardsService {
     required String userId,
     required bool active,
   }) async {
-    final familyRef = FirebaseFirestore.instance
-        .collection('families')
-        .doc(familyId);
+    final familyRef = _firestore.collection('families').doc(familyId);
 
     final rewardRef = familyRef.collection('rewards').doc(rewardId);
 
-    await FirebaseFirestore.instance.runTransaction((transaction) async {
+    await _firestore.runTransaction((transaction) async {
       final familySnapshot = await transaction.get(familyRef);
 
       if (!familySnapshot.exists) {
