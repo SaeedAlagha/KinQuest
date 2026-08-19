@@ -2122,6 +2122,8 @@ const tokens = devices.map((device) => device.token);
         familyId: notification.familyId?.toString() ?? "",
         proposalId:
           notification.proposalId?.toString() ?? "",
+        destination:
+          notification.destination?.toString() ?? "",
         notificationId: notificationDoc.id,
       },
       tokens,
@@ -2230,6 +2232,18 @@ async function checkWishlistGoalsForUser(userDoc) {
     const missionsRequired = Number(
       proposal.missionsRequired ?? 0,
     );
+    const dailyWinsBaseline = Number(
+      proposal.dailyWinsBaseline ?? 0,
+    );
+    const weeklyWinsBaseline = Number(
+      proposal.weeklyWinsBaseline ?? 0,
+    );
+    const monthlyWinsBaseline = Number(
+      proposal.monthlyWinsBaseline ?? 0,
+    );
+    const missionsBaseline = Number(
+      proposal.missionsBaseline ?? 0,
+    );
 
     const hasRequirement =
       tokenRequirement > 0 ||
@@ -2241,10 +2255,10 @@ async function checkWishlistGoalsForUser(userDoc) {
     const complete =
       hasRequirement &&
       currentTokens >= tokenRequirement &&
-      dailyWins >= dailyWinsRequired &&
-      weeklyWins >= weeklyWinsRequired &&
-      monthlyWins >= monthlyWinsRequired &&
-      missionsCompleted >= missionsRequired;
+      dailyWins - dailyWinsBaseline >= dailyWinsRequired &&
+      weeklyWins - weeklyWinsBaseline >= weeklyWinsRequired &&
+      monthlyWins - monthlyWinsBaseline >= monthlyWinsRequired &&
+      missionsCompleted - missionsBaseline >= missionsRequired;
 
     if (!complete) {
       continue;
@@ -2272,13 +2286,17 @@ async function checkWishlistGoalsForUser(userDoc) {
       const stillComplete =
         Number(latestUser.tokens ?? 0) >=
           Number(latestProposal.tokenRequirement ?? 0) &&
-        Number(latestUser.dailyWins ?? 0) >=
+        Number(latestUser.dailyWins ?? 0) -
+          Number(latestProposal.dailyWinsBaseline ?? 0) >=
           Number(latestProposal.dailyWinsRequired ?? 0) &&
-        Number(latestUser.weeklyWins ?? 0) >=
+        Number(latestUser.weeklyWins ?? 0) -
+          Number(latestProposal.weeklyWinsBaseline ?? 0) >=
           Number(latestProposal.weeklyWinsRequired ?? 0) &&
-        Number(latestUser.monthlyWins ?? 0) >=
+        Number(latestUser.monthlyWins ?? 0) -
+          Number(latestProposal.monthlyWinsBaseline ?? 0) >=
           Number(latestProposal.monthlyWinsRequired ?? 0) &&
-        Number(latestUser.missionsCompleted ?? 0) >=
+        Number(latestUser.missionsCompleted ?? 0) -
+          Number(latestProposal.missionsBaseline ?? 0) >=
           Number(latestProposal.missionsRequired ?? 0);
 
       if (!stillComplete) {
@@ -2305,6 +2323,7 @@ async function checkWishlistGoalsForUser(userDoc) {
           `${latestProposal.title ?? "Your reward"} is ready to redeem.`,
         familyId,
         proposalId: proposalDoc.id,
+        destination: "rewardsGoals",
         read: false,
         pushPending: true,
         createdAt: FieldValue.serverTimestamp(),
@@ -2341,7 +2360,9 @@ function startWishlistGoalReadyListener() {
   );
 }
 function startNotificationListener() {
-  return db
+  let fallbackUnsubscribe = null;
+
+  const collectionGroupUnsubscribe = db
     .collectionGroup("notifications")
     .where("pushPending", "==", true)
     .onSnapshot(
@@ -2360,8 +2381,83 @@ function startNotificationListener() {
           "Notification listener error:",
           error,
         );
+
+        if (
+          !fallbackUnsubscribe &&
+          (error.code === 9 || error.code === "failed-precondition")
+        ) {
+          console.warn(
+            "Notification collection-group index is unavailable. " +
+              "Falling back to per-user listeners while the index is built.",
+          );
+          fallbackUnsubscribe =
+            startPerUserNotificationListeners();
+        }
       },
     );
+
+  return () => {
+    collectionGroupUnsubscribe();
+    fallbackUnsubscribe?.();
+  };
+}
+
+function startPerUserNotificationListeners() {
+  const notificationListeners = new Map();
+
+  const usersUnsubscribe = db.collection("users").onSnapshot(
+    (snapshot) => {
+      for (const change of snapshot.docChanges()) {
+        const userId = change.doc.id;
+
+        if (change.type === "removed") {
+          notificationListeners.get(userId)?.();
+          notificationListeners.delete(userId);
+          continue;
+        }
+
+        if (notificationListeners.has(userId)) {
+          continue;
+        }
+
+        const unsubscribe = change.doc.ref
+          .collection("notifications")
+          .where("pushPending", "==", true)
+          .onSnapshot(
+            (notificationSnapshot) => {
+              for (const notificationChange of
+                notificationSnapshot.docChanges()) {
+                if (
+                  notificationChange.type === "added" ||
+                  notificationChange.type === "modified"
+                ) {
+                  void sendPendingNotification(notificationChange.doc);
+                }
+              }
+            },
+            (error) => {
+              console.error(
+                `Notification fallback listener error for ${userId}:`,
+                error,
+              );
+            },
+          );
+
+        notificationListeners.set(userId, unsubscribe);
+      }
+    },
+    (error) => {
+      console.error("Notification user fallback error:", error);
+    },
+  );
+
+  return () => {
+    usersUnsubscribe();
+    for (const unsubscribe of notificationListeners.values()) {
+      unsubscribe();
+    }
+    notificationListeners.clear();
+  };
 }
 
 const PORT = process.env.PORT || 3000;

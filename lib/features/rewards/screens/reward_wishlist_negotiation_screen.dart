@@ -2,18 +2,24 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
+import '../../../l10n/app_localizations.dart';
 import '../models/reward_wishlist_proposal.dart';
 import '../services/rewards_service.dart';
+import 'rewards_hub_screen.dart';
+
+enum WishlistSection { newRequest, sent, received }
 
 class RewardWishlistNegotiationScreen extends StatefulWidget {
   const RewardWishlistNegotiationScreen({
     super.key,
     this.familyId,
     this.proposalId,
+    this.initialSection,
   });
 
   final String? familyId;
   final String? proposalId;
+  final WishlistSection? initialSection;
 
   @override
   State<RewardWishlistNegotiationScreen> createState() =>
@@ -53,6 +59,10 @@ class _RewardWishlistNegotiationScreenState
         .doc(user.uid)
         .get();
 
+    if (!mounted) return;
+
+    final strings = AppLocalizations.of(context)!;
+
     final data = userDoc.data();
 
     final name = data?['name']?.toString().trim();
@@ -66,11 +76,12 @@ class _RewardWishlistNegotiationScreenState
         ? notificationFamilyId
         : storedFamilyId;
 
-    var initialTabIndex = 0;
+    var initialTabIndex = widget.initialSection?.index ?? 0;
 
     final proposalId = widget.proposalId?.trim();
 
-    if (resolvedFamilyId != null &&
+    if (widget.initialSection == null &&
+        resolvedFamilyId != null &&
         resolvedFamilyId.isNotEmpty &&
         proposalId != null &&
         proposalId.isNotEmpty) {
@@ -98,7 +109,7 @@ class _RewardWishlistNegotiationScreenState
       _familyId = resolvedFamilyId;
       _currentUserName = name != null && name.isNotEmpty
           ? name
-          : email ?? 'Family Member';
+          : email ?? strings.familyMemberFallback;
       _initialTabIndex = initialTabIndex;
       _loading = false;
     });
@@ -114,6 +125,8 @@ class _RewardWishlistNegotiationScreenState
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context)!;
+
     if (_loading) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
@@ -123,10 +136,8 @@ class _RewardWishlistNegotiationScreenState
 
     if (user == null || familyId == null || familyId.isEmpty) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Wishlist')),
-        body: const Center(
-          child: Text('Join a family to use Wishlist rewards.'),
-        ),
+        appBar: AppBar(title: Text(strings.wishlist)),
+        body: Center(child: Text(strings.joinFamilyWishlist)),
       );
     }
     return DefaultTabController(
@@ -134,13 +145,19 @@ class _RewardWishlistNegotiationScreenState
       initialIndex: _initialTabIndex,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Wishlist'),
-          bottom: const TabBar(
+          title: Text(strings.wishlist),
+          bottom: TabBar(
             isScrollable: true,
             tabs: [
-              Tab(icon: Icon(Icons.add_circle_outline), text: 'New Request'),
-              Tab(icon: Icon(Icons.send_outlined), text: 'Sent'),
-              Tab(icon: Icon(Icons.inbox_outlined), text: 'Received'),
+              Tab(
+                icon: const Icon(Icons.add_circle_outline),
+                text: strings.newRequest,
+              ),
+              Tab(icon: const Icon(Icons.send_outlined), text: strings.sent),
+              Tab(
+                icon: const Icon(Icons.inbox_outlined),
+                text: strings.received,
+              ),
             ],
           ),
         ),
@@ -169,6 +186,8 @@ class _RewardWishlistNegotiationScreenState
     required String familyId,
     required String userId,
   }) {
+    final strings = AppLocalizations.of(context)!;
+
     return FutureBuilder<DocumentSnapshot<Map<String, dynamic>>>(
       future: FirebaseFirestore.instance
           .collection('families')
@@ -180,7 +199,7 @@ class _RewardWishlistNegotiationScreenState
         }
 
         if (!familySnapshot.data!.exists) {
-          return const Center(child: Text('Family not found.'));
+          return Center(child: Text(strings.familyNotFound));
         }
 
         final familyData = familySnapshot.data!.data()!;
@@ -190,11 +209,11 @@ class _RewardWishlistNegotiationScreenState
         ).where((id) => id != userId).toList();
 
         if (memberIds.isEmpty) {
-          return const Center(
+          return Center(
             child: Padding(
-              padding: EdgeInsets.all(24),
+              padding: const EdgeInsets.all(24),
               child: Text(
-                'There are no other family members to request a reward from.',
+                strings.noOtherFamilyRewardMembers,
                 textAlign: TextAlign.center,
               ),
             ),
@@ -202,7 +221,10 @@ class _RewardWishlistNegotiationScreenState
         }
 
         return FutureBuilder<List<_FamilyMember>>(
-          future: _loadFamilyMembers(memberIds),
+          future: _loadFamilyMembers(
+            memberIds,
+            fallbackName: strings.familyMemberFallback,
+          ),
           builder: (context, membersSnapshot) {
             if (!membersSnapshot.hasData) {
               return const Center(child: CircularProgressIndicator());
@@ -221,14 +243,15 @@ class _RewardWishlistNegotiationScreenState
                       await _rewardsService.createWishlistProposal(
                         familyId: familyId,
                         requesterId: userId,
-                        requesterName: _currentUserName ?? 'Family Member',
+                        requesterName:
+                            _currentUserName ?? strings.familyMemberFallback,
                         recipientId: recipientId,
                         recipientName: recipientName,
                         title: title,
                         description: description,
                       );
 
-                      _showMessage('Wishlist request sent to $recipientName.');
+                      _showMessage(strings.wishlistRequestSent(recipientName));
 
                       return true;
                     } catch (error) {
@@ -246,7 +269,10 @@ class _RewardWishlistNegotiationScreenState
     );
   }
 
-  Future<List<_FamilyMember>> _loadFamilyMembers(List<String> memberIds) async {
+  Future<List<_FamilyMember>> _loadFamilyMembers(
+    List<String> memberIds, {
+    required String fallbackName,
+  }) async {
     final members = <_FamilyMember>[];
 
     for (final id in memberIds) {
@@ -267,9 +293,7 @@ class _RewardWishlistNegotiationScreenState
       members.add(
         _FamilyMember(
           id: id,
-          name: name != null && name.isNotEmpty
-              ? name
-              : email ?? 'Family Member',
+          name: name != null && name.isNotEmpty ? name : email ?? fallbackName,
         ),
       );
     }
@@ -290,6 +314,8 @@ class _RewardWishlistNegotiationScreenState
   }
 
   Widget _buildSentTab({required String familyId, required String userId}) {
+    final strings = AppLocalizations.of(context)!;
+
     return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
       stream: _proposalStream(familyId),
       builder: (context, snapshot) {
@@ -313,11 +339,10 @@ class _RewardWishlistNegotiationScreenState
         );
 
         if (proposals.isEmpty) {
-          return const _EmptyState(
+          return _EmptyState(
             icon: Icons.send_outlined,
-            title: 'No sent requests',
-            message:
-                'Wishlist requests you send to family members will appear here.',
+            title: strings.noSentRequests,
+            message: strings.noSentRequestsDescription,
           );
         }
 
@@ -330,7 +355,7 @@ class _RewardWishlistNegotiationScreenState
 
             return _ProposalCard(
               proposal: proposal,
-              personLabel: 'Requested from',
+              personLabel: strings.requestedFrom,
               personName: proposal.recipientName,
               showRequirements:
                   proposal.status != RewardWishlistStatus.requested,
@@ -341,14 +366,14 @@ class _RewardWishlistNegotiationScreenState
                           await _acceptOffer(familyId, proposal, userId);
                         },
                         icon: const Icon(Icons.check),
-                        label: const Text('Accept'),
+                        label: Text(strings.accept),
                       ),
                       OutlinedButton.icon(
                         onPressed: () async {
                           await _rejectOffer(familyId, proposal, userId);
                         },
                         icon: const Icon(Icons.close),
-                        label: const Text('Reject'),
+                        label: Text(strings.reject),
                       ),
                     ]
                   : const [],
@@ -360,6 +385,8 @@ class _RewardWishlistNegotiationScreenState
   }
 
   Widget _buildReceivedTab({required String familyId, required String userId}) {
+    final strings = AppLocalizations.of(context)!;
+
     return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
       stream: _proposalStream(familyId),
       builder: (context, snapshot) {
@@ -383,11 +410,10 @@ class _RewardWishlistNegotiationScreenState
         );
 
         if (proposals.isEmpty) {
-          return const _EmptyState(
+          return _EmptyState(
             icon: Icons.inbox_outlined,
-            title: 'No received requests',
-            message:
-                'When a family member requests a reward from you, it will appear here.',
+            title: strings.noReceivedRequests,
+            message: strings.noReceivedRequestsDescription,
           );
         }
 
@@ -400,7 +426,7 @@ class _RewardWishlistNegotiationScreenState
 
             return _ProposalCard(
               proposal: proposal,
-              personLabel: 'Requested by',
+              personLabel: strings.requestedBy,
               personName: proposal.requesterName,
               showRequirements:
                   proposal.status != RewardWishlistStatus.requested,
@@ -415,14 +441,14 @@ class _RewardWishlistNegotiationScreenState
                           );
                         },
                         icon: const Icon(Icons.handshake_outlined),
-                        label: const Text('Make Offer'),
+                        label: Text(strings.makeOffer),
                       ),
                       OutlinedButton.icon(
                         onPressed: () async {
                           await _declineRequest(familyId, proposal, userId);
                         },
                         icon: const Icon(Icons.close),
-                        label: const Text('Decline'),
+                        label: Text(strings.decline),
                       ),
                     ]
                   : proposal.status == RewardWishlistStatus.redemptionRequested
@@ -437,7 +463,7 @@ class _RewardWishlistNegotiationScreenState
                             );
 
                             _showMessage(
-                              '${proposal.title} marked as fulfilled.',
+                              strings.rewardMarkedFulfilled(proposal.title),
                             );
                           } catch (error) {
                             _showMessage(
@@ -446,7 +472,7 @@ class _RewardWishlistNegotiationScreenState
                           }
                         },
                         icon: const Icon(Icons.check_circle_outline),
-                        label: const Text('Confirm Fulfillment'),
+                        label: Text(strings.confirmFulfillment),
                       ),
                     ]
                   : const [],
@@ -462,6 +488,8 @@ class _RewardWishlistNegotiationScreenState
     RewardWishlistProposal proposal,
     String userId,
   ) async {
+    final strings = AppLocalizations.of(context)!;
+
     try {
       await _rewardsService.acceptWishlistOffer(
         familyId: familyId,
@@ -469,7 +497,14 @@ class _RewardWishlistNegotiationScreenState
         requesterId: userId,
       );
 
-      _showMessage('${proposal.title} was added to your Rewards goals.');
+      _showMessage(strings.rewardAddedToGoals(proposal.title));
+
+      if (!mounted) return;
+      await Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (_) => RewardsHubScreen(highlightedGoalId: proposal.id),
+        ),
+      );
     } catch (error) {
       _showMessage(error.toString().replaceFirst('Exception: ', ''));
     }
@@ -480,6 +515,8 @@ class _RewardWishlistNegotiationScreenState
     RewardWishlistProposal proposal,
     String userId,
   ) async {
+    final strings = AppLocalizations.of(context)!;
+
     try {
       await _rewardsService.rejectWishlistOffer(
         familyId: familyId,
@@ -487,7 +524,7 @@ class _RewardWishlistNegotiationScreenState
         requesterId: userId,
       );
 
-      _showMessage('Offer rejected.');
+      _showMessage(strings.offerRejected);
     } catch (error) {
       _showMessage(error.toString().replaceFirst('Exception: ', ''));
     }
@@ -498,6 +535,8 @@ class _RewardWishlistNegotiationScreenState
     RewardWishlistProposal proposal,
     String userId,
   ) async {
+    final strings = AppLocalizations.of(context)!;
+
     try {
       await _rewardsService.declineWishlistProposal(
         familyId: familyId,
@@ -505,7 +544,7 @@ class _RewardWishlistNegotiationScreenState
         recipientId: userId,
       );
 
-      _showMessage('Wishlist request declined.');
+      _showMessage(strings.wishlistRequestDeclined);
     } catch (error) {
       _showMessage(error.toString().replaceFirst('Exception: ', ''));
     }
@@ -516,6 +555,7 @@ class _RewardWishlistNegotiationScreenState
     required RewardWishlistProposal proposal,
     required String recipientId,
   }) async {
+    final strings = AppLocalizations.of(context)!;
     final tokenController = TextEditingController(text: '0');
     final dailyController = TextEditingController(text: '0');
     final weeklyController = TextEditingController(text: '0');
@@ -526,42 +566,40 @@ class _RewardWishlistNegotiationScreenState
       context: context,
       builder: (dialogContext) {
         return AlertDialog(
-          title: Text('Offer for ${proposal.title}'),
+          title: Text(strings.offerForReward(proposal.title)),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Text(
-                  'Set the requirements they must complete to earn this reward.',
-                ),
+                Text(strings.offerRequirementsDescription),
                 const SizedBox(height: 16),
                 _numberField(
                   controller: tokenController,
-                  label: 'Tokens required',
+                  label: strings.tokensRequired,
                   icon: Icons.toll_outlined,
                 ),
                 const SizedBox(height: 10),
                 _numberField(
                   controller: dailyController,
-                  label: 'Daily Challenge wins',
+                  label: strings.dailyChallengeWins,
                   icon: Icons.today_outlined,
                 ),
                 const SizedBox(height: 10),
                 _numberField(
                   controller: weeklyController,
-                  label: 'Weekly Championship wins',
+                  label: strings.weeklyChampionshipWins,
                   icon: Icons.emoji_events_outlined,
                 ),
                 const SizedBox(height: 10),
                 _numberField(
                   controller: monthlyController,
-                  label: 'Monthly Cup wins',
+                  label: strings.monthlyCupWins,
                   icon: Icons.workspace_premium_outlined,
                 ),
                 const SizedBox(height: 10),
                 _numberField(
                   controller: missionsController,
-                  label: 'Missions completed',
+                  label: strings.missionsCompleted,
                   icon: Icons.task_alt_outlined,
                 ),
               ],
@@ -572,13 +610,13 @@ class _RewardWishlistNegotiationScreenState
               onPressed: () {
                 Navigator.pop(dialogContext, false);
               },
-              child: const Text('Cancel'),
+              child: Text(strings.cancel),
             ),
             FilledButton(
               onPressed: () {
                 Navigator.pop(dialogContext, true);
               },
-              child: const Text('Send Offer'),
+              child: Text(strings.sendOffer),
             ),
           ],
         );
@@ -611,7 +649,7 @@ class _RewardWishlistNegotiationScreenState
         weekly == 0 &&
         monthly == 0 &&
         missions == 0) {
-      _showMessage('Add at least one requirement to the offer.');
+      _showMessage(strings.addOfferRequirement);
       return;
     }
 
@@ -627,7 +665,7 @@ class _RewardWishlistNegotiationScreenState
         missionsRequired: missions,
       );
 
-      _showMessage('Offer sent to ${proposal.requesterName}.');
+      _showMessage(strings.offerSentTo(proposal.requesterName));
     } catch (error) {
       _showMessage(error.toString().replaceFirst('Exception: ', ''));
     }
@@ -687,24 +725,21 @@ class _NewWishlistRequestFormState extends State<_NewWishlistRequestForm> {
   }
 
   Future<void> _submit() async {
+    final strings = AppLocalizations.of(context)!;
     final selectedId = _selectedMemberId;
     final title = _titleController.text.trim();
 
     if (selectedId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Choose who you want to request this reward from.'),
-        ),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(strings.chooseRewardRecipient)));
       return;
     }
 
     if (title.length < 3) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Enter a reward with at least 3 characters.'),
-        ),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(strings.rewardMinimumLength)));
       return;
     }
 
@@ -741,24 +776,26 @@ class _NewWishlistRequestFormState extends State<_NewWishlistRequestForm> {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context)!;
+
     return ListView(
       padding: const EdgeInsets.all(20),
       children: [
         Text(
-          'What would you like to earn?',
+          strings.whatWouldYouLikeToEarn,
           style: Theme.of(
             context,
           ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 8),
-        const Text('Choose a family member and ask them to make you an offer.'),
+        Text(strings.chooseMemberForOffer),
         const SizedBox(height: 24),
         DropdownButtonFormField<String>(
           initialValue: _selectedMemberId,
-          decoration: const InputDecoration(
-            labelText: 'Request from',
-            prefixIcon: Icon(Icons.person_outline),
-            border: OutlineInputBorder(),
+          decoration: InputDecoration(
+            labelText: strings.requestFrom,
+            prefixIcon: const Icon(Icons.person_outline),
+            border: const OutlineInputBorder(),
           ),
           items: widget.members
               .map(
@@ -780,11 +817,11 @@ class _NewWishlistRequestFormState extends State<_NewWishlistRequestForm> {
         TextField(
           controller: _titleController,
           enabled: !_sending,
-          decoration: const InputDecoration(
-            labelText: 'Reward',
-            hintText: 'Example: iPad',
-            prefixIcon: Icon(Icons.card_giftcard_outlined),
-            border: OutlineInputBorder(),
+          decoration: InputDecoration(
+            labelText: strings.reward,
+            hintText: strings.rewardExample,
+            prefixIcon: const Icon(Icons.card_giftcard_outlined),
+            border: const OutlineInputBorder(),
           ),
         ),
         const SizedBox(height: 16),
@@ -792,10 +829,10 @@ class _NewWishlistRequestFormState extends State<_NewWishlistRequestForm> {
           controller: _descriptionController,
           enabled: !_sending,
           maxLines: 3,
-          decoration: const InputDecoration(
-            labelText: 'Message (optional)',
-            hintText: 'Example: I would like to earn this as a long-term goal.',
-            border: OutlineInputBorder(),
+          decoration: InputDecoration(
+            labelText: strings.optionalMessage,
+            hintText: strings.wishlistMessageExample,
+            border: const OutlineInputBorder(),
           ),
         ),
         const SizedBox(height: 20),
@@ -808,7 +845,7 @@ class _NewWishlistRequestFormState extends State<_NewWishlistRequestForm> {
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
               : const Icon(Icons.send_outlined),
-          label: Text(_sending ? 'Sending...' : 'Send Request'),
+          label: Text(_sending ? strings.sending : strings.sendRequest),
         ),
       ],
     );
@@ -832,6 +869,8 @@ class _ProposalCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context)!;
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -854,7 +893,7 @@ class _ProposalCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 12),
-            Text('$personLabel: $personName'),
+            Text(strings.personLabel(personLabel, personName)),
             if (proposal.description.trim().isNotEmpty) ...[
               const SizedBox(height: 6),
               Text(proposal.description),
@@ -883,38 +922,39 @@ class _RequirementsList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context)!;
     final items = <String>[];
 
     if (proposal.tokenRequirement > 0) {
-      items.add('${proposal.tokenRequirement} Tokens');
+      items.add(strings.requirementTokens(proposal.tokenRequirement));
     }
 
     if (proposal.dailyWinsRequired > 0) {
-      items.add('${proposal.dailyWinsRequired} Daily Challenge wins');
+      items.add(strings.requirementDailyWins(proposal.dailyWinsRequired));
     }
 
     if (proposal.weeklyWinsRequired > 0) {
-      items.add('${proposal.weeklyWinsRequired} Weekly Championship wins');
+      items.add(strings.requirementWeeklyWins(proposal.weeklyWinsRequired));
     }
 
     if (proposal.monthlyWinsRequired > 0) {
-      items.add('${proposal.monthlyWinsRequired} Monthly Cup wins');
+      items.add(strings.requirementMonthlyWins(proposal.monthlyWinsRequired));
     }
 
     if (proposal.missionsRequired > 0) {
-      items.add('${proposal.missionsRequired} missions completed');
+      items.add(strings.requirementMissions(proposal.missionsRequired));
     }
 
     if (items.isEmpty) {
-      return const Text('No requirements set.');
+      return Text(strings.noRequirementsSet);
     }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Requirements',
-          style: TextStyle(fontWeight: FontWeight.bold),
+        Text(
+          strings.requirements,
+          style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 6),
         ...items.map(
@@ -941,32 +981,34 @@ class _StatusChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context)!;
+
     return Chip(
-      label: Text(_label(status)),
+      label: Text(_label(strings, status)),
       visualDensity: VisualDensity.compact,
     );
   }
 
-  String _label(RewardWishlistStatus status) {
+  String _label(AppLocalizations strings, RewardWishlistStatus status) {
     switch (status) {
       case RewardWishlistStatus.requested:
-        return 'Requested';
+        return strings.statusRequested;
       case RewardWishlistStatus.offered:
-        return 'Offer Made';
+        return strings.statusOfferMade;
       case RewardWishlistStatus.accepted:
-        return 'Active Goal';
+        return strings.statusActiveGoal;
       case RewardWishlistStatus.declined:
-        return 'Declined';
+        return strings.statusDeclined;
       case RewardWishlistStatus.rejected:
-        return 'Rejected';
+        return strings.statusRejected;
       case RewardWishlistStatus.readyToRedeem:
-        return 'Ready';
+        return strings.statusReady;
       case RewardWishlistStatus.redemptionRequested:
-        return 'Redeeming';
+        return strings.statusRedeeming;
       case RewardWishlistStatus.completed:
-        return 'Completed';
+        return strings.statusCompleted;
       case RewardWishlistStatus.cancelled:
-        return 'Cancelled';
+        return strings.statusCancelled;
     }
   }
 }

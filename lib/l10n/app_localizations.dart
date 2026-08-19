@@ -3068,7 +3068,7 @@ abstract class AppLocalizations {
   /// No description provided for @missionsCompleted.
   ///
   /// In en, this message translates to:
-  /// **'Missions Completed'**
+  /// **'Missions completed'**
   String get missionsCompleted;
 
   /// No description provided for @memoriesAdded.
@@ -4300,6 +4300,510 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'One final question decides the winner.'**
   String get oneFinalQuestion;
+
+  /// No description provided for @wishlist.
+  ///
+  /// In en, this message translates to:
+  /// **'Wishlist'**
+  String get wishlist;
+
+  /// No description provided for @joinFamilyWishlist.
+  ///
+  /// In en, this message translates to:
+  /// **'Join a family to use Wishlist rewards.'**
+  String get joinFamilyWishlist;
+
+  /// No description provided for @newRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'New Request'**
+  String get newRequest;
+
+  /// No description provided for @sent.
+  ///
+  /// In en, this message translates to:
+  /// **'Sent'**
+  String get sent;
+
+  /// No description provided for @received.
+  ///
+  /// In en, this message translates to:
+  /// **'Received'**
+  String get received;
+
+  /// No description provided for @familyNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Family not found.'**
+  String get familyNotFound;
+
+  /// No description provided for @noOtherFamilyRewardMembers.
+  ///
+  /// In en, this message translates to:
+  /// **'There are no other family members to request a reward from.'**
+  String get noOtherFamilyRewardMembers;
+
+  /// No description provided for @wishlistRequestSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Wishlist request sent to {name}.'**
+  String wishlistRequestSent(String name);
+
+  /// No description provided for @noSentRequests.
+  ///
+  /// In en, this message translates to:
+  /// **'No sent requests'**
+  String get noSentRequests;
+
+  /// No description provided for @noSentRequestsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Wishlist requests you send to family members will appear here.'**
+  String get noSentRequestsDescription;
+
+  /// No description provided for @noReceivedRequests.
+  ///
+  /// In en, this message translates to:
+  /// **'No received requests'**
+  String get noReceivedRequests;
+
+  /// No description provided for @noReceivedRequestsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'When a family member requests a reward from you, it will appear here.'**
+  String get noReceivedRequestsDescription;
+
+  /// No description provided for @requestedFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'Requested from'**
+  String get requestedFrom;
+
+  /// No description provided for @requestedBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Requested by'**
+  String get requestedBy;
+
+  /// No description provided for @accept.
+  ///
+  /// In en, this message translates to:
+  /// **'Accept'**
+  String get accept;
+
+  /// No description provided for @reject.
+  ///
+  /// In en, this message translates to:
+  /// **'Reject'**
+  String get reject;
+
+  /// No description provided for @makeOffer.
+  ///
+  /// In en, this message translates to:
+  /// **'Make Offer'**
+  String get makeOffer;
+
+  /// No description provided for @decline.
+  ///
+  /// In en, this message translates to:
+  /// **'Decline'**
+  String get decline;
+
+  /// No description provided for @confirmFulfillment.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Fulfillment'**
+  String get confirmFulfillment;
+
+  /// No description provided for @rewardMarkedFulfilled.
+  ///
+  /// In en, this message translates to:
+  /// **'{reward} marked as fulfilled.'**
+  String rewardMarkedFulfilled(String reward);
+
+  /// No description provided for @rewardAddedToGoals.
+  ///
+  /// In en, this message translates to:
+  /// **'{reward} was added to your Rewards goals.'**
+  String rewardAddedToGoals(String reward);
+
+  /// No description provided for @offerRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Offer rejected.'**
+  String get offerRejected;
+
+  /// No description provided for @wishlistRequestDeclined.
+  ///
+  /// In en, this message translates to:
+  /// **'Wishlist request declined.'**
+  String get wishlistRequestDeclined;
+
+  /// No description provided for @offerForReward.
+  ///
+  /// In en, this message translates to:
+  /// **'Offer for {reward}'**
+  String offerForReward(String reward);
+
+  /// No description provided for @offerRequirementsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Set the progress they must complete after accepting to earn this reward.'**
+  String get offerRequirementsDescription;
+
+  /// No description provided for @tokensRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Tokens required'**
+  String get tokensRequired;
+
+  /// No description provided for @dailyChallengeWins.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily Challenge wins'**
+  String get dailyChallengeWins;
+
+  /// No description provided for @weeklyChampionshipWins.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly Championship wins'**
+  String get weeklyChampionshipWins;
+
+  /// No description provided for @monthlyCupWins.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly Cup wins'**
+  String get monthlyCupWins;
+
+  /// No description provided for @sendOffer.
+  ///
+  /// In en, this message translates to:
+  /// **'Send Offer'**
+  String get sendOffer;
+
+  /// No description provided for @addOfferRequirement.
+  ///
+  /// In en, this message translates to:
+  /// **'Add at least one requirement to the offer.'**
+  String get addOfferRequirement;
+
+  /// No description provided for @offerSentTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Offer sent to {name}.'**
+  String offerSentTo(String name);
+
+  /// No description provided for @chooseRewardRecipient.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose who you want to request this reward from.'**
+  String get chooseRewardRecipient;
+
+  /// No description provided for @rewardMinimumLength.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a reward with at least 3 characters.'**
+  String get rewardMinimumLength;
+
+  /// No description provided for @whatWouldYouLikeToEarn.
+  ///
+  /// In en, this message translates to:
+  /// **'What would you like to earn?'**
+  String get whatWouldYouLikeToEarn;
+
+  /// No description provided for @chooseMemberForOffer.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a family member and ask them to make you an offer.'**
+  String get chooseMemberForOffer;
+
+  /// No description provided for @requestFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'Request from'**
+  String get requestFrom;
+
+  /// No description provided for @reward.
+  ///
+  /// In en, this message translates to:
+  /// **'Reward'**
+  String get reward;
+
+  /// No description provided for @rewardExample.
+  ///
+  /// In en, this message translates to:
+  /// **'Example: Family day out'**
+  String get rewardExample;
+
+  /// No description provided for @optionalMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Message (optional)'**
+  String get optionalMessage;
+
+  /// No description provided for @wishlistMessageExample.
+  ///
+  /// In en, this message translates to:
+  /// **'Example: I would like to earn this as a long-term goal.'**
+  String get wishlistMessageExample;
+
+  /// No description provided for @sending.
+  ///
+  /// In en, this message translates to:
+  /// **'Sending...'**
+  String get sending;
+
+  /// No description provided for @sendRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'Send Request'**
+  String get sendRequest;
+
+  /// No description provided for @personLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'{label}: {name}'**
+  String personLabel(String label, String name);
+
+  /// No description provided for @requirementTokens.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} Tokens'**
+  String requirementTokens(int count);
+
+  /// No description provided for @requirementDailyWins.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} Daily Challenge wins'**
+  String requirementDailyWins(int count);
+
+  /// No description provided for @requirementWeeklyWins.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} Weekly Championship wins'**
+  String requirementWeeklyWins(int count);
+
+  /// No description provided for @requirementMonthlyWins.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} Monthly Cup wins'**
+  String requirementMonthlyWins(int count);
+
+  /// No description provided for @requirementMissions.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} missions completed'**
+  String requirementMissions(int count);
+
+  /// No description provided for @noRequirementsSet.
+  ///
+  /// In en, this message translates to:
+  /// **'No requirements set.'**
+  String get noRequirementsSet;
+
+  /// No description provided for @requirements.
+  ///
+  /// In en, this message translates to:
+  /// **'Requirements'**
+  String get requirements;
+
+  /// No description provided for @statusRequested.
+  ///
+  /// In en, this message translates to:
+  /// **'Requested'**
+  String get statusRequested;
+
+  /// No description provided for @statusOfferMade.
+  ///
+  /// In en, this message translates to:
+  /// **'Offer Made'**
+  String get statusOfferMade;
+
+  /// No description provided for @statusActiveGoal.
+  ///
+  /// In en, this message translates to:
+  /// **'Active Goal'**
+  String get statusActiveGoal;
+
+  /// No description provided for @statusDeclined.
+  ///
+  /// In en, this message translates to:
+  /// **'Declined'**
+  String get statusDeclined;
+
+  /// No description provided for @statusRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Rejected'**
+  String get statusRejected;
+
+  /// No description provided for @statusReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready'**
+  String get statusReady;
+
+  /// No description provided for @statusRedeeming.
+  ///
+  /// In en, this message translates to:
+  /// **'Redeeming'**
+  String get statusRedeeming;
+
+  /// No description provided for @statusCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get statusCompleted;
+
+  /// No description provided for @statusCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled'**
+  String get statusCancelled;
+
+  /// No description provided for @wishlistRequests.
+  ///
+  /// In en, this message translates to:
+  /// **'Wishlist Requests'**
+  String get wishlistRequests;
+
+  /// No description provided for @myGoals.
+  ///
+  /// In en, this message translates to:
+  /// **'My Goals'**
+  String get myGoals;
+
+  /// No description provided for @myGoalsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Accepted Wishlist offers appear here and update as you make progress.'**
+  String get myGoalsDescription;
+
+  /// No description provided for @noActiveGoals.
+  ///
+  /// In en, this message translates to:
+  /// **'No active goals'**
+  String get noActiveGoals;
+
+  /// No description provided for @noActiveGoalsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Accept a Wishlist offer and your goal will appear here.'**
+  String get noActiveGoalsDescription;
+
+  /// No description provided for @redemptionRequestSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Redemption request sent to {name}.'**
+  String redemptionRequestSent(String name);
+
+  /// No description provided for @agreedWith.
+  ///
+  /// In en, this message translates to:
+  /// **'Agreed with {name}'**
+  String agreedWith(String name);
+
+  /// No description provided for @openedFromNotification.
+  ///
+  /// In en, this message translates to:
+  /// **'Opened from notification'**
+  String get openedFromNotification;
+
+  /// No description provided for @allRequirementsCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'All requirements completed!'**
+  String get allRequirementsCompleted;
+
+  /// No description provided for @redeemReward.
+  ///
+  /// In en, this message translates to:
+  /// **'Redeem Reward'**
+  String get redeemReward;
+
+  /// No description provided for @waitingForFulfillment.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for the other family member to confirm fulfillment.'**
+  String get waitingForFulfillment;
+
+  /// No description provided for @rewardCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Reward completed.'**
+  String get rewardCompleted;
+
+  /// No description provided for @progressCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{current} / {required}'**
+  String progressCount(int current, int required);
+
+  /// No description provided for @milestonesComplete.
+  ///
+  /// In en, this message translates to:
+  /// **'{complete} of {total} milestones complete'**
+  String milestonesComplete(int complete, int total);
+
+  /// No description provided for @goalInProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'In progress'**
+  String get goalInProgress;
+
+  /// No description provided for @goalReadyToRedeem.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready to redeem'**
+  String get goalReadyToRedeem;
+
+  /// No description provided for @goalAwaitingConfirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'Awaiting confirmation'**
+  String get goalAwaitingConfirmation;
+
+  /// No description provided for @goalFulfilled.
+  ///
+  /// In en, this message translates to:
+  /// **'Fulfilled'**
+  String get goalFulfilled;
+
+  /// No description provided for @couldNotLoadRewardsAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load your Rewards account.'**
+  String get couldNotLoadRewardsAccount;
+
+  /// No description provided for @joinFamilyFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Join a family first'**
+  String get joinFamilyFirst;
+
+  /// No description provided for @joinFamilyRewardsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Join or create a family to use Wishlist goals and rewards.'**
+  String get joinFamilyRewardsDescription;
+
+  /// No description provided for @yourTokens.
+  ///
+  /// In en, this message translates to:
+  /// **'Your Tokens'**
+  String get yourTokens;
+
+  /// No description provided for @rewardsIntroTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn your progress into rewards'**
+  String get rewardsIntroTitle;
+
+  /// No description provided for @rewardsIntroDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Earn Tokens from competitions and family missions, then use them for family experiences or digital unlocks.'**
+  String get rewardsIntroDescription;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

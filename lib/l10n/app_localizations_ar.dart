@@ -1600,7 +1600,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get monthlyWins => 'انتصارات الكأس الشهري';
 
   @override
-  String get missionsCompleted => 'المهام المكتملة';
+  String get missionsCompleted => 'المهمات المكتملة';
 
   @override
   String get memoriesAdded => 'الذكريات المضافة';
@@ -2346,4 +2346,286 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get oneFinalQuestion => 'سؤال أخير واحد يحدد الفائز.';
+
+  @override
+  String get wishlist => 'قائمة الأمنيات';
+
+  @override
+  String get joinFamilyWishlist => 'انضم إلى عائلة لاستخدام مكافآت قائمة الأمنيات.';
+
+  @override
+  String get newRequest => 'طلب جديد';
+
+  @override
+  String get sent => 'المرسلة';
+
+  @override
+  String get received => 'المستلمة';
+
+  @override
+  String get familyNotFound => 'لم يتم العثور على العائلة.';
+
+  @override
+  String get noOtherFamilyRewardMembers => 'لا يوجد أفراد آخرون في العائلة لطلب مكافأة منهم.';
+
+  @override
+  String wishlistRequestSent(String name) {
+    return 'تم إرسال طلب قائمة الأمنيات إلى $name.';
+  }
+
+  @override
+  String get noSentRequests => 'لا توجد طلبات مرسلة';
+
+  @override
+  String get noSentRequestsDescription => 'ستظهر هنا طلبات قائمة الأمنيات التي ترسلها إلى أفراد العائلة.';
+
+  @override
+  String get noReceivedRequests => 'لا توجد طلبات مستلمة';
+
+  @override
+  String get noReceivedRequestsDescription => 'عندما يطلب منك أحد أفراد العائلة مكافأة، ستظهر هنا.';
+
+  @override
+  String get requestedFrom => 'طُلبت من';
+
+  @override
+  String get requestedBy => 'طُلبت بواسطة';
+
+  @override
+  String get accept => 'قبول';
+
+  @override
+  String get reject => 'رفض';
+
+  @override
+  String get makeOffer => 'تقديم عرض';
+
+  @override
+  String get decline => 'رفض الطلب';
+
+  @override
+  String get confirmFulfillment => 'تأكيد تقديم المكافأة';
+
+  @override
+  String rewardMarkedFulfilled(String reward) {
+    return 'تم اعتماد تقديم $reward.';
+  }
+
+  @override
+  String rewardAddedToGoals(String reward) {
+    return 'تمت إضافة $reward إلى أهداف مكافآتك.';
+  }
+
+  @override
+  String get offerRejected => 'تم رفض العرض.';
+
+  @override
+  String get wishlistRequestDeclined => 'تم رفض طلب قائمة الأمنيات.';
+
+  @override
+  String offerForReward(String reward) {
+    return 'عرض من أجل $reward';
+  }
+
+  @override
+  String get offerRequirementsDescription => 'حدد التقدم الذي يجب إنجازه بعد قبول العرض للحصول على هذه المكافأة.';
+
+  @override
+  String get tokensRequired => 'الرموز المطلوبة';
+
+  @override
+  String get dailyChallengeWins => 'انتصارات التحدي اليومي';
+
+  @override
+  String get weeklyChampionshipWins => 'انتصارات البطولة الأسبوعية';
+
+  @override
+  String get monthlyCupWins => 'انتصارات الكأس الشهري';
+
+  @override
+  String get sendOffer => 'إرسال العرض';
+
+  @override
+  String get addOfferRequirement => 'أضف شرطًا واحدًا على الأقل إلى العرض.';
+
+  @override
+  String offerSentTo(String name) {
+    return 'تم إرسال العرض إلى $name.';
+  }
+
+  @override
+  String get chooseRewardRecipient => 'اختر الشخص الذي تريد طلب هذه المكافأة منه.';
+
+  @override
+  String get rewardMinimumLength => 'اكتب مكافأة من 3 أحرف على الأقل.';
+
+  @override
+  String get whatWouldYouLikeToEarn => 'ما الذي تود الحصول عليه؟';
+
+  @override
+  String get chooseMemberForOffer => 'اختر فردًا من العائلة واطلب منه تقديم عرض لك.';
+
+  @override
+  String get requestFrom => 'اطلب من';
+
+  @override
+  String get reward => 'المكافأة';
+
+  @override
+  String get rewardExample => 'مثال: نزهة عائلية';
+
+  @override
+  String get optionalMessage => 'رسالة (اختيارية)';
+
+  @override
+  String get wishlistMessageExample => 'مثال: أود الحصول على هذه المكافأة كهدف طويل المدى.';
+
+  @override
+  String get sending => 'جارٍ الإرسال...';
+
+  @override
+  String get sendRequest => 'إرسال الطلب';
+
+  @override
+  String personLabel(String label, String name) {
+    return '$label: $name';
+  }
+
+  @override
+  String requirementTokens(int count) {
+    return '$count رمزًا';
+  }
+
+  @override
+  String requirementDailyWins(int count) {
+    return '$count من انتصارات التحدي اليومي';
+  }
+
+  @override
+  String requirementWeeklyWins(int count) {
+    return '$count من انتصارات البطولة الأسبوعية';
+  }
+
+  @override
+  String requirementMonthlyWins(int count) {
+    return '$count من انتصارات الكأس الشهري';
+  }
+
+  @override
+  String requirementMissions(int count) {
+    return '$count من المهمات المكتملة';
+  }
+
+  @override
+  String get noRequirementsSet => 'لم يتم تحديد متطلبات.';
+
+  @override
+  String get requirements => 'المتطلبات';
+
+  @override
+  String get statusRequested => 'تم الطلب';
+
+  @override
+  String get statusOfferMade => 'تم تقديم عرض';
+
+  @override
+  String get statusActiveGoal => 'هدف نشط';
+
+  @override
+  String get statusDeclined => 'مرفوض';
+
+  @override
+  String get statusRejected => 'لم يُقبل';
+
+  @override
+  String get statusReady => 'جاهز';
+
+  @override
+  String get statusRedeeming => 'قيد الاستلام';
+
+  @override
+  String get statusCompleted => 'مكتمل';
+
+  @override
+  String get statusCancelled => 'ملغى';
+
+  @override
+  String get wishlistRequests => 'طلبات قائمة الأمنيات';
+
+  @override
+  String get myGoals => 'أهدافي';
+
+  @override
+  String get myGoalsDescription => 'تظهر عروض قائمة الأمنيات المقبولة هنا وتتحدث مع تقدمك.';
+
+  @override
+  String get noActiveGoals => 'لا توجد أهداف نشطة';
+
+  @override
+  String get noActiveGoalsDescription => 'اقبل عرضًا من قائمة الأمنيات وسيظهر هدفك هنا.';
+
+  @override
+  String redemptionRequestSent(String name) {
+    return 'تم إرسال طلب الاستلام إلى $name.';
+  }
+
+  @override
+  String agreedWith(String name) {
+    return 'تم الاتفاق مع $name';
+  }
+
+  @override
+  String get openedFromNotification => 'فُتح من الإشعار';
+
+  @override
+  String get allRequirementsCompleted => 'اكتملت جميع المتطلبات!';
+
+  @override
+  String get redeemReward => 'استلام المكافأة';
+
+  @override
+  String get waitingForFulfillment => 'بانتظار فرد العائلة الآخر لتأكيد تقديم المكافأة.';
+
+  @override
+  String get rewardCompleted => 'اكتملت المكافأة.';
+
+  @override
+  String progressCount(int current, int required) {
+    return '$current / $required';
+  }
+
+  @override
+  String milestonesComplete(int complete, int total) {
+    return 'اكتمل $complete من أصل $total أهداف مرحلية';
+  }
+
+  @override
+  String get goalInProgress => 'قيد التقدم';
+
+  @override
+  String get goalReadyToRedeem => 'جاهز للاستلام';
+
+  @override
+  String get goalAwaitingConfirmation => 'بانتظار التأكيد';
+
+  @override
+  String get goalFulfilled => 'تم تقديمه';
+
+  @override
+  String get couldNotLoadRewardsAccount => 'تعذر تحميل حساب المكافآت الخاص بك.';
+
+  @override
+  String get joinFamilyFirst => 'انضم إلى عائلة أولًا';
+
+  @override
+  String get joinFamilyRewardsDescription => 'انضم إلى عائلة أو أنشئ واحدة لاستخدام أهداف قائمة الأمنيات والمكافآت.';
+
+  @override
+  String get yourTokens => 'رموزك';
+
+  @override
+  String get rewardsIntroTitle => 'حوّل تقدمك إلى مكافآت';
+
+  @override
+  String get rewardsIntroDescription => 'اكسب الرموز من المنافسات والمهام العائلية، ثم استخدمها للحصول على تجارب عائلية أو عناصر رقمية.';
 }
