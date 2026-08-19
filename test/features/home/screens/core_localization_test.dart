@@ -43,11 +43,11 @@ void main() {
     await tester.tap(quickPlayView);
     await tester.pumpAndSettle();
 
-    expect(find.text('Choose Players'), findsOneWidget);
-    expect(find.text('Who is playing?'), findsOneWidget);
-    expect(find.text('4 players selected'), findsOneWidget);
+    expect(find.text('اختر اللاعبين'), findsOneWidget);
+    expect(find.text('من سيلعب؟'), findsOneWidget);
+    expect(find.text('تم اختيار 4 لاعبين'), findsOneWidget);
 
-    await tester.tap(find.widgetWithText(FilledButton, 'Choose Game'));
+    await tester.tap(find.widgetWithText(FilledButton, 'اختر اللعبة'));
     await tester.pumpAndSettle();
 
     expect(find.text('اختاروا لعبتكم العائلية المفضلة'), findsOneWidget);

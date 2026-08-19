@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 
 import '../../../l10n/app_localizations.dart';
 import '../services/family_quiz_ai_service.dart';
+import '../utils/game_localization.dart';
 import '../widgets/game_setup_widgets.dart';
 import '../../competitions/config/competition_games.dart';
 import '../../competitions/models/competition_game_result.dart';
@@ -25,6 +26,8 @@ enum _FamilyQuizPhase {
   voteReveal,
   finalResults,
 }
+
+enum _FamilyQuizLoadError { signedOut, noFamily, invalidPlayers, loadFailed }
 
 class FamilyQuizScreen extends StatefulWidget {
   const FamilyQuizScreen({
@@ -176,10 +179,124 @@ class _FamilyQuizScreenState extends State<FamilyQuizScreen> {
     ],
   };
 
+  static const Map<String, List<FamilyQuizQuestion>> _arabicFallbackQuestions =
+      {
+        'Family Fun': [
+          FamilyQuizQuestion(
+            question: 'أي نشاط عائلي ستختار ليوم عطلة؟',
+            options: ['ليلة ألعاب', 'نزهة', 'ماراثون أفلام', 'رحلة يومية'],
+          ),
+          FamilyQuizQuestion(
+            question: 'أي حيوان أليف خيالي ستختار للعائلة؟',
+            options: ['تنين صغير', 'كلب متكلم', 'قطة طائرة', 'روبوت ودود'],
+          ),
+          FamilyQuizQuestion(
+            question: 'أي دور ستختار في عرض مواهب عائلي؟',
+            options: ['مغنٍ', 'كوميدي', 'ساحر', 'مقدم'],
+          ),
+          FamilyQuizQuestion(
+            question: 'أي مفاجأة ستسعدك أكثر؟',
+            options: ['وجبتك المفضلة', 'رحلة غامضة', 'هدية يدوية', 'نوم إضافي'],
+          ),
+          FamilyQuizQuestion(
+            question: 'أي تحدٍ عائلي ستستمتع به أكثر؟',
+            options: ['مسابقة خبز', 'بحث عن كنز', 'مسابقة رقص', 'سباق ألغاز'],
+          ),
+        ],
+        'Favorites': [
+          FamilyQuizQuestion(
+            question: 'أي وجبة خفيفة ستختار لليلة أفلام عائلية؟',
+            options: ['فشار', 'بيتزا', 'فاكهة', 'مثلجات'],
+          ),
+          FamilyQuizQuestion(
+            question: 'أي نوع من النزهات ستختار؟',
+            options: ['الشاطئ', 'مدينة ألعاب', 'متحف', 'نزهة في الطبيعة'],
+          ),
+          FamilyQuizQuestion(
+            question: 'أي نوع من الأفلام ستختار الليلة؟',
+            options: ['كوميديا', 'مغامرة', 'رسوم متحركة', 'غموض'],
+          ),
+          FamilyQuizQuestion(
+            question: 'أي هواية تود تجربتها أكثر؟',
+            options: ['الرسم', 'الطبخ', 'التصوير', 'البستنة'],
+          ),
+          FamilyQuizQuestion(
+            question: 'أي حلوى ستختار؟',
+            options: ['كعكة', 'بسكويت', 'فاكهة', 'مثلجات'],
+          ),
+        ],
+        'Habits': [
+          FamilyQuizQuestion(
+            question: 'ما أول شيء تفعله عادة بعد الاستيقاظ؟',
+            options: ['تفقد الوقت', 'شرب الماء', 'التمدد', 'البقاء في السرير'],
+          ),
+          FamilyQuizQuestion(
+            question: 'كيف تفضل الاستعداد لمناسبة؟',
+            options: ['مبكرًا جدًا', 'بقائمة مهام', 'بمساعدة', 'في آخر لحظة'],
+          ),
+          FamilyQuizQuestion(
+            question: 'أي مهمة تفضل إنهاءها أولًا؟',
+            options: ['التنظيف', 'الواجبات', 'الرسائل', 'التخطيط'],
+          ),
+          FamilyQuizQuestion(
+            question: 'ما الذي يساعدك على الاسترخاء في نهاية اليوم؟',
+            options: ['الموسيقى', 'مشاهدة برنامج', 'القراءة', 'الحديث'],
+          ),
+          FamilyQuizQuestion(
+            question: 'كيف تتذكر شيئًا مهمًا عادة؟',
+            options: ['أكتب ملاحظة', 'أضبط منبهًا', 'أخبر شخصًا', 'أتذكره فقط'],
+          ),
+        ],
+        'Memories': [
+          FamilyQuizQuestion(
+            question: 'أي نوع من الذكريات العائلية تود أن تعيشه مجددًا؟',
+            options: ['رحلة', 'احتفال', 'لحظة مضحكة', 'يوم هادئ'],
+          ),
+          FamilyQuizQuestion(
+            question: 'أي تذكار ستحتفظ به من يوم مميز؟',
+            options: ['صورة', 'تذكرة', 'هدية صغيرة', 'رسالة مكتوبة'],
+          ),
+          FamilyQuizQuestion(
+            question: 'أي لحظة عائلية تتذكرها بسهولة أكبر؟',
+            options: ['وجبة', 'رحلة', 'لعبة', 'احتفال'],
+          ),
+          FamilyQuizQuestion(
+            question: 'كيف ستحفظ ذكرى عائلية مفضلة؟',
+            options: ['ألبوم صور', 'فيديو', 'قصة', 'صندوق ذكريات'],
+          ),
+          FamilyQuizQuestion(
+            question: 'أي عادة عائلية تود تكرارها أكثر؟',
+            options: ['وجبة مناسبة', 'رحلة سنوية', 'ليلة ألعاب', 'صورة عائلية'],
+          ),
+        ],
+        'Most Likely To': [
+          FamilyQuizQuestion(
+            question: 'من الأكثر احتمالًا أن يخطط لنزهة عائلية مفاجئة؟',
+            options: [],
+          ),
+          FamilyQuizQuestion(
+            question: 'من الأكثر احتمالًا أن يُضحك الجميع؟',
+            options: [],
+          ),
+          FamilyQuizQuestion(
+            question: 'من الأكثر احتمالًا أن يتذكر كل أعياد الميلاد؟',
+            options: [],
+          ),
+          FamilyQuizQuestion(
+            question: 'من الأكثر احتمالًا أن يقترح ليلة ألعاب عائلية؟',
+            options: [],
+          ),
+          FamilyQuizQuestion(
+            question: 'من الأكثر احتمالًا أن يساعد من دون أن يُطلب منه؟',
+            options: [],
+          ),
+        ],
+      };
+
   bool _isLoadingFamily = true;
   bool _isPreparingGame = false;
 
-  String? _familyError;
+  _FamilyQuizLoadError? _familyError;
 
   final List<_QuizPlayer> _familyMembers = [];
   final Set<String> _selectedPlayerIds = {};
@@ -248,7 +365,7 @@ class _FamilyQuizScreenState extends State<FamilyQuizScreen> {
       if (user == null) {
         setState(() {
           _isLoadingFamily = false;
-          _familyError = 'You must be logged in to play.';
+          _familyError = _FamilyQuizLoadError.signedOut;
         });
 
         return;
@@ -268,7 +385,7 @@ class _FamilyQuizScreenState extends State<FamilyQuizScreen> {
 
         setState(() {
           _isLoadingFamily = false;
-          _familyError = 'Join or create a family before playing Family Quiz.';
+          _familyError = _FamilyQuizLoadError.noFamily;
         });
 
         return;
@@ -279,6 +396,10 @@ class _FamilyQuizScreenState extends State<FamilyQuizScreen> {
           .where('familyId', isEqualTo: familyId)
           .get();
 
+      if (!mounted) {
+        return;
+      }
+      final strings = AppLocalizations.of(context)!;
       final members = membersSnapshot.docs.map((document) {
         final data = document.data();
 
@@ -289,7 +410,7 @@ class _FamilyQuizScreenState extends State<FamilyQuizScreen> {
           id: document.id,
           name: name?.trim().isNotEmpty == true
               ? name!
-              : email ?? 'Family Member',
+              : email ?? strings.familyMemberFallback,
         );
       }).toList();
 
@@ -320,8 +441,7 @@ class _FamilyQuizScreenState extends State<FamilyQuizScreen> {
         _isLoadingFamily = false;
 
         if (_hasLockedParticipants && availableMembers.length < 2) {
-          _familyError =
-              'This official Family Quiz match does not have enough valid family members.';
+          _familyError = _FamilyQuizLoadError.invalidPlayers;
         } else {
           _familyError = null;
         }
@@ -333,7 +453,7 @@ class _FamilyQuizScreenState extends State<FamilyQuizScreen> {
 
       setState(() {
         _isLoadingFamily = false;
-        _familyError = 'Could not load your family members.';
+        _familyError = _FamilyQuizLoadError.loadFailed;
       });
     }
   }
@@ -349,13 +469,17 @@ class _FamilyQuizScreenState extends State<FamilyQuizScreen> {
   }
 
   Future<void> _startGame() async {
+    final strings = AppLocalizations.of(context)!;
+    final languageCode = Localizations.localeOf(context).languageCode;
     final selectedPlayers = _familyMembers
         .where((player) => _selectedPlayerIds.contains(player.id))
         .toList();
 
     if (selectedPlayers.length < 2) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Family Quiz needs at least 2 players.')),
+        SnackBar(
+          content: Text(strings.minimumPlayersForGame(strings.familyQuiz, 2)),
+        ),
       );
       return;
     }
@@ -371,7 +495,7 @@ class _FamilyQuizScreenState extends State<FamilyQuizScreen> {
         category: _selectedCategory,
         count: totalQuestions,
         familyMembers: selectedPlayers.map((player) => player.name).toList(),
-        languageCode: Localizations.localeOf(context).languageCode,
+        languageCode: languageCode,
       );
 
       if (generated.length < totalQuestions) {
@@ -396,8 +520,11 @@ class _FamilyQuizScreenState extends State<FamilyQuizScreen> {
         questions: generated.take(totalQuestions).toList(),
       );
     } catch (_) {
+      final fallbackSource = languageCode == 'ar'
+          ? _arabicFallbackQuestions
+          : _fallbackQuestions;
       final fallback = List<FamilyQuizQuestion>.from(
-        _fallbackQuestions[_selectedCategory]!,
+        fallbackSource[_selectedCategory]!,
       )..shuffle(Random());
 
       if (!mounted) {
@@ -654,8 +781,9 @@ class _FamilyQuizScreenState extends State<FamilyQuizScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppBar(title: const Text('Family Quiz')),
+      appBar: AppBar(title: Text(strings.familyQuiz)),
       body: SafeArea(
         child: Center(
           child: ConstrainedBox(
@@ -668,15 +796,15 @@ class _FamilyQuizScreenState extends State<FamilyQuizScreen> {
   }
 
   Widget _buildBody() {
+    final strings = AppLocalizations.of(context)!;
     return switch (_phase) {
       _FamilyQuizPhase.setup => _buildSetup(),
 
       _FamilyQuizPhase.subjectHandoff => _buildHandoff(
         icon: Icons.lock_outline,
-        title: 'Pass the phone to ${_currentSubject.name}',
-        message:
-            'Everyone else should look away while ${_currentSubject.name} chooses a private answer.',
-        buttonLabel: 'I\'m ${_currentSubject.name}',
+        title: strings.passPhoneTo(_currentSubject.name),
+        message: strings.subjectPrivateAnswer(_currentSubject.name),
+        buttonLabel: strings.iAmPlayer(_currentSubject.name),
         onPressed: () {
           setState(() {
             _phase = _FamilyQuizPhase.subjectAnswer;
@@ -688,10 +816,12 @@ class _FamilyQuizScreenState extends State<FamilyQuizScreen> {
 
       _FamilyQuizPhase.guesserHandoff => _buildHandoff(
         icon: Icons.visibility_off_outlined,
-        title: 'Pass the phone to ${_currentGuesser.name}',
-        message:
-            '${_currentGuesser.name} will privately guess what ${_currentSubject.name} chose.',
-        buttonLabel: 'I\'m ${_currentGuesser.name}',
+        title: strings.passPhoneTo(_currentGuesser.name),
+        message: strings.guesserPrivateGuess(
+          _currentGuesser.name,
+          _currentSubject.name,
+        ),
+        buttonLabel: strings.iAmPlayer(_currentGuesser.name),
         onPressed: () {
           setState(() {
             _phase = _FamilyQuizPhase.guess;
@@ -707,9 +837,9 @@ class _FamilyQuizScreenState extends State<FamilyQuizScreen> {
 
       _FamilyQuizPhase.voteHandoff => _buildHandoff(
         icon: Icons.how_to_vote_outlined,
-        title: 'Pass the phone to ${_players[_currentVoterIndex].name}',
-        message: 'Votes are private. Everyone else should look away.',
-        buttonLabel: 'I\'m ${_players[_currentVoterIndex].name}',
+        title: strings.passPhoneTo(_players[_currentVoterIndex].name),
+        message: strings.votesArePrivate,
+        buttonLabel: strings.iAmPlayer(_players[_currentVoterIndex].name),
         onPressed: () {
           setState(() {
             _phase = _FamilyQuizPhase.vote;
@@ -726,15 +856,25 @@ class _FamilyQuizScreenState extends State<FamilyQuizScreen> {
   }
 
   Widget _buildSetup() {
+    final strings = AppLocalizations.of(context)!;
     if (_isLoadingFamily) {
       return const Center(child: CircularProgressIndicator());
     }
 
     if (_familyError != null) {
+      final errorMessage = switch (_familyError!) {
+        _FamilyQuizLoadError.signedOut => strings.mustBeLoggedInToPlay,
+        _FamilyQuizLoadError.noFamily => strings.joinOrCreateFamilyBeforeGame(
+          strings.familyQuiz,
+        ),
+        _FamilyQuizLoadError.invalidPlayers =>
+          strings.officialMatchInvalidPlayers(strings.familyQuiz),
+        _FamilyQuizLoadError.loadFailed => strings.couldNotLoadFamilyMembers,
+      };
       return Center(
         child: Padding(
           padding: const EdgeInsets.all(24),
-          child: Text(_familyError!, textAlign: TextAlign.center),
+          child: Text(errorMessage, textAlign: TextAlign.center),
         ),
       );
     }
@@ -745,7 +885,7 @@ class _FamilyQuizScreenState extends State<FamilyQuizScreen> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
-            'Who is playing?',
+            strings.whoIsPlaying,
             style: Theme.of(
               context,
             ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
@@ -753,7 +893,7 @@ class _FamilyQuizScreenState extends State<FamilyQuizScreen> {
 
           const SizedBox(height: 8),
 
-          const Text('Choose at least 2 players.'),
+          Text(strings.chooseAtLeastTwoPlayers),
 
           const SizedBox(height: 18),
 
@@ -786,7 +926,7 @@ class _FamilyQuizScreenState extends State<FamilyQuizScreen> {
           const SizedBox(height: 28),
 
           Text(
-            'Category',
+            strings.category,
             style: Theme.of(
               context,
             ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
@@ -799,7 +939,7 @@ class _FamilyQuizScreenState extends State<FamilyQuizScreen> {
             runSpacing: 10,
             children: _categories.map((category) {
               return ChoiceChip(
-                label: Text(category),
+                label: Text(localizedGameCategory(strings, category)),
                 selected: _selectedCategory == category,
                 onSelected: (_) {
                   setState(() {
@@ -824,7 +964,7 @@ class _FamilyQuizScreenState extends State<FamilyQuizScreen> {
           const SizedBox(height: 28),
 
           Text(
-            'Questions per round',
+            strings.questionsPerRound,
             style: Theme.of(
               context,
             ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
@@ -857,19 +997,23 @@ class _FamilyQuizScreenState extends State<FamilyQuizScreen> {
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 14),
               child: _isPreparingGame
-                  ? const Row(
+                  ? Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        SizedBox(
+                        const SizedBox(
                           width: 20,
                           height: 20,
                           child: CircularProgressIndicator(strokeWidth: 2),
                         ),
-                        SizedBox(width: 12),
-                        Text('Preparing Game...'),
+                        const SizedBox(width: 12),
+                        Text(strings.preparingGame),
                       ],
                     )
-                  : Text(_isVotingMode ? 'Start Voting' : 'Start Family Quiz'),
+                  : Text(
+                      _isVotingMode
+                          ? strings.startVoting
+                          : strings.startNamedGame(strings.familyQuiz),
+                    ),
             ),
           ),
         ],
@@ -922,17 +1066,19 @@ class _FamilyQuizScreenState extends State<FamilyQuizScreen> {
   }
 
   Widget _buildSubjectAnswer() {
+    final strings = AppLocalizations.of(context)!;
     return _buildChoices(
-      heading: '${_currentSubject.name}, choose your real answer',
-      helper: 'Everyone else will try to predict what you chose.',
+      heading: strings.chooseRealAnswer(_currentSubject.name),
+      helper: strings.predictTheirChoice,
       onSelected: _chooseSubjectAnswer,
     );
   }
 
   Widget _buildGuess() {
+    final strings = AppLocalizations.of(context)!;
     return _buildChoices(
-      heading: 'What did ${_currentSubject.name} choose?',
-      helper: '${_currentGuesser.name}, make your private guess.',
+      heading: strings.whatDidPlayerChoose(_currentSubject.name),
+      helper: strings.makePrivateGuess(_currentGuesser.name),
       onSelected: _chooseGuess,
     );
   }
@@ -988,6 +1134,7 @@ class _FamilyQuizScreenState extends State<FamilyQuizScreen> {
 
   Widget _buildAnswerReveal() {
     final answerIndex = _subjectAnswerIndex!;
+    final strings = AppLocalizations.of(context)!;
 
     final correctGuessers = _guessers
         .where((player) => _currentGuesses[player.id] == answerIndex)
@@ -1005,7 +1152,7 @@ class _FamilyQuizScreenState extends State<FamilyQuizScreen> {
         const SizedBox(height: 20),
 
         Text(
-          '${_currentSubject.name} chose:',
+          strings.playerChose(_currentSubject.name),
           textAlign: TextAlign.center,
           style: Theme.of(context).textTheme.titleLarge,
         ),
@@ -1024,15 +1171,17 @@ class _FamilyQuizScreenState extends State<FamilyQuizScreen> {
 
         Text(
           correctGuessers.isEmpty
-              ? 'Nobody guessed correctly!'
-              : '${correctGuessers.map((player) => player.name).join(', ')} guessed correctly!',
+              ? strings.nobodyGuessedCorrectly
+              : strings.playersGuessedCorrectly(
+                  correctGuessers.map((player) => player.name).join(', '),
+                ),
           textAlign: TextAlign.center,
           style: Theme.of(context).textTheme.titleMedium,
         ),
 
         if (correctGuessers.isNotEmpty) ...[
           const SizedBox(height: 8),
-          const Text('+1 point each', textAlign: TextAlign.center),
+          Text(strings.onePointEach, textAlign: TextAlign.center),
         ],
 
         const SizedBox(height: 32),
@@ -1041,8 +1190,8 @@ class _FamilyQuizScreenState extends State<FamilyQuizScreen> {
           onPressed: _continueAfterQuestion,
           child: Text(
             _questionInRound == _questionsPerRound - 1
-                ? 'Round Results'
-                : 'Next Question',
+                ? strings.roundResults
+                : strings.nextQuestion,
           ),
         ),
       ],
@@ -1050,6 +1199,7 @@ class _FamilyQuizScreenState extends State<FamilyQuizScreen> {
   }
 
   Widget _buildVote() {
+    final strings = AppLocalizations.of(context)!;
     return ListView(
       padding: const EdgeInsets.all(24),
       children: [
@@ -1068,7 +1218,7 @@ class _FamilyQuizScreenState extends State<FamilyQuizScreen> {
         const SizedBox(height: 12),
 
         Text(
-          '${_players[_currentVoterIndex].name}, choose privately.',
+          strings.choosePrivately(_players[_currentVoterIndex].name),
           textAlign: TextAlign.center,
         ),
 
@@ -1096,7 +1246,7 @@ class _FamilyQuizScreenState extends State<FamilyQuizScreen> {
 
         FilledButton(
           onPressed: _selectedVoteIndex == null ? null : _submitVote,
-          child: const Text('Submit Private Vote'),
+          child: Text(strings.submitPrivateVote),
         ),
       ],
     );
@@ -1104,6 +1254,7 @@ class _FamilyQuizScreenState extends State<FamilyQuizScreen> {
 
   Widget _buildVoteReveal() {
     final highestVoteCount = _currentVotes.reduce(max);
+    final strings = AppLocalizations.of(context)!;
 
     final winners = <_QuizPlayer>[
       for (int i = 0; i < _players.length; i++)
@@ -1123,8 +1274,8 @@ class _FamilyQuizScreenState extends State<FamilyQuizScreen> {
 
         Text(
           winners.length == 1
-              ? '${winners.first.name} received the most votes!'
-              : 'It\'s a tie!',
+              ? strings.playerReceivedMostVotes(winners.first.name)
+              : strings.gameTie,
           textAlign: TextAlign.center,
           style: Theme.of(
             context,
@@ -1140,10 +1291,7 @@ class _FamilyQuizScreenState extends State<FamilyQuizScreen> {
         for (int i = 0; i < _players.length; i++)
           ListTile(
             title: Text(_players[i].name),
-            trailing: Text(
-              '${_currentVotes[i]} '
-              '${_currentVotes[i] == 1 ? 'vote' : 'votes'}',
-            ),
+            trailing: Text(strings.voteCount(_currentVotes[i])),
           ),
 
         const SizedBox(height: 24),
@@ -1152,8 +1300,8 @@ class _FamilyQuizScreenState extends State<FamilyQuizScreen> {
           onPressed: _continueAfterVote,
           child: Text(
             _questionInRound == _questionsPerRound - 1
-                ? 'Round Results'
-                : 'Next Vote',
+                ? strings.roundResults
+                : strings.nextVote,
           ),
         ),
       ],
@@ -1161,6 +1309,7 @@ class _FamilyQuizScreenState extends State<FamilyQuizScreen> {
   }
 
   Widget _buildRoundSummary() {
+    final strings = AppLocalizations.of(context)!;
     final leaderboard = [..._players];
 
     leaderboard.sort(
@@ -1173,7 +1322,7 @@ class _FamilyQuizScreenState extends State<FamilyQuizScreen> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
-            'Round $_currentRound Complete',
+            strings.roundNumberComplete(_currentRound),
             textAlign: TextAlign.center,
             style: Theme.of(
               context,
@@ -1193,7 +1342,7 @@ class _FamilyQuizScreenState extends State<FamilyQuizScreen> {
                   leading: CircleAvatar(child: Text('${index + 1}')),
                   title: Text(player.name),
                   trailing: Text(
-                    '${_scores[player.id] ?? 0} pts',
+                    strings.pointsAbbreviation(_scores[player.id] ?? 0),
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                 );
@@ -1207,8 +1356,8 @@ class _FamilyQuizScreenState extends State<FamilyQuizScreen> {
             onPressed: _continueAfterRound,
             child: Text(
               _currentRound == _selectedRounds
-                  ? 'See Final Results'
-                  : 'Start Round ${_currentRound + 1}',
+                  ? strings.seeFinalResults
+                  : strings.startRound(_currentRound + 1),
             ),
           ),
         ],
@@ -1351,12 +1500,17 @@ class _FamilyQuizScreenState extends State<FamilyQuizScreen> {
   }
 
   Widget _buildProgress() {
+    final strings = AppLocalizations.of(context)!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Round $_currentRound of $_selectedRounds • '
-          'Question ${_questionInRound + 1} of $_questionsPerRound',
+          strings.questionRoundProgress(
+            _currentRound,
+            _selectedRounds,
+            _questionInRound + 1,
+            _questionsPerRound,
+          ),
           style: Theme.of(context).textTheme.titleMedium,
         ),
 

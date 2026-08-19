@@ -46,4 +46,37 @@ void main() {
     expect(find.text('5 rounds'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('preview setup localizes prompt variety and RTL in Arabic', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        locale: Locale('ar'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: CaptionBattleScreen(developerPreview: true),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.text('معركة التعليقات'), findsWidgets);
+    expect(find.text('تنوع التحديات'), findsOneWidget);
+    expect(find.text('فاجئني'), findsOneWidget);
+    expect(find.text('سرد القصص'), findsOneWidget);
+    expect(find.text('عناوين ومنشورات'), findsOneWidget);
+    expect(find.text('أفكار جامحة'), findsOneWidget);
+    expect(
+      tester
+          .widget<Directionality>(find.byType(Directionality).first)
+          .textDirection,
+      TextDirection.rtl,
+    );
+    expect(tester.takeException(), isNull);
+  });
 }

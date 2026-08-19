@@ -3373,5 +3373,264 @@ class AppLocalizationsEn extends AppLocalizations {
   String get bombSurvivorPoint => 'Everyone else earns 1 point for surviving the round.';
 
   @override
+  String get choosePlayers => 'Choose Players';
+
+  @override
+  String get chooseQuickPlayMembers => 'Choose the family members who are together for this Quick Play session.';
+
+  @override
+  String get chooseGame => 'Choose Game';
+
+  @override
+  String get memoryChallenge => 'Memory Challenge';
+
+  @override
+  String get memoryNeedsPhoto => 'Your family needs at least one memory with a photo before playing.';
+
+  @override
+  String get memoryChallengeCreateError => 'We could not create a Memory Challenge right now. Please try again.';
+
+  @override
+  String get familyMemoryFallback => 'Family Memory';
+
+  @override
+  String get howWellRemember => 'How well do you remember?';
+
+  @override
+  String get memoryChallengeSetupDescription => 'Sila uses your family photos and stories to create unique questions from moments you shared together.';
+
+  @override
+  String get creatingChallenge => 'Creating your challenge...';
+
+  @override
+  String get startMemoryChallenge => 'Start Memory Challenge';
+
+  @override
+  String questionProgress(int current, int total) {
+    return 'Question $current of $total';
+  }
+
+  @override
+  String get correct => 'Correct!';
+
+  @override
+  String correctAnswerLabel(String answer) {
+    return 'Correct answer: $answer';
+  }
+
+  @override
+  String get nextMemory => 'Next Memory';
+
+  @override
+  String get memoryChallengeComplete => 'Memory Challenge Complete!';
+
+  @override
+  String scoreProgress(int score, int total) {
+    return 'Score: $score / $total';
+  }
+
+  @override
+  String get couldNotLoadCaptionBattle => 'Could not load Caption Battle';
+
+  @override
+  String get unknownError => 'Unknown error';
+
+  @override
+  String get captionBattleSetupDescription => 'Everyone captions the same family photo. Then the captions are shuffled and the family votes anonymously.';
+
+  @override
+  String get howItWorks => 'How it works';
+
+  @override
+  String get captionRulePhoto => 'A real family Memory photo appears each round.';
+
+  @override
+  String get captionRuleWrite => 'Each player secretly writes one caption.';
+
+  @override
+  String get captionRuleShuffle => 'Captions are shuffled so authors stay hidden.';
+
+  @override
+  String get captionRuleVote => 'Everyone votes, but cannot vote for themselves.';
+
+  @override
+  String get captionRulePoint => 'Each vote is worth 1 local Quick Play point.';
+
+  @override
+  String get promptVariety => 'Prompt variety';
+
+  @override
+  String get promptVarietyDescription => 'Choose the kind of creative challenge your family wants.';
+
+  @override
+  String get captionStyleSurprise => 'Surprise Me';
+
+  @override
+  String get captionStyleStorytelling => 'Storytelling';
+
+  @override
+  String get captionStyleHeadlines => 'Headlines & Posts';
+
+  @override
+  String get captionStyleWild => 'Wild Ideas';
+
+  @override
+  String get familyPhotos => 'Family photos';
+
+  @override
+  String get noPhotoMemories => 'No Memories with photos were found.';
+
+  @override
+  String photoMemoriesAvailable(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count photo memories available.',
+      one: '1 photo memory available.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get addPhotoMemoryFirst => 'Add a Memory with a photo first, then return here.';
+
+  @override
+  String captionBattleRoundCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count rounds.',
+      one: '1 round.',
+    );
+    return 'This game will play $_temp0';
+  }
+
+  @override
+  String get captionRoundPhotoDescription => 'Each round uses a different family photo. More photos unlock the 3 and 5-round options.';
+
+  @override
+  String get selectAtLeastTwoFamilyMembers => 'Select at least 2 family members.';
+
+  @override
+  String get captionBattleNeedsPhoto => 'Caption Battle needs at least one Memory with a photo.';
+
+  @override
+  String get quickPlayNoRanking => 'Quick Play only • No Tokens or global ranking';
+
+  @override
+  String takeThePhone(String name) {
+    return '$name, take the phone';
+  }
+
+  @override
+  String get keepCaptionPrivate => 'Make sure nobody else can see your caption.';
+
+  @override
+  String get imReady => 'I\'m Ready';
+
+  @override
+  String get yourChallenge => 'Your challenge';
+
+  @override
+  String get writeYourCaption => 'Write your caption';
+
+  @override
+  String get writeCaptionFirst => 'Write a caption before continuing.';
+
+  @override
+  String get submitFinalCaption => 'Submit Final Caption';
+
+  @override
+  String get privateCaptionVote => 'Vote privately for your favorite caption. You will not be able to vote for your own.';
+
+  @override
+  String get showCaptions => 'Show Captions';
+
+  @override
+  String chooseFavoriteCaption(String name) {
+    return '$name, choose your favorite';
+  }
+
+  @override
+  String get captionAuthorsHidden => 'Authors stay hidden until everyone votes.';
+
+  @override
+  String get cannotVoteOwnCaption => 'You cannot vote for your own caption.';
+
+  @override
+  String get captionReveal => 'Caption reveal';
+
+  @override
+  String get finalLeaderboard => 'Final Leaderboard';
+
+  @override
+  String developerFamilyMemory(int number) {
+    return 'Developer Family Memory $number';
+  }
+
+  @override
+  String subjectPrivateAnswer(String name) {
+    return 'Everyone else should look away while $name chooses a private answer.';
+  }
+
+  @override
+  String guesserPrivateGuess(String guesser, String subject) {
+    return '$guesser will privately guess what $subject chose.';
+  }
+
+  @override
+  String get votesArePrivate => 'Votes are private. Everyone else should look away.';
+
+  @override
+  String chooseRealAnswer(String name) {
+    return '$name, choose your real answer';
+  }
+
+  @override
+  String get predictTheirChoice => 'Everyone else will try to predict what you chose.';
+
+  @override
+  String whatDidPlayerChoose(String name) {
+    return 'What did $name choose?';
+  }
+
+  @override
+  String makePrivateGuess(String name) {
+    return '$name, make your private guess.';
+  }
+
+  @override
+  String playerChose(String name) {
+    return '$name chose:';
+  }
+
+  @override
+  String get nobodyGuessedCorrectly => 'Nobody guessed correctly!';
+
+  @override
+  String playersGuessedCorrectly(String names) {
+    return '$names guessed correctly!';
+  }
+
+  @override
+  String get onePointEach => '+1 point each';
+
+  @override
+  String choosePrivately(String name) {
+    return '$name, choose privately.';
+  }
+
+  @override
+  String get submitPrivateVote => 'Submit Private Vote';
+
+  @override
+  String playerReceivedMostVotes(String name) {
+    return '$name received the most votes!';
+  }
+
+  @override
+  String get nextVote => 'Next Vote';
+
+  @override
   String get monthlyInvalidWinner => 'The match returned a winner who was not one of the two selected competitors. Please replay the match.';
 }

@@ -2,7 +2,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
+import '../../../l10n/app_localizations.dart';
 import 'games_screen.dart';
+
+enum _QuickPlayLoadError { signedOut, noFamily, loadFailed }
 
 class QuickPlayPlayerSelectionScreen extends StatefulWidget {
   const QuickPlayPlayerSelectionScreen({
@@ -23,7 +26,7 @@ class _QuickPlayPlayerSelectionScreenState
   final Set<String> _selectedIds = {};
 
   bool _isLoading = true;
-  String? _errorMessage;
+  _QuickPlayLoadError? _loadError;
 
   @override
   void initState() {
@@ -63,7 +66,7 @@ class _QuickPlayPlayerSelectionScreenState
     if (user == null) {
       setState(() {
         _isLoading = false;
-        _errorMessage = 'Please sign in before starting Quick Play.';
+        _loadError = _QuickPlayLoadError.signedOut;
       });
 
       return;
@@ -80,7 +83,7 @@ class _QuickPlayPlayerSelectionScreenState
 
         setState(() {
           _isLoading = false;
-          _errorMessage = 'Join or create a family before starting Quick Play.';
+          _loadError = _QuickPlayLoadError.noFamily;
         });
 
         return;
@@ -91,6 +94,9 @@ class _QuickPlayPlayerSelectionScreenState
           .where('familyId', isEqualTo: familyId)
           .get();
 
+      if (!mounted) return;
+
+      final strings = AppLocalizations.of(context)!;
       final members = snapshot.docs.map((document) {
         final data = document.data();
 
@@ -103,7 +109,7 @@ class _QuickPlayPlayerSelectionScreenState
               ? name!
               : email?.isNotEmpty == true
               ? email!
-              : 'Family Member',
+              : strings.familyMemberFallback,
         );
       }).toList();
 
@@ -123,14 +129,14 @@ class _QuickPlayPlayerSelectionScreenState
           ..addAll(members.map((member) => member.id));
 
         _isLoading = false;
-        _errorMessage = null;
+        _loadError = null;
       });
     } catch (_) {
       if (!mounted) return;
 
       setState(() {
         _isLoading = false;
-        _errorMessage = 'Could not load your family members.';
+        _loadError = _QuickPlayLoadError.loadFailed;
       });
     }
   }
@@ -146,10 +152,13 @@ class _QuickPlayPlayerSelectionScreenState
   }
 
   void _continueToGames() {
+    final strings = AppLocalizations.of(context)!;
     if (_selectedIds.length < 2) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Quick Play needs at least 2 family members.'),
+        SnackBar(
+          content: Text(
+            strings.minimumFamilyMembersForGame(strings.quickPlay, 2),
+          ),
         ),
       );
 
@@ -168,12 +177,13 @@ class _QuickPlayPlayerSelectionScreenState
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppBar(title: const Text('Choose Players')),
+      appBar: AppBar(title: Text(strings.choosePlayers)),
       body: SafeArea(
         child: _isLoading
             ? const Center(child: CircularProgressIndicator())
-            : _errorMessage != null
+            : _loadError != null
             ? _buildError()
             : _buildPlayerSelection(),
       ),
@@ -181,6 +191,14 @@ class _QuickPlayPlayerSelectionScreenState
   }
 
   Widget _buildError() {
+    final strings = AppLocalizations.of(context)!;
+    final message = switch (_loadError!) {
+      _QuickPlayLoadError.signedOut => strings.mustBeLoggedInToPlay,
+      _QuickPlayLoadError.noFamily => strings.joinOrCreateFamilyBeforeGame(
+        strings.quickPlay,
+      ),
+      _QuickPlayLoadError.loadFailed => strings.couldNotLoadFamilyMembers,
+    };
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
@@ -189,18 +207,18 @@ class _QuickPlayPlayerSelectionScreenState
           children: [
             const Icon(Icons.group_off_rounded, size: 64),
             const SizedBox(height: 16),
-            Text(_errorMessage!, textAlign: TextAlign.center),
+            Text(message, textAlign: TextAlign.center),
             const SizedBox(height: 20),
             FilledButton(
               onPressed: () {
                 setState(() {
                   _isLoading = true;
-                  _errorMessage = null;
+                  _loadError = null;
                 });
 
                 _loadFamilyMembers();
               },
-              child: const Text('Try Again'),
+              child: Text(strings.tryAgain),
             ),
           ],
         ),
@@ -209,12 +227,13 @@ class _QuickPlayPlayerSelectionScreenState
   }
 
   Widget _buildPlayerSelection() {
+    final strings = AppLocalizations.of(context)!;
     if (_members.length < 2) {
-      return const Center(
+      return Center(
         child: Padding(
-          padding: EdgeInsets.all(24),
+          padding: const EdgeInsets.all(24),
           child: Text(
-            'Quick Play needs at least 2 family members.',
+            strings.minimumFamilyMembersForGame(strings.quickPlay, 2),
             textAlign: TextAlign.center,
           ),
         ),
@@ -228,14 +247,14 @@ class _QuickPlayPlayerSelectionScreenState
             padding: const EdgeInsets.all(20),
             children: [
               Text(
-                'Who is playing?',
+                strings.whoIsPlaying,
                 style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
               ),
               const SizedBox(height: 8),
               Text(
-                'Choose the family members who are together for this Quick Play session.',
+                strings.chooseQuickPlayMembers,
                 style: Theme.of(context).textTheme.bodyLarge,
               ),
               const SizedBox(height: 24),
@@ -269,14 +288,14 @@ class _QuickPlayPlayerSelectionScreenState
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Text(
-                  '${_selectedIds.length} players selected',
+                  strings.selectedPlayersCount(_selectedIds.length),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 10),
                 FilledButton.icon(
                   onPressed: _selectedIds.length >= 2 ? _continueToGames : null,
                   icon: const Icon(Icons.sports_esports_rounded),
-                  label: const Text('Choose Game'),
+                  label: Text(strings.chooseGame),
                 ),
               ],
             ),
