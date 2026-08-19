@@ -883,6 +883,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get memorySaved => 'تم حفظ الذكرى بنجاح.';
 
   @override
+  String get couldNotSaveMemoryTryAgain => 'تعذر حفظ هذه الذكرى. يرجى المحاولة مرة أخرى.';
+
+  @override
   String couldNotSaveMemory(String error) {
     return 'تعذر حفظ الذكرى: $error';
   }
@@ -921,6 +924,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get enterMemoryTitle => 'أدخل عنوانًا للذكرى.';
 
   @override
+  String get couldNotSaveMemoryChangesTryAgain => 'تعذر حفظ هذه التغييرات. يرجى المحاولة مرة أخرى.';
+
+  @override
   String couldNotSaveMemoryChanges(String error) {
     return 'تعذر حفظ التغييرات: $error';
   }
@@ -941,10 +947,19 @@ class AppLocalizationsAr extends AppLocalizations {
   String get saveChanges => 'حفظ التغييرات';
 
   @override
+  String get removePhoto => 'إزالة الصورة';
+
+  @override
   String get deleteMemoryQuestion => 'حذف الذكرى؟';
 
   @override
   String get deleteMemoryWarning => 'ستتم إزالة هذه الذكرى نهائيًا من ذكريات عائلتك.';
+
+  @override
+  String get deletingMemory => 'جارٍ حذف الذكرى...';
+
+  @override
+  String get couldNotDeleteMemory => 'تعذر حذف هذه الذكرى. يرجى المحاولة مرة أخرى.';
 
   @override
   String get cancel => 'إلغاء';
@@ -954,6 +969,9 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get memoryNotFound => 'لم يتم العثور على الذكرى.';
+
+  @override
+  String get memoryDetailsLoadError => 'تعذر تحميل هذه الذكرى. يرجى المحاولة مرة أخرى.';
 
   @override
   String get noDate => 'لا يوجد تاريخ';
@@ -1194,12 +1212,12 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String familyMissionRewardSuccess(int tokens, String participants) {
-    return 'تم منح $tokens من الرموز لكل مشارك.\n\n$participants\n\nتمت إضافة مهمة عائلية مشتركة جديدة.';
+    return 'تم منح $tokens من الرموز لكل مشارك.\n\n$participants\n\nتم تحديث تقدم مهام عائلتك لهذا الأسبوع.';
   }
 
   @override
   String personalMissionRewardSuccess(int tokens) {
-    return 'ربحت $tokens من الرموز.\n\nتمت إضافة مهمة شخصية جديدة.';
+    return 'ربحت $tokens من الرموز.\n\nتم تحديث تقدم مهامك لهذا الأسبوع.';
   }
 
   @override
@@ -1219,12 +1237,12 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String personalMissionsSubtitle(int count) {
-    return '$count مهام شخصية لك';
+    return 'تبقى لك $count من المهام الشخصية هذا الأسبوع';
   }
 
   @override
   String sharedMissionsSubtitle(int count) {
-    return '$count مهام مشتركة — أكملوا كل مهمة مرة واحدة كعائلة';
+    return 'تبقت $count من المهام المشتركة هذا الأسبوع';
   }
 
   @override
@@ -1235,7 +1253,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String missionsHeaderDescription(int count) {
-    return '$count مهام نشطة بإثبات يتحقق منه الذكاء الاصطناعي ومكافآت عادلة وتحديات جديدة مع تقدمكم.';
+    return 'تبقت $count من المهام في لوحة هذا الأسبوع. تبقى المهام الموثقة مكتملة حتى تتجدد اللوحة.';
   }
 
   @override
@@ -1267,6 +1285,30 @@ class AppLocalizationsAr extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String missionWeekWindow(String start, String end) {
+    return 'هذا الأسبوع • $start–$end';
+  }
+
+  @override
+  String personalWeeklyProgress(int completed, int total) {
+    return 'التقدم الشخصي • $completed/$total';
+  }
+
+  @override
+  String familyWeeklyProgress(int completed, int total) {
+    return 'تقدم العائلة • $completed/$total';
+  }
+
+  @override
+  String get personalWeekComplete => 'أكملت جميع مهامك الشخصية!';
+
+  @override
+  String get familyWeekComplete => 'أكملت عائلتك جميع المهام المشتركة!';
+
+  @override
+  String get missionsResetMonday => 'تصل لوحة مهام جديدة يوم الاثنين المقبل.';
 
   @override
   String get aiProofRequired => 'إثبات بالذكاء الاصطناعي مطلوب';

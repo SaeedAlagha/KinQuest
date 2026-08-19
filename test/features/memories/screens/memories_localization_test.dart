@@ -1,3 +1,6 @@
+import 'dart:typed_data';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kinquest/core/theme/app_theme.dart';
@@ -77,6 +80,32 @@ void main() {
     await tester.pump();
 
     expect(find.text('أدخل عنوانًا للذكرى.'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Arabic edit-memory form can remove an existing photo', (
+    tester,
+  ) async {
+    await _setViewport(tester, const Size(320, 568));
+    await _pumpArabic(
+      tester,
+      EditMemoryScreen(
+        memoryId: 'preview-memory',
+        familyId: 'preview-family',
+        memoryData: <String, dynamic>{
+          'title': 'ذكرى عائلية',
+          'imageData': Blob(Uint8List.fromList(<int>[1, 2, 3])),
+        },
+      ),
+    );
+
+    final removePhoto = find.text('إزالة الصورة');
+    expect(removePhoto, findsOneWidget);
+    await tester.tap(removePhoto);
+    await tester.pumpAndSettle();
+
+    expect(find.text('إضافة صورة'), findsOneWidget);
+    expect(find.text('إزالة الصورة'), findsNothing);
     expect(tester.takeException(), isNull);
   });
 }

@@ -36,6 +36,7 @@ class _EditMemoryScreenState extends State<EditMemoryScreen> {
 
   DateTime? _selectedDate;
   bool _isSaving = false;
+  bool _removeImage = false;
 
   @override
   void initState() {
@@ -112,6 +113,15 @@ class _EditMemoryScreenState extends State<EditMemoryScreen> {
 
     setState(() {
       _selectedImageBytes = bytes;
+      _removeImage = false;
+    });
+  }
+
+  void _removePhoto() {
+    setState(() {
+      _selectedImageBytes = null;
+      _existingImageBytes = null;
+      _removeImage = true;
     });
   }
 
@@ -141,7 +151,10 @@ class _EditMemoryScreenState extends State<EditMemoryScreen> {
         'updatedAt': FieldValue.serverTimestamp(),
       };
 
-      if (_selectedImageBytes != null) {
+      if (_removeImage) {
+        updateData['imageData'] = null;
+        updateData['imageUrl'] = null;
+      } else if (_selectedImageBytes != null) {
         updateData['imageData'] = Blob(_selectedImageBytes!);
         updateData['imageUrl'] = null;
       }
@@ -169,11 +182,8 @@ class _EditMemoryScreenState extends State<EditMemoryScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            AppLocalizations.of(
-              context,
-            )!.couldNotSaveMemoryChanges(error.toString()),
+            AppLocalizations.of(context)!.couldNotSaveMemoryChangesTryAgain,
           ),
-          duration: const Duration(seconds: 8),
         ),
       );
     }
@@ -182,12 +192,18 @@ class _EditMemoryScreenState extends State<EditMemoryScreen> {
   Widget _buildPhoto() {
     final oldImageUrl = widget.memoryData['imageUrl'] as String?;
 
+    if (_removeImage) {
+      return _buildEmptyPhoto();
+    }
+
     if (_selectedImageBytes != null) {
       return Image.memory(
         _selectedImageBytes!,
         fit: BoxFit.cover,
         width: double.infinity,
         height: 180,
+        errorBuilder: (context, error, stackTrace) =>
+            const Center(child: Icon(Icons.broken_image_outlined, size: 52)),
       );
     }
 
@@ -197,6 +213,8 @@ class _EditMemoryScreenState extends State<EditMemoryScreen> {
         fit: BoxFit.cover,
         width: double.infinity,
         height: 180,
+        errorBuilder: (context, error, stackTrace) =>
+            const Center(child: Icon(Icons.broken_image_outlined, size: 52)),
       );
     }
 
@@ -214,6 +232,10 @@ class _EditMemoryScreenState extends State<EditMemoryScreen> {
       );
     }
 
+    return _buildEmptyPhoto();
+  }
+
+  Widget _buildEmptyPhoto() {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -231,9 +253,13 @@ class _EditMemoryScreenState extends State<EditMemoryScreen> {
     final strings = AppLocalizations.of(context)!;
     final formattedDate = _selectedDate == null
         ? strings.chooseDate
-        : '${_selectedDate!.day.toString().padLeft(2, '0')}/'
-              '${_selectedDate!.month.toString().padLeft(2, '0')}/'
-              '${_selectedDate!.year}';
+        : MaterialLocalizations.of(context).formatMediumDate(_selectedDate!);
+    final oldImageUrl = widget.memoryData['imageUrl'] as String?;
+    final hasPhoto =
+        !_removeImage &&
+        (_selectedImageBytes != null ||
+            _existingImageBytes != null ||
+            (oldImageUrl != null && oldImageUrl.isNotEmpty));
 
     return Scaffold(
       appBar: AppBar(title: Text(strings.editMemory)),
@@ -253,6 +279,17 @@ class _EditMemoryScreenState extends State<EditMemoryScreen> {
               child: _buildPhoto(),
             ),
           ),
+          if (hasPhoto) ...[
+            const SizedBox(height: 8),
+            Align(
+              alignment: AlignmentDirectional.centerEnd,
+              child: TextButton.icon(
+                onPressed: _isSaving ? null : _removePhoto,
+                icon: const Icon(Icons.delete_outline_rounded),
+                label: Text(strings.removePhoto),
+              ),
+            ),
+          ],
           const SizedBox(height: 20),
           TextField(
             controller: _titleController,

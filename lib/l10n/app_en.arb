@@ -302,6 +302,7 @@
   "saveMemorySignInRequired": "You must be signed in to save a memory.",
   "addMemoryFamilyRequired": "Join or create a family before adding memories.",
   "memorySaved": "Memory saved successfully.",
+  "couldNotSaveMemoryTryAgain": "Could not save this memory. Please try again.",
   "couldNotSaveMemory": "Could not save the memory: {error}",
   "@couldNotSaveMemory": {
     "placeholders": {
@@ -319,6 +320,7 @@
   "saveMemory": "Save Memory",
   "editMemory": "Edit Memory",
   "enterMemoryTitle": "Enter a title for the memory.",
+  "couldNotSaveMemoryChangesTryAgain": "Could not save these changes. Please try again.",
   "couldNotSaveMemoryChanges": "Could not save changes: {error}",
   "@couldNotSaveMemoryChanges": {
     "placeholders": {
@@ -330,11 +332,15 @@
   "locationLabel": "Location",
   "chooseDate": "Choose date",
   "saveChanges": "Save Changes",
+  "removePhoto": "Remove Photo",
   "deleteMemoryQuestion": "Delete memory?",
   "deleteMemoryWarning": "This memory will be permanently removed from your family memories.",
+  "deletingMemory": "Deleting memory...",
+  "couldNotDeleteMemory": "Could not delete this memory. Please try again.",
   "cancel": "Cancel",
   "delete": "Delete",
   "memoryNotFound": "Memory not found.",
+  "memoryDetailsLoadError": "Could not load this memory. Please try again.",
   "noDate": "No date",
   "editMemoryTooltip": "Edit memory",
   "deleteMemoryTooltip": "Delete memory",
@@ -429,14 +435,14 @@
   "missionRewardSaveError": "The proof was verified, but the reward could not be saved. Please try again.",
   "familyMissionMinimumParticipants": "A family mission needs at least 2 participants.",
   "missionVerified": "Mission Verified!",
-  "familyMissionRewardSuccess": "{tokens} tokens were awarded to each participant.\n\n{participants}\n\nA new shared family mission has been added.",
+  "familyMissionRewardSuccess": "{tokens} tokens were awarded to each participant.\n\n{participants}\n\nYour family's weekly mission progress has been updated.",
   "@familyMissionRewardSuccess": {
     "placeholders": {
       "tokens": {"type": "int"},
       "participants": {"type": "String"}
     }
   },
-  "personalMissionRewardSuccess": "You earned {tokens} tokens.\n\nA new personal mission has been added.",
+  "personalMissionRewardSuccess": "You earned {tokens} tokens.\n\nYour weekly mission progress has been updated.",
   "@personalMissionRewardSuccess": {
     "placeholders": {
       "tokens": {"type": "int"}
@@ -447,13 +453,13 @@
   "difficultyMedium": "Medium",
   "difficultyChallenge": "Challenge",
   "yourMissions": "Your Missions",
-  "personalMissionsSubtitle": "{count} personal missions just for you",
+  "personalMissionsSubtitle": "{count} personal missions remaining this week",
   "@personalMissionsSubtitle": {
     "placeholders": {
       "count": {"type": "int"}
     }
   },
-  "sharedMissionsSubtitle": "{count} shared missions — complete each once as a family",
+  "sharedMissionsSubtitle": "{count} shared missions remaining this week",
   "@sharedMissionsSubtitle": {
     "placeholders": {
       "count": {"type": "int"}
@@ -461,7 +467,7 @@
   },
   "recentlyCompleted": "Recently Completed",
   "doMoreTogether": "Do More Together",
-  "missionsHeaderDescription": "{count} active missions, AI-verified proof, fair rewards, and new challenges as you progress.",
+  "missionsHeaderDescription": "{count} missions remain on this week's board. Verified completions stay complete until the board resets.",
   "@missionsHeaderDescription": {
     "placeholders": {
       "count": {"type": "int"}
@@ -479,6 +485,15 @@
       "count": {"type": "int"}
     }
   },
+  "missionWeekWindow": "This week • {start}–{end}",
+  "@missionWeekWindow": {"placeholders": {"start": {"type": "String"}, "end": {"type": "String"}}},
+  "personalWeeklyProgress": "Personal progress • {completed}/{total}",
+  "@personalWeeklyProgress": {"placeholders": {"completed": {"type": "int"}, "total": {"type": "int"}}},
+  "familyWeeklyProgress": "Family progress • {completed}/{total}",
+  "@familyWeeklyProgress": {"placeholders": {"completed": {"type": "int"}, "total": {"type": "int"}}},
+  "personalWeekComplete": "Your personal missions are complete!",
+  "familyWeekComplete": "Your family completed every shared mission!",
+  "missionsResetMonday": "A fresh mission board arrives next Monday.",
   "aiProofRequired": "AI proof required",
   "personalLabel": "Personal",
   "missionCategoryOutdoor": "Outdoor",

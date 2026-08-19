@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import '../../../l10n/app_localizations.dart';
 import 'edit_memory_screen.dart';
 
-class MemoryDetailsScreen extends StatelessWidget {
+class MemoryDetailsScreen extends StatefulWidget {
   const MemoryDetailsScreen({
     super.key,
     required this.memoryData,
@@ -18,7 +18,14 @@ class MemoryDetailsScreen extends StatelessWidget {
   final String memoryId;
   final String familyId;
 
-  Future<void> _deleteMemory(BuildContext context) async {
+  @override
+  State<MemoryDetailsScreen> createState() => _MemoryDetailsScreenState();
+}
+
+class _MemoryDetailsScreenState extends State<MemoryDetailsScreen> {
+  bool _isDeleting = false;
+
+  Future<void> _deleteMemory() async {
     final strings = AppLocalizations.of(context)!;
     final shouldDelete = await showDialog<bool>(
       context: context,
@@ -44,15 +51,37 @@ class MemoryDetailsScreen extends StatelessWidget {
       return;
     }
 
-    await FirebaseFirestore.instance
-        .collection('families')
-        .doc(familyId)
-        .collection('memories')
-        .doc(memoryId)
-        .delete();
+    setState(() {
+      _isDeleting = true;
+    });
 
-    if (context.mounted) {
-      Navigator.pop(context);
+    try {
+      await FirebaseFirestore.instance
+          .collection('families')
+          .doc(widget.familyId)
+          .collection('memories')
+          .doc(widget.memoryId)
+          .delete();
+
+      if (mounted) {
+        Navigator.pop(context);
+      }
+    } catch (error, stackTrace) {
+      debugPrint('DELETE MEMORY ERROR: $error');
+      debugPrintStack(
+        label: 'DELETE MEMORY STACK TRACE',
+        stackTrace: stackTrace,
+      );
+
+      if (!mounted) return;
+
+      setState(() {
+        _isDeleting = false;
+      });
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(strings.couldNotDeleteMemory)));
     }
   }
 
@@ -73,6 +102,13 @@ class MemoryDetailsScreen extends StatelessWidget {
         fit: BoxFit.cover,
         width: double.infinity,
         height: 220,
+        errorBuilder: (context, error, stackTrace) {
+          return Icon(
+            Icons.broken_image_outlined,
+            size: 90,
+            color: Theme.of(context).colorScheme.onPrimaryContainer,
+          );
+        },
       );
     }
 
@@ -104,9 +140,9 @@ class MemoryDetailsScreen extends StatelessWidget {
     final strings = AppLocalizations.of(context)!;
     final memoryRef = FirebaseFirestore.instance
         .collection('families')
-        .doc(familyId)
+        .doc(widget.familyId)
         .collection('memories')
-        .doc(memoryId);
+        .doc(widget.memoryId);
 
     return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
       stream: memoryRef.snapshots(),
@@ -114,6 +150,13 @@ class MemoryDetailsScreen extends StatelessWidget {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Scaffold(
             body: Center(child: CircularProgressIndicator()),
+          );
+        }
+
+        if (snapshot.hasError) {
+          return Scaffold(
+            appBar: AppBar(title: Text(strings.memoryTitleGeneric)),
+            body: Center(child: Text(strings.memoryDetailsLoadError)),
           );
         }
 
@@ -135,82 +178,121 @@ class MemoryDetailsScreen extends StatelessWidget {
 
         final formattedDate = date == null
             ? strings.noDate
-            : '${date.day.toString().padLeft(2, '0')}/'
-                  '${date.month.toString().padLeft(2, '0')}/'
-                  '${date.year}';
+            : MaterialLocalizations.of(context).formatMediumDate(date);
 
         return Scaffold(
           appBar: AppBar(
             title: Text(strings.memoryTitleGeneric),
             actions: [
               IconButton(
-                onPressed: () async {
-                  await Navigator.push<bool>(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => EditMemoryScreen(
-                        memoryId: memoryId,
-                        familyId: familyId,
-                        memoryData: data,
-                      ),
-                    ),
-                  );
-                },
+                onPressed: _isDeleting
+                    ? null
+                    : () async {
+                        await Navigator.push<bool>(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => EditMemoryScreen(
+                              memoryId: widget.memoryId,
+                              familyId: widget.familyId,
+                              memoryData: data,
+                            ),
+                          ),
+                        );
+                      },
                 tooltip: strings.editMemoryTooltip,
                 icon: const Icon(Icons.edit_outlined),
               ),
               IconButton(
-                onPressed: () => _deleteMemory(context),
+                onPressed: _isDeleting ? null : _deleteMemory,
                 tooltip: strings.deleteMemoryTooltip,
                 icon: const Icon(Icons.delete_outline),
               ),
             ],
           ),
-          body: ListView(
-            padding: const EdgeInsets.all(24),
+          body: Stack(
             children: [
-              Container(
-                height: 220,
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primaryContainer,
-                  borderRadius: BorderRadius.circular(24),
-                ),
-                clipBehavior: Clip.antiAlias,
-                child: _buildMemoryImage(context, data),
+              ListView(
+                padding: const EdgeInsets.all(24),
+                children: [
+                  Container(
+                    height: 220,
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.primaryContainer,
+                      borderRadius: BorderRadius.circular(24),
+                    ),
+                    clipBehavior: Clip.antiAlias,
+                    child: _buildMemoryImage(context, data),
+                  ),
+                  const SizedBox(height: 24),
+                  Text(
+                    title,
+                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  _DetailRow(
+                    icon: Icons.calendar_today_outlined,
+                    text: formattedDate,
+                  ),
+                  if (location.isNotEmpty) ...[
+                    const SizedBox(height: 12),
+                    _DetailRow(
+                      icon: Icons.location_on_outlined,
+                      text: location,
+                    ),
+                  ],
+                  if (description.isNotEmpty) ...[
+                    const SizedBox(height: 28),
+                    Text(
+                      strings.storyLabel,
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      description,
+                      style: Theme.of(
+                        context,
+                      ).textTheme.bodyLarge?.copyWith(height: 1.5),
+                    ),
+                  ],
+                ],
               ),
-              const SizedBox(height: 24),
-              Text(
-                title,
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
+              if (_isDeleting)
+                Positioned.fill(
+                  child: ColoredBox(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.scrim.withValues(alpha: 0.42),
+                    child: Center(
+                      child: Card(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 24,
+                            vertical: 20,
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const SizedBox(
+                                width: 22,
+                                height: 22,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2.5,
+                                ),
+                              ),
+                              const SizedBox(width: 14),
+                              Text(strings.deletingMemory),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
-              ),
-              const SizedBox(height: 20),
-              _DetailRow(
-                icon: Icons.calendar_today_outlined,
-                text: formattedDate,
-              ),
-              if (location.isNotEmpty) ...[
-                const SizedBox(height: 12),
-                _DetailRow(icon: Icons.location_on_outlined, text: location),
-              ],
-              if (description.isNotEmpty) ...[
-                const SizedBox(height: 28),
-                Text(
-                  strings.storyLabel,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  description,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodyLarge?.copyWith(height: 1.5),
-                ),
-              ],
             ],
           ),
         );

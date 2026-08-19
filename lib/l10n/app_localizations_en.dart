@@ -876,6 +876,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get memorySaved => 'Memory saved successfully.';
 
   @override
+  String get couldNotSaveMemoryTryAgain => 'Could not save this memory. Please try again.';
+
+  @override
   String couldNotSaveMemory(String error) {
     return 'Could not save the memory: $error';
   }
@@ -914,6 +917,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get enterMemoryTitle => 'Enter a title for the memory.';
 
   @override
+  String get couldNotSaveMemoryChangesTryAgain => 'Could not save these changes. Please try again.';
+
+  @override
   String couldNotSaveMemoryChanges(String error) {
     return 'Could not save changes: $error';
   }
@@ -934,10 +940,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get saveChanges => 'Save Changes';
 
   @override
+  String get removePhoto => 'Remove Photo';
+
+  @override
   String get deleteMemoryQuestion => 'Delete memory?';
 
   @override
   String get deleteMemoryWarning => 'This memory will be permanently removed from your family memories.';
+
+  @override
+  String get deletingMemory => 'Deleting memory...';
+
+  @override
+  String get couldNotDeleteMemory => 'Could not delete this memory. Please try again.';
 
   @override
   String get cancel => 'Cancel';
@@ -947,6 +962,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get memoryNotFound => 'Memory not found.';
+
+  @override
+  String get memoryDetailsLoadError => 'Could not load this memory. Please try again.';
 
   @override
   String get noDate => 'No date';
@@ -1180,12 +1198,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String familyMissionRewardSuccess(int tokens, String participants) {
-    return '$tokens tokens were awarded to each participant.\n\n$participants\n\nA new shared family mission has been added.';
+    return '$tokens tokens were awarded to each participant.\n\n$participants\n\nYour family\'s weekly mission progress has been updated.';
   }
 
   @override
   String personalMissionRewardSuccess(int tokens) {
-    return 'You earned $tokens tokens.\n\nA new personal mission has been added.';
+    return 'You earned $tokens tokens.\n\nYour weekly mission progress has been updated.';
   }
 
   @override
@@ -1205,12 +1223,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String personalMissionsSubtitle(int count) {
-    return '$count personal missions just for you';
+    return '$count personal missions remaining this week';
   }
 
   @override
   String sharedMissionsSubtitle(int count) {
-    return '$count shared missions — complete each once as a family';
+    return '$count shared missions remaining this week';
   }
 
   @override
@@ -1221,7 +1239,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String missionsHeaderDescription(int count) {
-    return '$count active missions, AI-verified proof, fair rewards, and new challenges as you progress.';
+    return '$count missions remain on this week\'s board. Verified completions stay complete until the board resets.';
   }
 
   @override
@@ -1245,6 +1263,30 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String missionWeekWindow(String start, String end) {
+    return 'This week • $start–$end';
+  }
+
+  @override
+  String personalWeeklyProgress(int completed, int total) {
+    return 'Personal progress • $completed/$total';
+  }
+
+  @override
+  String familyWeeklyProgress(int completed, int total) {
+    return 'Family progress • $completed/$total';
+  }
+
+  @override
+  String get personalWeekComplete => 'Your personal missions are complete!';
+
+  @override
+  String get familyWeekComplete => 'Your family completed every shared mission!';
+
+  @override
+  String get missionsResetMonday => 'A fresh mission board arrives next Monday.';
 
   @override
   String get aiProofRequired => 'AI proof required';

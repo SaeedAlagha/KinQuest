@@ -57,10 +57,15 @@ class _AddMemoryScreenState extends State<AddMemoryScreen> {
 
     setState(() {
       _selectedDate = selectedDate;
-      _dateController.text =
-          '${selectedDate.day.toString().padLeft(2, '0')}/'
-          '${selectedDate.month.toString().padLeft(2, '0')}/'
-          '${selectedDate.year}';
+      _dateController.text = MaterialLocalizations.of(
+        context,
+      ).formatMediumDate(selectedDate);
+    });
+  }
+
+  void _removePhoto() {
+    setState(() {
+      _selectedImageBytes = null;
     });
   }
 
@@ -200,9 +205,8 @@ class _AddMemoryScreenState extends State<AddMemoryScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            AppLocalizations.of(context)!.couldNotSaveMemory(error.toString()),
+            AppLocalizations.of(context)!.couldNotSaveMemoryTryAgain,
           ),
-          duration: const Duration(seconds: 8),
         ),
       );
     }
@@ -263,6 +267,17 @@ class _AddMemoryScreenState extends State<AddMemoryScreen> {
                           ),
                   ),
                 ),
+                if (_selectedImageBytes != null) ...[
+                  const SizedBox(height: 8),
+                  Align(
+                    alignment: AlignmentDirectional.centerEnd,
+                    child: TextButton.icon(
+                      onPressed: _isSaving ? null : _removePhoto,
+                      icon: const Icon(Icons.delete_outline_rounded),
+                      label: Text(strings.removePhoto),
+                    ),
+                  ),
+                ],
                 const SizedBox(height: 24),
                 TextFormField(
                   controller: _titleController,
