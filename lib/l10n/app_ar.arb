@@ -302,6 +302,7 @@
   "saveMemorySignInRequired": "يجب تسجيل الدخول لحفظ ذكرى.",
   "addMemoryFamilyRequired": "انضم إلى عائلة أو أنشئ واحدة قبل إضافة الذكريات.",
   "memorySaved": "تم حفظ الذكرى بنجاح.",
+  "couldNotSaveMemoryTryAgain": "تعذر حفظ هذه الذكرى. يرجى المحاولة مرة أخرى.",
   "couldNotSaveMemory": "تعذر حفظ الذكرى: {error}",
   "@couldNotSaveMemory": {
     "placeholders": {
@@ -319,6 +320,7 @@
   "saveMemory": "حفظ الذكرى",
   "editMemory": "تعديل الذكرى",
   "enterMemoryTitle": "أدخل عنوانًا للذكرى.",
+  "couldNotSaveMemoryChangesTryAgain": "تعذر حفظ هذه التغييرات. يرجى المحاولة مرة أخرى.",
   "couldNotSaveMemoryChanges": "تعذر حفظ التغييرات: {error}",
   "@couldNotSaveMemoryChanges": {
     "placeholders": {
@@ -330,11 +332,15 @@
   "locationLabel": "الموقع",
   "chooseDate": "اختر التاريخ",
   "saveChanges": "حفظ التغييرات",
+  "removePhoto": "إزالة الصورة",
   "deleteMemoryQuestion": "حذف الذكرى؟",
   "deleteMemoryWarning": "ستتم إزالة هذه الذكرى نهائيًا من ذكريات عائلتك.",
+  "deletingMemory": "جارٍ حذف الذكرى...",
+  "couldNotDeleteMemory": "تعذر حذف هذه الذكرى. يرجى المحاولة مرة أخرى.",
   "cancel": "إلغاء",
   "delete": "حذف",
   "memoryNotFound": "لم يتم العثور على الذكرى.",
+  "memoryDetailsLoadError": "تعذر تحميل هذه الذكرى. يرجى المحاولة مرة أخرى.",
   "noDate": "لا يوجد تاريخ",
   "editMemoryTooltip": "تعديل الذكرى",
   "deleteMemoryTooltip": "حذف الذكرى",
@@ -429,14 +435,14 @@
   "missionRewardSaveError": "تم التحقق من الإثبات، لكن تعذر حفظ المكافأة. يرجى المحاولة مجددًا.",
   "familyMissionMinimumParticipants": "تحتاج المهمة العائلية إلى مشاركين اثنين على الأقل.",
   "missionVerified": "تم التحقق من المهمة!",
-  "familyMissionRewardSuccess": "تم منح {tokens} من الرموز لكل مشارك.\n\n{participants}\n\nتمت إضافة مهمة عائلية مشتركة جديدة.",
+  "familyMissionRewardSuccess": "تم منح {tokens} من الرموز لكل مشارك.\n\n{participants}\n\nتم تحديث تقدم مهام عائلتك لهذا الأسبوع.",
   "@familyMissionRewardSuccess": {
     "placeholders": {
       "tokens": {"type": "int"},
       "participants": {"type": "String"}
     }
   },
-  "personalMissionRewardSuccess": "ربحت {tokens} من الرموز.\n\nتمت إضافة مهمة شخصية جديدة.",
+  "personalMissionRewardSuccess": "ربحت {tokens} من الرموز.\n\nتم تحديث تقدم مهامك لهذا الأسبوع.",
   "@personalMissionRewardSuccess": {
     "placeholders": {
       "tokens": {"type": "int"}
@@ -447,13 +453,13 @@
   "difficultyMedium": "متوسطة",
   "difficultyChallenge": "تحدٍّ",
   "yourMissions": "مهامك",
-  "personalMissionsSubtitle": "{count} مهام شخصية لك",
+  "personalMissionsSubtitle": "تبقى لك {count} من المهام الشخصية هذا الأسبوع",
   "@personalMissionsSubtitle": {
     "placeholders": {
       "count": {"type": "int"}
     }
   },
-  "sharedMissionsSubtitle": "{count} مهام مشتركة — أكملوا كل مهمة مرة واحدة كعائلة",
+  "sharedMissionsSubtitle": "تبقت {count} من المهام المشتركة هذا الأسبوع",
   "@sharedMissionsSubtitle": {
     "placeholders": {
       "count": {"type": "int"}
@@ -461,7 +467,7 @@
   },
   "recentlyCompleted": "أُنجزت مؤخرًا",
   "doMoreTogether": "أنجزوا المزيد معًا",
-  "missionsHeaderDescription": "{count} مهام نشطة بإثبات يتحقق منه الذكاء الاصطناعي ومكافآت عادلة وتحديات جديدة مع تقدمكم.",
+  "missionsHeaderDescription": "تبقت {count} من المهام في لوحة هذا الأسبوع. تبقى المهام الموثقة مكتملة حتى تتجدد اللوحة.",
   "@missionsHeaderDescription": {
     "placeholders": {
       "count": {"type": "int"}
@@ -479,6 +485,15 @@
       "count": {"type": "int"}
     }
   },
+  "missionWeekWindow": "هذا الأسبوع • {start}–{end}",
+  "@missionWeekWindow": {"placeholders": {"start": {"type": "String"}, "end": {"type": "String"}}},
+  "personalWeeklyProgress": "التقدم الشخصي • {completed}/{total}",
+  "@personalWeeklyProgress": {"placeholders": {"completed": {"type": "int"}, "total": {"type": "int"}}},
+  "familyWeeklyProgress": "تقدم العائلة • {completed}/{total}",
+  "@familyWeeklyProgress": {"placeholders": {"completed": {"type": "int"}, "total": {"type": "int"}}},
+  "personalWeekComplete": "أكملت جميع مهامك الشخصية!",
+  "familyWeekComplete": "أكملت عائلتك جميع المهام المشتركة!",
+  "missionsResetMonday": "تصل لوحة مهام جديدة يوم الاثنين المقبل.",
   "aiProofRequired": "إثبات بالذكاء الاصطناعي مطلوب",
   "personalLabel": "شخصية",
   "missionCategoryOutdoor": "في الخارج",

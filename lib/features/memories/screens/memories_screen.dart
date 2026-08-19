@@ -48,6 +48,10 @@ class MemoriesScreen extends StatelessWidget {
               return const Center(child: CircularProgressIndicator());
             }
 
+            if (userSnapshot.hasError) {
+              return Center(child: Text(strings.memoriesLoadError));
+            }
+
             final userData = userSnapshot.data?.data();
             final familyId = userData?['familyId'] as String?;
 
@@ -139,9 +143,9 @@ class MemoriesScreen extends StatelessWidget {
 
                     final formattedDate = date == null
                         ? ''
-                        : '${date.day.toString().padLeft(2, '0')}/'
-                              '${date.month.toString().padLeft(2, '0')}/'
-                              '${date.year}';
+                        : MaterialLocalizations.of(
+                            context,
+                          ).formatMediumDate(date);
 
                     return Card(
                       child: ListTile(

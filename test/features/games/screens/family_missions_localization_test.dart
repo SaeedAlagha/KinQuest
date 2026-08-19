@@ -34,6 +34,9 @@ void main() {
     final heading = find.text('أنجزوا المزيد معًا');
     expect(heading, findsOneWidget);
     expect(Directionality.of(tester.element(heading)), TextDirection.rtl);
+    expect(find.text('التقدم الشخصي • 0/6'), findsOneWidget);
+    expect(find.text('تقدم العائلة • 0/4'), findsOneWidget);
+    expect(find.textContaining('هذا الأسبوع •'), findsOneWidget);
 
     await tester.scrollUntilVisible(
       find.text('أظهر تقديرك'),

@@ -29,14 +29,21 @@ class _FamilyMissionsScreenState extends State<FamilyMissionsScreen> {
   final _picker = ImagePicker();
   final _aiService = const FamilyMissionAiService();
   final _random = Random();
-  String get _weekKey {
+
+  DateTime get _weekStart {
     final now = DateTime.now();
 
-    final monday = DateTime(
+    return DateTime(
       now.year,
       now.month,
       now.day,
     ).subtract(Duration(days: now.weekday - DateTime.monday));
+  }
+
+  DateTime get _nextWeekStart => _weekStart.add(const Duration(days: 7));
+
+  String get _weekKey {
+    final monday = _weekStart;
 
     return '${monday.year}-'
         '${monday.month.toString().padLeft(2, '0')}-'
@@ -195,7 +202,8 @@ class _FamilyMissionsScreenState extends State<FamilyMissionsScreen> {
           .data()?['weekKey']
           ?.toString();
 
-      final personalAssignments = personalBoardWeekKey == _weekKey
+      final personalBoardIsCurrent = personalBoardWeekKey == _weekKey;
+      final personalAssignments = personalBoardIsCurrent
           ? _parseAssignments(
               personalBoardDoc.data()?['assignments'],
               MissionScope.personal,
@@ -204,36 +212,51 @@ class _FamilyMissionsScreenState extends State<FamilyMissionsScreen> {
 
       final familyBoardWeekKey = familyBoardDoc.data()?['weekKey']?.toString();
 
-      final familyAssignments = familyBoardWeekKey == _weekKey
+      final familyBoardIsCurrent = familyBoardWeekKey == _weekKey;
+      final familyAssignments = familyBoardIsCurrent
           ? _parseAssignments(
               familyBoardDoc.data()?['assignments'],
               MissionScope.family,
             )
           : <_MissionAssignment>[];
-      _fillAssignments(
-        assignments: personalAssignments,
-        scope: MissionScope.personal,
-        desiredCount: _personalMissionCount,
-        completionData: personalCompletionData,
-      );
+      if (!personalBoardIsCurrent) {
+        _fillAssignments(
+          assignments: personalAssignments,
+          scope: MissionScope.personal,
+          desiredCount: _personalMissionCount,
+          completionData: personalCompletionData,
+        );
+      }
 
-      _fillAssignments(
-        assignments: familyAssignments,
-        scope: MissionScope.family,
-        desiredCount: _familyMissionCount,
-        completionData: familyCompletionData,
-      );
+      if (!familyBoardIsCurrent) {
+        _fillAssignments(
+          assignments: familyAssignments,
+          scope: MissionScope.family,
+          desiredCount: _familyMissionCount,
+          completionData: familyCompletionData,
+        );
+      }
 
-      await personalBoardRef.set({
-        'boardType': 'personal',
-        'userId': user.uid,
-        'familyId': familyId,
-        'weekKey': _weekKey,
-        'assignments': personalAssignments
-            .map((item) => item.toFirestore())
-            .toList(),
-        'updatedAt': FieldValue.serverTimestamp(),
-      }, SetOptions(merge: true));
+      // Refresh a personal board only when its week changes. Reading and
+      // writing in one transaction prevents another device from restoring a
+      // mission that was completed while this screen was loading.
+      await firestore.runTransaction((transaction) async {
+        final freshPersonalBoard = await transaction.get(personalBoardRef);
+        final storedWeekKey = freshPersonalBoard.data()?['weekKey']?.toString();
+
+        if (!freshPersonalBoard.exists || storedWeekKey != _weekKey) {
+          transaction.set(personalBoardRef, {
+            'boardType': 'personal',
+            'userId': user.uid,
+            'familyId': familyId,
+            'weekKey': _weekKey,
+            'assignments': personalAssignments
+                .map((item) => item.toFirestore())
+                .toList(),
+            'updatedAt': FieldValue.serverTimestamp(),
+          });
+        }
+      });
       // Only create the shared board if one does not
       // already exist. This keeps every family member
       // looking at the same assignments.
@@ -259,30 +282,17 @@ class _FamilyMissionsScreenState extends State<FamilyMissionsScreen> {
       });
 
       final freshSharedBoard = await familyBoardRef.get();
+      final freshPersonalBoard = await personalBoardRef.get();
+
+      final currentPersonalAssignments = _parseAssignments(
+        freshPersonalBoard.data()?['assignments'],
+        MissionScope.personal,
+      );
 
       final sharedFamilyAssignments = _parseAssignments(
         freshSharedBoard.data()?['assignments'],
         MissionScope.family,
       );
-
-      if (sharedFamilyAssignments.length < _familyMissionCount) {
-        _fillAssignments(
-          assignments: sharedFamilyAssignments,
-          scope: MissionScope.family,
-          desiredCount: _familyMissionCount,
-          completionData: familyCompletionData,
-        );
-
-        await familyBoardRef.set({
-          'boardType': 'family',
-          'familyId': familyId,
-          'weekKey': _weekKey,
-          'assignments': sharedFamilyAssignments
-              .map((item) => item.toFirestore())
-              .toList(),
-          'updatedAt': FieldValue.serverTimestamp(),
-        }, SetOptions(merge: true));
-      }
 
       final history =
           completionSnapshot.docs
@@ -303,7 +313,7 @@ class _FamilyMissionsScreenState extends State<FamilyMissionsScreen> {
 
         _personalAssignments
           ..clear()
-          ..addAll(personalAssignments);
+          ..addAll(currentPersonalAssignments);
 
         _familyAssignments
           ..clear()
@@ -1082,39 +1092,30 @@ class _FamilyMissionsScreenState extends State<FamilyMissionsScreen> {
 
     final userRef = firestore.collection('users').doc(userId);
 
-    final completionSnapshot = await familyRef
-        .collection('missionCompletions')
-        .get();
-
-    final completionData = completionSnapshot.docs
-        .map((document) => document.data())
-        .where(
-          (data) => data['scope'] == 'personal' && data['userId'] == userId,
-        )
-        .toList();
-
-    final remaining = List<_MissionAssignment>.from(_personalAssignments)
-      ..removeWhere((item) => item.assignmentId == assignment.assignmentId);
-
-    final replacement = _pickMission(
-      scope: MissionScope.personal,
-      currentAssignments: remaining,
-      completionData: [
-        ...completionData,
-        {'missionId': assignment.mission.id, 'completedAt': Timestamp.now()},
-      ],
-    );
-
-    if (replacement != null) {
-      remaining.add(_newAssignment(replacement));
-    }
-
     final rewarded = await firestore.runTransaction<bool>((transaction) async {
       final existing = await transaction.get(completionRef);
+      final currentBoard = await transaction.get(boardRef);
 
       if (existing.exists) {
         return false;
       }
+
+      final remaining = _parseAssignments(
+        currentBoard.data()?['assignments'],
+        MissionScope.personal,
+      );
+
+      final assignmentStillActive = remaining.any(
+        (item) => item.assignmentId == assignment.assignmentId,
+      );
+
+      if (!assignmentStillActive) {
+        return false;
+      }
+
+      remaining.removeWhere(
+        (item) => item.assignmentId == assignment.assignmentId,
+      );
 
       transaction.set(completionRef, {
         'scope': 'personal',
@@ -1123,6 +1124,7 @@ class _FamilyMissionsScreenState extends State<FamilyMissionsScreen> {
         'assignmentId': assignment.assignmentId,
         'userId': userId,
         'familyId': familyId,
+        'weekKey': _weekKey,
         'tokenReward': assignment.mission.tokenReward,
         'tokenRewardPerParticipant': assignment.mission.tokenReward,
         'participantIds': [userId],
@@ -1136,6 +1138,12 @@ class _FamilyMissionsScreenState extends State<FamilyMissionsScreen> {
         'submittedBy': userId,
         'rewarded': true,
       });
+
+      transaction.set(userRef, {
+        'missionsCompleted': FieldValue.increment(1),
+        'tokens': FieldValue.increment(assignment.mission.tokenReward),
+        'updatedAt': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
 
       final tokenTransactionRef = userRef.collection('tokenTransactions').doc();
 
@@ -1155,6 +1163,7 @@ class _FamilyMissionsScreenState extends State<FamilyMissionsScreen> {
         'boardType': 'personal',
         'userId': userId,
         'familyId': familyId,
+        'weekKey': _weekKey,
         'assignments': remaining.map((item) => item.toFirestore()).toList(),
         'updatedAt': FieldValue.serverTimestamp(),
       }, SetOptions(merge: true));
@@ -1193,31 +1202,6 @@ class _FamilyMissionsScreenState extends State<FamilyMissionsScreen> {
         .collection('missionCompletions')
         .doc('family_${assignment.assignmentId}');
 
-    final completionSnapshot = await familyRef
-        .collection('missionCompletions')
-        .get();
-
-    final familyCompletionData = completionSnapshot.docs
-        .map((document) => document.data())
-        .where((data) => data['scope'] == 'family')
-        .toList();
-
-    final remaining = List<_MissionAssignment>.from(_familyAssignments)
-      ..removeWhere((item) => item.assignmentId == assignment.assignmentId);
-
-    final replacement = _pickMission(
-      scope: MissionScope.family,
-      currentAssignments: remaining,
-      completionData: [
-        ...familyCompletionData,
-        {'missionId': assignment.mission.id, 'completedAt': Timestamp.now()},
-      ],
-    );
-
-    if (replacement != null) {
-      remaining.add(_newAssignment(replacement));
-    }
-
     final participantIds = participants
         .map((member) => member.id)
         .toSet()
@@ -1247,12 +1231,17 @@ class _FamilyMissionsScreenState extends State<FamilyMissionsScreen> {
         return false;
       }
 
+      currentAssignments.removeWhere(
+        (item) => item.assignmentId == assignment.assignmentId,
+      );
+
       transaction.set(completionRef, {
         'scope': 'family',
         'missionId': assignment.mission.id,
         'missionTitle': assignment.mission.title,
         'assignmentId': assignment.assignmentId,
         'familyId': familyId,
+        'weekKey': _weekKey,
         'submittedBy': submitterId,
         'participantIds': participantIds,
         'participantNames': participantNames,
@@ -1298,7 +1287,10 @@ class _FamilyMissionsScreenState extends State<FamilyMissionsScreen> {
       transaction.set(boardRef, {
         'boardType': 'family',
         'familyId': familyId,
-        'assignments': remaining.map((item) => item.toFirestore()).toList(),
+        'weekKey': _weekKey,
+        'assignments': currentAssignments
+            .map((item) => item.toFirestore())
+            .toList(),
         'updatedAt': FieldValue.serverTimestamp(),
       }, SetOptions(merge: true));
 
@@ -1474,7 +1466,14 @@ class _FamilyMissionsScreenState extends State<FamilyMissionsScreen> {
             count: _personalAssignments.length,
           ),
           const SizedBox(height: 14),
-          ..._personalAssignments.map(_buildMissionCard),
+          if (_personalAssignments.isEmpty)
+            _MissionCompletionCard(
+              icon: Icons.person_rounded,
+              title: strings.personalWeekComplete,
+              message: strings.missionsResetMonday,
+            )
+          else
+            ..._personalAssignments.map(_buildMissionCard),
 
           const SizedBox(height: 28),
 
@@ -1485,7 +1484,14 @@ class _FamilyMissionsScreenState extends State<FamilyMissionsScreen> {
             count: _familyAssignments.length,
           ),
           const SizedBox(height: 14),
-          ..._familyAssignments.map(_buildMissionCard),
+          if (_familyAssignments.isEmpty)
+            _MissionCompletionCard(
+              icon: Icons.groups_rounded,
+              title: strings.familyWeekComplete,
+              message: strings.missionsResetMonday,
+            )
+          else
+            ..._familyAssignments.map(_buildMissionCard),
 
           if (_history.isNotEmpty) ...[
             const SizedBox(height: 30),
@@ -1508,13 +1514,35 @@ class _FamilyMissionsScreenState extends State<FamilyMissionsScreen> {
   Widget _buildHeader() {
     final strings = AppLocalizations.of(context)!;
     final currentUserId = _currentUserId;
+    final weeklyHistory = _history
+        .where(
+          (item) =>
+              !item.completedAt.isBefore(_weekStart) &&
+              item.completedAt.isBefore(_nextWeekStart),
+        )
+        .toList();
 
-    final userEarned = _history.fold<int>(
+    final personalCompleted = weeklyHistory
+        .where(
+          (item) =>
+              item.scope == MissionScope.personal && item.userEarnedReward,
+        )
+        .length
+        .clamp(0, _personalMissionCount)
+        .toInt();
+
+    final familyCompleted = weeklyHistory
+        .where((item) => item.scope == MissionScope.family)
+        .length
+        .clamp(0, _familyMissionCount)
+        .toInt();
+
+    final userEarned = weeklyHistory.fold<int>(
       0,
       (total, item) => total + (item.userEarnedReward ? item.reward : 0),
     );
 
-    final userCompleted = _history.where((item) {
+    final userCompleted = weeklyHistory.where((item) {
       if (item.scope == MissionScope.personal) {
         return item.userEarnedReward;
       }
@@ -1552,6 +1580,34 @@ class _FamilyMissionsScreenState extends State<FamilyMissionsScreen> {
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
               color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            strings.missionWeekWindow(
+              _formatDate(_weekStart),
+              _formatDate(_nextWeekStart.subtract(const Duration(days: 1))),
+            ),
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.labelLarge?.copyWith(
+              color: AppTheme.primaryColor,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          const SizedBox(height: 18),
+          _MissionProgressRow(
+            label: strings.personalWeeklyProgress(
+              personalCompleted,
+              _personalMissionCount,
+            ),
+            value: personalCompleted / _personalMissionCount,
+          ),
+          const SizedBox(height: 12),
+          _MissionProgressRow(
+            label: strings.familyWeeklyProgress(
+              familyCompleted,
+              _familyMissionCount,
+            ),
+            value: familyCompleted / _familyMissionCount,
           ),
           const SizedBox(height: 18),
           Wrap(
@@ -1962,6 +2018,69 @@ class _SectionHeader extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _MissionProgressRow extends StatelessWidget {
+  const _MissionProgressRow({required this.label, required this.value});
+
+  final String label;
+  final double value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(label, style: const TextStyle(fontWeight: FontWeight.w800)),
+        const SizedBox(height: 7),
+        LinearProgressIndicator(value: value.clamp(0.0, 1.0)),
+      ],
+    );
+  }
+}
+
+class _MissionCompletionCard extends StatelessWidget {
+  const _MissionCompletionCard({
+    required this.icon,
+    required this.title,
+    required this.message,
+  });
+
+  final IconData icon;
+  final String title;
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      color: Theme.of(context).colorScheme.primaryContainer,
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Row(
+          children: [
+            CircleAvatar(child: Icon(icon)),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(message),
+                ],
+              ),
+            ),
+            const Icon(Icons.celebration_rounded),
+          ],
+        ),
+      ),
     );
   }
 }

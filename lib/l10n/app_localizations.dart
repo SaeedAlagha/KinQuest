@@ -1787,6 +1787,12 @@ abstract class AppLocalizations {
   /// **'Memory saved successfully.'**
   String get memorySaved;
 
+  /// No description provided for @couldNotSaveMemoryTryAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save this memory. Please try again.'**
+  String get couldNotSaveMemoryTryAgain;
+
   /// No description provided for @couldNotSaveMemory.
   ///
   /// In en, this message translates to:
@@ -1859,6 +1865,12 @@ abstract class AppLocalizations {
   /// **'Enter a title for the memory.'**
   String get enterMemoryTitle;
 
+  /// No description provided for @couldNotSaveMemoryChangesTryAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save these changes. Please try again.'**
+  String get couldNotSaveMemoryChangesTryAgain;
+
   /// No description provided for @couldNotSaveMemoryChanges.
   ///
   /// In en, this message translates to:
@@ -1895,6 +1907,12 @@ abstract class AppLocalizations {
   /// **'Save Changes'**
   String get saveChanges;
 
+  /// No description provided for @removePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove Photo'**
+  String get removePhoto;
+
   /// No description provided for @deleteMemoryQuestion.
   ///
   /// In en, this message translates to:
@@ -1906,6 +1924,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This memory will be permanently removed from your family memories.'**
   String get deleteMemoryWarning;
+
+  /// No description provided for @deletingMemory.
+  ///
+  /// In en, this message translates to:
+  /// **'Deleting memory...'**
+  String get deletingMemory;
+
+  /// No description provided for @couldNotDeleteMemory.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not delete this memory. Please try again.'**
+  String get couldNotDeleteMemory;
 
   /// No description provided for @cancel.
   ///
@@ -1924,6 +1954,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Memory not found.'**
   String get memoryNotFound;
+
+  /// No description provided for @memoryDetailsLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load this memory. Please try again.'**
+  String get memoryDetailsLoadError;
 
   /// No description provided for @noDate.
   ///
@@ -2342,13 +2378,13 @@ abstract class AppLocalizations {
   /// No description provided for @familyMissionRewardSuccess.
   ///
   /// In en, this message translates to:
-  /// **'{tokens} tokens were awarded to each participant.\n\n{participants}\n\nA new shared family mission has been added.'**
+  /// **'{tokens} tokens were awarded to each participant.\n\n{participants}\n\nYour family\'s weekly mission progress has been updated.'**
   String familyMissionRewardSuccess(int tokens, String participants);
 
   /// No description provided for @personalMissionRewardSuccess.
   ///
   /// In en, this message translates to:
-  /// **'You earned {tokens} tokens.\n\nA new personal mission has been added.'**
+  /// **'You earned {tokens} tokens.\n\nYour weekly mission progress has been updated.'**
   String personalMissionRewardSuccess(int tokens);
 
   /// No description provided for @nice.
@@ -2384,13 +2420,13 @@ abstract class AppLocalizations {
   /// No description provided for @personalMissionsSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'{count} personal missions just for you'**
+  /// **'{count} personal missions remaining this week'**
   String personalMissionsSubtitle(int count);
 
   /// No description provided for @sharedMissionsSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'{count} shared missions — complete each once as a family'**
+  /// **'{count} shared missions remaining this week'**
   String sharedMissionsSubtitle(int count);
 
   /// No description provided for @recentlyCompleted.
@@ -2408,7 +2444,7 @@ abstract class AppLocalizations {
   /// No description provided for @missionsHeaderDescription.
   ///
   /// In en, this message translates to:
-  /// **'{count} active missions, AI-verified proof, fair rewards, and new challenges as you progress.'**
+  /// **'{count} missions remain on this week\'s board. Verified completions stay complete until the board resets.'**
   String missionsHeaderDescription(int count);
 
   /// No description provided for @missionsCompletedCount.
@@ -2422,6 +2458,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count, plural, =1{1 mission token earned} other{{count} mission tokens earned}}'**
   String missionTokensEarnedCount(int count);
+
+  /// No description provided for @missionWeekWindow.
+  ///
+  /// In en, this message translates to:
+  /// **'This week • {start}–{end}'**
+  String missionWeekWindow(String start, String end);
+
+  /// No description provided for @personalWeeklyProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal progress • {completed}/{total}'**
+  String personalWeeklyProgress(int completed, int total);
+
+  /// No description provided for @familyWeeklyProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Family progress • {completed}/{total}'**
+  String familyWeeklyProgress(int completed, int total);
+
+  /// No description provided for @personalWeekComplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Your personal missions are complete!'**
+  String get personalWeekComplete;
+
+  /// No description provided for @familyWeekComplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Your family completed every shared mission!'**
+  String get familyWeekComplete;
+
+  /// No description provided for @missionsResetMonday.
+  ///
+  /// In en, this message translates to:
+  /// **'A fresh mission board arrives next Monday.'**
+  String get missionsResetMonday;
 
   /// No description provided for @aiProofRequired.
   ///
