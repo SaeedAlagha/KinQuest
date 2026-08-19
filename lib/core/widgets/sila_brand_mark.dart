@@ -17,7 +17,7 @@ class SilaBrandMark extends StatelessWidget {
         width: size,
         height: size,
         decoration: BoxDecoration(
-          gradient: AppTheme.brandGradient,
+          gradient: AppTheme.heroGradientFor(context),
           borderRadius: BorderRadius.circular(size * 0.3),
           boxShadow: showShadow
               ? [

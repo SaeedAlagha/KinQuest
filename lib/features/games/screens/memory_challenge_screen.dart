@@ -245,7 +245,7 @@ class _MemoryChallengeScreenState extends State<MemoryChallengeScreen> {
                       width: 84,
                       height: 84,
                       decoration: BoxDecoration(
-                        gradient: AppTheme.brandGradient,
+                        gradient: AppTheme.heroGradientFor(context),
                         borderRadius: BorderRadius.circular(26),
                       ),
                       child: const Icon(

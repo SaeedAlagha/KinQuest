@@ -2,21 +2,39 @@ import 'package:flutter/material.dart';
 
 import 'appearance_controller.dart';
 
+enum SilaVisualStyle {
+  classic,
+  familyYear,
+  space,
+  khalifaUniversity,
+  desertNights,
+  pearlLagoon,
+}
+
 @immutable
 class SilaThemeTokens extends ThemeExtension<SilaThemeTokens> {
   const SilaThemeTokens({
     required this.pageGradient,
-    required this.isFamilyYear,
+    required this.heroGradient,
+    required this.visualStyle,
   });
 
   final LinearGradient pageGradient;
-  final bool isFamilyYear;
+  final LinearGradient heroGradient;
+  final SilaVisualStyle visualStyle;
+
+  bool get isFamilyYear => visualStyle == SilaVisualStyle.familyYear;
 
   @override
-  SilaThemeTokens copyWith({LinearGradient? pageGradient, bool? isFamilyYear}) {
+  SilaThemeTokens copyWith({
+    LinearGradient? pageGradient,
+    LinearGradient? heroGradient,
+    SilaVisualStyle? visualStyle,
+  }) {
     return SilaThemeTokens(
       pageGradient: pageGradient ?? this.pageGradient,
-      isFamilyYear: isFamilyYear ?? this.isFamilyYear,
+      heroGradient: heroGradient ?? this.heroGradient,
+      visualStyle: visualStyle ?? this.visualStyle,
     );
   }
 
@@ -28,7 +46,8 @@ class SilaThemeTokens extends ThemeExtension<SilaThemeTokens> {
 
     return SilaThemeTokens(
       pageGradient: LinearGradient.lerp(pageGradient, other.pageGradient, t)!,
-      isFamilyYear: t < 0.5 ? isFamilyYear : other.isFamilyYear,
+      heroGradient: LinearGradient.lerp(heroGradient, other.heroGradient, t)!,
+      visualStyle: t < 0.5 ? visualStyle : other.visualStyle,
     );
   }
 }
@@ -77,8 +96,36 @@ class AppTheme {
   static const LinearGradient _familyYearPageGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [Color(0xFFFFFCF4), Color(0xFFF4F8EE), Color(0xFFFFF0EC)],
+    colors: [Color(0xFFFFF4DC), Color(0xFFF2E2C0), Color(0xFFF8D9D3)],
+    stops: [0, 0.58, 1],
+  );
+
+  static const LinearGradient _spacePageGradient = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [Color(0xFF040615), Color(0xFF10133B), Color(0xFF191044)],
+    stops: [0, 0.58, 1],
+  );
+
+  static const LinearGradient _kuPageGradient = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [Color(0xFFF5FAFF), Color(0xFFE6F3FC), Color(0xFFF0F7FB)],
+    stops: [0, 0.55, 1],
+  );
+
+  static const LinearGradient _desertNightsPageGradient = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [Color(0xFF120D24), Color(0xFF2B1633), Color(0xFF40202F)],
     stops: [0, 0.56, 1],
+  );
+
+  static const LinearGradient _pearlLagoonPageGradient = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [Color(0xFFF9F6EF), Color(0xFFE3F4F1), Color(0xFFE9F4FA)],
+    stops: [0, 0.52, 1],
   );
 
   static LinearGradient pageGradientFor(BuildContext context) {
@@ -86,11 +133,20 @@ class AppTheme {
         pageGradient;
   }
 
+  static LinearGradient heroGradientFor(BuildContext context) {
+    return Theme.of(context).extension<SilaThemeTokens>()?.heroGradient ??
+        brandGradient;
+  }
+
   static ThemeData forAppearance(AppAppearance appearance) {
     return switch (appearance) {
       AppAppearance.light => lightTheme,
       AppAppearance.dark => darkTheme,
       AppAppearance.familyYear2026 => familyYearTheme,
+      AppAppearance.space => spaceTheme,
+      AppAppearance.khalifaUniversity => khalifaUniversityTheme,
+      AppAppearance.desertNights => desertNightsTheme,
+      AppAppearance.pearlLagoon => pearlLagoonTheme,
     };
   }
 
@@ -106,6 +162,7 @@ class AppTheme {
     outline: outlineColor,
     appBar: const Color(0xFFF8FAF6),
     pageGradient: pageGradient,
+    heroGradient: brandGradient,
   );
 
   static ThemeData get darkTheme => _buildTheme(
@@ -120,27 +177,151 @@ class AppTheme {
     outline: const Color(0xFF344C41),
     appBar: const Color(0xFF0A1712),
     pageGradient: _darkPageGradient,
+    heroGradient: const LinearGradient(
+      colors: [Color(0xFF12382C), Color(0xFF006B49), Color(0xFF51232D)],
+    ),
   );
 
   static ThemeData get familyYearTheme => _buildTheme(
     brightness: Brightness.light,
-    primary: uaeGreen,
-    secondary: coralColor,
-    background: const Color(0xFFFBF7ED),
-    surface: const Color(0xFFFFFEFA),
-    surfaceMuted: const Color(0xFFF4EBD8),
-    text: uaeBlack,
-    secondaryText: const Color(0xFF625F57),
-    outline: const Color(0xFFE4D8C0),
-    appBar: const Color(0xFFFFFCF4),
+    primary: const Color(0xFF7A2432),
+    secondary: uaeGreen,
+    tertiary: const Color(0xFFC3943E),
+    background: const Color(0xFFF4E3C4),
+    surface: const Color(0xFFFFF9EA),
+    surfaceMuted: const Color(0xFFEAD4A9),
+    text: const Color(0xFF2E211C),
+    secondaryText: const Color(0xFF705D50),
+    outline: const Color(0xFFD5BA86),
+    appBar: const Color(0xFFFFF3D8),
     pageGradient: _familyYearPageGradient,
-    isFamilyYear: true,
+    heroGradient: const LinearGradient(
+      begin: AlignmentDirectional.topStart,
+      end: AlignmentDirectional.bottomEnd,
+      colors: [Color(0xFF6E1F2C), Color(0xFF9A3542), Color(0xFF006B49)],
+    ),
+    visualStyle: SilaVisualStyle.familyYear,
+    primaryContainer: const Color(0xFFF4D4D1),
+    onPrimaryContainer: const Color(0xFF4F111D),
+    secondaryContainer: const Color(0xFFD7ECDF),
+    onSecondaryContainer: const Color(0xFF003D2A),
+    cardRadius: 28,
+    buttonRadius: 22,
+  );
+
+  static ThemeData get spaceTheme => _buildTheme(
+    brightness: Brightness.dark,
+    primary: const Color(0xFF69D8FF),
+    secondary: const Color(0xFFAE8BFF),
+    tertiary: const Color(0xFFFFC857),
+    background: const Color(0xFF050716),
+    surface: const Color(0xFF11172D),
+    surfaceMuted: const Color(0xFF1B2340),
+    text: const Color(0xFFF3F5FF),
+    secondaryText: const Color(0xFFB9C1DE),
+    outline: const Color(0xFF34416C),
+    appBar: const Color(0xFF070A1D),
+    pageGradient: _spacePageGradient,
+    heroGradient: const LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: [Color(0xFF142B60), Color(0xFF44308C), Color(0xFF8B3FA8)],
+    ),
+    visualStyle: SilaVisualStyle.space,
+    primaryContainer: const Color(0xFF173C58),
+    onPrimaryContainer: const Color(0xFFCCF2FF),
+    secondaryContainer: const Color(0xFF392C65),
+    onSecondaryContainer: const Color(0xFFEADDFF),
+    cardRadius: 22,
+    buttonRadius: 20,
+  );
+
+  static ThemeData get khalifaUniversityTheme => _buildTheme(
+    brightness: Brightness.light,
+    primary: const Color(0xFF0057B8),
+    secondary: const Color(0xFF00A9CE),
+    tertiary: const Color(0xFF6F5091),
+    background: const Color(0xFFEFF6FC),
+    surface: Colors.white,
+    surfaceMuted: const Color(0xFFDCECF7),
+    text: const Color(0xFF10263B),
+    secondaryText: const Color(0xFF526B7E),
+    outline: const Color(0xFFC4D9E9),
+    appBar: const Color(0xFFF5FAFF),
+    pageGradient: _kuPageGradient,
+    heroGradient: const LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: [Color(0xFF003C80), Color(0xFF0057B8), Color(0xFF00A9CE)],
+    ),
+    visualStyle: SilaVisualStyle.khalifaUniversity,
+    primaryContainer: const Color(0xFFD7E9FA),
+    onPrimaryContainer: const Color(0xFF002F64),
+    secondaryContainer: const Color(0xFFD3F3FA),
+    onSecondaryContainer: const Color(0xFF004E60),
+    cardRadius: 18,
+    buttonRadius: 12,
+  );
+
+  static ThemeData get desertNightsTheme => _buildTheme(
+    brightness: Brightness.dark,
+    primary: const Color(0xFFE8BD68),
+    secondary: const Color(0xFFE17B69),
+    tertiary: const Color(0xFFA98BE0),
+    background: const Color(0xFF120D24),
+    surface: const Color(0xFF25182E),
+    surfaceMuted: const Color(0xFF38233C),
+    text: const Color(0xFFFFF5E5),
+    secondaryText: const Color(0xFFD8C5C5),
+    outline: const Color(0xFF5A3B55),
+    appBar: const Color(0xFF160F27),
+    pageGradient: _desertNightsPageGradient,
+    heroGradient: const LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: [Color(0xFF4A2144), Color(0xFF793C4A), Color(0xFFB36B50)],
+    ),
+    visualStyle: SilaVisualStyle.desertNights,
+    primaryContainer: const Color(0xFF554421),
+    onPrimaryContainer: const Color(0xFFFFE6AA),
+    secondaryContainer: const Color(0xFF65332F),
+    onSecondaryContainer: const Color(0xFFFFDAD3),
+    cardRadius: 30,
+    buttonRadius: 26,
+  );
+
+  static ThemeData get pearlLagoonTheme => _buildTheme(
+    brightness: Brightness.light,
+    primary: const Color(0xFF087F8C),
+    secondary: const Color(0xFFE66E79),
+    tertiary: const Color(0xFF8A72B5),
+    background: const Color(0xFFEDF8F6),
+    surface: const Color(0xFFFFFCF8),
+    surfaceMuted: const Color(0xFFDDF1ED),
+    text: const Color(0xFF173A3C),
+    secondaryText: const Color(0xFF587374),
+    outline: const Color(0xFFBFDCD8),
+    appBar: const Color(0xFFF7FBF9),
+    pageGradient: _pearlLagoonPageGradient,
+    heroGradient: const LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: [Color(0xFF087F8C), Color(0xFF45B9B0), Color(0xFFE68B91)],
+    ),
+    visualStyle: SilaVisualStyle.pearlLagoon,
+    primaryContainer: const Color(0xFFD1EFEC),
+    onPrimaryContainer: const Color(0xFF004D54),
+    secondaryContainer: const Color(0xFFFFDFE1),
+    onSecondaryContainer: const Color(0xFF6C2029),
+    cardRadius: 32,
+    buttonRadius: 24,
   );
 
   static ThemeData _buildTheme({
     required Brightness brightness,
     required Color primary,
     required Color secondary,
+    Color tertiary = goldColor,
     required Color background,
     required Color surface,
     required Color surfaceMuted,
@@ -149,7 +330,14 @@ class AppTheme {
     required Color outline,
     required Color appBar,
     required LinearGradient pageGradient,
-    bool isFamilyYear = false,
+    required LinearGradient heroGradient,
+    SilaVisualStyle visualStyle = SilaVisualStyle.classic,
+    Color? primaryContainer,
+    Color? onPrimaryContainer,
+    Color? secondaryContainer,
+    Color? onSecondaryContainer,
+    double cardRadius = 24,
+    double buttonRadius = 18,
   }) {
     final isDark = brightness == Brightness.dark;
     final colorScheme =
@@ -160,17 +348,19 @@ class AppTheme {
           primary: primary,
           onPrimary: isDark ? const Color(0xFF052017) : Colors.white,
           secondary: secondary,
-          tertiary: goldColor,
-          primaryContainer: isDark
-              ? const Color(0xFF164D36)
-              : const Color(0xFFDDEFE5),
-          onPrimaryContainer: isDark ? const Color(0xFFD9F7E7) : primaryDark,
-          secondaryContainer: isDark
-              ? const Color(0xFF5B2226)
-              : const Color(0xFFFCE3E4),
-          onSecondaryContainer: isDark
-              ? const Color(0xFFFFDADD)
-              : const Color(0xFF641014),
+          tertiary: tertiary,
+          primaryContainer:
+              primaryContainer ??
+              (isDark ? const Color(0xFF164D36) : const Color(0xFFDDEFE5)),
+          onPrimaryContainer:
+              onPrimaryContainer ??
+              (isDark ? const Color(0xFFD9F7E7) : primaryDark),
+          secondaryContainer:
+              secondaryContainer ??
+              (isDark ? const Color(0xFF5B2226) : const Color(0xFFFCE3E4)),
+          onSecondaryContainer:
+              onSecondaryContainer ??
+              (isDark ? const Color(0xFFFFDADD) : const Color(0xFF641014)),
           tertiaryContainer: isDark
               ? const Color(0xFF4B3A19)
               : const Color(0xFFF4E8CC),
@@ -191,7 +381,11 @@ class AppTheme {
       fontFamily: 'NotoSansArabic',
       scaffoldBackgroundColor: background,
       extensions: [
-        SilaThemeTokens(pageGradient: pageGradient, isFamilyYear: isFamilyYear),
+        SilaThemeTokens(
+          pageGradient: pageGradient,
+          heroGradient: heroGradient,
+          visualStyle: visualStyle,
+        ),
       ],
     );
 
@@ -272,7 +466,7 @@ class AppTheme {
         shadowColor: primaryDark.withValues(alpha: isDark ? 0.34 : 0.1),
         margin: EdgeInsets.zero,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(24),
+          borderRadius: BorderRadius.circular(cardRadius),
           side: BorderSide(color: outline),
         ),
       ),
@@ -283,7 +477,7 @@ class AppTheme {
           minimumSize: const Size(0, 52),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(18),
+            borderRadius: BorderRadius.circular(buttonRadius),
           ),
           textStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
         ),
@@ -295,7 +489,7 @@ class AppTheme {
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
           side: BorderSide(color: outline),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(18),
+            borderRadius: BorderRadius.circular(buttonRadius),
           ),
           textStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
         ),

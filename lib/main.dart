@@ -133,10 +133,15 @@ Future<void> main() async {
 
   await Future.wait([
     LocaleController.instance.load(),
-    AppearanceController.instance.load(),
+    AppearanceController.instance.load(
+      ownershipScope: FirebaseAuth.instance.currentUser?.uid,
+    ),
   ]);
 
   runApp(const SilaApp());
+  FirebaseAuth.instance.authStateChanges().listen((user) {
+    unawaited(AppearanceController.instance.load(ownershipScope: user?.uid));
+  });
   unawaited(_initializePushNotifications());
 }
 

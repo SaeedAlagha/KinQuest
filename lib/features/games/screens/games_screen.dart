@@ -254,7 +254,7 @@ class _GamesHeader extends StatelessWidget {
                 width: 66,
                 height: 66,
                 decoration: BoxDecoration(
-                  gradient: AppTheme.brandGradient,
+                  gradient: AppTheme.heroGradientFor(context),
                   borderRadius: BorderRadius.circular(22),
                 ),
                 child: const Icon(

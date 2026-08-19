@@ -468,7 +468,7 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> {
               Container(
                 padding: const EdgeInsets.all(28),
                 decoration: BoxDecoration(
-                  gradient: AppTheme.brandGradient,
+                  gradient: AppTheme.heroGradientFor(context),
                   borderRadius: BorderRadius.circular(30),
                 ),
                 child: Column(
