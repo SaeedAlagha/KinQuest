@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/sila_celebration_card.dart';
 import '../config/competition_rewards.dart';
 import '../config/official_competition_games.dart';
 import '../models/competition_game_result.dart';
@@ -1022,46 +1023,27 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
     return ListView(
       padding: const EdgeInsets.all(24),
       children: [
-        Container(
-          padding: const EdgeInsets.all(30),
-          decoration: BoxDecoration(
-            gradient: AppTheme.brandGradient,
-            borderRadius: BorderRadius.circular(30),
-          ),
-          child: Column(
-            children: [
-              const Icon(
-                Icons.emoji_events_rounded,
-                size: 84,
-                color: AppTheme.goldColor,
-              ),
-              const SizedBox(height: 16),
-              const Text(
-                'MONTHLY CUP CHAMPION',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: 1.2,
-                ),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                _championName ?? 'Champion',
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                '+${CompetitionRewards.monthlyChampionTokens} Tokens • '
-                '+${CompetitionRewards.monthlyChampionRankingPoints} RP • Trophy',
-                textAlign: TextAlign.center,
-                style: const TextStyle(color: Colors.white),
-              ),
-            ],
-          ),
+        SilaCelebrationCard(
+          key: const ValueKey('monthly-cup-celebration'),
+          eyebrow: 'Monthly Cup Champion',
+          title: _championName ?? 'Champion',
+          subtitle:
+              'The family\'s biggest competition ends with a trophy and a memory for the cabinet.',
+          icon: Icons.workspace_premium_rounded,
+          rewards: const [
+            SilaCelebrationReward(
+              icon: Icons.stars_rounded,
+              label: '+${CompetitionRewards.monthlyChampionTokens} Tokens',
+            ),
+            SilaCelebrationReward(
+              icon: Icons.trending_up_rounded,
+              label: '+${CompetitionRewards.monthlyChampionRankingPoints} RP',
+            ),
+            SilaCelebrationReward(
+              icon: Icons.emoji_events_rounded,
+              label: 'Cup trophy',
+            ),
+          ],
         ),
         const SizedBox(height: 24),
         ..._matches.map(

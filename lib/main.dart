@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -40,16 +42,8 @@ void handleNotificationTap(RemoteMessage message) {
   );
 }
 
-Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-
-  final messaging = FirebaseMessaging.instance;
-
-  await messaging.requestPermission(alert: true, badge: true, sound: true);
-
-  Future<void> saveFcmTokenForUser(String userId) async {
+Future<void> _saveFcmTokenForUser(String userId) async {
+  try {
     final token = await FirebaseMessaging.instance.getToken();
 
     if (token == null || token.isEmpty) {
@@ -62,30 +56,65 @@ Future<void> main() async {
         .collection('fcmTokens')
         .doc(token)
         .set({'token': token, 'updatedAt': FieldValue.serverTimestamp()});
+  } catch (error) {
+    debugPrint('Push token registration skipped: $error');
   }
+}
 
-  FirebaseAuth.instance.authStateChanges().listen((user) async {
-    if (user == null) {
+Future<void> _enablePushForUser(User user) async {
+  try {
+    final settings = await FirebaseMessaging.instance.requestPermission(
+      alert: true,
+      badge: true,
+      sound: true,
+    );
+
+    if (settings.authorizationStatus == AuthorizationStatus.denied) {
       return;
     }
 
-    await saveFcmTokenForUser(user.uid);
+    await _saveFcmTokenForUser(user.uid);
+  } catch (error) {
+    debugPrint('Push notification permission skipped: $error');
+  }
+}
+
+Future<void> _initializePushNotifications() async {
+  FirebaseAuth.instance.authStateChanges().listen((user) {
+    if (user != null) {
+      unawaited(_enablePushForUser(user));
+    }
   });
 
-  FirebaseMessaging.instance.onTokenRefresh.listen((newToken) async {
+  FirebaseMessaging.instance.onTokenRefresh.listen((newToken) {
     final user = FirebaseAuth.instance.currentUser;
 
     if (user == null || newToken.isEmpty) {
       return;
     }
 
-    await FirebaseFirestore.instance
-        .collection('users')
-        .doc(user.uid)
-        .collection('fcmTokens')
-        .doc(newToken)
-        .set({'token': newToken, 'updatedAt': FieldValue.serverTimestamp()});
+    unawaited(_saveFcmTokenForUser(user.uid));
   });
+
+  FirebaseMessaging.onMessageOpenedApp.listen(handleNotificationTap);
+
+  try {
+    final initialMessage = await FirebaseMessaging.instance.getInitialMessage();
+
+    if (initialMessage != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        handleNotificationTap(initialMessage);
+      });
+    }
+  } catch (error) {
+    debugPrint('Initial push notification lookup skipped: $error');
+  }
+}
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   await Future.wait([
     LocaleController.instance.load(),
@@ -93,16 +122,7 @@ Future<void> main() async {
   ]);
 
   runApp(const SilaApp());
-
-  FirebaseMessaging.onMessageOpenedApp.listen(handleNotificationTap);
-
-  final initialMessage = await FirebaseMessaging.instance.getInitialMessage();
-
-  if (initialMessage != null) {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      handleNotificationTap(initialMessage);
-    });
-  }
+  unawaited(_initializePushNotifications());
 }
 
 class SilaApp extends StatelessWidget {

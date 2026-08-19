@@ -3,6 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/sila_celebration_card.dart';
+import '../../../core/widgets/sila_page_backdrop.dart';
 import '../../../l10n/app_localizations.dart';
 import '../config/competition_rewards.dart';
 import '../config/official_competition_games.dart';
@@ -426,17 +428,19 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> {
 
     return Scaffold(
       appBar: AppBar(title: Text(strings.dailyChallenge)),
-      body: SafeArea(
-        child: _isLoading
-            ? const Center(child: CircularProgressIndicator())
-            : _errorMessage != null
-            ? Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(24),
-                  child: Text(_errorMessage!, textAlign: TextAlign.center),
-                ),
-              )
-            : _buildChallenge(),
+      body: SilaPageBackdrop(
+        child: SafeArea(
+          child: _isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : _errorMessage != null
+              ? Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: Text(_errorMessage!, textAlign: TextAlign.center),
+                  ),
+                )
+              : _buildChallenge(),
+        ),
       ),
     );
   }
@@ -584,31 +588,29 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> {
   }
 
   Widget _buildCompletedCard() {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: AppTheme.tealColor.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Icon(
-            Icons.check_circle_rounded,
-            color: AppTheme.tealColor,
-            size: 32,
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Text(
-              _winnerName == null
-                  ? 'Your family completed today\'s official challenge.'
-                  : '${_winnerName!} won today\'s official challenge. '
-                        'Come back tomorrow for a new game.',
-            ),
-          ),
-        ],
-      ),
+    final winner = _winnerName;
+
+    return SilaCelebrationCard(
+      key: const ValueKey('daily-challenge-celebration'),
+      eyebrow: 'Daily Challenge complete',
+      title: winner ?? 'Family challenge complete',
+      subtitle: winner == null
+          ? 'Your family showed up, played together, and completed today\'s official challenge.'
+          : '$winner takes today\'s family crown. Come back tomorrow for a fresh challenge.',
+      rewards: const [
+        SilaCelebrationReward(
+          icon: Icons.stars_rounded,
+          label: '+${CompetitionRewards.dailyWinnerTokens} Tokens',
+        ),
+        SilaCelebrationReward(
+          icon: Icons.trending_up_rounded,
+          label: '+${CompetitionRewards.dailyWinnerRankingPoints} RP',
+        ),
+        SilaCelebrationReward(
+          icon: Icons.favorite_rounded,
+          label: 'Family moment',
+        ),
+      ],
     );
   }
 
