@@ -163,3 +163,41 @@ test("mission completions accept verdicts but reject retained proof images", asy
 
   assert.ok(true);
 });
+
+test("wishlist negotiations stay between members of one family", async () => {
+  const aliceDatabase = testEnvironment
+    .authenticatedContext("alice")
+    .firestore();
+  const malloryDatabase = testEnvironment
+    .authenticatedContext("mallory")
+    .firestore();
+  const proposals = collection(
+    aliceDatabase,
+    "families/FAMILY_A/rewardWishlistProposals",
+  );
+
+  await assertSucceeds(
+    setDoc(doc(proposals, "family-proposal"), {
+      familyId: "FAMILY_A",
+      requesterId: "alice",
+      recipientId: "bob",
+      status: "requested",
+    }),
+  );
+
+  await assertSucceeds(
+    setDoc(doc(aliceDatabase, "users/bob/notifications/request"), {
+      userId: "bob",
+      familyId: "FAMILY_A",
+      type: "wishlistRequest",
+    }),
+  );
+
+  await assertFails(
+    setDoc(doc(malloryDatabase, "users/bob/notifications/intrusion"), {
+      userId: "bob",
+      familyId: "FAMILY_A",
+      type: "wishlistRequest",
+    }),
+  );
+});

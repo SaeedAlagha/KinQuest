@@ -1,5 +1,5 @@
-const { getApps, initializeApp } = require("firebase-admin/app");
 const { getAuth } = require("firebase-admin/auth");
+const { ensureFirebaseAdmin } = require("./firebase_admin");
 
 const DEFAULT_RATE_LIMIT = 60;
 const DEFAULT_RATE_WINDOW_MS = 60_000;
@@ -121,10 +121,7 @@ function createRateLimiter({
 }
 
 function defaultTokenVerifier(token) {
-  if (getApps().length === 0) {
-    initializeApp();
-  }
-
+  ensureFirebaseAdmin();
   return getAuth().verifyIdToken(token, true);
 }
 

@@ -10,6 +10,17 @@ const {
 } = require("./security");
 
 dotenv.config({ quiet: true });
+const {
+  FieldValue,
+  getFirestore,
+} = require("firebase-admin/firestore");
+const { getMessaging } = require("firebase-admin/messaging");
+const { ensureFirebaseAdmin } = require("./firebase_admin");
+
+ensureFirebaseAdmin();
+
+const db = getFirestore();
+const messaging = getMessaging();
 
 const app = express();
 
@@ -1868,6 +1879,308 @@ Return ONLY valid JSON in this exact structure:
     });
   }
 });
+async function sendPendingNotification(notificationDoc) {
+  const notification = notificationDoc.data();
+
+  if (notification.pushPending !== true) {
+    return;
+  }
+
+  const userId = notification.userId?.toString();
+
+  if (!userId) {
+    console.warn(`Notification ${notificationDoc.id} has no userId.`);
+    return;
+  }
+
+  try {
+    const tokenSnapshot = await db
+      .collection("users")
+      .doc(userId)
+      .collection("fcmTokens")
+      .get();
+
+const devices = tokenSnapshot.docs
+  .map((doc) => ({
+    token: doc.data().token,
+    ref: doc.ref,
+  }))
+  .filter(
+    (device) =>
+      typeof device.token === "string" &&
+      device.token.length > 0,
+  );
+
+const tokens = devices.map((device) => device.token);
+    if (tokens.length === 0) {
+      console.log(`No FCM tokens found for user ${userId}.`);
+
+      await notificationDoc.ref.update({
+        pushPending: false,
+        pushStatus: "no_devices",
+      });
+
+      return;
+    }
+
+    const message = {
+      notification: {
+        title:
+          notification.title?.toString() ??
+          "KinQuest",
+        body:
+          notification.message?.toString() ??
+          "You have a new notification.",
+      },
+      data: {
+        type: notification.type?.toString() ?? "",
+        familyId: notification.familyId?.toString() ?? "",
+        proposalId:
+          notification.proposalId?.toString() ?? "",
+        notificationId: notificationDoc.id,
+      },
+      tokens,
+    };
+
+    const response =
+      await messaging.sendEachForMulticast(message);
+
+    console.log(
+      `Push ${notificationDoc.id}: ` +
+        `${response.successCount} sent, ` +
+        `${response.failureCount} failed.`,
+    );
+
+    const invalidTokenRefs = [];
+
+    response.responses.forEach((result, index) => {
+      if (result.success) {
+        return;
+      }
+
+      const code = result.error?.code;
+
+      if (
+        code ===
+          "messaging/registration-token-not-registered" ||
+        code === "messaging/invalid-registration-token"
+      ) {
+invalidTokenRefs.push(
+  devices[index].ref,
+);
+      }
+    });
+
+    await Promise.all(
+      invalidTokenRefs.map((ref) => ref.delete()),
+    );
+
+    await notificationDoc.ref.update({
+      pushPending: false,
+      pushStatus:
+        response.successCount > 0
+          ? "sent"
+          : "failed",
+      pushSuccessCount: response.successCount,
+      pushFailureCount: response.failureCount,
+    });
+  } catch (error) {
+    console.error(
+      `Could not send push ${notificationDoc.id}:`,
+      error,
+    );
+
+    await notificationDoc.ref.update({
+      pushStatus: "error",
+      pushError:
+        error.message?.toString() ??
+        "Unknown error",
+    });
+  }
+}
+async function checkWishlistGoalsForUser(userDoc) {
+  const userData = userDoc.data();
+  const userId = userDoc.id;
+
+  const familyId = userData.familyId?.toString();
+
+  if (!familyId) {
+    return;
+  }
+
+  const proposalsSnapshot = await db
+    .collection("families")
+    .doc(familyId)
+    .collection("rewardWishlistProposals")
+    .where("requesterId", "==", userId)
+    .get();
+
+  for (const proposalDoc of proposalsSnapshot.docs) {
+    const proposal = proposalDoc.data();
+
+    if (proposal.status !== "accepted") {
+      continue;
+    }
+
+    const currentTokens = Number(userData.tokens ?? 0);
+    const dailyWins = Number(userData.dailyWins ?? 0);
+    const weeklyWins = Number(userData.weeklyWins ?? 0);
+    const monthlyWins = Number(userData.monthlyWins ?? 0);
+    const missionsCompleted = Number(
+      userData.missionsCompleted ?? 0,
+    );
+
+    const tokenRequirement = Number(
+      proposal.tokenRequirement ?? 0,
+    );
+    const dailyWinsRequired = Number(
+      proposal.dailyWinsRequired ?? 0,
+    );
+    const weeklyWinsRequired = Number(
+      proposal.weeklyWinsRequired ?? 0,
+    );
+    const monthlyWinsRequired = Number(
+      proposal.monthlyWinsRequired ?? 0,
+    );
+    const missionsRequired = Number(
+      proposal.missionsRequired ?? 0,
+    );
+
+    const hasRequirement =
+      tokenRequirement > 0 ||
+      dailyWinsRequired > 0 ||
+      weeklyWinsRequired > 0 ||
+      monthlyWinsRequired > 0 ||
+      missionsRequired > 0;
+
+    const complete =
+      hasRequirement &&
+      currentTokens >= tokenRequirement &&
+      dailyWins >= dailyWinsRequired &&
+      weeklyWins >= weeklyWinsRequired &&
+      monthlyWins >= monthlyWinsRequired &&
+      missionsCompleted >= missionsRequired;
+
+    if (!complete) {
+      continue;
+    }
+
+    await db.runTransaction(async (transaction) => {
+      const latestProposalDoc =
+        await transaction.get(proposalDoc.ref);
+
+      const latestUserDoc =
+        await transaction.get(userDoc.ref);
+
+      if (!latestProposalDoc.exists ||
+          !latestUserDoc.exists) {
+        return;
+      }
+
+      const latestProposal = latestProposalDoc.data();
+      const latestUser = latestUserDoc.data();
+
+      if (latestProposal.status !== "accepted") {
+        return;
+      }
+
+      const stillComplete =
+        Number(latestUser.tokens ?? 0) >=
+          Number(latestProposal.tokenRequirement ?? 0) &&
+        Number(latestUser.dailyWins ?? 0) >=
+          Number(latestProposal.dailyWinsRequired ?? 0) &&
+        Number(latestUser.weeklyWins ?? 0) >=
+          Number(latestProposal.weeklyWinsRequired ?? 0) &&
+        Number(latestUser.monthlyWins ?? 0) >=
+          Number(latestProposal.monthlyWinsRequired ?? 0) &&
+        Number(latestUser.missionsCompleted ?? 0) >=
+          Number(latestProposal.missionsRequired ?? 0);
+
+      if (!stillComplete) {
+        return;
+      }
+
+      transaction.update(proposalDoc.ref, {
+        status: "readyToRedeem",
+        readyToRedeemAt: FieldValue.serverTimestamp(),
+        updatedAt: FieldValue.serverTimestamp(),
+      });
+
+      const notificationRef = db
+        .collection("users")
+        .doc(userId)
+        .collection("notifications")
+        .doc();
+
+      transaction.set(notificationRef, {
+        userId,
+        type: "wishlistGoalReady",
+        title: "Wishlist Goal Ready",
+        message:
+          `${latestProposal.title ?? "Your reward"} is ready to redeem.`,
+        familyId,
+        proposalId: proposalDoc.id,
+        read: false,
+        pushPending: true,
+        createdAt: FieldValue.serverTimestamp(),
+      });
+    });
+  }
+}
+
+function startWishlistGoalReadyListener() {
+  return db.collection("users").onSnapshot(
+    (snapshot) => {
+      for (const change of snapshot.docChanges()) {
+        if (
+          change.type === "added" ||
+          change.type === "modified"
+        ) {
+          void checkWishlistGoalsForUser(
+            change.doc,
+          ).catch((error) => {
+            console.error(
+              `Could not check Wishlist goals for ${change.doc.id}:`,
+              error,
+            );
+          });
+        }
+      }
+    },
+    (error) => {
+      console.error(
+        "Wishlist goal listener error:",
+        error,
+      );
+    },
+  );
+}
+function startNotificationListener() {
+  return db
+    .collectionGroup("notifications")
+    .where("pushPending", "==", true)
+    .onSnapshot(
+      (snapshot) => {
+        for (const change of snapshot.docChanges()) {
+          if (
+            change.type === "added" ||
+            change.type === "modified"
+          ) {
+            void sendPendingNotification(change.doc);
+          }
+        }
+      },
+      (error) => {
+        console.error(
+          "Notification listener error:",
+          error,
+        );
+      },
+    );
+}
+
+const PORT = process.env.PORT || 3000;
+
 app.use((error, request, response, next) => {
   if (error instanceof SyntaxError && "body" in error) {
     return response.status(400).json({ error: "Request body must be valid JSON." });
@@ -1876,11 +2189,13 @@ app.use((error, request, response, next) => {
   return next(error);
 });
 
-const PORT = process.env.PORT || 3000;
-
 if (require.main === module) {
+  startNotificationListener();
+  startWishlistGoalReadyListener();
+
   app.listen(PORT, () => {
     console.log(`Sila AI service running on port ${PORT}`);
+    console.log("FCM notification listeners started.");
   });
 }
 
