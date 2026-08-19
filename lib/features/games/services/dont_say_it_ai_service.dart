@@ -22,12 +22,15 @@ class DontSayItCard {
 class DontSayItAiService {
   const DontSayItAiService();
 
-  Future<List<DontSayItCard>> generateCards({required int count}) async {
+  Future<List<DontSayItCard>> generateCards({
+    required int count,
+    required String languageCode,
+  }) async {
     final response = await http
         .post(
           ApiConfig.endpoint('/api/dont-say-it'),
           headers: await ApiConfig.authenticatedJsonHeaders(),
-          body: jsonEncode({'count': count}),
+          body: jsonEncode({'count': count, 'language': languageCode}),
         )
         .timeout(const Duration(seconds: 30));
 

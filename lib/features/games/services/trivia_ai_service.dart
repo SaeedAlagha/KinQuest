@@ -27,12 +27,17 @@ class TriviaAiService {
   Future<List<TriviaQuestion>> generateQuestions({
     required String category,
     required int count,
+    required String languageCode,
   }) async {
     final response = await http
         .post(
           ApiConfig.endpoint('/api/trivia'),
           headers: await ApiConfig.authenticatedJsonHeaders(),
-          body: jsonEncode({'category': category, 'count': count}),
+          body: jsonEncode({
+            'category': category,
+            'count': count,
+            'language': languageCode,
+          }),
         )
         .timeout(const Duration(seconds: 20));
 

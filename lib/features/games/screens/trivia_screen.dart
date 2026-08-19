@@ -277,6 +277,7 @@ class _TriviaScreenState extends State<TriviaScreen> {
       final generated = await _aiService.generateQuestions(
         category: _selectedCategory,
         count: totalQuestions,
+        languageCode: Localizations.localeOf(context).languageCode,
       );
 
       if (generated.length < totalQuestions) {

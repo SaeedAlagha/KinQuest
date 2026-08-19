@@ -176,7 +176,7 @@ class _SecretMissionScreenState extends State<SecretMissionScreen> {
   ) async {
     final generatedMissions = await _aiService.generateMissions(
       playerNames: players.map((player) => player.name).toList(),
-      languageCode: 'en',
+      languageCode: Localizations.localeOf(context).languageCode,
     );
 
     if (generatedMissions.length != players.length) {

@@ -1860,4 +1860,212 @@ class AppLocalizationsEn extends AppLocalizations {
   String startTieBreakRound(int number) {
     return 'Start Tie-Break Round $number';
   }
+
+  @override
+  String get gameFamilyEyebrow => 'SILA FAMILY GAME';
+
+  @override
+  String get rounds => 'Rounds';
+
+  @override
+  String get roundsDescription => 'Choose a quick round or play a longer 3 or 5-round game.';
+
+  @override
+  String roundCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count rounds',
+      one: '$count round',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get mustBeLoggedInToPlay => 'You must be logged in to play.';
+
+  @override
+  String get emojiFamilyRequired => 'Join or create a family before playing Emoji Guess.';
+
+  @override
+  String get couldNotLoadFamilyMembers => 'Could not load your family members.';
+
+  @override
+  String get familyMemberFallback => 'Family Member';
+
+  @override
+  String get emojiGuessSetupDescription => 'Build two teams and decode playful emoji clues before time runs out.';
+
+  @override
+  String get whoIsPlaying => 'Who is playing?';
+
+  @override
+  String get chooseAtLeastTwoPlayers => 'Choose at least 2 players for the family match.';
+
+  @override
+  String get chooseTeams => 'Choose teams';
+
+  @override
+  String get assignPlayersToTeams => 'Assign every selected player to Team A or Team B.';
+
+  @override
+  String get teamA => 'Team A';
+
+  @override
+  String get teamB => 'Team B';
+
+  @override
+  String get shuffleTeams => 'Shuffle Teams';
+
+  @override
+  String get category => 'Category';
+
+  @override
+  String get categoryMovies => 'Movies';
+
+  @override
+  String get categoryAnimals => 'Animals';
+
+  @override
+  String get categoryFood => 'Food';
+
+  @override
+  String get categoryPlaces => 'Places';
+
+  @override
+  String get categoryMixed => 'Mixed';
+
+  @override
+  String get matchPace => 'Match pace';
+
+  @override
+  String get puzzlesPerRound => 'Puzzles per round';
+
+  @override
+  String get timePerPuzzle => 'Time per puzzle';
+
+  @override
+  String secondsShort(int count) {
+    return '$count sec';
+  }
+
+  @override
+  String preparingNamedGame(String game) {
+    return 'Preparing $game...';
+  }
+
+  @override
+  String startNamedGame(String game) {
+    return 'Start $game';
+  }
+
+  @override
+  String teamTurn(String team) {
+    return '$team\'s turn';
+  }
+
+  @override
+  String stealTeam(String team) {
+    return 'Steal — $team';
+  }
+
+  @override
+  String roundPuzzleProgress(int round, int totalRounds, int puzzle, int totalPuzzles) {
+    return 'Round $round of $totalRounds • Puzzle $puzzle of $totalPuzzles';
+  }
+
+  @override
+  String secondsRemaining(int count) {
+    return '$count s';
+  }
+
+  @override
+  String hintLabel(String hint) {
+    return 'Hint: $hint';
+  }
+
+  @override
+  String get typeYourAnswer => 'Type your answer';
+
+  @override
+  String get checking => 'Checking...';
+
+  @override
+  String get submitAnswer => 'Submit Answer';
+
+  @override
+  String teamScore(String team, int score) {
+    return '$team: $score';
+  }
+
+  @override
+  String get puzzleComplete => 'Puzzle Complete';
+
+  @override
+  String answerLabel(String answer) {
+    return 'Answer: $answer';
+  }
+
+  @override
+  String get roundResults => 'Round Results';
+
+  @override
+  String get nextPuzzle => 'Next Puzzle';
+
+  @override
+  String roundNumberComplete(int number) {
+    return 'Round $number Complete';
+  }
+
+  @override
+  String get startTieBreaker => 'Start Tie-Breaker';
+
+  @override
+  String get seeFinalResults => 'See Final Results';
+
+  @override
+  String startRound(int number) {
+    return 'Start Round $number';
+  }
+
+  @override
+  String tieBreakerTeam(String team) {
+    return 'Tie-Breaker — $team';
+  }
+
+  @override
+  String teamWins(String team) {
+    return '$team Wins!';
+  }
+
+  @override
+  String returnToCompetition(String competition) {
+    return 'Return to $competition';
+  }
+
+  @override
+  String get playAgain => 'Play Again';
+
+  @override
+  String get backToGames => 'Back to Games';
+
+  @override
+  String noStealAnswer(String answer) {
+    return 'No steal.\n\nAnswer: $answer';
+  }
+
+  @override
+  String teamGuessedCorrectly(String team, int points) {
+    return '$team guessed correctly!\n\n+$points points';
+  }
+
+  @override
+  String teamStolePuzzle(String team, int points) {
+    return '$team stole the puzzle!\n\n+$points point';
+  }
+
+  @override
+  String stealMissedAnswer(String answer) {
+    return 'Steal missed.\n\nAnswer: $answer';
+  }
 }

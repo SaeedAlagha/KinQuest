@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kinquest/features/games/widgets/game_setup_widgets.dart';
+import 'package:kinquest/l10n/app_localizations.dart';
 
 void main() {
   testWidgets('round selector consistently offers 1, 3, and 5 rounds', (
@@ -10,6 +11,8 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
         home: Scaffold(
           body: StatefulBuilder(
             builder: (context, setState) {
@@ -42,6 +45,8 @@ void main() {
   ) async {
     await tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
         home: Scaffold(
           body: GameRoundSelector(value: 1, maximum: 1, onChanged: (_) {}),
         ),

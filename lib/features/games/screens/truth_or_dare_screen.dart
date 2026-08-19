@@ -72,6 +72,7 @@ class _TruthOrDareScreenState extends State<TruthOrDareScreen> {
       final generated = await _aiService.generatePrompts(
         category: _selectedCategory,
         count: _selectedRounds,
+        languageCode: Localizations.localeOf(context).languageCode,
       );
 
       if (!mounted) return;

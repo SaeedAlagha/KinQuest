@@ -16,12 +16,15 @@ class DrawAndGuessPrompt {
 class DrawAndGuessAiService {
   const DrawAndGuessAiService();
 
-  Future<List<DrawAndGuessPrompt>> generatePrompts({int count = 6}) async {
+  Future<List<DrawAndGuessPrompt>> generatePrompts({
+    int count = 6,
+    required String languageCode,
+  }) async {
     final response = await http
         .post(
           ApiConfig.endpoint('/api/draw-and-guess'),
           headers: await ApiConfig.authenticatedJsonHeaders(),
-          body: jsonEncode({'count': count}),
+          body: jsonEncode({'count': count, 'language': languageCode}),
         )
         .timeout(const Duration(seconds: 20));
 

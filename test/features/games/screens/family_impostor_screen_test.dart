@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kinquest/features/games/screens/family_impostor_screen.dart';
+import 'package:kinquest/l10n/app_localizations.dart';
 
 void main() {
   testWidgets('preview setup offers random and selectable categories', (
@@ -12,7 +13,11 @@ void main() {
     addTearDown(tester.view.resetDevicePixelRatio);
 
     await tester.pumpWidget(
-      const MaterialApp(home: FamilyImpostorScreen(developerPreview: true)),
+      const MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: FamilyImpostorScreen(developerPreview: true),
+      ),
     );
     await tester.pump();
 

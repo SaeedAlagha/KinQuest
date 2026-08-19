@@ -46,6 +46,21 @@ const ai = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY,
 });
 
+function normalizedLanguage(value) {
+  return value === "ar" ? "ar" : "en";
+}
+
+function playerLanguageInstruction(value) {
+  return normalizedLanguage(value) === "ar"
+    ? `LANGUAGE REQUIREMENT:
+- Write every player-visible string in natural Modern Standard Arabic.
+- Do not include English translations or transliterations.
+- Keep JSON property names exactly as specified in English.`
+    : `LANGUAGE REQUIREMENT:
+- Write every player-visible string in clear, natural English.
+- Keep JSON property names exactly as specified.`;
+}
+
 app.get("/", (req, res) => {
   res.json({
     message: "Sila AI service is running",
@@ -129,7 +144,7 @@ app.post("/api/digital-rewards/unequip", async (request, response) => {
 
 app.post("/api/would-you-rather", async (req, res) => {
   try {
-    const { category, count } = req.body;
+    const { category, count, language } = req.body;
 
     if (!category) {
       return res.status(400).json({
@@ -142,6 +157,8 @@ app.post("/api/would-you-rather", async (req, res) => {
 
     const prompt = `
 Generate exactly ${questionCount} unique Would You Rather questions.
+
+${playerLanguageInstruction(language)}
 
 Category: ${category}
 
@@ -192,7 +209,7 @@ Return ONLY valid JSON in this exact format:
 });
 app.post("/api/charades", async (req, res) => {
   try {
-    const { category, count } = req.body;
+    const { category, count, language } = req.body;
 
     if (!category) {
       return res.status(400).json({ error: "Category is required" });
@@ -203,6 +220,8 @@ app.post("/api/charades", async (req, res) => {
 
     const prompt = `
 Generate exactly ${promptCount} unique Charades prompts.
+
+${playerLanguageInstruction(language)}
 
 Category: ${category}
 
@@ -251,7 +270,7 @@ Return ONLY valid JSON in this exact format:
 });
 app.post("/api/never-have-i-ever", async (req, res) => {
   try {
-    const { category, count } = req.body;
+    const { category, count, language } = req.body;
 
     if (!category) {
       return res.status(400).json({
@@ -264,6 +283,8 @@ app.post("/api/never-have-i-ever", async (req, res) => {
 
     const prompt = `
 Generate exactly ${promptCount} unique Never Have I Ever statements.
+
+${playerLanguageInstruction(language)}
 
 Category: ${category}
 
@@ -281,7 +302,7 @@ Rules:
 - No dangerous challenges
 - No duplicate statements
 - Keep each statement concise
-- Start each statement with "Never have I ever"
+- Start each statement with ${normalizedLanguage(language) === "ar" ? 'the natural Arabic equivalent of "Never have I ever"' : '"Never have I ever"'}
 
 Return ONLY valid JSON in this exact format:
 
@@ -333,7 +354,7 @@ Return ONLY valid JSON in this exact format:
 });
 app.post("/api/trivia", async (req, res) => {
   try {
-    const { category, count } = req.body;
+    const { category, count, language } = req.body;
 
     if (!category) {
       return res.status(400).json({
@@ -346,6 +367,8 @@ app.post("/api/trivia", async (req, res) => {
 
     const prompt = `
 Generate exactly ${questionCount} unique multiple-choice trivia questions.
+
+${playerLanguageInstruction(language)}
 
 Category: ${category}
 
@@ -438,7 +461,7 @@ Return ONLY valid JSON in this exact structure:
 });
 app.post("/api/truth-or-dare", async (req, res) => {
   try {
-    const { category, count } = req.body;
+    const { category, count, language } = req.body;
 
     if (!category) {
       return res.status(400).json({
@@ -451,6 +474,8 @@ app.post("/api/truth-or-dare", async (req, res) => {
 
     const prompt = `
 Generate exactly ${promptCount} unique Truth or Dare prompts.
+
+${playerLanguageInstruction(language)}
 
 Category: ${category}
 
@@ -530,7 +555,7 @@ Return ONLY valid JSON in this structure:
 });
 app.post("/api/emoji-guess", async (req, res) => {
   try {
-    const { category, count } = req.body;
+    const { category, count, language } = req.body;
 
     if (!category) {
       return res.status(400).json({
@@ -539,10 +564,12 @@ app.post("/api/emoji-guess", async (req, res) => {
     }
 
     const requestedCount = Number(count) || 10;
-    const puzzleCount = Math.min(Math.max(requestedCount, 1), 20);
+    const puzzleCount = Math.min(Math.max(requestedCount, 1), 60);
 
     const prompt = `
 Generate exactly ${puzzleCount} unique Emoji Guess puzzles.
+
+${playerLanguageInstruction(language)}
 
 Category: ${category}
 
@@ -616,9 +643,71 @@ Return ONLY valid JSON in this structure:
     });
   }
 });
+app.post("/api/emoji-guess/check-answer", async (req, res) => {
+  try {
+    const { expectedAnswer, playerAnswer, language } = req.body;
+
+    if (
+      typeof expectedAnswer !== "string" ||
+      expectedAnswer.trim().length === 0 ||
+      typeof playerAnswer !== "string" ||
+      playerAnswer.trim().length === 0
+    ) {
+      return res.status(400).json({
+        match: false,
+        error: "Both answers are required",
+      });
+    }
+
+    const prompt = `
+You are the answer judge for a family Emoji Guess game.
+
+${playerLanguageInstruction(language)}
+
+EXPECTED ANSWER: "${expectedAnswer.trim()}"
+PLAYER ANSWER: "${playerAnswer.trim()}"
+
+Return match=true when the player clearly means the expected answer. Accept:
+- Arabic or English equivalents of the same answer
+- Common synonyms and familiar alternate titles
+- Singular/plural differences
+- Minor spelling mistakes when the meaning is obvious
+
+Reject unrelated, vague, or empty answers. Be friendly but accurate.
+
+Return ONLY valid JSON:
+{
+  "match": true
+}
+`;
+
+    const response = await ai.models.generateContent({
+      model: "gemini-3.5-flash",
+      contents: prompt,
+      config: {
+        responseMimeType: "application/json",
+        responseJsonSchema: {
+          type: "object",
+          properties: {
+            match: { type: "boolean" },
+          },
+          required: ["match"],
+        },
+      },
+    });
+
+    const result = JSON.parse(response.text);
+    res.json({ match: result.match === true });
+  } catch (error) {
+    console.error("Emoji Guess answer validation error:", error);
+    res.status(500).json({
+      error: "Failed to validate Emoji Guess answer",
+    });
+  }
+});
 app.post("/api/family-quiz", async (req, res) => {
   try {
-    const { category, count, familyMembers } = req.body;
+    const { category, count, familyMembers, language } = req.body;
 
     if (!category) {
       return res.status(400).json({
@@ -671,6 +760,8 @@ app.post("/api/family-quiz", async (req, res) => {
 
     const sharedRules = `
 This is for KinQuest, a family bonding game.
+
+${playerLanguageInstruction(language)}
 
 Rules:
 - Family friendly and appropriate for children and adults
@@ -819,6 +910,7 @@ app.post("/api/memory-challenge", async (req, res) => {
       location,
       date,
       count,
+      language,
     } = req.body;
 
     if (!imageUrl) {
@@ -845,6 +937,8 @@ app.post("/api/memory-challenge", async (req, res) => {
 
     const prompt = `
 Create exactly ${questionCount} multiple-choice questions for a family memory game.
+
+${playerLanguageInstruction(language)}
 
 Memory information:
 
@@ -984,7 +1078,7 @@ Return ONLY valid JSON.
 });
 app.post("/api/family-impostor", async (req, res) => {
   try {
-    const { rounds, category } = req.body;
+    const { rounds, category, language } = req.body;
 
     const requestedRounds = Number(rounds) || 5;
     const roundCount = Math.min(Math.max(requestedRounds, 1), 10);
@@ -1014,6 +1108,8 @@ app.post("/api/family-impostor", async (req, res) => {
 
     const prompt = `
 Generate exactly ${roundCount} Family Impostor rounds.
+
+${playerLanguageInstruction(language)}
 
 This is for KinQuest, a family bonding game played by children and adults together.
 
@@ -1384,7 +1480,7 @@ Return ONLY valid JSON:
 });
 app.post("/api/pass-the-bomb", async (req, res) => {
   try {
-    const { count } = req.body;
+    const { count, language } = req.body;
 
     const requestedCount = Number(count) || 5;
     const categoryCount = Math.min(
@@ -1394,6 +1490,8 @@ app.post("/api/pass-the-bomb", async (req, res) => {
 
     const prompt = `
 Generate exactly ${categoryCount} categories for a family game called Pass the Bomb.
+
+${playerLanguageInstruction(language)}
 
 KinQuest is a family bonding app played together on one shared phone.
 
@@ -1483,7 +1581,7 @@ Return ONLY valid JSON in this exact structure:
 });
 app.post("/api/pass-the-bomb/validate", async (req, res) => {
   try {
-    const { category, answer } = req.body;
+    const { category, answer, language } = req.body;
 
     if (
       typeof category !== "string" ||
@@ -1499,6 +1597,8 @@ app.post("/api/pass-the-bomb/validate", async (req, res) => {
 
     const prompt = `
 You are the answer judge for a fast family party game called Pass the Bomb.
+
+${playerLanguageInstruction(language)}
 
 CATEGORY:
 "${category.trim()}"
@@ -1597,13 +1697,15 @@ Return ONLY valid JSON:
 });
 app.post("/api/draw-and-guess", async (req, res) => {
   try {
-    const { count } = req.body;
+    const { count, language } = req.body;
 
     const requestedCount = Number(count) || 6;
     const promptCount = Math.min(Math.max(requestedCount, 1), 30);
 
     const prompt = `
 Generate exactly ${promptCount} unique drawing prompts for a family game called Draw & Guess.
+
+${playerLanguageInstruction(language)}
 
 This game is played by children and adults together.
 
@@ -1863,13 +1965,15 @@ Confidence must be a number from 0 to 1.
 });
 app.post("/api/dont-say-it", async (req, res) => {
   try {
-    const { count } = req.body;
+    const { count, language } = req.body;
 
     const requestedCount = Number(count) || 20;
     const cardCount = Math.min(Math.max(requestedCount, 1), 100);
 
     const prompt = `
 Generate exactly ${cardCount} unique cards for a family game called Don't Say It.
+
+${playerLanguageInstruction(language)}
 
 For each card provide:
 - one secret word

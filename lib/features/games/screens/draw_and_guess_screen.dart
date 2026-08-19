@@ -204,6 +204,7 @@ class _DrawAndGuessScreenState extends State<DrawAndGuessScreen> {
 
       final prompts = await _aiService.generatePrompts(
         count: selectedPlayers.length * _selectedRounds,
+        languageCode: Localizations.localeOf(context).languageCode,
       );
 
       if (prompts.isEmpty) {

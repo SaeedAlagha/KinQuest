@@ -270,6 +270,7 @@ class _CaptionBattleScreenState extends State<CaptionBattleScreen> {
   }
 
   Future<void> _startGame() async {
+    final languageCode = Localizations.localeOf(context).languageCode;
     final players = _selectedPlayers;
 
     if (players.length < 2) {
@@ -299,7 +300,7 @@ class _CaptionBattleScreenState extends State<CaptionBattleScreen> {
       try {
         modes = await _aiService.generateModes(
           count: roundCount,
-          languageCode: 'en',
+          languageCode: languageCode,
           promptStyle: _selectedPromptStyle,
         );
 
@@ -310,6 +311,7 @@ class _CaptionBattleScreenState extends State<CaptionBattleScreen> {
         modes = CaptionBattleAiService.offlineModes(
           count: roundCount,
           promptStyle: _selectedPromptStyle,
+          languageCode: languageCode,
           random: _random,
         );
       }
@@ -640,6 +642,9 @@ class _CaptionBattleScreenState extends State<CaptionBattleScreen> {
                     Text(
                       CaptionBattleAiService.descriptionForStyle(
                         _selectedPromptStyle,
+                        languageCode: Localizations.localeOf(
+                          context,
+                        ).languageCode,
                       ),
                       style: Theme.of(context).textTheme.bodyMedium,
                     ),
@@ -647,6 +652,9 @@ class _CaptionBattleScreenState extends State<CaptionBattleScreen> {
                     Text(
                       CaptionBattleAiService.examplesForStyle(
                         _selectedPromptStyle,
+                        languageCode: Localizations.localeOf(
+                          context,
+                        ).languageCode,
                       ),
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: AppTheme.primaryColor,
@@ -846,7 +854,12 @@ class _CaptionBattleScreenState extends State<CaptionBattleScreen> {
                       ),
                       const SizedBox(height: 6),
                       Text(
-                        CaptionBattleAiService.instructionForMode(_currentMode),
+                        CaptionBattleAiService.instructionForMode(
+                          _currentMode,
+                          languageCode: Localizations.localeOf(
+                            context,
+                          ).languageCode,
+                        ),
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
@@ -862,6 +875,9 @@ class _CaptionBattleScreenState extends State<CaptionBattleScreen> {
                           labelText: 'Write your caption',
                           hintText: CaptionBattleAiService.hintForMode(
                             _currentMode,
+                            languageCode: Localizations.localeOf(
+                              context,
+                            ).languageCode,
                           ),
                           border: const OutlineInputBorder(),
                         ),

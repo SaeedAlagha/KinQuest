@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kinquest/features/games/screens/family_quiz_screen.dart';
 import 'package:kinquest/features/games/services/family_quiz_ai_service.dart';
+import 'package:kinquest/l10n/app_localizations.dart';
 
 void main() {
   group('FamilyQuizScreen', () {
@@ -183,6 +184,7 @@ class _FakeFamilyQuizAiService extends FamilyQuizAiService {
     required String category,
     required int count,
     required List<String> familyMembers,
+    required String languageCode,
   }) async {
     callCount++;
     lastCategory = category;
@@ -200,6 +202,7 @@ class _FailingFamilyQuizAiService extends FamilyQuizAiService {
     required String category,
     required int count,
     required List<String> familyMembers,
+    required String languageCode,
   }) async {
     callCount++;
     throw Exception('AI unavailable');
@@ -210,6 +213,8 @@ Future<void> _pumpQuiz(WidgetTester tester, FamilyQuizAiService service) async {
   await tester.pumpWidget(
     MaterialApp(
       theme: ThemeData(useMaterial3: true),
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
       home: FamilyQuizScreen(aiService: service, developerPreview: true),
     ),
   );

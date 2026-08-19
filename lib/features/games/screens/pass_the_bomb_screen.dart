@@ -187,6 +187,7 @@ class _PassTheBombScreenState extends State<PassTheBombScreen> {
 
       final categories = await _aiService.generateCategories(
         count: _selectedRounds,
+        languageCode: Localizations.localeOf(context).languageCode,
       );
 
       if (categories.length < _selectedRounds) {
@@ -308,6 +309,7 @@ class _PassTheBombScreenState extends State<PassTheBombScreen> {
       final result = await _aiService.validateAnswer(
         category: category,
         answer: answer,
+        languageCode: Localizations.localeOf(context).languageCode,
       );
 
       if (!mounted) {
