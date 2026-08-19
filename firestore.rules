@@ -98,7 +98,25 @@ service cloud.firestore {
       }
 
       match /ownedRewards/{rewardId} {
-        allow read, write: if isSelf(userId);
+        allow read: if isSelf(userId)
+          || (
+            signedIn()
+            && get(/databases/$(database)/documents/users/$(userId))
+              .data.familyId == currentUser().data.familyId
+          );
+        // Digital Reward ownership is written only by the trusted backend.
+        allow create, update, delete: if false;
+      }
+
+      match /settings/{settingId} {
+        allow read: if isSelf(userId)
+          || (
+            signedIn()
+            && get(/databases/$(database)/documents/users/$(userId))
+              .data.familyId == currentUser().data.familyId
+          );
+        // Equipped Digital Reward state is written only by the trusted backend.
+        allow create, update, delete: if false;
       }
 
       match /fcmTokens/{tokenId} {

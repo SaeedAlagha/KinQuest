@@ -17,6 +17,7 @@ void main() {
           body: SingleChildScrollView(
             padding: EdgeInsets.all(16),
             child: SilaCelebrationCard(
+              effect: 'fireworks',
               eyebrow: 'Daily Challenge complete',
               title: 'Sara takes the family crown',
               subtitle: 'A shared win becomes a family memory.',
@@ -40,6 +41,10 @@ void main() {
     expect(find.text('Sara takes the family crown'), findsOneWidget);
     expect(find.text('+10 Tokens'), findsOneWidget);
     expect(find.text('+10 RP'), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('celebration-effect-fireworks')),
+      findsOneWidget,
+    );
 
     await tester.pumpAndSettle();
 

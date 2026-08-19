@@ -76,6 +76,19 @@ test.beforeEach(async () => {
         createdBy: "alice",
         title: "Private family memory",
       }),
+      setDoc(doc(database, "users/alice/ownedRewards/frame_gold"), {
+        rewardId: "frame_gold",
+        category: "profileFrame",
+        assetKey: "gold",
+        equipped: true,
+      }),
+      setDoc(doc(database, "users/alice/settings/digitalRewards"), {
+        profileFrame: "gold",
+        profileBadge: "default",
+        profileTheme: "default",
+        celebrationEffect: "default",
+        nameplate: "default",
+      }),
     ]);
   });
 });
@@ -91,6 +104,40 @@ test("family content is readable only inside the authenticated family", async ()
 
   await assertSucceeds(getDoc(doc(aliceDatabase, memoryPath)));
   await assertFails(getDoc(doc(malloryDatabase, memoryPath)));
+});
+
+test("digital rewards are family-visible but backend-write-only", async () => {
+  const aliceDatabase = testEnvironment
+    .authenticatedContext("alice")
+    .firestore();
+  const bobDatabase = testEnvironment
+    .authenticatedContext("bob")
+    .firestore();
+  const malloryDatabase = testEnvironment
+    .authenticatedContext("mallory")
+    .firestore();
+  const ownedPath = "users/alice/ownedRewards/frame_gold";
+  const settingsPath = "users/alice/settings/digitalRewards";
+
+  await assertSucceeds(getDoc(doc(aliceDatabase, ownedPath)));
+  await assertSucceeds(getDoc(doc(bobDatabase, ownedPath)));
+  await assertFails(getDoc(doc(malloryDatabase, ownedPath)));
+  await assertSucceeds(getDoc(doc(bobDatabase, settingsPath)));
+  await assertFails(getDoc(doc(malloryDatabase, settingsPath)));
+
+  await assertFails(
+    setDoc(doc(aliceDatabase, "users/alice/ownedRewards/forged"), {
+      rewardId: "forged",
+      category: "profileFrame",
+      assetKey: "gold",
+      equipped: true,
+    }),
+  );
+  await assertFails(
+    updateDoc(doc(aliceDatabase, settingsPath), {
+      profileFrame: "forged",
+    }),
+  );
 });
 
 test("an invite holder can add only their own membership", async () => {
