@@ -22,10 +22,12 @@ class PassTheBombScreen extends StatefulWidget {
     super.key,
     this.playMode = GamePlayMode.quickPlay,
     this.participantIds,
+    this.developerPreview = false,
   });
 
   final GamePlayMode playMode;
   final Set<String>? participantIds;
+  final bool developerPreview;
 
   @override
   State<PassTheBombScreen> createState() => _PassTheBombScreenState();
@@ -64,7 +66,28 @@ class _PassTheBombScreenState extends State<PassTheBombScreen> {
   @override
   void initState() {
     super.initState();
-    _loadFamilyMembers();
+    if (widget.developerPreview) {
+      _loadPreviewMembers();
+    } else {
+      _loadFamilyMembers();
+    }
+  }
+
+  void _loadPreviewMembers() {
+    const members = [
+      _BombPlayer(id: 'preview-1', name: 'Alex'),
+      _BombPlayer(id: 'preview-2', name: 'Sam'),
+      _BombPlayer(id: 'preview-3', name: 'Jordan'),
+      _BombPlayer(id: 'preview-4', name: 'Taylor'),
+    ];
+    final availableMembers = widget.participantIds == null
+        ? members
+        : members
+              .where((member) => widget.participantIds!.contains(member.id))
+              .toList();
+    _familyMembers.addAll(availableMembers);
+    _selectedPlayerIds.addAll(availableMembers.map((member) => member.id));
+    _isLoading = false;
   }
 
   @override
@@ -192,14 +215,33 @@ class _PassTheBombScreenState extends State<PassTheBombScreen> {
       final selectedPlayers = _familyMembers
           .where((player) => _selectedPlayerIds.contains(player.id))
           .toList();
+      final languageCode = Localizations.localeOf(context).languageCode;
+      List<String> categories;
 
-      final categories = await _aiService.generateCategories(
-        count: _selectedRounds,
-        languageCode: Localizations.localeOf(context).languageCode,
-      );
+      if (widget.developerPreview) {
+        categories = PassTheBombAiService.offlineCategories(
+          count: _selectedRounds,
+          languageCode: languageCode,
+        );
+      } else {
+        try {
+          categories = await _aiService.generateCategories(
+            count: _selectedRounds,
+            languageCode: languageCode,
+          );
+        } catch (_) {
+          categories = PassTheBombAiService.offlineCategories(
+            count: _selectedRounds,
+            languageCode: languageCode,
+          );
+        }
+      }
 
       if (categories.length < _selectedRounds) {
-        throw Exception('Not enough categories generated.');
+        categories = PassTheBombAiService.offlineCategories(
+          count: _selectedRounds,
+          languageCode: languageCode,
+        );
       }
 
       final shuffledPlayers = List<_BombPlayer>.from(selectedPlayers)
@@ -307,11 +349,20 @@ class _PassTheBombScreenState extends State<PassTheBombScreen> {
     });
 
     try {
-      final result = await _aiService.validateAnswer(
-        category: category,
-        answer: answer,
-        languageCode: Localizations.localeOf(context).languageCode,
-      );
+      PassTheBombValidationResult result;
+      if (widget.developerPreview) {
+        result = const PassTheBombValidationResult(valid: true, reason: '');
+      } else {
+        try {
+          result = await _aiService.validateAnswer(
+            category: category,
+            answer: answer,
+            languageCode: Localizations.localeOf(context).languageCode,
+          );
+        } catch (_) {
+          result = const PassTheBombValidationResult(valid: true, reason: '');
+        }
+      }
 
       if (!mounted) {
         return;

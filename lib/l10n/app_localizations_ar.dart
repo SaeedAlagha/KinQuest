@@ -3663,5 +3663,123 @@ class AppLocalizationsAr extends AppLocalizations {
   String get nextVote => 'التصويت التالي';
 
   @override
+  String get couldNotGenerateMissions => 'تعذر تجهيز المهام السرية. حاول مجددًا بعد قليل.';
+
+  @override
+  String get couldNotGenerateNextRound => 'تعذر تجهيز الجولة التالية. حاول مجددًا.';
+
+  @override
+  String get missionTimeUp => 'انتهى الوقت! حان وقت كشف المهام وتقييمها.';
+
+  @override
+  String get finishRoundEarlyTitle => 'إنهاء الجولة مبكرًا؟';
+
+  @override
+  String get finishRoundEarlyDescription => 'سيتوقف المؤقت وسينتقل الجميع إلى تقييم المهام.';
+
+  @override
+  String get keepPlaying => 'متابعة اللعب';
+
+  @override
+  String get finishRound => 'إنهاء الجولة';
+
+  @override
+  String get chooseMissionPlayers => 'اختر أفراد العائلة الذين سيلعبون معًا على هذا الهاتف.';
+
+  @override
+  String secretMissionSetupSummary(int rounds) {
+    String _temp0 = intl.Intl.pluralLogic(
+      rounds,
+      locale: localeName,
+      other: '$rounds جولات',
+      two: 'جولتان',
+      one: 'جولة واحدة',
+    );
+    return '$_temp0 • 10 دقائق لكل جولة • مهمة سرية واحدة لكل لاعب في كل جولة.';
+  }
+
+  @override
+  String get secretMissionSetupInstructions => 'أنجز مهمتك بصورة طبيعية من دون أن يكتشفها الآخرون.';
+
+  @override
+  String generatingRound(int number) {
+    return 'جارٍ تجهيز الجولة $number...';
+  }
+
+  @override
+  String playerProgress(int current, int total) {
+    return 'اللاعب $current من $total';
+  }
+
+  @override
+  String get keepScreenPrivate => 'تأكد من أن لا أحد آخر يرى الشاشة.';
+
+  @override
+  String get revealMyMission => 'اكشف مهمتي';
+
+  @override
+  String get yourSecretMission => 'مهمتك السرية';
+
+  @override
+  String get rememberMission => 'تذكّرها ولا تخبر أحدًا.';
+
+  @override
+  String get hideMissionStartRound => 'إخفاء المهمة وبدء جولة 10 دقائق';
+
+  @override
+  String get hideMissionPassPhone => 'إخفاء المهمة وتمرير الهاتف';
+
+  @override
+  String get missionsAreLive => 'بدأت المهام!';
+
+  @override
+  String get missionsLiveInstructions => 'ضع الهاتف وتصرف بطبيعتك. أنجز مهمتك من دون أن تكون واضحة.';
+
+  @override
+  String get timeRemaining => 'الوقت المتبقي';
+
+  @override
+  String get missionAutoJudge => 'ستنتقل الجولة تلقائيًا إلى التقييم عندما يصل المؤقت إلى 00:00.';
+
+  @override
+  String get finishRoundEarly => 'إنهاء الجولة مبكرًا';
+
+  @override
+  String judgeProgress(int current, int total) {
+    return 'التقييم $current من $total';
+  }
+
+  @override
+  String get missionCompletedQuestion => 'هل نجح اللاعب في إنجاز المهمة خلال هذه الجولة؟';
+
+  @override
+  String get notCompleted => 'لم تكتمل';
+
+  @override
+  String get completedPlusOne => 'مكتملة +1';
+
+  @override
+  String roundsRemaining(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count جولات متبقية',
+      two: 'جولتان متبقيتان',
+      one: 'جولة واحدة متبقية',
+      zero: 'لا جولات متبقية',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get missionCompletedThisRound => 'اكتملت المهمة في هذه الجولة';
+
+  @override
+  String get missionNotCompletedThisRound => 'لم تكتمل المهمة في هذه الجولة';
+
+  @override
+  String get previewPlayer => 'لاعب تجريبي';
+
+  @override
   String get monthlyInvalidWinner => 'أعادت المباراة فائزًا ليس أحد المتنافسين المحددين. يُرجى إعادة المباراة.';
 }

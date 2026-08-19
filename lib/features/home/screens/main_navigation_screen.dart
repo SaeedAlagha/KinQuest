@@ -20,8 +20,6 @@ class MainNavigationScreen extends StatefulWidget {
 }
 
 class _MainNavigationScreenState extends State<MainNavigationScreen> {
-  late final List<Widget> _screens;
-
   List<NavigationDestination> _mobileDestinations(AppLocalizations strings) => [
     NavigationDestination(
       icon: const Icon(Icons.home_outlined),
@@ -82,15 +80,12 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
 
   int _selectedIndex = 0;
 
-  @override
-  void initState() {
-    super.initState();
-
-    _screens = widget.developerPreview
+  List<Widget> _screens(AppLocalizations strings) {
+    return widget.developerPreview
         ? [
             HomeDashboard(
-              name: 'Sila Developer',
-              familyName: 'Developer Family',
+              name: strings.silaDeveloper,
+              familyName: strings.developerFamilyName,
               memberCount: 5,
               tokens: '480',
               developerPreview: true,
@@ -120,8 +115,11 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     });
   }
 
-  Widget _buildScreenStack(BuildContext context) {
-    final screenStack = IndexedStack(index: _selectedIndex, children: _screens);
+  Widget _buildScreenStack(BuildContext context, AppLocalizations strings) {
+    final screenStack = IndexedStack(
+      index: _selectedIndex,
+      children: _screens(strings),
+    );
 
     if (!widget.developerPreview) {
       return screenStack;
@@ -200,14 +198,14 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                     ),
                   ),
                 ),
-                Expanded(child: _buildScreenStack(context)),
+                Expanded(child: _buildScreenStack(context, strings)),
               ],
             ),
           );
         }
 
         return Scaffold(
-          body: _buildScreenStack(context),
+          body: _buildScreenStack(context, strings),
           bottomNavigationBar: _MobileNavigationShell(
             selectedIndex: _selectedIndex,
             onDestinationSelected: _selectScreen,

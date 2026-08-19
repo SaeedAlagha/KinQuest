@@ -23,11 +23,25 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   bool _isLoading = true;
   bool _isSaving = false;
   bool _loadFailed = false;
+  bool _previewInitialized = false;
 
   @override
   void initState() {
     super.initState();
-    _loadProfile();
+    if (!widget.developerPreview) {
+      _loadProfile();
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (widget.developerPreview && !_previewInitialized) {
+      _previewInitialized = true;
+      _nameController.text = AppLocalizations.of(context)!.silaDeveloper;
+      _emailController.text = 'preview@sila.local';
+      _isLoading = false;
+    }
   }
 
   @override
@@ -38,15 +52,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   }
 
   Future<void> _loadProfile() async {
-    if (widget.developerPreview) {
-      _nameController.text = 'Sila Developer';
-      _emailController.text = 'preview@sila.local';
-      setState(() {
-        _isLoading = false;
-      });
-      return;
-    }
-
     final user = FirebaseAuth.instance.currentUser;
 
     if (user == null) {

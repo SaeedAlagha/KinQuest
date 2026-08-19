@@ -29,10 +29,12 @@ class DontSayItScreen extends StatefulWidget {
     super.key,
     this.playMode = GamePlayMode.quickPlay,
     this.participantIds,
+    this.developerPreview = false,
   });
 
   final GamePlayMode playMode;
   final Set<String>? participantIds;
+  final bool developerPreview;
 
   @override
   State<DontSayItScreen> createState() => _DontSayItScreenState();
@@ -77,7 +79,28 @@ class _DontSayItScreenState extends State<DontSayItScreen> {
   @override
   void initState() {
     super.initState();
-    _loadFamilyMembers();
+    if (widget.developerPreview) {
+      _loadPreviewMembers();
+    } else {
+      _loadFamilyMembers();
+    }
+  }
+
+  void _loadPreviewMembers() {
+    const members = [
+      _DontSayItPlayer(id: 'preview-1', name: 'Alex'),
+      _DontSayItPlayer(id: 'preview-2', name: 'Sam'),
+      _DontSayItPlayer(id: 'preview-3', name: 'Jordan'),
+      _DontSayItPlayer(id: 'preview-4', name: 'Taylor'),
+    ];
+    final availableMembers = widget.participantIds == null
+        ? members
+        : members
+              .where((member) => widget.participantIds!.contains(member.id))
+              .toList();
+    _familyMembers.addAll(availableMembers);
+    _selectedPlayerIds.addAll(availableMembers.map((member) => member.id));
+    _isLoading = false;
   }
 
   @override
@@ -223,14 +246,33 @@ class _DontSayItScreenState extends State<DontSayItScreen> {
       }
 
       final totalTurns = selectedPlayers.length * _selectedRounds;
+      final languageCode = Localizations.localeOf(context).languageCode;
+      List<DontSayItCard> cards;
 
-      final cards = await _aiService.generateCards(
-        count: totalTurns,
-        languageCode: Localizations.localeOf(context).languageCode,
-      );
+      if (widget.developerPreview) {
+        cards = DontSayItAiService.offlineCards(
+          count: totalTurns,
+          languageCode: languageCode,
+        );
+      } else {
+        try {
+          cards = await _aiService.generateCards(
+            count: totalTurns,
+            languageCode: languageCode,
+          );
+        } catch (_) {
+          cards = DontSayItAiService.offlineCards(
+            count: totalTurns,
+            languageCode: languageCode,
+          );
+        }
+      }
 
       if (cards.length < totalTurns) {
-        throw Exception('Not enough cards generated');
+        cards = DontSayItAiService.offlineCards(
+          count: totalTurns,
+          languageCode: languageCode,
+        );
       }
 
       if (!mounted) {

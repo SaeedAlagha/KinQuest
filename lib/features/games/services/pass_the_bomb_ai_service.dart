@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:http/http.dart' as http;
 import 'package:kinquest/core/config/api_config.dart';
@@ -26,6 +27,39 @@ class PassTheBombAiService {
     final categories = data['categories'] as List<dynamic>;
 
     return categories.cast<String>();
+  }
+
+  static List<String> offlineCategories({
+    required int count,
+    required String languageCode,
+    Random? random,
+  }) {
+    final categories = languageCode == 'ar'
+        ? <String>[
+            'أطعمة تبدأ بحرف م',
+            'أماكن في الإمارات',
+            'حيوانات',
+            'أشياء في المنزل',
+            'رياضات',
+            'أفلام عائلية',
+            'أشياء تأخذها في السفر',
+            'مهن',
+          ]
+        : <String>[
+            'Foods beginning with P',
+            'Places in the UAE',
+            'Animals',
+            'Things at home',
+            'Sports',
+            'Family movies',
+            'Things you take when travelling',
+            'Jobs',
+          ];
+    categories.shuffle(random ?? Random.secure());
+    return List<String>.generate(
+      count,
+      (index) => categories[index % categories.length],
+    );
   }
 
   Future<PassTheBombValidationResult> validateAnswer({
