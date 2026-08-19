@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 
 abstract final class ApiConfig {
@@ -22,5 +23,22 @@ abstract final class ApiConfig {
   static Uri endpoint(String path) {
     final normalizedPath = path.startsWith('/') ? path : '/$path';
     return Uri.parse('$baseUrl$normalizedPath');
+  }
+
+  static Future<Map<String, String>> authenticatedJsonHeaders({
+    Future<String?> Function()? tokenProvider,
+  }) async {
+    final headers = <String, String>{'Content-Type': 'application/json'};
+    final idToken = await (tokenProvider ?? _currentUserIdToken)();
+
+    if (idToken != null && idToken.isNotEmpty) {
+      headers['Authorization'] = 'Bearer $idToken';
+    }
+
+    return headers;
+  }
+
+  static Future<String?> _currentUserIdToken() async {
+    return FirebaseAuth.instance.currentUser?.getIdToken();
   }
 }

@@ -13,7 +13,7 @@ class SecretMissionAiService {
     final response = await http
         .post(
           ApiConfig.endpoint('/api/secret-mission'),
-          headers: {'Content-Type': 'application/json'},
+          headers: await ApiConfig.authenticatedJsonHeaders(),
           body: jsonEncode({'players': playerNames, 'language': languageCode}),
         )
         .timeout(const Duration(seconds: 20));

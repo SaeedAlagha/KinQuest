@@ -4,34 +4,24 @@ import 'package:http/http.dart' as http;
 import 'package:kinquest/core/config/api_config.dart';
 
 class DrawAndGuessPrompt {
-  const DrawAndGuessPrompt({
-    required this.text,
-  });
+  const DrawAndGuessPrompt({required this.text});
 
   final String text;
 
   factory DrawAndGuessPrompt.fromJson(Map<String, dynamic> json) {
-    return DrawAndGuessPrompt(
-      text: json['text'] as String,
-    );
+    return DrawAndGuessPrompt(text: json['text'] as String);
   }
 }
 
 class DrawAndGuessAiService {
   const DrawAndGuessAiService();
 
-  Future<List<DrawAndGuessPrompt>> generatePrompts({
-    int count = 6,
-  }) async {
+  Future<List<DrawAndGuessPrompt>> generatePrompts({int count = 6}) async {
     final response = await http
         .post(
           ApiConfig.endpoint('/api/draw-and-guess'),
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: jsonEncode({
-            'count': count,
-          }),
+          headers: await ApiConfig.authenticatedJsonHeaders(),
+          body: jsonEncode({'count': count}),
         )
         .timeout(const Duration(seconds: 20));
 
@@ -44,9 +34,7 @@ class DrawAndGuessAiService {
 
     return prompts
         .map(
-          (item) => DrawAndGuessPrompt.fromJson(
-            item as Map<String, dynamic>,
-          ),
+          (item) => DrawAndGuessPrompt.fromJson(item as Map<String, dynamic>),
         )
         .toList();
   }

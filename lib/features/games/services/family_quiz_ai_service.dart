@@ -28,7 +28,7 @@ class FamilyQuizAiService {
     final response = await http
         .post(
           ApiConfig.endpoint('/api/family-quiz'),
-          headers: {'Content-Type': 'application/json'},
+          headers: await ApiConfig.authenticatedJsonHeaders(),
           body: jsonEncode({
             'category': category,
             'count': count,

@@ -1141,6 +1141,12 @@ class AppLocalizationsAr extends AppLocalizations {
   String get reviewYourProof => 'راجع إثباتك';
 
   @override
+  String get missionProofPrivacyNotice => 'تُرسل صورتك بأمان إلى Google Gemini عبر خادم صلة للتحقق من هذه المهمة فقط. تحفظ صلة نتيجة التحقق، وليس نسخة من الصورة.';
+
+  @override
+  String get missionProofConsent => 'أوافق على التحقق من هذه الصورة باستخدام الذكاء الاصطناعي.';
+
+  @override
   String participantsLabel(String names) {
     return 'المشاركون: $names';
   }

@@ -10,7 +10,7 @@ class PassTheBombAiService {
     final response = await http
         .post(
           ApiConfig.endpoint('/api/pass-the-bomb'),
-          headers: {'Content-Type': 'application/json'},
+          headers: await ApiConfig.authenticatedJsonHeaders(),
           body: jsonEncode({'count': count}),
         )
         .timeout(const Duration(seconds: 20));
@@ -32,7 +32,7 @@ class PassTheBombAiService {
     final response = await http
         .post(
           ApiConfig.endpoint('/api/pass-the-bomb/validate'),
-          headers: {'Content-Type': 'application/json'},
+          headers: await ApiConfig.authenticatedJsonHeaders(),
           body: jsonEncode({'category': category, 'answer': answer}),
         )
         .timeout(const Duration(seconds: 8));

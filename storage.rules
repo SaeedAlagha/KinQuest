@@ -1,0 +1,12 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Sila currently keeps compressed memory images in family-scoped
+    // Firestore documents. Storage remains closed until a reviewed path and
+    // retention policy are introduced.
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

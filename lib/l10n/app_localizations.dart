@@ -2243,6 +2243,18 @@ abstract class AppLocalizations {
   /// **'Review Your Proof'**
   String get reviewYourProof;
 
+  /// No description provided for @missionProofPrivacyNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Your image is sent securely to Google Gemini through Sila\'s server only to verify this mission. Sila stores the verdict, not a copy of the image.'**
+  String get missionProofPrivacyNotice;
+
+  /// No description provided for @missionProofConsent.
+  ///
+  /// In en, this message translates to:
+  /// **'I consent to AI verification of this image.'**
+  String get missionProofConsent;
+
   /// No description provided for @participantsLabel.
   ///
   /// In en, this message translates to:

@@ -748,69 +748,111 @@ class _FamilyMissionsScreenState extends State<FamilyMissionsScreen> {
   }) async {
     final strings = AppLocalizations.of(context)!;
     final noteController = TextEditingController();
+    var consentGranted = false;
 
     final shouldSubmit = await showDialog<bool>(
       context: context,
       builder: (dialogContext) {
-        return AlertDialog(
-          title: Text(strings.reviewYourProof),
-          content: SizedBox(
-            width: 500,
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(18),
-                    child: Image.memory(
-                      imageBytes,
-                      height: 230,
-                      width: double.infinity,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                  if (assignment.mission.scope == MissionScope.family) ...[
-                    const SizedBox(height: 16),
-                    Align(
-                      alignment: AlignmentDirectional.centerStart,
-                      child: Text(
-                        strings.participantsLabel(
-                          participants
-                              .map(
-                                (member) => _displayMemberName(member, strings),
-                              )
-                              .join(', '),
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              title: Text(strings.reviewYourProof),
+              content: SizedBox(
+                width: 500,
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(18),
+                        child: Image.memory(
+                          imageBytes,
+                          height: 230,
+                          width: double.infinity,
+                          fit: BoxFit.cover,
                         ),
-                        style: const TextStyle(fontWeight: FontWeight.w700),
                       ),
-                    ),
-                  ],
-                  const SizedBox(height: 18),
-                  TextField(
-                    controller: noteController,
-                    maxLength: 300,
-                    maxLines: 4,
-                    decoration: InputDecoration(
-                      labelText: strings.explanationOptional,
-                      hintText: strings.missionExplanationHint,
-                      border: const OutlineInputBorder(),
-                    ),
+                      if (assignment.mission.scope == MissionScope.family) ...[
+                        const SizedBox(height: 16),
+                        Align(
+                          alignment: AlignmentDirectional.centerStart,
+                          child: Text(
+                            strings.participantsLabel(
+                              participants
+                                  .map(
+                                    (member) =>
+                                        _displayMemberName(member, strings),
+                                  )
+                                  .join(', '),
+                            ),
+                            style: const TextStyle(fontWeight: FontWeight.w700),
+                          ),
+                        ),
+                      ],
+                      const SizedBox(height: 18),
+                      Container(
+                        padding: const EdgeInsets.all(14),
+                        decoration: BoxDecoration(
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.primaryContainer.withValues(alpha: 0.6),
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Icon(
+                              Icons.privacy_tip_outlined,
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Text(strings.missionProofPrivacyNotice),
+                            ),
+                          ],
+                        ),
+                      ),
+                      CheckboxListTile(
+                        contentPadding: EdgeInsets.zero,
+                        controlAffinity: ListTileControlAffinity.leading,
+                        value: consentGranted,
+                        title: Text(strings.missionProofConsent),
+                        onChanged: (value) {
+                          setDialogState(() {
+                            consentGranted = value ?? false;
+                          });
+                        },
+                      ),
+                      const SizedBox(height: 4),
+                      TextField(
+                        controller: noteController,
+                        maxLength: 300,
+                        maxLines: 4,
+                        decoration: InputDecoration(
+                          labelText: strings.explanationOptional,
+                          hintText: strings.missionExplanationHint,
+                          border: const OutlineInputBorder(),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(dialogContext, false),
-              child: Text(strings.cancel),
-            ),
-            FilledButton.icon(
-              onPressed: () => Navigator.pop(dialogContext, true),
-              icon: const Icon(Icons.verified_rounded),
-              label: Text(strings.verifyProof),
-            ),
-          ],
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(dialogContext, false),
+                  child: Text(strings.cancel),
+                ),
+                FilledButton.icon(
+                  onPressed: consentGranted
+                      ? () => Navigator.pop(dialogContext, true)
+                      : null,
+                  icon: const Icon(Icons.verified_rounded),
+                  label: Text(strings.verifyProof),
+                ),
+              ],
+            );
+          },
         );
       },
     );
@@ -877,7 +919,6 @@ class _FamilyMissionsScreenState extends State<FamilyMissionsScreen> {
       await _awardMission(
         assignment: assignment,
         participants: participants,
-        imageBytes: imageBytes,
         mimeType: mimeType,
         note: note,
         verification: verification,
@@ -930,7 +971,6 @@ class _FamilyMissionsScreenState extends State<FamilyMissionsScreen> {
   Future<void> _awardMission({
     required _MissionAssignment assignment,
     required List<_FamilyMember> participants,
-    required Uint8List imageBytes,
     required String mimeType,
     required String note,
     required MissionVerificationResult verification,
@@ -965,7 +1005,6 @@ class _FamilyMissionsScreenState extends State<FamilyMissionsScreen> {
           userId: user.uid,
           familyId: familyId,
           assignment: assignment,
-          imageBytes: imageBytes,
           mimeType: mimeType,
           note: note,
           verification: verification,
@@ -976,7 +1015,6 @@ class _FamilyMissionsScreenState extends State<FamilyMissionsScreen> {
           familyId: familyId,
           assignment: assignment,
           participants: participants,
-          imageBytes: imageBytes,
           mimeType: mimeType,
           note: note,
           verification: verification,
@@ -1026,7 +1064,6 @@ class _FamilyMissionsScreenState extends State<FamilyMissionsScreen> {
     required String userId,
     required String familyId,
     required _MissionAssignment assignment,
-    required Uint8List imageBytes,
     required String mimeType,
     required String note,
     required MissionVerificationResult verification,
@@ -1090,7 +1127,7 @@ class _FamilyMissionsScreenState extends State<FamilyMissionsScreen> {
         'tokenRewardPerParticipant': assignment.mission.tokenReward,
         'participantIds': [userId],
         'completedAt': FieldValue.serverTimestamp(),
-        'proof': Blob(imageBytes),
+        'proofRetained': false,
         'proofMimeType': mimeType,
         'proofNote': note.trim(),
         'verificationVerdict': verification.verdict,
@@ -1135,7 +1172,6 @@ class _FamilyMissionsScreenState extends State<FamilyMissionsScreen> {
     required String familyId,
     required _MissionAssignment assignment,
     required List<_FamilyMember> participants,
-    required Uint8List imageBytes,
     required String mimeType,
     required String note,
     required MissionVerificationResult verification,
@@ -1224,7 +1260,7 @@ class _FamilyMissionsScreenState extends State<FamilyMissionsScreen> {
         'totalTokenReward':
             assignment.mission.tokenReward * participantIds.length,
         'completedAt': FieldValue.serverTimestamp(),
-        'proof': Blob(imageBytes),
+        'proofRetained': false,
         'proofMimeType': mimeType,
         'proofNote': note.trim(),
         'verificationVerdict': verification.verdict,

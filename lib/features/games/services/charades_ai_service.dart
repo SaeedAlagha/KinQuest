@@ -21,7 +21,7 @@ class CharadesAiService {
     final response = await http
         .post(
           ApiConfig.endpoint('/api/charades'),
-          headers: {'Content-Type': 'application/json'},
+          headers: await ApiConfig.authenticatedJsonHeaders(),
           body: jsonEncode({'category': category, 'count': count}),
         )
         .timeout(const Duration(seconds: 20));

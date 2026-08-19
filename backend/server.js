@@ -2,20 +2,36 @@ const express = require("express");
 const cors = require("cors");
 const dotenv = require("dotenv");
 const { GoogleGenAI } = require("@google/genai");
+const {
+  createCorsOptions,
+  createFirebaseAuthMiddleware,
+  createRateLimiter,
+  securityHeaders,
+} = require("./security");
 
-dotenv.config();
+dotenv.config({ quiet: true });
 
 const app = express();
 
-app.use(cors());
-app.use(express.json({ limit: "2mb" }));
+app.disable("x-powered-by");
+
+if (process.env.NODE_ENV === "production") {
+  app.set("trust proxy", 1);
+}
+
+app.use(securityHeaders);
+app.use(cors(createCorsOptions()));
+app.use("/api", createRateLimiter());
+app.use("/api", createFirebaseAuthMiddleware());
+app.use("/api", express.json({ limit: "2mb", type: "application/json" }));
 const ai = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY,
 });
 
 app.get("/", (req, res) => {
   res.json({
-    message: "KinQuest Gemini server is running",
+    message: "Sila AI service is running",
+    authentication: "Firebase ID token required in production",
   });
 });
 
@@ -1852,8 +1868,20 @@ Return ONLY valid JSON in this exact structure:
     });
   }
 });
+app.use((error, request, response, next) => {
+  if (error instanceof SyntaxError && "body" in error) {
+    return response.status(400).json({ error: "Request body must be valid JSON." });
+  }
+
+  return next(error);
+});
+
 const PORT = process.env.PORT || 3000;
 
-app.listen(PORT, () => {
-  console.log(`KinQuest Gemini server running on port ${PORT}`);
-});
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`Sila AI service running on port ${PORT}`);
+  });
+}
+
+module.exports = app;

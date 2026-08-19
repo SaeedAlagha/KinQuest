@@ -38,7 +38,7 @@ class MemoryChallengeAiService {
     final response = await http
         .post(
           ApiConfig.endpoint('/api/memory-challenge'),
-          headers: {'Content-Type': 'application/json'},
+          headers: await ApiConfig.authenticatedJsonHeaders(),
           body: jsonEncode({
             'imageUrl': imageUrl,
             'title': title,
