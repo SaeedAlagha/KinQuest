@@ -2068,4 +2068,258 @@ class AppLocalizationsEn extends AppLocalizations {
   String stealMissedAnswer(String answer) {
     return 'Steal missed.\n\nAnswer: $answer';
   }
+
+  @override
+  String get categoryFamily => 'Family';
+
+  @override
+  String get categoryFamilyFun => 'Family Fun';
+
+  @override
+  String get categoryFavorites => 'Favorites';
+
+  @override
+  String get categoryHabits => 'Habits';
+
+  @override
+  String get categoryMemories => 'Memories';
+
+  @override
+  String get categoryMostLikelyTo => 'Most Likely To';
+
+  @override
+  String get categoryTravel => 'Travel';
+
+  @override
+  String get categoryAtHome => 'At Home';
+
+  @override
+  String get categorySchool => 'School';
+
+  @override
+  String get categoryActions => 'Actions';
+
+  @override
+  String get categoryObjects => 'Objects';
+
+  @override
+  String get categorySports => 'Sports';
+
+  @override
+  String get categoryFunny => 'Funny';
+
+  @override
+  String get categoryFriends => 'Friends';
+
+  @override
+  String get categoryScience => 'Science';
+
+  @override
+  String get categoryGeography => 'Geography';
+
+  @override
+  String get categoryHistory => 'History';
+
+  @override
+  String get categoryGeneralKnowledge => 'General Knowledge';
+
+  @override
+  String get categoryActivities => 'Activities';
+
+  @override
+  String get categoryNature => 'Nature';
+
+  @override
+  String get categoryHome => 'Home';
+
+  @override
+  String get categoryMusic => 'Music';
+
+  @override
+  String get categoryTechnology => 'Technology';
+
+  @override
+  String get categoryUaeHeritage => 'UAE & Heritage';
+
+  @override
+  String get chooseCategory => 'Choose a category';
+
+  @override
+  String get pickCategory => 'Pick a category';
+
+  @override
+  String get couldNotReachAiOfflinePrompts => 'Could not reach AI. Using offline prompts instead.';
+
+  @override
+  String get couldNotReachAiOfflineQuestions => 'Could not reach AI. Using offline questions instead.';
+
+  @override
+  String get generatingPrompts => 'Generating prompts...';
+
+  @override
+  String get generatingQuestions => 'Generating questions...';
+
+  @override
+  String get startGame => 'Start Game';
+
+  @override
+  String get startCharades => 'Start Charades';
+
+  @override
+  String promptProgress(int current, int total) {
+    return 'Prompt $current of $total';
+  }
+
+  @override
+  String roundProgress(int current, int total) {
+    return 'Round $current of $total';
+  }
+
+  @override
+  String get gameProgress => 'Game progress';
+
+  @override
+  String get nextPrompt => 'Next Prompt';
+
+  @override
+  String get charadesRoundComplete => 'Charades round complete!';
+
+  @override
+  String get never => 'Never';
+
+  @override
+  String get iHave => 'I Have';
+
+  @override
+  String get roundCompleteCelebration => 'Round Complete!';
+
+  @override
+  String iHaveCount(int count) {
+    return 'I Have: $count';
+  }
+
+  @override
+  String neverCount(int count) {
+    return 'Never: $count';
+  }
+
+  @override
+  String get changeCategory => 'Change Category';
+
+  @override
+  String get truth => 'TRUTH';
+
+  @override
+  String get dare => 'DARE';
+
+  @override
+  String get done => 'Done';
+
+  @override
+  String truthsCompleted(int count) {
+    return 'Truths completed: $count';
+  }
+
+  @override
+  String daresCompleted(int count) {
+    return 'Dares completed: $count';
+  }
+
+  @override
+  String get charadesSetupDescription => 'Choose a theme and a 1, 3, or 5-round game, then act out each prompt without saying the answer.';
+
+  @override
+  String get neverSetupDescription => 'Pick a family-friendly theme and choose 1, 3, or 5 prompts for a quick round of surprising stories.';
+
+  @override
+  String get truthDareSetupDescription => 'Choose a playful theme and a 1, 3, or 5-round game of safe truths and family-friendly dares.';
+
+  @override
+  String get wouldRatherSetupDescription => 'Pick a category, choose 1, 3, or 5 rounds, then discover which playful choices your family makes.';
+
+  @override
+  String get wouldYouRatherPrompt => 'Would you rather...';
+
+  @override
+  String get chooseMostFunAnswer => 'Choose the answer that sounds the most fun to you.';
+
+  @override
+  String get tapAnswerToLock => 'Tap one answer to lock it in.';
+
+  @override
+  String youSelectedAnswer(String answer) {
+    return 'You selected: $answer';
+  }
+
+  @override
+  String get seeResults => 'See Results';
+
+  @override
+  String get nextRound => 'Next Round';
+
+  @override
+  String get greatJob => 'Great job!';
+
+  @override
+  String completedRoundsCategory(int rounds, String category) {
+    return 'You completed $rounds rounds in the $category category.';
+  }
+
+  @override
+  String get changeSettings => 'Change Settings';
+
+  @override
+  String get triviaFamilyRequired => 'Join or create a family before playing Trivia.';
+
+  @override
+  String get couldNotPrepareTrivia => 'Could not prepare Trivia. Please try again.';
+
+  @override
+  String get triviaSetupDescription => 'Build two teams, pick a category, and race through family-friendly questions.';
+
+  @override
+  String get questionsPerRound => 'Questions per round';
+
+  @override
+  String get timePerQuestion => 'Time per question';
+
+  @override
+  String questionRoundProgress(int round, int totalRounds, int question, int totalQuestions) {
+    return 'Round $round of $totalRounds • Question $question of $totalQuestions';
+  }
+
+  @override
+  String get questionComplete => 'Question Complete';
+
+  @override
+  String get nextQuestion => 'Next Question';
+
+  @override
+  String noStealCorrectAnswer(String answer) {
+    return 'No steal.\n\nCorrect answer: $answer';
+  }
+
+  @override
+  String teamAnsweredCorrectly(String team, int points) {
+    return '$team answered correctly!\n\n+$points points';
+  }
+
+  @override
+  String teamStoleQuestion(String team, int points) {
+    return '$team stole the question!\n\n+$points point';
+  }
+
+  @override
+  String stealMissedCorrectAnswer(String answer) {
+    return 'Steal missed.\n\nCorrect answer: $answer';
+  }
+
+  @override
+  String get triviaTie => 'Trivia Tie!';
+
+  @override
+  String get tieBreaker => 'TIE-BREAKER';
+
+  @override
+  String get oneFinalQuestion => 'One final question decides the winner.';
 }

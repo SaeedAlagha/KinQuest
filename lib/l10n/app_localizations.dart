@@ -3844,6 +3844,462 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Steal missed.\n\nAnswer: {answer}'**
   String stealMissedAnswer(String answer);
+
+  /// No description provided for @categoryFamily.
+  ///
+  /// In en, this message translates to:
+  /// **'Family'**
+  String get categoryFamily;
+
+  /// No description provided for @categoryFamilyFun.
+  ///
+  /// In en, this message translates to:
+  /// **'Family Fun'**
+  String get categoryFamilyFun;
+
+  /// No description provided for @categoryFavorites.
+  ///
+  /// In en, this message translates to:
+  /// **'Favorites'**
+  String get categoryFavorites;
+
+  /// No description provided for @categoryHabits.
+  ///
+  /// In en, this message translates to:
+  /// **'Habits'**
+  String get categoryHabits;
+
+  /// No description provided for @categoryMemories.
+  ///
+  /// In en, this message translates to:
+  /// **'Memories'**
+  String get categoryMemories;
+
+  /// No description provided for @categoryMostLikelyTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Most Likely To'**
+  String get categoryMostLikelyTo;
+
+  /// No description provided for @categoryTravel.
+  ///
+  /// In en, this message translates to:
+  /// **'Travel'**
+  String get categoryTravel;
+
+  /// No description provided for @categoryAtHome.
+  ///
+  /// In en, this message translates to:
+  /// **'At Home'**
+  String get categoryAtHome;
+
+  /// No description provided for @categorySchool.
+  ///
+  /// In en, this message translates to:
+  /// **'School'**
+  String get categorySchool;
+
+  /// No description provided for @categoryActions.
+  ///
+  /// In en, this message translates to:
+  /// **'Actions'**
+  String get categoryActions;
+
+  /// No description provided for @categoryObjects.
+  ///
+  /// In en, this message translates to:
+  /// **'Objects'**
+  String get categoryObjects;
+
+  /// No description provided for @categorySports.
+  ///
+  /// In en, this message translates to:
+  /// **'Sports'**
+  String get categorySports;
+
+  /// No description provided for @categoryFunny.
+  ///
+  /// In en, this message translates to:
+  /// **'Funny'**
+  String get categoryFunny;
+
+  /// No description provided for @categoryFriends.
+  ///
+  /// In en, this message translates to:
+  /// **'Friends'**
+  String get categoryFriends;
+
+  /// No description provided for @categoryScience.
+  ///
+  /// In en, this message translates to:
+  /// **'Science'**
+  String get categoryScience;
+
+  /// No description provided for @categoryGeography.
+  ///
+  /// In en, this message translates to:
+  /// **'Geography'**
+  String get categoryGeography;
+
+  /// No description provided for @categoryHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'History'**
+  String get categoryHistory;
+
+  /// No description provided for @categoryGeneralKnowledge.
+  ///
+  /// In en, this message translates to:
+  /// **'General Knowledge'**
+  String get categoryGeneralKnowledge;
+
+  /// No description provided for @categoryActivities.
+  ///
+  /// In en, this message translates to:
+  /// **'Activities'**
+  String get categoryActivities;
+
+  /// No description provided for @categoryNature.
+  ///
+  /// In en, this message translates to:
+  /// **'Nature'**
+  String get categoryNature;
+
+  /// No description provided for @categoryHome.
+  ///
+  /// In en, this message translates to:
+  /// **'Home'**
+  String get categoryHome;
+
+  /// No description provided for @categoryMusic.
+  ///
+  /// In en, this message translates to:
+  /// **'Music'**
+  String get categoryMusic;
+
+  /// No description provided for @categoryTechnology.
+  ///
+  /// In en, this message translates to:
+  /// **'Technology'**
+  String get categoryTechnology;
+
+  /// No description provided for @categoryUaeHeritage.
+  ///
+  /// In en, this message translates to:
+  /// **'UAE & Heritage'**
+  String get categoryUaeHeritage;
+
+  /// No description provided for @chooseCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a category'**
+  String get chooseCategory;
+
+  /// No description provided for @pickCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a category'**
+  String get pickCategory;
+
+  /// No description provided for @couldNotReachAiOfflinePrompts.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not reach AI. Using offline prompts instead.'**
+  String get couldNotReachAiOfflinePrompts;
+
+  /// No description provided for @couldNotReachAiOfflineQuestions.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not reach AI. Using offline questions instead.'**
+  String get couldNotReachAiOfflineQuestions;
+
+  /// No description provided for @generatingPrompts.
+  ///
+  /// In en, this message translates to:
+  /// **'Generating prompts...'**
+  String get generatingPrompts;
+
+  /// No description provided for @generatingQuestions.
+  ///
+  /// In en, this message translates to:
+  /// **'Generating questions...'**
+  String get generatingQuestions;
+
+  /// No description provided for @startGame.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Game'**
+  String get startGame;
+
+  /// No description provided for @startCharades.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Charades'**
+  String get startCharades;
+
+  /// No description provided for @promptProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Prompt {current} of {total}'**
+  String promptProgress(int current, int total);
+
+  /// No description provided for @roundProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Round {current} of {total}'**
+  String roundProgress(int current, int total);
+
+  /// No description provided for @gameProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Game progress'**
+  String get gameProgress;
+
+  /// No description provided for @nextPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Next Prompt'**
+  String get nextPrompt;
+
+  /// No description provided for @charadesRoundComplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Charades round complete!'**
+  String get charadesRoundComplete;
+
+  /// No description provided for @never.
+  ///
+  /// In en, this message translates to:
+  /// **'Never'**
+  String get never;
+
+  /// No description provided for @iHave.
+  ///
+  /// In en, this message translates to:
+  /// **'I Have'**
+  String get iHave;
+
+  /// No description provided for @roundCompleteCelebration.
+  ///
+  /// In en, this message translates to:
+  /// **'Round Complete!'**
+  String get roundCompleteCelebration;
+
+  /// No description provided for @iHaveCount.
+  ///
+  /// In en, this message translates to:
+  /// **'I Have: {count}'**
+  String iHaveCount(int count);
+
+  /// No description provided for @neverCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Never: {count}'**
+  String neverCount(int count);
+
+  /// No description provided for @changeCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Change Category'**
+  String get changeCategory;
+
+  /// No description provided for @truth.
+  ///
+  /// In en, this message translates to:
+  /// **'TRUTH'**
+  String get truth;
+
+  /// No description provided for @dare.
+  ///
+  /// In en, this message translates to:
+  /// **'DARE'**
+  String get dare;
+
+  /// No description provided for @done.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get done;
+
+  /// No description provided for @truthsCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Truths completed: {count}'**
+  String truthsCompleted(int count);
+
+  /// No description provided for @daresCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Dares completed: {count}'**
+  String daresCompleted(int count);
+
+  /// No description provided for @charadesSetupDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a theme and a 1, 3, or 5-round game, then act out each prompt without saying the answer.'**
+  String get charadesSetupDescription;
+
+  /// No description provided for @neverSetupDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a family-friendly theme and choose 1, 3, or 5 prompts for a quick round of surprising stories.'**
+  String get neverSetupDescription;
+
+  /// No description provided for @truthDareSetupDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a playful theme and a 1, 3, or 5-round game of safe truths and family-friendly dares.'**
+  String get truthDareSetupDescription;
+
+  /// No description provided for @wouldRatherSetupDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a category, choose 1, 3, or 5 rounds, then discover which playful choices your family makes.'**
+  String get wouldRatherSetupDescription;
+
+  /// No description provided for @wouldYouRatherPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Would you rather...'**
+  String get wouldYouRatherPrompt;
+
+  /// No description provided for @chooseMostFunAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the answer that sounds the most fun to you.'**
+  String get chooseMostFunAnswer;
+
+  /// No description provided for @tapAnswerToLock.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap one answer to lock it in.'**
+  String get tapAnswerToLock;
+
+  /// No description provided for @youSelectedAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'You selected: {answer}'**
+  String youSelectedAnswer(String answer);
+
+  /// No description provided for @seeResults.
+  ///
+  /// In en, this message translates to:
+  /// **'See Results'**
+  String get seeResults;
+
+  /// No description provided for @nextRound.
+  ///
+  /// In en, this message translates to:
+  /// **'Next Round'**
+  String get nextRound;
+
+  /// No description provided for @greatJob.
+  ///
+  /// In en, this message translates to:
+  /// **'Great job!'**
+  String get greatJob;
+
+  /// No description provided for @completedRoundsCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'You completed {rounds} rounds in the {category} category.'**
+  String completedRoundsCategory(int rounds, String category);
+
+  /// No description provided for @changeSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Change Settings'**
+  String get changeSettings;
+
+  /// No description provided for @triviaFamilyRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Join or create a family before playing Trivia.'**
+  String get triviaFamilyRequired;
+
+  /// No description provided for @couldNotPrepareTrivia.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not prepare Trivia. Please try again.'**
+  String get couldNotPrepareTrivia;
+
+  /// No description provided for @triviaSetupDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Build two teams, pick a category, and race through family-friendly questions.'**
+  String get triviaSetupDescription;
+
+  /// No description provided for @questionsPerRound.
+  ///
+  /// In en, this message translates to:
+  /// **'Questions per round'**
+  String get questionsPerRound;
+
+  /// No description provided for @timePerQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Time per question'**
+  String get timePerQuestion;
+
+  /// No description provided for @questionRoundProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Round {round} of {totalRounds} • Question {question} of {totalQuestions}'**
+  String questionRoundProgress(int round, int totalRounds, int question, int totalQuestions);
+
+  /// No description provided for @questionComplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Question Complete'**
+  String get questionComplete;
+
+  /// No description provided for @nextQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Next Question'**
+  String get nextQuestion;
+
+  /// No description provided for @noStealCorrectAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'No steal.\n\nCorrect answer: {answer}'**
+  String noStealCorrectAnswer(String answer);
+
+  /// No description provided for @teamAnsweredCorrectly.
+  ///
+  /// In en, this message translates to:
+  /// **'{team} answered correctly!\n\n+{points} points'**
+  String teamAnsweredCorrectly(String team, int points);
+
+  /// No description provided for @teamStoleQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'{team} stole the question!\n\n+{points} point'**
+  String teamStoleQuestion(String team, int points);
+
+  /// No description provided for @stealMissedCorrectAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'Steal missed.\n\nCorrect answer: {answer}'**
+  String stealMissedCorrectAnswer(String answer);
+
+  /// No description provided for @triviaTie.
+  ///
+  /// In en, this message translates to:
+  /// **'Trivia Tie!'**
+  String get triviaTie;
+
+  /// No description provided for @tieBreaker.
+  ///
+  /// In en, this message translates to:
+  /// **'TIE-BREAKER'**
+  String get tieBreaker;
+
+  /// No description provided for @oneFinalQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'One final question decides the winner.'**
+  String get oneFinalQuestion;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

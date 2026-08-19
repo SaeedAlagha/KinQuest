@@ -2,7 +2,9 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 
+import '../../../l10n/app_localizations.dart';
 import '../services/never_have_i_ever_ai_service.dart';
+import '../utils/game_localization.dart';
 import '../widgets/game_setup_widgets.dart';
 
 class NeverHaveIEverScreen extends StatefulWidget {
@@ -61,6 +63,44 @@ class _NeverHaveIEverScreenState extends State<NeverHaveIEverScreen> {
     ],
   };
 
+  final Map<String, List<String>> _arabicFallbackPrompts = {
+    'Family': [
+      'لم أنم من قبل أثناء مشاهدة فيلم عائلي.',
+      'لم آكل من قبل وجبة خفيفة تخص شخصًا آخر.',
+      'لم أنسَ من قبل عيد ميلاد أحد أفراد العائلة.',
+      'لم ألقِ اللوم من قبل على غيري بسبب فوضى.',
+      'لم أضحك من قبل كثيرًا أثناء العشاء.',
+    ],
+    'School': [
+      'لم أنسَ من قبل واجبي المدرسي.',
+      'لم أتأخر من قبل عن الحصة.',
+      'لم أرسم من قبل أثناء الدرس.',
+      'لم أنسَ من قبل وجبة الغداء.',
+      'لم أجب من قبل إجابة خاطئة عن سؤال.',
+    ],
+    'Travel': [
+      'لم تفُتني من قبل حافلة أو قطار.',
+      'لم أضل الطريق من قبل أثناء السفر.',
+      'لم أنم من قبل خلال رحلة بالسيارة.',
+      'لم أنسَ من قبل شيئًا مهمًا في المنزل.',
+      'لم ألتقط من قبل صورًا كثيرة جدًا في رحلة.',
+    ],
+    'Food': [
+      'لم آكل من قبل الحلوى قبل العشاء.',
+      'لم أجرب من قبل طعامًا حارًا جدًا.',
+      'لم أسقط من قبل الطعام على الأرض.',
+      'لم أتناول من قبل الفطور وقت العشاء.',
+      'لم أمزج من قبل نوعين غريبين من الطعام.',
+    ],
+    'Funny': [
+      'لم أدخل من قبل الغرفة الخطأ.',
+      'لم أرتدِ من قبل جوربين غير متطابقين.',
+      'لم أضحك من قبل في الوقت الخطأ.',
+      'لم أنسَ من قبل لماذا دخلت الغرفة.',
+      'لم أتحدث من قبل مع نفسي بصوت مرتفع.',
+    ],
+  };
+
   String _selectedCategory = 'Family';
   int _selectedRounds = 3;
   bool _isLoading = false;
@@ -97,7 +137,10 @@ class _NeverHaveIEverScreenState extends State<NeverHaveIEverScreen> {
         _isLoading = false;
       });
     } catch (error) {
-      final fallback = List<String>.from(_fallbackPrompts[_selectedCategory]!)
+      final fallbackBank = Localizations.localeOf(context).languageCode == 'ar'
+          ? _arabicFallbackPrompts
+          : _fallbackPrompts;
+      final fallback = List<String>.from(fallbackBank[_selectedCategory]!)
         ..shuffle(Random());
 
       if (!mounted) return;
@@ -110,8 +153,10 @@ class _NeverHaveIEverScreenState extends State<NeverHaveIEverScreen> {
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Could not reach AI. Using offline prompts instead.'),
+        SnackBar(
+          content: Text(
+            AppLocalizations.of(context)!.couldNotReachAiOfflinePrompts,
+          ),
         ),
       );
     }
@@ -138,8 +183,10 @@ class _NeverHaveIEverScreenState extends State<NeverHaveIEverScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context)!;
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Never Have I Ever')),
+      appBar: AppBar(title: Text(strings.neverHaveIEver)),
       body: _showResults || _isPlaying
           ? Padding(
               padding: const EdgeInsets.all(24),
@@ -150,18 +197,19 @@ class _NeverHaveIEverScreenState extends State<NeverHaveIEverScreen> {
   }
 
   Widget _buildSetup() {
+    final strings = AppLocalizations.of(context)!;
+
     return GameSetupView(
       icon: Icons.sentiment_satisfied_alt_rounded,
-      title: 'Never Have I Ever',
-      description:
-          'Pick a family-friendly theme and choose 1, 3, or 5 prompts for a quick round of surprising stories.',
+      title: strings.neverHaveIEver,
+      description: strings.neverSetupDescription,
       children: [
         GameSetupSectionCard(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Choose a category',
+                strings.chooseCategory,
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               const SizedBox(height: 14),
@@ -172,7 +220,7 @@ class _NeverHaveIEverScreenState extends State<NeverHaveIEverScreen> {
                   final selected = category == _selectedCategory;
 
                   return ChoiceChip(
-                    label: Text(category),
+                    label: Text(localizedGameCategory(strings, category)),
                     selected: selected,
                     onSelected: (_) {
                       setState(() {
@@ -198,30 +246,32 @@ class _NeverHaveIEverScreenState extends State<NeverHaveIEverScreen> {
         ElevatedButton(
           onPressed: _isLoading ? null : _startGame,
           child: _isLoading
-              ? const Row(
+              ? Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    SizedBox(
+                    const SizedBox(
                       width: 20,
                       height: 20,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     ),
-                    SizedBox(width: 12),
-                    Text('Generating prompts...'),
+                    const SizedBox(width: 12),
+                    Text(strings.generatingPrompts),
                   ],
                 )
-              : const Text('Start Game'),
+              : Text(strings.startGame),
         ),
       ],
     );
   }
 
   Widget _buildGame() {
+    final strings = AppLocalizations.of(context)!;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(
-          'Prompt ${_currentIndex + 1} of ${_prompts.length}',
+          strings.promptProgress(_currentIndex + 1, _prompts.length),
           style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
         ),
         const SizedBox(height: 24),
@@ -250,14 +300,14 @@ class _NeverHaveIEverScreenState extends State<NeverHaveIEverScreen> {
             Expanded(
               child: OutlinedButton(
                 onPressed: () => _answer(false),
-                child: const Text('Never'),
+                child: Text(strings.never),
               ),
             ),
             const SizedBox(width: 12),
             Expanded(
               child: ElevatedButton(
                 onPressed: () => _answer(true),
-                child: const Text('I Have'),
+                child: Text(strings.iHave),
               ),
             ),
           ],
@@ -267,31 +317,33 @@ class _NeverHaveIEverScreenState extends State<NeverHaveIEverScreen> {
   }
 
   Widget _buildResults() {
+    final strings = AppLocalizations.of(context)!;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const Spacer(),
         const Icon(Icons.celebration, size: 72),
         const SizedBox(height: 24),
-        const Text(
-          'Round Complete!',
+        Text(
+          strings.roundCompleteCelebration,
           textAlign: TextAlign.center,
           style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 32),
         Text(
-          'I Have: $_iHaveCount',
+          strings.iHaveCount(_iHaveCount),
           textAlign: TextAlign.center,
           style: const TextStyle(fontSize: 22),
         ),
         const SizedBox(height: 12),
         Text(
-          'Never: $_neverCount',
+          strings.neverCount(_neverCount),
           textAlign: TextAlign.center,
           style: const TextStyle(fontSize: 22),
         ),
         const Spacer(),
-        ElevatedButton(onPressed: _startGame, child: const Text('Play Again')),
+        ElevatedButton(onPressed: _startGame, child: Text(strings.playAgain)),
         const SizedBox(height: 12),
         OutlinedButton(
           onPressed: () {
@@ -300,7 +352,7 @@ class _NeverHaveIEverScreenState extends State<NeverHaveIEverScreen> {
               _isPlaying = false;
             });
           },
-          child: const Text('Change Category'),
+          child: Text(strings.changeCategory),
         ),
       ],
     );

@@ -5,12 +5,14 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-import '../services/trivia_ai_service.dart';
-import '../widgets/game_setup_widgets.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../competitions/config/competition_games.dart';
 import '../../competitions/models/competition_game_result.dart';
 import '../../competitions/models/competition_player_result.dart';
 import '../../competitions/models/game_play_mode.dart';
+import '../services/trivia_ai_service.dart';
+import '../utils/game_localization.dart';
+import '../widgets/game_setup_widgets.dart';
 
 enum _TriviaPhase {
   setup,
@@ -21,6 +23,8 @@ enum _TriviaPhase {
   tieBreaker,
   finalResults,
 }
+
+enum _TriviaFamilyError { signedOut, noFamily, loadFailed }
 
 class TriviaScreen extends StatefulWidget {
   const TriviaScreen({
@@ -52,7 +56,7 @@ class _TriviaScreenState extends State<TriviaScreen> {
   bool _isLoadingFamily = true;
   bool _isLoadingQuestions = false;
 
-  String? _familyError;
+  _TriviaFamilyError? _familyError;
 
   final List<_TriviaPlayer> _familyMembers = [];
   final Set<String> _selectedPlayerIds = {};
@@ -129,7 +133,7 @@ class _TriviaScreenState extends State<TriviaScreen> {
     if (user == null) {
       setState(() {
         _isLoadingFamily = false;
-        _familyError = 'You must be logged in to play.';
+        _familyError = _TriviaFamilyError.signedOut;
       });
       return;
     }
@@ -140,6 +144,8 @@ class _TriviaScreenState extends State<TriviaScreen> {
           .doc(user.uid)
           .get();
 
+      if (!mounted) return;
+
       final familyId = userDocument.data()?['familyId'] as String?;
 
       if (familyId == null || familyId.isEmpty) {
@@ -147,7 +153,7 @@ class _TriviaScreenState extends State<TriviaScreen> {
 
         setState(() {
           _isLoadingFamily = false;
-          _familyError = 'Join or create a family before playing Trivia.';
+          _familyError = _TriviaFamilyError.noFamily;
         });
 
         return;
@@ -158,6 +164,10 @@ class _TriviaScreenState extends State<TriviaScreen> {
           .where('familyId', isEqualTo: familyId)
           .get();
 
+      if (!mounted) return;
+
+      final fallbackName = AppLocalizations.of(context)!.familyMemberFallback;
+
       final members = membersSnapshot.docs.map((document) {
         final data = document.data();
 
@@ -166,9 +176,7 @@ class _TriviaScreenState extends State<TriviaScreen> {
 
         return _TriviaPlayer(
           id: document.id,
-          name: name?.trim().isNotEmpty == true
-              ? name!
-              : email ?? 'Family Member',
+          name: name?.trim().isNotEmpty == true ? name! : email ?? fallbackName,
         );
       }).toList();
 
@@ -202,7 +210,7 @@ class _TriviaScreenState extends State<TriviaScreen> {
 
       setState(() {
         _isLoadingFamily = false;
-        _familyError = 'Could not load your family members.';
+        _familyError = _TriviaFamilyError.loadFailed;
       });
     }
   }
@@ -312,8 +320,8 @@ class _TriviaScreenState extends State<TriviaScreen> {
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Could not prepare Trivia. Please try again.'),
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.couldNotPrepareTrivia),
         ),
       );
     }
@@ -321,9 +329,13 @@ class _TriviaScreenState extends State<TriviaScreen> {
 
   bool get _teamAStartsQuestion => _globalQuestionIndex.isEven;
 
-  String get _startingTeamName => _teamAStartsQuestion ? 'Team A' : 'Team B';
+  AppLocalizations get _strings => AppLocalizations.of(context)!;
 
-  String get _stealingTeamName => _teamAStartsQuestion ? 'Team B' : 'Team A';
+  String get _startingTeamName =>
+      _teamAStartsQuestion ? _strings.teamA : _strings.teamB;
+
+  String get _stealingTeamName =>
+      _teamAStartsQuestion ? _strings.teamB : _strings.teamA;
 
   void _startNormalQuestion() {
     _questionTimer?.cancel();
@@ -354,10 +366,9 @@ class _TriviaScreenState extends State<TriviaScreen> {
         final question = _questions[_globalQuestionIndex];
 
         setState(() {
-          _questionResultMessage =
-              'No steal.\n\n'
-              'Correct answer: '
-              '${question.options[question.correctIndex]}';
+          _questionResultMessage = _strings.noStealCorrectAnswer(
+            question.options[question.correctIndex],
+          );
 
           _phase = _TriviaPhase.questionResult;
         });
@@ -412,9 +423,10 @@ class _TriviaScreenState extends State<TriviaScreen> {
           _teamBScore += 2;
         }
 
-        _questionResultMessage =
-            '$_startingTeamName answered correctly!\n\n'
-            '+2 points';
+        _questionResultMessage = _strings.teamAnsweredCorrectly(
+          _startingTeamName,
+          2,
+        );
 
         _phase = _TriviaPhase.questionResult;
       });
@@ -466,9 +478,10 @@ class _TriviaScreenState extends State<TriviaScreen> {
           _teamAScore += 1;
         }
 
-        _questionResultMessage =
-            '$_stealingTeamName stole the question!\n\n'
-            '+1 point';
+        _questionResultMessage = _strings.teamStoleQuestion(
+          _stealingTeamName,
+          1,
+        );
 
         _phase = _TriviaPhase.questionResult;
       });
@@ -476,10 +489,9 @@ class _TriviaScreenState extends State<TriviaScreen> {
       setState(() {
         _selectedAnswer = index;
 
-        _questionResultMessage =
-            'Steal missed.\n\n'
-            'Correct answer: '
-            '${question.options[question.correctIndex]}';
+        _questionResultMessage = _strings.stealMissedCorrectAnswer(
+          question.options[question.correctIndex],
+        );
 
         _phase = _TriviaPhase.questionResult;
       });
@@ -557,10 +569,23 @@ class _TriviaScreenState extends State<TriviaScreen> {
     });
   }
 
+  String _familyErrorMessage(
+    AppLocalizations strings,
+    _TriviaFamilyError error,
+  ) {
+    return switch (error) {
+      _TriviaFamilyError.signedOut => strings.mustBeLoggedInToPlay,
+      _TriviaFamilyError.noFamily => strings.triviaFamilyRequired,
+      _TriviaFamilyError.loadFailed => strings.couldNotLoadFamilyMembers,
+    };
+  }
+
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context)!;
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Trivia')),
+      appBar: AppBar(title: Text(strings.trivia)),
       body: SafeArea(
         child: _phase == _TriviaPhase.setup
             ? _buildSetup()
@@ -582,30 +607,36 @@ class _TriviaScreenState extends State<TriviaScreen> {
   }
 
   Widget _buildSetup() {
+    final strings = AppLocalizations.of(context)!;
+
     if (_isLoadingFamily) {
       return const Center(child: CircularProgressIndicator());
     }
 
     if (_familyError != null) {
-      return Center(child: Text(_familyError!, textAlign: TextAlign.center));
+      return Center(
+        child: Text(
+          _familyErrorMessage(strings, _familyError!),
+          textAlign: TextAlign.center,
+        ),
+      );
     }
 
     return GameSetupView(
       icon: Icons.quiz_rounded,
-      title: 'Trivia',
-      description:
-          'Build two teams, pick a category, and race through family-friendly questions.',
+      title: strings.trivia,
+      description: strings.triviaSetupDescription,
       children: [
         GameSetupSectionCard(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Who is playing?',
+                strings.whoIsPlaying,
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               const SizedBox(height: 6),
-              const Text('Choose at least 2 players for the family match.'),
+              Text(strings.chooseAtLeastTwoPlayers),
               const SizedBox(height: 12),
               for (final player in _familyMembers)
                 Material(
@@ -627,11 +658,11 @@ class _TriviaScreenState extends State<TriviaScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
-                'Choose teams',
+                strings.chooseTeams,
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               const SizedBox(height: 6),
-              const Text('Assign every selected player to Team A or Team B.'),
+              Text(strings.assignPlayersToTeams),
               const SizedBox(height: 14),
               ..._familyMembers
                   .where((player) => _selectedPlayerIds.contains(player.id))
@@ -659,7 +690,7 @@ class _TriviaScreenState extends State<TriviaScreen> {
                                 ),
                               ),
                               ChoiceChip(
-                                label: const Text('Team A'),
+                                label: Text(strings.teamA),
                                 selected: inTeamA,
                                 onSelected: (_) {
                                   _assignPlayerToTeam(player, 'A');
@@ -667,7 +698,7 @@ class _TriviaScreenState extends State<TriviaScreen> {
                               ),
                               const SizedBox(width: 8),
                               ChoiceChip(
-                                label: const Text('Team B'),
+                                label: Text(strings.teamB),
                                 selected: inTeamB,
                                 onSelected: (_) {
                                   _assignPlayerToTeam(player, 'B');
@@ -685,7 +716,7 @@ class _TriviaScreenState extends State<TriviaScreen> {
                     ? _shuffleTeams
                     : null,
                 icon: const Icon(Icons.shuffle_rounded),
-                label: const Text('Shuffle Teams'),
+                label: Text(strings.shuffleTeams),
               ),
               if (_teamA.isNotEmpty || _teamB.isNotEmpty) ...[
                 const SizedBox(height: 14),
@@ -693,11 +724,17 @@ class _TriviaScreenState extends State<TriviaScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Expanded(
-                      child: _buildTeamCard(title: 'Team A', players: _teamA),
+                      child: _buildTeamCard(
+                        title: strings.teamA,
+                        players: _teamA,
+                      ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
-                      child: _buildTeamCard(title: 'Team B', players: _teamB),
+                      child: _buildTeamCard(
+                        title: strings.teamB,
+                        players: _teamB,
+                      ),
                     ),
                   ],
                 ),
@@ -710,14 +747,17 @@ class _TriviaScreenState extends State<TriviaScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Category', style: Theme.of(context).textTheme.titleLarge),
+              Text(
+                strings.category,
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
               const SizedBox(height: 12),
               Wrap(
                 spacing: 10,
                 runSpacing: 10,
                 children: _categories.map((category) {
                   return ChoiceChip(
-                    label: Text(category),
+                    label: Text(localizedGameCategory(strings, category)),
                     selected: category == _selectedCategory,
                     onSelected: (_) {
                       setState(() {
@@ -744,9 +784,12 @@ class _TriviaScreenState extends State<TriviaScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Match pace', style: Theme.of(context).textTheme.titleLarge),
+              Text(
+                strings.matchPace,
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
               const SizedBox(height: 14),
-              const Text('Questions per round'),
+              Text(strings.questionsPerRound),
               const SizedBox(height: 9),
               Wrap(
                 spacing: 10,
@@ -763,14 +806,14 @@ class _TriviaScreenState extends State<TriviaScreen> {
                 }).toList(),
               ),
               const SizedBox(height: 18),
-              const Text('Time per question'),
+              Text(strings.timePerQuestion),
               const SizedBox(height: 9),
               Wrap(
                 spacing: 10,
                 runSpacing: 10,
                 children: [20, 30, 45].map((seconds) {
                   return ChoiceChip(
-                    label: Text('$seconds sec'),
+                    label: Text(strings.secondsShort(seconds)),
                     selected: _secondsPerQuestion == seconds,
                     onSelected: (_) {
                       setState(() {
@@ -801,7 +844,9 @@ class _TriviaScreenState extends State<TriviaScreen> {
                 )
               : const Icon(Icons.play_arrow_rounded),
           label: Text(
-            _isLoadingQuestions ? 'Preparing Trivia...' : 'Start Trivia',
+            _isLoadingQuestions
+                ? strings.preparingNamedGame(strings.trivia)
+                : strings.startNamedGame(strings.trivia),
           ),
         ),
       ],
@@ -830,7 +875,7 @@ class _TriviaScreenState extends State<TriviaScreen> {
     final question = _questions[_globalQuestionIndex];
 
     return _buildQuestionLayout(
-      heading: '$_startingTeamName\'S TURN',
+      heading: _strings.teamTurn(_startingTeamName),
       question: question,
       seconds: _secondsRemaining,
       onAnswer: _selectNormalAnswer,
@@ -841,7 +886,7 @@ class _TriviaScreenState extends State<TriviaScreen> {
     final question = _questions[_globalQuestionIndex];
 
     return _buildQuestionLayout(
-      heading: 'STEAL — $_stealingTeamName',
+      heading: _strings.stealTeam(_stealingTeamName),
       question: question,
       seconds: _secondsRemaining,
       onAnswer: _selectStealAnswer,
@@ -854,6 +899,8 @@ class _TriviaScreenState extends State<TriviaScreen> {
     required int seconds,
     required ValueChanged<int> onAnswer,
   }) {
+    final strings = AppLocalizations.of(context)!;
+
     return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -869,15 +916,19 @@ class _TriviaScreenState extends State<TriviaScreen> {
           const SizedBox(height: 8),
 
           Text(
-            'Round $_currentRound of $_selectedRounds • '
-            'Question ${_questionInRound + 1} of $_questionsPerRound',
+            strings.questionRoundProgress(
+              _currentRound,
+              _selectedRounds,
+              _questionInRound + 1,
+              _questionsPerRound,
+            ),
             textAlign: TextAlign.center,
           ),
 
           const SizedBox(height: 18),
 
           Text(
-            '$seconds s',
+            strings.secondsRemaining(seconds),
             textAlign: TextAlign.center,
             style: Theme.of(
               context,
@@ -923,11 +974,11 @@ class _TriviaScreenState extends State<TriviaScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
                   Text(
-                    'Team A: $_teamAScore',
+                    strings.teamScore(strings.teamA, _teamAScore),
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                   Text(
-                    'Team B: $_teamBScore',
+                    strings.teamScore(strings.teamB, _teamBScore),
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                 ],
@@ -940,6 +991,8 @@ class _TriviaScreenState extends State<TriviaScreen> {
   }
 
   Widget _buildQuestionResultScreen() {
+    final strings = AppLocalizations.of(context)!;
+
     return Center(
       child: SingleChildScrollView(
         child: Column(
@@ -949,7 +1002,7 @@ class _TriviaScreenState extends State<TriviaScreen> {
             const SizedBox(height: 20),
 
             Text(
-              'Question Complete',
+              strings.questionComplete,
               style: Theme.of(
                 context,
               ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
@@ -967,8 +1020,14 @@ class _TriviaScreenState extends State<TriviaScreen> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    Text('Team A\n$_teamAScore', textAlign: TextAlign.center),
-                    Text('Team B\n$_teamBScore', textAlign: TextAlign.center),
+                    Text(
+                      strings.teamScore(strings.teamA, _teamAScore),
+                      textAlign: TextAlign.center,
+                    ),
+                    Text(
+                      strings.teamScore(strings.teamB, _teamBScore),
+                      textAlign: TextAlign.center,
+                    ),
                   ],
                 ),
               ),
@@ -982,8 +1041,8 @@ class _TriviaScreenState extends State<TriviaScreen> {
                 onPressed: _continueAfterQuestion,
                 child: Text(
                   _questionInRound == _questionsPerRound - 1
-                      ? 'Round Results'
-                      : 'Next Question',
+                      ? strings.roundResults
+                      : strings.nextQuestion,
                 ),
               ),
             ),
@@ -994,6 +1053,8 @@ class _TriviaScreenState extends State<TriviaScreen> {
   }
 
   Widget _buildRoundSummaryScreen() {
+    final strings = AppLocalizations.of(context)!;
+
     return Center(
       child: SingleChildScrollView(
         child: Column(
@@ -1003,7 +1064,7 @@ class _TriviaScreenState extends State<TriviaScreen> {
             const SizedBox(height: 20),
 
             Text(
-              'Round $_currentRound Complete',
+              strings.roundNumberComplete(_currentRound),
               style: Theme.of(
                 context,
               ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
@@ -1012,14 +1073,14 @@ class _TriviaScreenState extends State<TriviaScreen> {
             const SizedBox(height: 28),
 
             Text(
-              'Team A: $_teamAScore',
+              strings.teamScore(strings.teamA, _teamAScore),
               style: Theme.of(context).textTheme.titleLarge,
             ),
 
             const SizedBox(height: 12),
 
             Text(
-              'Team B: $_teamBScore',
+              strings.teamScore(strings.teamB, _teamBScore),
               style: Theme.of(context).textTheme.titleLarge,
             ),
 
@@ -1031,8 +1092,8 @@ class _TriviaScreenState extends State<TriviaScreen> {
                 onPressed: _continueAfterRound,
                 child: Text(
                   _currentRound == _selectedRounds
-                      ? 'See Final Results'
-                      : 'Start Round ${_currentRound + 1}',
+                      ? strings.seeFinalResults
+                      : strings.startRound(_currentRound + 1),
                 ),
               ),
             ),
@@ -1076,9 +1137,10 @@ class _TriviaScreenState extends State<TriviaScreen> {
   }
 
   Widget _buildFinalResultsScreen() {
+    final strings = AppLocalizations.of(context)!;
     final isTie = _teamAScore == _teamBScore;
 
-    final winner = _teamAScore > _teamBScore ? 'Team A' : 'Team B';
+    final winner = _teamAScore > _teamBScore ? strings.teamA : strings.teamB;
 
     return Center(
       child: SingleChildScrollView(
@@ -1089,7 +1151,7 @@ class _TriviaScreenState extends State<TriviaScreen> {
             const SizedBox(height: 20),
 
             Text(
-              isTie ? 'Trivia Tie!' : '$winner Wins!',
+              isTie ? strings.triviaTie : strings.teamWins(winner),
               textAlign: TextAlign.center,
               style: Theme.of(
                 context,
@@ -1099,14 +1161,14 @@ class _TriviaScreenState extends State<TriviaScreen> {
             const SizedBox(height: 28),
 
             Text(
-              'Team A: $_teamAScore',
+              strings.teamScore(strings.teamA, _teamAScore),
               style: Theme.of(context).textTheme.titleLarge,
             ),
 
             const SizedBox(height: 12),
 
             Text(
-              'Team B: $_teamBScore',
+              strings.teamScore(strings.teamB, _teamBScore),
               style: Theme.of(context).textTheme.titleLarge,
             ),
 
@@ -1125,8 +1187,8 @@ class _TriviaScreenState extends State<TriviaScreen> {
                 },
                 child: Text(
                   widget.playMode.isOfficial
-                      ? 'Return to ${widget.playMode.displayName}'
-                      : 'Play Again',
+                      ? strings.returnToCompetition(widget.playMode.displayName)
+                      : strings.playAgain,
                 ),
               ),
             ),
@@ -1138,7 +1200,7 @@ class _TriviaScreenState extends State<TriviaScreen> {
                 onPressed: () {
                   Navigator.of(context).pop();
                 },
-                child: const Text('Back to Games'),
+                child: Text(strings.backToGames),
               ),
             ),
           ],
@@ -1149,13 +1211,14 @@ class _TriviaScreenState extends State<TriviaScreen> {
 
   Widget _buildTieBreakerScreen() {
     final question = _questions[_globalQuestionIndex];
+    final strings = AppLocalizations.of(context)!;
 
     return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
-            'TIE-BREAKER',
+            strings.tieBreaker,
             textAlign: TextAlign.center,
             style: Theme.of(
               context,
@@ -1164,15 +1227,12 @@ class _TriviaScreenState extends State<TriviaScreen> {
 
           const SizedBox(height: 8),
 
-          const Text(
-            'One final question decides the winner.',
-            textAlign: TextAlign.center,
-          ),
+          Text(strings.oneFinalQuestion, textAlign: TextAlign.center),
 
           const SizedBox(height: 18),
 
           Text(
-            '10 s',
+            strings.secondsRemaining(10),
             textAlign: TextAlign.center,
             style: Theme.of(
               context,

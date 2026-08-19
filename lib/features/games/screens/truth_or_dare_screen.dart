@@ -2,7 +2,9 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 
+import '../../../l10n/app_localizations.dart';
 import '../services/truth_or_dare_ai_service.dart';
+import '../utils/game_localization.dart';
 import '../widgets/game_setup_widgets.dart';
 
 class TruthOrDareScreen extends StatefulWidget {
@@ -46,6 +48,17 @@ class _TruthOrDareScreenState extends State<TruthOrDareScreen> {
     ),
   ];
 
+  final List<TruthOrDarePrompt> _arabicFallbackPrompts = const [
+    TruthOrDarePrompt(type: 'truth', text: 'ما أطرف شيء فعلته مؤخرًا؟'),
+    TruthOrDarePrompt(type: 'dare', text: 'قلّد حيوانك المفضل لمدة 10 ثوانٍ.'),
+    TruthOrDarePrompt(
+      type: 'truth',
+      text: 'ما الطعام الذي يمكنك تناوله كل يوم؟',
+    ),
+    TruthOrDarePrompt(type: 'dare', text: 'ارقص من دون موسيقى لمدة 15 ثانية.'),
+    TruthOrDarePrompt(type: 'truth', text: 'ما الشيء الذي يجعلك تضحك دائمًا؟'),
+  ];
+
   String _selectedCategory = 'Family';
   int _selectedRounds = 3;
 
@@ -83,7 +96,11 @@ class _TruthOrDareScreenState extends State<TruthOrDareScreen> {
         _isLoading = false;
       });
     } catch (error) {
-      final fallback = List<TruthOrDarePrompt>.from(_fallbackPrompts)
+      final fallbackSource =
+          Localizations.localeOf(context).languageCode == 'ar'
+          ? _arabicFallbackPrompts
+          : _fallbackPrompts;
+      final fallback = List<TruthOrDarePrompt>.from(fallbackSource)
         ..shuffle(Random());
 
       if (!mounted) return;
@@ -95,8 +112,10 @@ class _TruthOrDareScreenState extends State<TruthOrDareScreen> {
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Could not reach AI. Using offline prompts instead.'),
+        SnackBar(
+          content: Text(
+            AppLocalizations.of(context)!.couldNotReachAiOfflinePrompts,
+          ),
         ),
       );
     }
@@ -125,8 +144,10 @@ class _TruthOrDareScreenState extends State<TruthOrDareScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context)!;
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Truth or Dare')),
+      appBar: AppBar(title: Text(strings.truthOrDare)),
       body: _showResults || _isPlaying
           ? Padding(
               padding: const EdgeInsets.all(24),
@@ -137,18 +158,19 @@ class _TruthOrDareScreenState extends State<TruthOrDareScreen> {
   }
 
   Widget _buildSetup() {
+    final strings = AppLocalizations.of(context)!;
+
     return GameSetupView(
       icon: Icons.casino_rounded,
-      title: 'Truth or Dare',
-      description:
-          'Choose a playful theme and a 1, 3, or 5-round game of safe truths and family-friendly dares.',
+      title: strings.truthOrDare,
+      description: strings.truthDareSetupDescription,
       children: [
         GameSetupSectionCard(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Choose a category',
+                strings.chooseCategory,
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               const SizedBox(height: 14),
@@ -157,7 +179,7 @@ class _TruthOrDareScreenState extends State<TruthOrDareScreen> {
                 runSpacing: 10,
                 children: _categories.map((category) {
                   return ChoiceChip(
-                    label: Text(category),
+                    label: Text(localizedGameCategory(strings, category)),
                     selected: category == _selectedCategory,
                     onSelected: (_) {
                       setState(() {
@@ -183,25 +205,26 @@ class _TruthOrDareScreenState extends State<TruthOrDareScreen> {
         ElevatedButton(
           onPressed: _isLoading ? null : _startGame,
           child: _isLoading
-              ? const Row(
+              ? Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    SizedBox(
+                    const SizedBox(
                       width: 20,
                       height: 20,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     ),
-                    SizedBox(width: 12),
-                    Text('Generating prompts...'),
+                    const SizedBox(width: 12),
+                    Text(strings.generatingPrompts),
                   ],
                 )
-              : const Text('Start Game'),
+              : Text(strings.startGame),
         ),
       ],
     );
   }
 
   Widget _buildGame() {
+    final strings = AppLocalizations.of(context)!;
     final prompt = _prompts[_currentIndex];
     final isTruth = prompt.type == 'truth';
 
@@ -209,14 +232,14 @@ class _TruthOrDareScreenState extends State<TruthOrDareScreen> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(
-          'Prompt ${_currentIndex + 1} of ${_prompts.length}',
+          strings.promptProgress(_currentIndex + 1, _prompts.length),
           style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
         ),
         const SizedBox(height: 16),
         LinearProgressIndicator(value: (_currentIndex + 1) / _prompts.length),
         const SizedBox(height: 30),
         Text(
-          isTruth ? 'TRUTH' : 'DARE',
+          isTruth ? strings.truth : strings.dare,
           textAlign: TextAlign.center,
           style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
         ),
@@ -239,37 +262,39 @@ class _TruthOrDareScreenState extends State<TruthOrDareScreen> {
           ),
         ),
         const SizedBox(height: 24),
-        ElevatedButton(onPressed: _completePrompt, child: const Text('Done')),
+        ElevatedButton(onPressed: _completePrompt, child: Text(strings.done)),
       ],
     );
   }
 
   Widget _buildResults() {
+    final strings = AppLocalizations.of(context)!;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const Spacer(),
         const Icon(Icons.celebration, size: 72),
         const SizedBox(height: 24),
-        const Text(
-          'Round Complete!',
+        Text(
+          strings.roundCompleteCelebration,
           textAlign: TextAlign.center,
           style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 30),
         Text(
-          'Truths completed: $_truthCount',
+          strings.truthsCompleted(_truthCount),
           textAlign: TextAlign.center,
           style: const TextStyle(fontSize: 22),
         ),
         const SizedBox(height: 12),
         Text(
-          'Dares completed: $_dareCount',
+          strings.daresCompleted(_dareCount),
           textAlign: TextAlign.center,
           style: const TextStyle(fontSize: 22),
         ),
         const Spacer(),
-        ElevatedButton(onPressed: _startGame, child: const Text('Play Again')),
+        ElevatedButton(onPressed: _startGame, child: Text(strings.playAgain)),
         const SizedBox(height: 12),
         OutlinedButton(
           onPressed: () {
@@ -278,7 +303,7 @@ class _TruthOrDareScreenState extends State<TruthOrDareScreen> {
               _isPlaying = false;
             });
           },
-          child: const Text('Change Category'),
+          child: Text(strings.changeCategory),
         ),
       ],
     );
