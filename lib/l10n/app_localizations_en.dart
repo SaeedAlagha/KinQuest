@@ -1127,6 +1127,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reviewYourProof => 'Review Your Proof';
 
   @override
+  String get missionProofPrivacyNotice => 'Your image is sent securely to Google Gemini through Sila\'s server only to verify this mission. Sila stores the verdict, not a copy of the image.';
+
+  @override
+  String get missionProofConsent => 'I consent to AI verification of this image.';
+
+  @override
   String participantsLabel(String names) {
     return 'Participants: $names';
   }

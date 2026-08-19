@@ -403,6 +403,8 @@
   "chooseExistingImage": "اختر صورة موجودة من جهازك",
   "missionImageTooLarge": "حجم الصورة كبير جدًا. يرجى اختيار صورة أصغر.",
   "reviewYourProof": "راجع إثباتك",
+  "missionProofPrivacyNotice": "تُرسل صورتك بأمان إلى Google Gemini عبر خادم صلة للتحقق من هذه المهمة فقط. تحفظ صلة نتيجة التحقق، وليس نسخة من الصورة.",
+  "missionProofConsent": "أوافق على التحقق من هذه الصورة باستخدام الذكاء الاصطناعي.",
   "participantsLabel": "المشاركون: {names}",
   "@participantsLabel": {
     "placeholders": {

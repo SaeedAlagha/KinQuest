@@ -4,10 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:kinquest/core/config/api_config.dart';
 
 class DontSayItCard {
-  const DontSayItCard({
-    required this.word,
-    required this.forbiddenWords,
-  });
+  const DontSayItCard({required this.word, required this.forbiddenWords});
 
   final String word;
   final List<String> forbiddenWords;
@@ -25,18 +22,12 @@ class DontSayItCard {
 class DontSayItAiService {
   const DontSayItAiService();
 
-  Future<List<DontSayItCard>> generateCards({
-    required int count,
-  }) async {
+  Future<List<DontSayItCard>> generateCards({required int count}) async {
     final response = await http
         .post(
           ApiConfig.endpoint('/api/dont-say-it'),
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: jsonEncode({
-            'count': count,
-          }),
+          headers: await ApiConfig.authenticatedJsonHeaders(),
+          body: jsonEncode({'count': count}),
         )
         .timeout(const Duration(seconds: 30));
 
@@ -48,11 +39,7 @@ class DontSayItAiService {
     final cards = data['cards'] as List<dynamic>;
 
     return cards
-        .map(
-          (item) => DontSayItCard.fromJson(
-            item as Map<String, dynamic>,
-          ),
-        )
+        .map((item) => DontSayItCard.fromJson(item as Map<String, dynamic>))
         .toList();
   }
 }

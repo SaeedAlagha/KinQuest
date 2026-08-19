@@ -220,7 +220,7 @@ class FamilyImpostorAiService {
       final response = await http
           .post(
             ApiConfig.endpoint('/api/family-impostor'),
-            headers: {'Content-Type': 'application/json'},
+            headers: await ApiConfig.authenticatedJsonHeaders(),
             body: jsonEncode({
               'rounds': roundCount,
               'category': ?selectedCategory,

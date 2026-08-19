@@ -64,3 +64,40 @@ jobs:
 
       - name: Check backend syntax
         run: node --check server.js
+
+      - name: Run backend tests
+        run: npm test
+
+      - name: Audit production dependencies
+        run: npm audit --omit=dev
+
+  firebase-rules:
+    name: Firebase rules validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Install rules test dependencies
+        working-directory: backend
+        run: npm ci
+
+      - name: Compile Firebase rules in isolated emulators
+        run: >-
+          npx --yes firebase-tools@15.27.0 emulators:exec
+          --only firestore,storage
+          --project demo-kinquest
+          "npm --prefix backend run test:rules"

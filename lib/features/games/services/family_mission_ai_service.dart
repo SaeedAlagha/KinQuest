@@ -33,7 +33,7 @@ class FamilyMissionAiService {
     final response = await http
         .post(
           ApiConfig.endpoint('/api/family-missions/verify'),
-          headers: const {'Content-Type': 'application/json'},
+          headers: await ApiConfig.authenticatedJsonHeaders(),
           body: jsonEncode({
             'missionId': mission.id,
             'title': mission.title,

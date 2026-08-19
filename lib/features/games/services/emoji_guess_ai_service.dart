@@ -31,7 +31,7 @@ class EmojiGuessAiService {
     final response = await http
         .post(
           ApiConfig.endpoint('/api/emoji-guess'),
-          headers: {'Content-Type': 'application/json'},
+          headers: await ApiConfig.authenticatedJsonHeaders(),
           body: jsonEncode({'category': category, 'count': count}),
         )
         .timeout(const Duration(seconds: 20));
@@ -48,7 +48,7 @@ class EmojiGuessAiService {
         .toList();
   }
 
-    Future<bool> checkAnswer({
+  Future<bool> checkAnswer({
     required String expectedAnswer,
     required String playerAnswer,
   }) async {
@@ -59,16 +59,14 @@ class EmojiGuessAiService {
       return true;
     }
     if (normalizedExpected.contains(normalizedPlayer) ||
-    normalizedPlayer.contains(normalizedExpected)) {
-  return true;
-  } 
+        normalizedPlayer.contains(normalizedExpected)) {
+      return true;
+    }
 
     final response = await http
         .post(
           ApiConfig.endpoint('/api/emoji-guess/check-answer'),
-          headers: {
-            'Content-Type': 'application/json',
-          },
+          headers: await ApiConfig.authenticatedJsonHeaders(),
           body: jsonEncode({
             'expectedAnswer': expectedAnswer,
             'playerAnswer': playerAnswer,
@@ -80,32 +78,23 @@ class EmojiGuessAiService {
       return false;
     }
 
-    final data =
-        jsonDecode(response.body) as Map<String, dynamic>;
+    final data = jsonDecode(response.body) as Map<String, dynamic>;
 
     return data['match'] == true;
   }
 
- String _normalize(String value) {
-  final ignoredWords = {
-    'the',
-    'a',
-    'an',
-  };
+  String _normalize(String value) {
+    final ignoredWords = {'the', 'a', 'an'};
 
-  final words = value
-      .toLowerCase()
-      .replaceAll(RegExp(r'[^a-z0-9 ]'), '')
-      .replaceAll(RegExp(r'\s+'), ' ')
-      .trim()
-      .split(' ')
-      .where(
-        (word) =>
-            word.isNotEmpty &&
-            !ignoredWords.contains(word),
-      )
-      .toList();
+    final words = value
+        .toLowerCase()
+        .replaceAll(RegExp(r'[^a-z0-9 ]'), '')
+        .replaceAll(RegExp(r'\s+'), ' ')
+        .trim()
+        .split(' ')
+        .where((word) => word.isNotEmpty && !ignoredWords.contains(word))
+        .toList();
 
-  return words.join(' ');
-}
+    return words.join(' ');
+  }
 }

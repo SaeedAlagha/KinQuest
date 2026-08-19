@@ -1,1 +1,41 @@
-{"flutter":{"platforms":{"android":{"default":{"projectId":"kinquest-af379","appId":"1:292633186914:android:6134d1e467a2b75bdf373b","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"kinquest-af379","configurations":{"android":"1:292633186914:android:6134d1e467a2b75bdf373b","ios":"1:292633186914:ios:880a9e6fcde89bc7df373b","macos":"1:292633186914:ios:880a9e6fcde89bc7df373b","web":"1:292633186914:web:0d6115e87182b9fbdf373b","windows":"1:292633186914:web:b9dc3d88f5604563df373b"}}}}}}
+{
+  "firestore": {
+    "rules": "firestore.rules"
+  },
+  "storage": {
+    "rules": "storage.rules"
+  },
+  "emulators": {
+    "firestore": {
+      "host": "127.0.0.1",
+      "port": 9090
+    },
+    "storage": {
+      "host": "127.0.0.1",
+      "port": 9199
+    }
+  },
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "kinquest-af379",
+          "appId": "1:292633186914:android:6134d1e467a2b75bdf373b",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "kinquest-af379",
+          "configurations": {
+            "android": "1:292633186914:android:6134d1e467a2b75bdf373b",
+            "ios": "1:292633186914:ios:880a9e6fcde89bc7df373b",
+            "macos": "1:292633186914:ios:880a9e6fcde89bc7df373b",
+            "web": "1:292633186914:web:0d6115e87182b9fbdf373b",
+            "windows": "1:292633186914:web:b9dc3d88f5604563df373b"
+          }
+        }
+      }
+    }
+  }
+}

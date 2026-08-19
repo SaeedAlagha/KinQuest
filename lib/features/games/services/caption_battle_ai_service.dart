@@ -49,7 +49,7 @@ class CaptionBattleAiService {
     final response = await http
         .post(
           ApiConfig.endpoint('/api/caption-battle/modes'),
-          headers: {'Content-Type': 'application/json'},
+          headers: await ApiConfig.authenticatedJsonHeaders(),
           body: jsonEncode({
             'count': count,
             'language': languageCode,

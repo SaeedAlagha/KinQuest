@@ -2,39 +2,47 @@ const express = require("express");
 const cors = require("cors");
 const dotenv = require("dotenv");
 const { GoogleGenAI } = require("@google/genai");
-
 const {
-  cert,
-  initializeApp,
-} = require("firebase-admin/app");
+  createCorsOptions,
+  createFirebaseAuthMiddleware,
+  createRateLimiter,
+  securityHeaders,
+} = require("./security");
 
+dotenv.config({ quiet: true });
 const {
   FieldValue,
   getFirestore,
-} = require("firebase-admin/firestore");const { getMessaging } = require("firebase-admin/messaging");
+} = require("firebase-admin/firestore");
+const { getMessaging } = require("firebase-admin/messaging");
+const { ensureFirebaseAdmin } = require("./firebase_admin");
 
-dotenv.config();
-
-const serviceAccount = require("./firebase-service-account.json");
-
-initializeApp({
-  credential: cert(serviceAccount),
-});
+ensureFirebaseAdmin();
 
 const db = getFirestore();
 const messaging = getMessaging();
 
 const app = express();
 
-app.use(cors());
-app.use(express.json({ limit: "2mb" }));
+app.disable("x-powered-by");
+
+if (process.env.NODE_ENV === "production") {
+  app.set("trust proxy", 1);
+}
+
+app.use(securityHeaders);
+app.use(cors(createCorsOptions()));
+app.use("/api", createRateLimiter());
+app.use("/api", createFirebaseAuthMiddleware());
+app.use("/api", express.json({ limit: "2mb", type: "application/json" }));
 const ai = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY,
 });
 
 app.get("/", (req, res) => {
   res.json({
-    message: "KinQuest Gemini server is running",
+    message: "Sila AI service is running",
+    authentication: "Firebase ID token required in production",
   });
 });
 
@@ -2171,12 +2179,24 @@ function startNotificationListener() {
     );
 }
 
-startNotificationListener();
-startWishlistGoalReadyListener();
-
 const PORT = process.env.PORT || 3000;
 
-app.listen(PORT, () => {
-  console.log(`KinQuest server running on port ${PORT}`);
-  console.log("FCM notification listener started.");
+app.use((error, request, response, next) => {
+  if (error instanceof SyntaxError && "body" in error) {
+    return response.status(400).json({ error: "Request body must be valid JSON." });
+  }
+
+  return next(error);
 });
+
+if (require.main === module) {
+  startNotificationListener();
+  startWishlistGoalReadyListener();
+
+  app.listen(PORT, () => {
+    console.log(`Sila AI service running on port ${PORT}`);
+    console.log("FCM notification listeners started.");
+  });
+}
+
+module.exports = app;
