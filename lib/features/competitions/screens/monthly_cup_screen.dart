@@ -177,6 +177,16 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
         }
       }
 
+      final storedSemifinalistNames = <String>[];
+
+      final rawSemifinalistNames = data?['semifinalistNames'];
+
+      if (rawSemifinalistNames is List) {
+        storedSemifinalistNames.addAll(
+          rawSemifinalistNames.whereType<String>(),
+        );
+      }
+
       if (!mounted) return;
 
       setState(() {
@@ -204,11 +214,7 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
         _runnerUpName = data?['runnerUpName'] as String?;
         _semifinalistNames
           ..clear()
-          ..addAll(
-            storedMatches
-                .where((match) => match.matchIndex < 2)
-                .map((match) => match.loserName),
-          );
+          ..addAll(storedSemifinalistNames);
 
         _isLoading = false;
         _loadError = null;
@@ -529,21 +535,53 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
   }
 
   Future<void> _finishCup() async {
-    if (_matches.length < 3 || _completed || _isSaving) {
+    final totalMatches = _selectedPlayers.length - 1;
+
+    if (_matches.length < totalMatches || _completed || _isSaving) {
       return;
     }
 
-    final finalMatch = _matches.firstWhere((match) => match.matchIndex == 2);
+    final sortedMatches = List<_MonthlyMatch>.from(_matches)
+      ..sort((a, b) => a.matchIndex.compareTo(b.matchIndex));
+
+    final finalMatch = sortedMatches.last;
 
     final championId = finalMatch.winnerId;
     final championName = finalMatch.winnerName;
     final runnerUpId = finalMatch.loserId;
     final runnerUpName = finalMatch.loserName;
 
-    final semifinalLoserIds = _matches
-        .where((match) => match.matchIndex < 2)
-        .map((match) => match.loserId)
+    final rounds = _buildRounds();
+
+    final semifinalMatches = rounds.length >= 2
+        ? rounds[rounds.length - 2].matches
+        : <_MonthlyRoundMatch>[];
+
+    final semifinalLoserIds = semifinalMatches
+        .map((roundMatch) => roundMatch.savedMatch?.loserId)
+        .whereType<String>()
         .toList();
+
+    final semifinalLoserNames = semifinalMatches
+        .map((roundMatch) => roundMatch.savedMatch?.loserName)
+        .whereType<String>()
+        .toList();
+
+    final gamesPlayedByUser = <String, int>{};
+
+    for (final match in _matches) {
+      gamesPlayedByUser.update(
+        match.player1Id,
+        (currentValue) => currentValue + 1,
+        ifAbsent: () => 1,
+      );
+
+      gamesPlayedByUser.update(
+        match.player2Id,
+        (currentValue) => currentValue + 1,
+        ifAbsent: () => 1,
+      );
+    }
 
     setState(() {
       _isSaving = true;
@@ -554,13 +592,11 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
         _championId = championId;
         _championName = championName;
         _runnerUpName = runnerUpName;
+
         _semifinalistNames
           ..clear()
-          ..addAll(
-            _matches
-                .where((match) => match.matchIndex < 2)
-                .map((match) => match.loserName),
-          );
+          ..addAll(semifinalLoserNames);
+
         _completed = true;
         _isSaving = false;
       });
@@ -608,6 +644,7 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
           'runnerUpId': runnerUpId,
           'runnerUpName': runnerUpName,
           'semifinalistIds': semifinalLoserIds,
+          'semifinalistNames': semifinalLoserNames,
           'tokenReward': CompetitionRewards.monthlyChampionTokens,
           'championRankingPointReward':
               CompetitionRewards.monthlyChampionRankingPoints,
@@ -618,6 +655,15 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
           'completedAt': FieldValue.serverTimestamp(),
           'updatedAt': FieldValue.serverTimestamp(),
         }, SetOptions(merge: true));
+
+        for (final entry in gamesPlayedByUser.entries) {
+          final userRef = firestore.collection('users').doc(entry.key);
+
+          transaction.set(userRef, {
+            'gamesPlayed': FieldValue.increment(entry.value),
+            'updatedAt': FieldValue.serverTimestamp(),
+          }, SetOptions(merge: true));
+        }
 
         final championRef = firestore.collection('users').doc(championId);
 
@@ -630,10 +676,10 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
           ),
           'officialWins': FieldValue.increment(1),
           'monthlyWins': FieldValue.increment(1),
-          'gamesPlayed': FieldValue.increment(2),
           'trophies': FieldValue.increment(1),
           'updatedAt': FieldValue.serverTimestamp(),
         }, SetOptions(merge: true));
+
         final tokenTransactionRef = championRef
             .collection('tokenTransactions')
             .doc();
@@ -649,13 +695,13 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
           'relatedCompetitionId': _competitionId,
           'createdAt': FieldValue.serverTimestamp(),
         });
+
         final runnerUpRef = firestore.collection('users').doc(runnerUpId);
 
         transaction.set(runnerUpRef, {
           'rankingPoints': FieldValue.increment(
             CompetitionRewards.monthlyRunnerUpRankingPoints,
           ),
-          'gamesPlayed': FieldValue.increment(2),
           'updatedAt': FieldValue.serverTimestamp(),
         }, SetOptions(merge: true));
 
@@ -668,7 +714,6 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
             'rankingPoints': FieldValue.increment(
               CompetitionRewards.monthlySemifinalistRankingPoints,
             ),
-            'gamesPlayed': FieldValue.increment(1),
             'updatedAt': FieldValue.serverTimestamp(),
           }, SetOptions(merge: true));
         }
@@ -702,13 +747,11 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
         _championId = championId;
         _championName = championName;
         _runnerUpName = runnerUpName;
+
         _semifinalistNames
           ..clear()
-          ..addAll(
-            _matches
-                .where((match) => match.matchIndex < 2)
-                .map((match) => match.loserName),
-          );
+          ..addAll(semifinalLoserNames);
+
         _completed = true;
         _isSaving = false;
       });
