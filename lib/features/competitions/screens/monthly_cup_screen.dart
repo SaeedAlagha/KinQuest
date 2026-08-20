@@ -435,7 +435,7 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
         _isSaving = false;
       });
 
-      if (_matches.length == 3) {
+      if (_matches.length == _selectedPlayers.length - 1) {
         await _finishCup();
       }
 
@@ -514,7 +514,7 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
         _isSaving = false;
       });
 
-      if (_matches.length == 3) {
+      if (_matches.length == _selectedPlayers.length - 1) {
         await _finishCup();
       }
     } catch (_) {
@@ -938,25 +938,81 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
     );
   }
 
+  List<_MonthlyRound> _buildRounds() {
+    var currentPlayers = List<_MonthlyPlayer>.from(_selectedPlayers);
+    final rounds = <_MonthlyRound>[];
+    var nextMatchIndex = 0;
+    var roundNumber = 1;
+
+    while (currentPlayers.length > 1) {
+      final roundMatches = <_MonthlyRoundMatch>[];
+      final advancingPlayers = <_MonthlyPlayer>[];
+
+      var index = 0;
+
+      while (index + 1 < currentPlayers.length) {
+        final player1 = currentPlayers[index];
+        final player2 = currentPlayers[index + 1];
+
+        final savedMatch = _matchByIndex(nextMatchIndex);
+
+        roundMatches.add(
+          _MonthlyRoundMatch(
+            matchIndex: nextMatchIndex,
+            player1: player1,
+            player2: player2,
+            savedMatch: savedMatch,
+          ),
+        );
+
+        if (savedMatch != null) {
+          advancingPlayers.add(_playerById(savedMatch.winnerId));
+        }
+
+        nextMatchIndex++;
+        index += 2;
+      }
+
+      _MonthlyPlayer? byePlayer;
+
+      if (index < currentPlayers.length) {
+        byePlayer = currentPlayers[index];
+        advancingPlayers.add(byePlayer);
+      }
+
+      rounds.add(
+        _MonthlyRound(
+          roundNumber: roundNumber,
+          matches: roundMatches,
+          byePlayer: byePlayer,
+        ),
+      );
+
+      final roundComplete = roundMatches.every(
+        (match) => match.savedMatch != null,
+      );
+
+      if (!roundComplete) {
+        break;
+      }
+
+      currentPlayers = advancingPlayers;
+      roundNumber++;
+    }
+
+    return rounds;
+  }
+
   Widget _buildBracket() {
     final strings = AppLocalizations.of(context)!;
     final players = _selectedPlayers;
 
-    if (players.length != 4) {
+    if (players.length < 2) {
       return Center(child: Text(strings.monthlyParticipantIncomplete));
     }
 
-    final semifinal1 = _matchByIndex(0);
-    final semifinal2 = _matchByIndex(1);
-    final finalMatch = _matchByIndex(2);
-
-    final finalist1 = semifinal1 == null
-        ? null
-        : _playerById(semifinal1.winnerId);
-
-    final finalist2 = semifinal2 == null
-        ? null
-        : _playerById(semifinal2.winnerId);
+    final rounds = _buildRounds();
+    final totalMatches = players.length - 1;
 
     return ListView(
       padding: const EdgeInsets.all(24),
@@ -967,58 +1023,77 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
             context,
           ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
         ),
+
         const SizedBox(height: 8),
-        Text(strings.competitionProgress(_matches.length, 3)),
+
+        Text('${_matches.length} / $totalMatches matches completed'),
+
         const SizedBox(height: 8),
-        LinearProgressIndicator(value: _matches.length / 3),
-        const SizedBox(height: 20),
 
-        _buildMatchCard(
-          matchIndex: 0,
-          title: strings.semifinalNumber(1),
-          player1: players[0],
-          player2: players[1],
-          match: semifinal1,
-          onPlay: () => _playMatch(
-            matchIndex: 0,
-            player1: players[0],
-            player2: players[1],
-          ),
-          enabled: semifinal1 == null,
-        ),
-
-        const SizedBox(height: 14),
-
-        _buildMatchCard(
-          matchIndex: 1,
-          title: strings.semifinalNumber(2),
-          player1: players[2],
-          player2: players[3],
-          match: semifinal2,
-          onPlay: () => _playMatch(
-            matchIndex: 1,
-            player1: players[2],
-            player2: players[3],
-          ),
-          enabled: semifinal1 != null && semifinal2 == null,
+        LinearProgressIndicator(
+          value: totalMatches == 0 ? 0 : _matches.length / totalMatches,
         ),
 
         const SizedBox(height: 24),
 
-        if (finalist1 != null && finalist2 != null)
-          _buildMatchCard(
-            matchIndex: 2,
-            title: strings.finalRound,
-            player1: finalist1,
-            player2: finalist2,
-            match: finalMatch,
-            onPlay: () => _playMatch(
-              matchIndex: 2,
-              player1: finalist1,
-              player2: finalist2,
+        ...rounds.expand((round) {
+          final isFinalRound =
+              round.matches.length == 1 &&
+              round.byePlayer == null &&
+              round.matches.first.player1.id != round.matches.first.player2.id;
+
+          final title = isFinalRound
+              ? strings.finalRound
+              : 'Round ${round.roundNumber}';
+
+          return [
+            Text(
+              title,
+              style: Theme.of(
+                context,
+              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
             ),
-            enabled: finalMatch == null,
-          ),
+
+            const SizedBox(height: 12),
+
+            ...round.matches.map((roundMatch) {
+              final match = roundMatch.savedMatch;
+
+              final allPreviousMatchesDone =
+                  _matches.length == roundMatch.matchIndex;
+
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 14),
+                child: _buildMatchCard(
+                  matchIndex: roundMatch.matchIndex,
+                  title: title,
+                  player1: roundMatch.player1,
+                  player2: roundMatch.player2,
+                  match: match,
+                  onPlay: () => _playMatch(
+                    matchIndex: roundMatch.matchIndex,
+                    player1: roundMatch.player1,
+                    player2: roundMatch.player2,
+                  ),
+                  enabled: match == null && allPreviousMatchesDone,
+                ),
+              );
+            }),
+
+            if (round.byePlayer != null)
+              Card(
+                child: ListTile(
+                  leading: const Icon(Icons.fast_forward_rounded),
+                  title: Text(round.byePlayer!.name),
+                  subtitle: const Text(
+                    'Bye — automatically advances to the next round',
+                  ),
+                ),
+              ),
+
+            const SizedBox(height: 20),
+          ];
+        }),
 
         if (_isSaving) ...[
           const SizedBox(height: 20),
@@ -1250,6 +1325,32 @@ class _MonthlyPlayer {
 
   final String id;
   final String name;
+}
+
+class _MonthlyRound {
+  const _MonthlyRound({
+    required this.roundNumber,
+    required this.matches,
+    required this.byePlayer,
+  });
+
+  final int roundNumber;
+  final List<_MonthlyRoundMatch> matches;
+  final _MonthlyPlayer? byePlayer;
+}
+
+class _MonthlyRoundMatch {
+  const _MonthlyRoundMatch({
+    required this.matchIndex,
+    required this.player1,
+    required this.player2,
+    required this.savedMatch,
+  });
+
+  final int matchIndex;
+  final _MonthlyPlayer player1;
+  final _MonthlyPlayer player2;
+  final _MonthlyMatch? savedMatch;
 }
 
 class _MonthlyMatch {
