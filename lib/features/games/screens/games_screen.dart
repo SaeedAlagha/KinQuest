@@ -88,7 +88,6 @@ class GamesScreen extends StatelessWidget {
           'Caption real family photos, vote anonymously, and crown the funniest family member.',
       eyebrow: 'PHOTO PARTY',
       isAvailable: true,
-      isSignatureFeature: true,
     ),
     _GameItem(
       icon: Icons.timer_rounded,
