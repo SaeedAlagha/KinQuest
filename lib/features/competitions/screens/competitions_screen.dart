@@ -8,7 +8,7 @@ import '../../../core/widgets/sila_page_backdrop.dart';
 import 'daily_challenge_screen.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../rewards/digital/digital_reward_visuals.dart';
-import '../../games/screens/quick_play_player_selection_screen.dart';
+import '../../games/screens/games_screen.dart';
 import 'weekly_championship_screen.dart';
 import 'monthly_cup_screen.dart';
 
@@ -97,9 +97,8 @@ class CompetitionsScreen extends StatelessWidget {
 
   void _openCompetition(BuildContext context, _CompetitionItem competition) {
     final Widget destination = switch (competition.title) {
-      'Quick Play' => QuickPlayPlayerSelectionScreen(
-        developerPreview: developerPreview,
-      ),
+      'Quick Play' => GamesScreen(developerPreview: developerPreview),
+
       'Daily Challenge' => DailyChallengeScreen(
         developerPreview: developerPreview,
       ),
