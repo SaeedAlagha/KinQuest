@@ -1003,7 +1003,10 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
 
   List<_MonthlyRound> _buildRounds() {
     var currentPlayers = List<_MonthlyPlayer>.from(_selectedPlayers);
+
     final rounds = <_MonthlyRound>[];
+    final playersWhoHadBye = <String>{};
+
     var nextMatchIndex = 0;
     var roundNumber = 1;
 
@@ -1011,11 +1014,24 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
       final roundMatches = <_MonthlyRoundMatch>[];
       final advancingPlayers = <_MonthlyPlayer>[];
 
+      _MonthlyPlayer? byePlayer;
+      var playersForMatches = List<_MonthlyPlayer>.from(currentPlayers);
+
+      if (playersForMatches.length.isOdd) {
+        byePlayer = playersForMatches.lastWhere(
+          (player) => !playersWhoHadBye.contains(player.id),
+          orElse: () => playersForMatches.last,
+        );
+
+        playersWhoHadBye.add(byePlayer.id);
+        playersForMatches.removeWhere((player) => player.id == byePlayer!.id);
+      }
+
       var index = 0;
 
-      while (index + 1 < currentPlayers.length) {
-        final player1 = currentPlayers[index];
-        final player2 = currentPlayers[index + 1];
+      while (index + 1 < playersForMatches.length) {
+        final player1 = playersForMatches[index];
+        final player2 = playersForMatches[index + 1];
 
         final savedMatch = _matchByIndex(nextMatchIndex);
 
@@ -1036,10 +1052,7 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
         index += 2;
       }
 
-      _MonthlyPlayer? byePlayer;
-
-      if (index < currentPlayers.length) {
-        byePlayer = currentPlayers[index];
+      if (byePlayer != null) {
         advancingPlayers.add(byePlayer);
       }
 
