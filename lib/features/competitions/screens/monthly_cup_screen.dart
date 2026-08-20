@@ -573,7 +573,7 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
 
     final rounds = _buildRounds();
 
-    final semifinalMatches = rounds.length >= 2
+    final semifinalMatches = _selectedPlayers.length >= 4 && rounds.length >= 2
         ? rounds[rounds.length - 2].matches
         : <_MonthlyRoundMatch>[];
 
