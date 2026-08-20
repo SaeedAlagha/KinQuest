@@ -37,6 +37,7 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
 
   final List<_MonthlyPlayer> _familyMembers = [];
   final Set<String> _selectedIds = {};
+  final List<String> _participantOrder = [];
   final List<_MonthlyMatch> _matches = [];
 
   String? _championId;
@@ -51,9 +52,15 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
   String get _competitionId => 'monthly_$_monthKey';
 
   bool get _tournamentStarted => _started;
-  List<_MonthlyPlayer> get _selectedPlayers => _familyMembers
-      .where((player) => _selectedIds.contains(player.id))
-      .toList();
+  List<_MonthlyPlayer> get _selectedPlayers {
+    if (_participantOrder.isNotEmpty) {
+      return _participantOrder.map(_playerById).toList();
+    }
+
+    return _familyMembers
+        .where((player) => _selectedIds.contains(player.id))
+        .toList();
+  }
 
   @override
   void initState() {
@@ -200,6 +207,14 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
           ..clear()
           ..addAll(storedParticipantIds);
 
+        _participantOrder
+          ..clear()
+          ..addAll(
+            rawParticipantIds is List
+                ? rawParticipantIds.whereType<String>()
+                : const <String>[],
+          );
+
         _matches
           ..clear()
           ..addAll(storedMatches);
@@ -260,6 +275,8 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
       return;
     }
 
+    final bracketParticipantIds = _selectedIds.toList()..shuffle();
+
     setState(() {
       _isSaving = true;
     });
@@ -298,7 +315,7 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
           'familyId': familyId,
           'type': 'monthly',
           'periodKey': _monthKey,
-          'participantIds': _selectedIds.toList(),
+          'participantIds': bracketParticipantIds,
           'completed': false,
           'rewardGranted': false,
           'matches': <Map<String, dynamic>>[],
@@ -323,6 +340,9 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
       if (!mounted) return;
 
       setState(() {
+        _participantOrder
+          ..clear()
+          ..addAll(bracketParticipantIds);
         _started = true;
         _isSaving = false;
       });
