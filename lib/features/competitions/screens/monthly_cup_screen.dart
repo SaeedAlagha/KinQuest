@@ -194,7 +194,7 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
           ..clear()
           ..addAll(storedMatches);
         _started =
-            storedParticipantIds.length == 4 ||
+            storedParticipantIds.length >= 2 ||
             storedMatches.isNotEmpty ||
             data?['completed'] == true;
 
@@ -229,15 +229,15 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
     setState(() {
       if (_selectedIds.contains(id)) {
         _selectedIds.remove(id);
-      } else if (_selectedIds.length < 4) {
+      } else {
         _selectedIds.add(id);
       }
     });
   }
 
   Future<void> _startTournament() async {
-    if (_selectedIds.length != 4) {
-      _showMessage(AppLocalizations.of(context)!.selectExactlyFourMembers);
+    if (_selectedIds.length < 2) {
+      _showMessage('Select at least 2 family members.');
       return;
     }
 
@@ -886,16 +886,15 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
         ),
         const SizedBox(height: 20),
         Text(
-          strings.competitorsSelected(_selectedIds.length, 4),
+          '${_selectedIds.length} competitors selected',
           style: Theme.of(
             context,
           ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
         ),
         const SizedBox(height: 8),
-        LinearProgressIndicator(value: _selectedIds.length / 4),
         const SizedBox(height: 20),
         Text(
-          strings.chooseFourCompetitors,
+          'Choose competitors',
           style: Theme.of(
             context,
           ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
@@ -921,7 +920,7 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
         }),
         const SizedBox(height: 18),
         FilledButton.icon(
-          onPressed: _selectedIds.length == 4 && !_isSaving
+          onPressed: _selectedIds.length >= 2 && !_isSaving
               ? _startTournament
               : null,
           icon: _isSaving
