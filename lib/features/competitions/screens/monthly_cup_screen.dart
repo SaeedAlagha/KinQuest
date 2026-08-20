@@ -37,6 +37,7 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
 
   final List<_MonthlyPlayer> _familyMembers = [];
   final Set<String> _selectedIds = {};
+  final List<String> _participantOrder = [];
   final List<_MonthlyMatch> _matches = [];
 
   String? _championId;
@@ -51,9 +52,15 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
   String get _competitionId => 'monthly_$_monthKey';
 
   bool get _tournamentStarted => _started;
-  List<_MonthlyPlayer> get _selectedPlayers => _familyMembers
-      .where((player) => _selectedIds.contains(player.id))
-      .toList();
+  List<_MonthlyPlayer> get _selectedPlayers {
+    if (_participantOrder.isNotEmpty) {
+      return _participantOrder.map(_playerById).toList();
+    }
+
+    return _familyMembers
+        .where((player) => _selectedIds.contains(player.id))
+        .toList();
+  }
 
   @override
   void initState() {
@@ -177,6 +184,16 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
         }
       }
 
+      final storedSemifinalistNames = <String>[];
+
+      final rawSemifinalistNames = data?['semifinalistNames'];
+
+      if (rawSemifinalistNames is List) {
+        storedSemifinalistNames.addAll(
+          rawSemifinalistNames.whereType<String>(),
+        );
+      }
+
       if (!mounted) return;
 
       setState(() {
@@ -190,11 +207,19 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
           ..clear()
           ..addAll(storedParticipantIds);
 
+        _participantOrder
+          ..clear()
+          ..addAll(
+            rawParticipantIds is List
+                ? rawParticipantIds.whereType<String>()
+                : const <String>[],
+          );
+
         _matches
           ..clear()
           ..addAll(storedMatches);
         _started =
-            storedParticipantIds.length == 4 ||
+            storedParticipantIds.length >= 2 ||
             storedMatches.isNotEmpty ||
             data?['completed'] == true;
 
@@ -204,11 +229,7 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
         _runnerUpName = data?['runnerUpName'] as String?;
         _semifinalistNames
           ..clear()
-          ..addAll(
-            storedMatches
-                .where((match) => match.matchIndex < 2)
-                .map((match) => match.loserName),
-          );
+          ..addAll(storedSemifinalistNames);
 
         _isLoading = false;
         _loadError = null;
@@ -229,15 +250,15 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
     setState(() {
       if (_selectedIds.contains(id)) {
         _selectedIds.remove(id);
-      } else if (_selectedIds.length < 4) {
+      } else {
         _selectedIds.add(id);
       }
     });
   }
 
   Future<void> _startTournament() async {
-    if (_selectedIds.length != 4) {
-      _showMessage(AppLocalizations.of(context)!.selectExactlyFourMembers);
+    if (_selectedIds.length < 2) {
+      _showMessage('Select at least 2 family members.');
       return;
     }
 
@@ -253,6 +274,8 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
     if (familyId == null || familyId.isEmpty) {
       return;
     }
+
+    final bracketParticipantIds = _selectedIds.toList()..shuffle();
 
     setState(() {
       _isSaving = true;
@@ -292,7 +315,7 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
           'familyId': familyId,
           'type': 'monthly',
           'periodKey': _monthKey,
-          'participantIds': _selectedIds.toList(),
+          'participantIds': bracketParticipantIds,
           'completed': false,
           'rewardGranted': false,
           'matches': <Map<String, dynamic>>[],
@@ -317,6 +340,9 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
       if (!mounted) return;
 
       setState(() {
+        _participantOrder
+          ..clear()
+          ..addAll(bracketParticipantIds);
         _started = true;
         _isSaving = false;
       });
@@ -435,7 +461,7 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
         _isSaving = false;
       });
 
-      if (_matches.length == 3) {
+      if (_matches.length == _selectedPlayers.length - 1) {
         await _finishCup();
       }
 
@@ -514,7 +540,7 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
         _isSaving = false;
       });
 
-      if (_matches.length == 3) {
+      if (_matches.length == _selectedPlayers.length - 1) {
         await _finishCup();
       }
     } catch (_) {
@@ -529,21 +555,53 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
   }
 
   Future<void> _finishCup() async {
-    if (_matches.length < 3 || _completed || _isSaving) {
+    final totalMatches = _selectedPlayers.length - 1;
+
+    if (_matches.length < totalMatches || _completed || _isSaving) {
       return;
     }
 
-    final finalMatch = _matches.firstWhere((match) => match.matchIndex == 2);
+    final sortedMatches = List<_MonthlyMatch>.from(_matches)
+      ..sort((a, b) => a.matchIndex.compareTo(b.matchIndex));
+
+    final finalMatch = sortedMatches.last;
 
     final championId = finalMatch.winnerId;
     final championName = finalMatch.winnerName;
     final runnerUpId = finalMatch.loserId;
     final runnerUpName = finalMatch.loserName;
 
-    final semifinalLoserIds = _matches
-        .where((match) => match.matchIndex < 2)
-        .map((match) => match.loserId)
+    final rounds = _buildRounds();
+
+    final semifinalMatches = _selectedPlayers.length >= 4 && rounds.length >= 2
+        ? rounds[rounds.length - 2].matches
+        : <_MonthlyRoundMatch>[];
+
+    final semifinalLoserIds = semifinalMatches
+        .map((roundMatch) => roundMatch.savedMatch?.loserId)
+        .whereType<String>()
         .toList();
+
+    final semifinalLoserNames = semifinalMatches
+        .map((roundMatch) => roundMatch.savedMatch?.loserName)
+        .whereType<String>()
+        .toList();
+
+    final gamesPlayedByUser = <String, int>{};
+
+    for (final match in _matches) {
+      gamesPlayedByUser.update(
+        match.player1Id,
+        (currentValue) => currentValue + 1,
+        ifAbsent: () => 1,
+      );
+
+      gamesPlayedByUser.update(
+        match.player2Id,
+        (currentValue) => currentValue + 1,
+        ifAbsent: () => 1,
+      );
+    }
 
     setState(() {
       _isSaving = true;
@@ -554,13 +612,11 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
         _championId = championId;
         _championName = championName;
         _runnerUpName = runnerUpName;
+
         _semifinalistNames
           ..clear()
-          ..addAll(
-            _matches
-                .where((match) => match.matchIndex < 2)
-                .map((match) => match.loserName),
-          );
+          ..addAll(semifinalLoserNames);
+
         _completed = true;
         _isSaving = false;
       });
@@ -608,6 +664,7 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
           'runnerUpId': runnerUpId,
           'runnerUpName': runnerUpName,
           'semifinalistIds': semifinalLoserIds,
+          'semifinalistNames': semifinalLoserNames,
           'tokenReward': CompetitionRewards.monthlyChampionTokens,
           'championRankingPointReward':
               CompetitionRewards.monthlyChampionRankingPoints,
@@ -618,6 +675,15 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
           'completedAt': FieldValue.serverTimestamp(),
           'updatedAt': FieldValue.serverTimestamp(),
         }, SetOptions(merge: true));
+
+        for (final entry in gamesPlayedByUser.entries) {
+          final userRef = firestore.collection('users').doc(entry.key);
+
+          transaction.set(userRef, {
+            'gamesPlayed': FieldValue.increment(entry.value),
+            'updatedAt': FieldValue.serverTimestamp(),
+          }, SetOptions(merge: true));
+        }
 
         final championRef = firestore.collection('users').doc(championId);
 
@@ -630,10 +696,10 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
           ),
           'officialWins': FieldValue.increment(1),
           'monthlyWins': FieldValue.increment(1),
-          'gamesPlayed': FieldValue.increment(2),
           'trophies': FieldValue.increment(1),
           'updatedAt': FieldValue.serverTimestamp(),
         }, SetOptions(merge: true));
+
         final tokenTransactionRef = championRef
             .collection('tokenTransactions')
             .doc();
@@ -649,13 +715,13 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
           'relatedCompetitionId': _competitionId,
           'createdAt': FieldValue.serverTimestamp(),
         });
+
         final runnerUpRef = firestore.collection('users').doc(runnerUpId);
 
         transaction.set(runnerUpRef, {
           'rankingPoints': FieldValue.increment(
             CompetitionRewards.monthlyRunnerUpRankingPoints,
           ),
-          'gamesPlayed': FieldValue.increment(2),
           'updatedAt': FieldValue.serverTimestamp(),
         }, SetOptions(merge: true));
 
@@ -668,7 +734,6 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
             'rankingPoints': FieldValue.increment(
               CompetitionRewards.monthlySemifinalistRankingPoints,
             ),
-            'gamesPlayed': FieldValue.increment(1),
             'updatedAt': FieldValue.serverTimestamp(),
           }, SetOptions(merge: true));
         }
@@ -702,13 +767,11 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
         _championId = championId;
         _championName = championName;
         _runnerUpName = runnerUpName;
+
         _semifinalistNames
           ..clear()
-          ..addAll(
-            _matches
-                .where((match) => match.matchIndex < 2)
-                .map((match) => match.loserName),
-          );
+          ..addAll(semifinalLoserNames);
+
         _completed = true;
         _isSaving = false;
       });
@@ -886,16 +949,15 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
         ),
         const SizedBox(height: 20),
         Text(
-          strings.competitorsSelected(_selectedIds.length, 4),
+          '${_selectedIds.length} competitors selected',
           style: Theme.of(
             context,
           ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
         ),
         const SizedBox(height: 8),
-        LinearProgressIndicator(value: _selectedIds.length / 4),
         const SizedBox(height: 20),
         Text(
-          strings.chooseFourCompetitors,
+          'Choose competitors',
           style: Theme.of(
             context,
           ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
@@ -921,7 +983,7 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
         }),
         const SizedBox(height: 18),
         FilledButton.icon(
-          onPressed: _selectedIds.length == 4 && !_isSaving
+          onPressed: _selectedIds.length >= 2 && !_isSaving
               ? _startTournament
               : null,
           icon: _isSaving
@@ -939,25 +1001,94 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
     );
   }
 
+  List<_MonthlyRound> _buildRounds() {
+    var currentPlayers = List<_MonthlyPlayer>.from(_selectedPlayers);
+
+    final rounds = <_MonthlyRound>[];
+    final playersWhoHadBye = <String>{};
+
+    var nextMatchIndex = 0;
+    var roundNumber = 1;
+
+    while (currentPlayers.length > 1) {
+      final roundMatches = <_MonthlyRoundMatch>[];
+      final advancingPlayers = <_MonthlyPlayer>[];
+
+      _MonthlyPlayer? byePlayer;
+      var playersForMatches = List<_MonthlyPlayer>.from(currentPlayers);
+
+      if (playersForMatches.length.isOdd) {
+        byePlayer = playersForMatches.lastWhere(
+          (player) => !playersWhoHadBye.contains(player.id),
+          orElse: () => playersForMatches.last,
+        );
+
+        playersWhoHadBye.add(byePlayer.id);
+        playersForMatches.removeWhere((player) => player.id == byePlayer!.id);
+      }
+
+      var index = 0;
+
+      while (index + 1 < playersForMatches.length) {
+        final player1 = playersForMatches[index];
+        final player2 = playersForMatches[index + 1];
+
+        final savedMatch = _matchByIndex(nextMatchIndex);
+
+        roundMatches.add(
+          _MonthlyRoundMatch(
+            matchIndex: nextMatchIndex,
+            player1: player1,
+            player2: player2,
+            savedMatch: savedMatch,
+          ),
+        );
+
+        if (savedMatch != null) {
+          advancingPlayers.add(_playerById(savedMatch.winnerId));
+        }
+
+        nextMatchIndex++;
+        index += 2;
+      }
+
+      if (byePlayer != null) {
+        advancingPlayers.add(byePlayer);
+      }
+
+      rounds.add(
+        _MonthlyRound(
+          roundNumber: roundNumber,
+          matches: roundMatches,
+          byePlayer: byePlayer,
+        ),
+      );
+
+      final roundComplete = roundMatches.every(
+        (match) => match.savedMatch != null,
+      );
+
+      if (!roundComplete) {
+        break;
+      }
+
+      currentPlayers = advancingPlayers;
+      roundNumber++;
+    }
+
+    return rounds;
+  }
+
   Widget _buildBracket() {
     final strings = AppLocalizations.of(context)!;
     final players = _selectedPlayers;
 
-    if (players.length != 4) {
+    if (players.length < 2) {
       return Center(child: Text(strings.monthlyParticipantIncomplete));
     }
 
-    final semifinal1 = _matchByIndex(0);
-    final semifinal2 = _matchByIndex(1);
-    final finalMatch = _matchByIndex(2);
-
-    final finalist1 = semifinal1 == null
-        ? null
-        : _playerById(semifinal1.winnerId);
-
-    final finalist2 = semifinal2 == null
-        ? null
-        : _playerById(semifinal2.winnerId);
+    final rounds = _buildRounds();
+    final totalMatches = players.length - 1;
 
     return ListView(
       padding: const EdgeInsets.all(24),
@@ -968,58 +1099,77 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
             context,
           ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
         ),
+
         const SizedBox(height: 8),
-        Text(strings.competitionProgress(_matches.length, 3)),
+
+        Text('${_matches.length} / $totalMatches matches completed'),
+
         const SizedBox(height: 8),
-        LinearProgressIndicator(value: _matches.length / 3),
-        const SizedBox(height: 20),
 
-        _buildMatchCard(
-          matchIndex: 0,
-          title: strings.semifinalNumber(1),
-          player1: players[0],
-          player2: players[1],
-          match: semifinal1,
-          onPlay: () => _playMatch(
-            matchIndex: 0,
-            player1: players[0],
-            player2: players[1],
-          ),
-          enabled: semifinal1 == null,
-        ),
-
-        const SizedBox(height: 14),
-
-        _buildMatchCard(
-          matchIndex: 1,
-          title: strings.semifinalNumber(2),
-          player1: players[2],
-          player2: players[3],
-          match: semifinal2,
-          onPlay: () => _playMatch(
-            matchIndex: 1,
-            player1: players[2],
-            player2: players[3],
-          ),
-          enabled: semifinal1 != null && semifinal2 == null,
+        LinearProgressIndicator(
+          value: totalMatches == 0 ? 0 : _matches.length / totalMatches,
         ),
 
         const SizedBox(height: 24),
 
-        if (finalist1 != null && finalist2 != null)
-          _buildMatchCard(
-            matchIndex: 2,
-            title: strings.finalRound,
-            player1: finalist1,
-            player2: finalist2,
-            match: finalMatch,
-            onPlay: () => _playMatch(
-              matchIndex: 2,
-              player1: finalist1,
-              player2: finalist2,
+        ...rounds.expand((round) {
+          final isFinalRound =
+              round.matches.length == 1 &&
+              round.byePlayer == null &&
+              round.matches.first.player1.id != round.matches.first.player2.id;
+
+          final title = isFinalRound
+              ? strings.finalRound
+              : 'Round ${round.roundNumber}';
+
+          return [
+            Text(
+              title,
+              style: Theme.of(
+                context,
+              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
             ),
-            enabled: finalMatch == null,
-          ),
+
+            const SizedBox(height: 12),
+
+            ...round.matches.map((roundMatch) {
+              final match = roundMatch.savedMatch;
+
+              final allPreviousMatchesDone =
+                  _matches.length == roundMatch.matchIndex;
+
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 14),
+                child: _buildMatchCard(
+                  matchIndex: roundMatch.matchIndex,
+                  title: title,
+                  player1: roundMatch.player1,
+                  player2: roundMatch.player2,
+                  match: match,
+                  onPlay: () => _playMatch(
+                    matchIndex: roundMatch.matchIndex,
+                    player1: roundMatch.player1,
+                    player2: roundMatch.player2,
+                  ),
+                  enabled: match == null && allPreviousMatchesDone,
+                ),
+              );
+            }),
+
+            if (round.byePlayer != null)
+              Card(
+                child: ListTile(
+                  leading: const Icon(Icons.fast_forward_rounded),
+                  title: Text(round.byePlayer!.name),
+                  subtitle: const Text(
+                    'Bye — automatically advances to the next round',
+                  ),
+                ),
+              ),
+
+            const SizedBox(height: 20),
+          ];
+        }),
 
         if (_isSaving) ...[
           const SizedBox(height: 20),
@@ -1251,6 +1401,32 @@ class _MonthlyPlayer {
 
   final String id;
   final String name;
+}
+
+class _MonthlyRound {
+  const _MonthlyRound({
+    required this.roundNumber,
+    required this.matches,
+    required this.byePlayer,
+  });
+
+  final int roundNumber;
+  final List<_MonthlyRoundMatch> matches;
+  final _MonthlyPlayer? byePlayer;
+}
+
+class _MonthlyRoundMatch {
+  const _MonthlyRoundMatch({
+    required this.matchIndex,
+    required this.player1,
+    required this.player2,
+    required this.savedMatch,
+  });
+
+  final int matchIndex;
+  final _MonthlyPlayer player1;
+  final _MonthlyPlayer player2;
+  final _MonthlyMatch? savedMatch;
 }
 
 class _MonthlyMatch {

@@ -308,20 +308,13 @@ class _GameCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final strings = AppLocalizations.of(context)!;
     final colorScheme = Theme.of(context).colorScheme;
-    final borderColor = game.isSignatureFeature
-        ? AppTheme.primaryColor.withValues(alpha: 0.5)
-        : colorScheme.outlineVariant;
+    final borderColor = colorScheme.outlineVariant;
 
     return Material(
-      color: game.isSignatureFeature
-          ? colorScheme.primaryContainer.withValues(alpha: 0.36)
-          : colorScheme.surface,
+      color: colorScheme.surface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(26),
-        side: BorderSide(
-          color: borderColor,
-          width: game.isSignatureFeature ? 1.5 : 1,
-        ),
+        side: BorderSide(color: borderColor, width: 1),
       ),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
@@ -658,7 +651,6 @@ class _GameItem {
     required this.description,
     required this.eyebrow,
     this.isAvailable = false,
-    this.isSignatureFeature = false,
   });
 
   final IconData icon;
@@ -667,7 +659,6 @@ class _GameItem {
   final String description;
   final String eyebrow;
   final bool isAvailable;
-  final bool isSignatureFeature;
 }
 
 class _PartyGameItem {
