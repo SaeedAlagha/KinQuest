@@ -17,6 +17,7 @@ import 'trivia_screen.dart';
 import 'truth_or_dare_screen.dart';
 import 'would_you_rather_screen.dart';
 import 'code_breaker_screen.dart';
+import 'attack_or_defend_screen.dart';
 
 enum _GameCategory { family, party, duel }
 
@@ -37,6 +38,16 @@ class GamesScreen extends StatelessWidget {
       description:
           'Crack hidden codes using logic. Fewer attempts and faster solves earn more points.',
       eyebrow: 'LOGIC DUEL',
+      category: _GameCategory.duel,
+      isAvailable: true,
+    ),
+    _GameItem(
+      icon: Icons.sports_martial_arts_rounded,
+      accent: AppTheme.coralColor,
+      title: 'Attack or Defend',
+      description:
+          'Build energy, attack your rival, defend your hearts, and survive the battle.',
+      eyebrow: 'BATTLE DUEL',
       category: _GameCategory.duel,
       isAvailable: true,
     ),
@@ -179,6 +190,10 @@ class GamesScreen extends StatelessWidget {
       MaterialPageRoute(
         builder: (_) => switch (game.title) {
           'Code Breaker' => CodeBreakerScreen(
+            participantIds: participantIds,
+            developerPreview: developerPreview,
+          ),
+          'Attack or Defend' => AttackOrDefendScreen(
             participantIds: participantIds,
             developerPreview: developerPreview,
           ),
