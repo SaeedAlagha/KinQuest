@@ -16,8 +16,9 @@ import 'secret_mission_screen.dart';
 import 'trivia_screen.dart';
 import 'truth_or_dare_screen.dart';
 import 'would_you_rather_screen.dart';
+import 'code_breaker_screen.dart';
 
-enum _GameCategory { family, party }
+enum _GameCategory { family, party, duel }
 
 class GamesScreen extends StatelessWidget {
   const GamesScreen({
@@ -29,6 +30,16 @@ class GamesScreen extends StatelessWidget {
   final bool developerPreview;
   final Set<String>? participantIds;
   static const List<_GameItem> _games = [
+    _GameItem(
+      icon: Icons.lock_open_rounded,
+      accent: AppTheme.tealColor,
+      title: 'Code Breaker',
+      description:
+          'Crack hidden codes using logic. Fewer attempts and faster solves earn more points.',
+      eyebrow: 'LOGIC DUEL',
+      category: _GameCategory.duel,
+      isAvailable: true,
+    ),
     _GameItem(
       icon: Icons.favorite_rounded,
       accent: AppTheme.coralColor,
@@ -167,6 +178,10 @@ class GamesScreen extends StatelessWidget {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) => switch (game.title) {
+          'Code Breaker' => CodeBreakerScreen(
+            participantIds: participantIds,
+            developerPreview: developerPreview,
+          ),
           'Family Quiz' => FamilyQuizScreen(
             developerPreview: developerPreview,
             participantIds: participantIds,
@@ -242,6 +257,18 @@ class GamesScreen extends StatelessWidget {
                     children: [
                       const _GamesHeader(),
                       const SizedBox(height: 28),
+                      _GameSection(
+                        icon: Icons.sports_kabaddi_rounded,
+                        title: 'Duel Games',
+                        subtitle:
+                            'Head-to-head games built specifically for 2 players.',
+                        games: _gamesFor(_GameCategory.duel),
+                        columns: columns,
+                        cardHeight: cardHeight,
+                        onOpen: (game) => _openGame(context, game),
+                      ),
+
+                      const SizedBox(height: 38),
                       _GameSection(
                         icon: Icons.groups_2_rounded,
                         title: 'Family Games',
