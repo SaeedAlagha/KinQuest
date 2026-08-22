@@ -2,149 +2,26 @@ const express = require("express");
 const cors = require("cors");
 const dotenv = require("dotenv");
 const { GoogleGenAI } = require("@google/genai");
-const {
-  createCorsOptions,
-  createFirebaseAuthMiddleware,
-  createRateLimiter,
-  securityHeaders,
-} = require("./security");
 
-dotenv.config({ quiet: true });
-const {
-  FieldValue,
-  getFirestore,
-} = require("firebase-admin/firestore");
-const { getMessaging } = require("firebase-admin/messaging");
-const { ensureFirebaseAdmin } = require("./firebase_admin");
-const {
-  DigitalRewardError,
-  digitalRewardCatalog,
-  equipDigitalReward,
-  purchaseDigitalReward,
-  unequipDigitalReward,
-} = require("./digital_rewards");
-
-ensureFirebaseAdmin();
-
-const db = getFirestore();
-const messaging = getMessaging();
+dotenv.config();
 
 const app = express();
 
-app.disable("x-powered-by");
-
-if (process.env.NODE_ENV === "production") {
-  app.set("trust proxy", 1);
-}
-
-app.use(securityHeaders);
-app.use(cors(createCorsOptions()));
-app.use("/api", createRateLimiter());
-app.use("/api", createFirebaseAuthMiddleware());
-app.use("/api", express.json({ limit: "2mb", type: "application/json" }));
+app.use(cors());
+app.use(express.json({ limit: "2mb" }));
 const ai = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY,
 });
 
-function normalizedLanguage(value) {
-  return value === "ar" ? "ar" : "en";
-}
-
-function playerLanguageInstruction(value) {
-  return normalizedLanguage(value) === "ar"
-    ? `LANGUAGE REQUIREMENT:
-- Write every player-visible string in natural Modern Standard Arabic.
-- Do not include English translations or transliterations.
-- Keep JSON property names exactly as specified in English.`
-    : `LANGUAGE REQUIREMENT:
-- Write every player-visible string in clear, natural English.
-- Keep JSON property names exactly as specified.`;
-}
-
 app.get("/", (req, res) => {
   res.json({
-    message: "Sila AI service is running",
-    authentication: "Firebase ID token required in production",
+    message: "KinQuest Gemini server is running",
   });
-});
-
-app.get("/api/digital-rewards", (request, response) => {
-  response.json({ rewards: digitalRewardCatalog });
-});
-
-function requireDigitalRewardUser(request, response) {
-  const userId = request.auth?.uid;
-  if (typeof userId !== "string" || !userId) {
-    response.status(401).json({
-      error: "Sign in is required to manage Digital Rewards.",
-    });
-    return null;
-  }
-  return userId;
-}
-
-function sendDigitalRewardError(error, response) {
-  if (error instanceof DigitalRewardError) {
-    return response.status(error.statusCode).json({ error: error.message });
-  }
-
-  console.error("Digital Reward mutation failed:", error);
-  return response.status(500).json({
-    error: "Digital Reward could not be updated.",
-  });
-}
-
-app.post("/api/digital-rewards/purchase", async (request, response) => {
-  const userId = requireDigitalRewardUser(request, response);
-  if (!userId) return;
-
-  try {
-    const result = await purchaseDigitalReward({
-      database: db,
-      userId,
-      rewardId: request.body?.rewardId,
-    });
-    response.status(201).json(result);
-  } catch (error) {
-    sendDigitalRewardError(error, response);
-  }
-});
-
-app.post("/api/digital-rewards/equip", async (request, response) => {
-  const userId = requireDigitalRewardUser(request, response);
-  if (!userId) return;
-
-  try {
-    const result = await equipDigitalReward({
-      database: db,
-      userId,
-      rewardId: request.body?.rewardId,
-    });
-    response.json(result);
-  } catch (error) {
-    sendDigitalRewardError(error, response);
-  }
-});
-
-app.post("/api/digital-rewards/unequip", async (request, response) => {
-  const userId = requireDigitalRewardUser(request, response);
-  if (!userId) return;
-
-  try {
-    const result = await unequipDigitalReward({
-      database: db,
-      userId,
-      rewardId: request.body?.rewardId,
-    });
-    response.json(result);
-  } catch (error) {
-    sendDigitalRewardError(error, response);
-  }
 });
 
 app.post("/api/would-you-rather", async (req, res) => {
   try {
-    const { category, count, language } = req.body;
+    const { category, count } = req.body;
 
     if (!category) {
       return res.status(400).json({
@@ -157,8 +34,6 @@ app.post("/api/would-you-rather", async (req, res) => {
 
     const prompt = `
 Generate exactly ${questionCount} unique Would You Rather questions.
-
-${playerLanguageInstruction(language)}
 
 Category: ${category}
 
@@ -209,7 +84,7 @@ Return ONLY valid JSON in this exact format:
 });
 app.post("/api/charades", async (req, res) => {
   try {
-    const { category, count, language } = req.body;
+    const { category, count } = req.body;
 
     if (!category) {
       return res.status(400).json({ error: "Category is required" });
@@ -220,8 +95,6 @@ app.post("/api/charades", async (req, res) => {
 
     const prompt = `
 Generate exactly ${promptCount} unique Charades prompts.
-
-${playerLanguageInstruction(language)}
 
 Category: ${category}
 
@@ -270,7 +143,7 @@ Return ONLY valid JSON in this exact format:
 });
 app.post("/api/never-have-i-ever", async (req, res) => {
   try {
-    const { category, count, language } = req.body;
+    const { category, count } = req.body;
 
     if (!category) {
       return res.status(400).json({
@@ -283,8 +156,6 @@ app.post("/api/never-have-i-ever", async (req, res) => {
 
     const prompt = `
 Generate exactly ${promptCount} unique Never Have I Ever statements.
-
-${playerLanguageInstruction(language)}
 
 Category: ${category}
 
@@ -302,7 +173,7 @@ Rules:
 - No dangerous challenges
 - No duplicate statements
 - Keep each statement concise
-- Start each statement with ${normalizedLanguage(language) === "ar" ? 'the natural Arabic equivalent of "Never have I ever"' : '"Never have I ever"'}
+- Start each statement with "Never have I ever"
 
 Return ONLY valid JSON in this exact format:
 
@@ -354,7 +225,7 @@ Return ONLY valid JSON in this exact format:
 });
 app.post("/api/trivia", async (req, res) => {
   try {
-    const { category, count, language } = req.body;
+    const { category, count } = req.body;
 
     if (!category) {
       return res.status(400).json({
@@ -367,8 +238,6 @@ app.post("/api/trivia", async (req, res) => {
 
     const prompt = `
 Generate exactly ${questionCount} unique multiple-choice trivia questions.
-
-${playerLanguageInstruction(language)}
 
 Category: ${category}
 
@@ -461,7 +330,7 @@ Return ONLY valid JSON in this exact structure:
 });
 app.post("/api/truth-or-dare", async (req, res) => {
   try {
-    const { category, count, language } = req.body;
+    const { category, count } = req.body;
 
     if (!category) {
       return res.status(400).json({
@@ -474,8 +343,6 @@ app.post("/api/truth-or-dare", async (req, res) => {
 
     const prompt = `
 Generate exactly ${promptCount} unique Truth or Dare prompts.
-
-${playerLanguageInstruction(language)}
 
 Category: ${category}
 
@@ -555,7 +422,7 @@ Return ONLY valid JSON in this structure:
 });
 app.post("/api/emoji-guess", async (req, res) => {
   try {
-    const { category, count, language } = req.body;
+    const { category, count } = req.body;
 
     if (!category) {
       return res.status(400).json({
@@ -564,12 +431,10 @@ app.post("/api/emoji-guess", async (req, res) => {
     }
 
     const requestedCount = Number(count) || 10;
-    const puzzleCount = Math.min(Math.max(requestedCount, 1), 60);
+    const puzzleCount = Math.min(Math.max(requestedCount, 1), 20);
 
     const prompt = `
 Generate exactly ${puzzleCount} unique Emoji Guess puzzles.
-
-${playerLanguageInstruction(language)}
 
 Category: ${category}
 
@@ -643,71 +508,9 @@ Return ONLY valid JSON in this structure:
     });
   }
 });
-app.post("/api/emoji-guess/check-answer", async (req, res) => {
-  try {
-    const { expectedAnswer, playerAnswer, language } = req.body;
-
-    if (
-      typeof expectedAnswer !== "string" ||
-      expectedAnswer.trim().length === 0 ||
-      typeof playerAnswer !== "string" ||
-      playerAnswer.trim().length === 0
-    ) {
-      return res.status(400).json({
-        match: false,
-        error: "Both answers are required",
-      });
-    }
-
-    const prompt = `
-You are the answer judge for a family Emoji Guess game.
-
-${playerLanguageInstruction(language)}
-
-EXPECTED ANSWER: "${expectedAnswer.trim()}"
-PLAYER ANSWER: "${playerAnswer.trim()}"
-
-Return match=true when the player clearly means the expected answer. Accept:
-- Arabic or English equivalents of the same answer
-- Common synonyms and familiar alternate titles
-- Singular/plural differences
-- Minor spelling mistakes when the meaning is obvious
-
-Reject unrelated, vague, or empty answers. Be friendly but accurate.
-
-Return ONLY valid JSON:
-{
-  "match": true
-}
-`;
-
-    const response = await ai.models.generateContent({
-      model: "gemini-3.5-flash",
-      contents: prompt,
-      config: {
-        responseMimeType: "application/json",
-        responseJsonSchema: {
-          type: "object",
-          properties: {
-            match: { type: "boolean" },
-          },
-          required: ["match"],
-        },
-      },
-    });
-
-    const result = JSON.parse(response.text);
-    res.json({ match: result.match === true });
-  } catch (error) {
-    console.error("Emoji Guess answer validation error:", error);
-    res.status(500).json({
-      error: "Failed to validate Emoji Guess answer",
-    });
-  }
-});
 app.post("/api/family-quiz", async (req, res) => {
   try {
-    const { category, count, familyMembers, language } = req.body;
+    const { category, count, familyMembers } = req.body;
 
     if (!category) {
       return res.status(400).json({
@@ -760,8 +563,6 @@ app.post("/api/family-quiz", async (req, res) => {
 
     const sharedRules = `
 This is for KinQuest, a family bonding game.
-
-${playerLanguageInstruction(language)}
 
 Rules:
 - Family friendly and appropriate for children and adults
@@ -910,7 +711,6 @@ app.post("/api/memory-challenge", async (req, res) => {
       location,
       date,
       count,
-      language,
     } = req.body;
 
     if (!imageUrl) {
@@ -937,8 +737,6 @@ app.post("/api/memory-challenge", async (req, res) => {
 
     const prompt = `
 Create exactly ${questionCount} multiple-choice questions for a family memory game.
-
-${playerLanguageInstruction(language)}
 
 Memory information:
 
@@ -1078,38 +876,13 @@ Return ONLY valid JSON.
 });
 app.post("/api/family-impostor", async (req, res) => {
   try {
-    const { rounds, category, language } = req.body;
+    const { rounds } = req.body;
 
     const requestedRounds = Number(rounds) || 5;
     const roundCount = Math.min(Math.max(requestedRounds, 1), 10);
-    const allowedCategories = [
-      "Food",
-      "Places",
-      "Animals",
-      "Objects",
-      "Activities",
-      "Movies",
-      "Sports",
-      "Travel",
-      "Nature",
-      "School",
-      "Home",
-      "Music",
-      "Technology",
-      "UAE & Heritage",
-    ];
-    const selectedCategory =
-      typeof category === "string" && allowedCategories.includes(category)
-        ? category
-        : null;
-    const categoryInstruction = selectedCategory
-      ? `Use exactly the category "${selectedCategory}" for every round.`
-      : "Mix the categories across the rounds. Do not use the same category for every round.";
 
     const prompt = `
 Generate exactly ${roundCount} Family Impostor rounds.
-
-${playerLanguageInstruction(language)}
 
 This is for KinQuest, a family bonding game played by children and adults together.
 
@@ -1129,11 +902,6 @@ Good categories include:
 - Nature
 - School
 - Home
-- Music
-- Technology
-- UAE & Heritage
-
-${categoryInstruction}
 
 Rules:
 - Family friendly
@@ -1354,26 +1122,13 @@ Return ONLY valid JSON:
   }
 });app.post("/api/caption-battle/modes", async (req, res) => {
   try {
-    const { count, language, style } = req.body;
+    const { count, language } = req.body;
 
     const requestedCount = Number(count) || 3;
     const modeCount = Math.min(Math.max(requestedCount, 1), 5);
 
     const outputLanguage =
       language === "ar" ? "Arabic" : "English";
-    const styleGuidance = {
-      Storytelling:
-        "Focus on story prompts such as What Happened Next?, Before This Photo, Plot Twist, Future Memory, and Family Documentary.",
-      "Headlines & Posts":
-        "Focus on formats such as Breaking News, Sports Commentary, Movie Title, Social Media Post, and Travel Postcard.",
-      "Wild Ideas":
-        "Focus on imaginative prompts such as Wrong Answers Only, Secret Thoughts, Superhero Origin, Advertisement, and One-Word Challenge.",
-      "Surprise Me":
-        "Mix storytelling, headlines, social formats, and unexpected imaginative challenges.",
-    };
-    const selectedStyle = Object.hasOwn(styleGuidance, style)
-      ? style
-      : "Surprise Me";
 
     const prompt = `
 You create round themes for a family party game called Caption Battle.
@@ -1386,9 +1141,6 @@ During each round:
 - Players cannot vote for their own caption.
 
 Generate exactly ${modeCount} DIFFERENT round themes.
-
-Selected prompt style: ${selectedStyle}
-${styleGuidance[selectedStyle]}
 
 Write every theme in ${outputLanguage}.
 
@@ -1480,7 +1232,7 @@ Return ONLY valid JSON:
 });
 app.post("/api/pass-the-bomb", async (req, res) => {
   try {
-    const { count, language } = req.body;
+    const { count } = req.body;
 
     const requestedCount = Number(count) || 5;
     const categoryCount = Math.min(
@@ -1490,8 +1242,6 @@ app.post("/api/pass-the-bomb", async (req, res) => {
 
     const prompt = `
 Generate exactly ${categoryCount} categories for a family game called Pass the Bomb.
-
-${playerLanguageInstruction(language)}
 
 KinQuest is a family bonding app played together on one shared phone.
 
@@ -1581,7 +1331,7 @@ Return ONLY valid JSON in this exact structure:
 });
 app.post("/api/pass-the-bomb/validate", async (req, res) => {
   try {
-    const { category, answer, language } = req.body;
+    const { category, answer } = req.body;
 
     if (
       typeof category !== "string" ||
@@ -1597,8 +1347,6 @@ app.post("/api/pass-the-bomb/validate", async (req, res) => {
 
     const prompt = `
 You are the answer judge for a fast family party game called Pass the Bomb.
-
-${playerLanguageInstruction(language)}
 
 CATEGORY:
 "${category.trim()}"
@@ -1697,15 +1445,13 @@ Return ONLY valid JSON:
 });
 app.post("/api/draw-and-guess", async (req, res) => {
   try {
-    const { count, language } = req.body;
+    const { count } = req.body;
 
     const requestedCount = Number(count) || 6;
-    const promptCount = Math.min(Math.max(requestedCount, 1), 30);
+    const promptCount = Math.min(Math.max(requestedCount, 1), 12);
 
     const prompt = `
 Generate exactly ${promptCount} unique drawing prompts for a family game called Draw & Guess.
-
-${playerLanguageInstruction(language)}
 
 This game is played by children and adults together.
 
@@ -1965,15 +1711,13 @@ Confidence must be a number from 0 to 1.
 });
 app.post("/api/dont-say-it", async (req, res) => {
   try {
-    const { count, language } = req.body;
+    const { count } = req.body;
 
     const requestedCount = Number(count) || 20;
     const cardCount = Math.min(Math.max(requestedCount, 1), 100);
 
     const prompt = `
 Generate exactly ${cardCount} unique cards for a family game called Don't Say It.
-
-${playerLanguageInstruction(language)}
 
 For each card provide:
 - one secret word
@@ -2064,420 +1808,384 @@ Return ONLY valid JSON in this exact structure:
     });
   }
 });
-async function sendPendingNotification(notificationDoc) {
-  const notification = notificationDoc.data();
 
-  if (notification.pushPending !== true) {
-    return;
-  }
-
-  const userId = notification.userId?.toString();
-
-  if (!userId) {
-    console.warn(`Notification ${notificationDoc.id} has no userId.`);
-    return;
-  }
-
+app.post("/api/emoji-guess/check-answer", async (req, res) => {
   try {
-    const tokenSnapshot = await db
-      .collection("users")
-      .doc(userId)
-      .collection("fcmTokens")
-      .get();
+    const { expectedAnswer, playerAnswer } = req.body;
 
-const devices = tokenSnapshot.docs
-  .map((doc) => ({
-    token: doc.data().token,
-    ref: doc.ref,
-  }))
-  .filter(
-    (device) =>
-      typeof device.token === "string" &&
-      device.token.length > 0,
-  );
-
-const tokens = devices.map((device) => device.token);
-    if (tokens.length === 0) {
-      console.log(`No FCM tokens found for user ${userId}.`);
-
-      await notificationDoc.ref.update({
-        pushPending: false,
-        pushStatus: "no_devices",
+    if (!expectedAnswer || !playerAnswer) {
+      return res.status(400).json({
+        match: false,
       });
-
-      return;
     }
 
-    const message = {
-      notification: {
-        title:
-          notification.title?.toString() ??
-          "KinQuest",
-        body:
-          notification.message?.toString() ??
-          "You have a new notification.",
-      },
-      data: {
-        type: notification.type?.toString() ?? "",
-        familyId: notification.familyId?.toString() ?? "",
-        proposalId:
-          notification.proposalId?.toString() ?? "",
-        destination:
-          notification.destination?.toString() ?? "",
-        notificationId: notificationDoc.id,
-      },
-      tokens,
-    };
+    const prompt = `
+You are checking an answer for a family Emoji Guess game.
 
-    const response =
-      await messaging.sendEachForMulticast(message);
+Expected answer:
+"${expectedAnswer}"
 
-    console.log(
-      `Push ${notificationDoc.id}: ` +
-        `${response.successCount} sent, ` +
-        `${response.failureCount} failed.`,
+Player answer:
+"${playerAnswer}"
+
+Decide whether the player's answer clearly refers to the same answer.
+
+Allow:
+- capitalization differences
+- punctuation differences
+- small spelling mistakes
+- common shortened forms
+- answers that clearly identify the same movie, place, animal, food, object, or phrase
+
+Do NOT accept:
+- answers that are only vaguely related
+- a broader category when a specific answer is expected
+- a different answer with similar meaning
+
+Return ONLY valid JSON:
+
+{
+  "match": true
+}
+`;
+
+const response = await ai.models.generateContent({
+  model: "gemini-3.5-flash",
+  contents: prompt,
+  config: {
+    responseMimeType: "application/json",
+  },
+});
+
+    const result = JSON.parse(response.text);
+
+    res.json({
+      match: result.match === true,
+    });
+  } catch (error) {
+    console.error("Emoji Guess answer check error:", error);
+
+    res.status(500).json({
+      match: false,
+    });
+  }
+});
+app.post("/api/attack-or-defend", async (req, res) => {
+  try {
+    const { category, difficulty, count, language } = req.body;
+
+    const allowedCategories = new Set([
+      "Mixed",
+      "General Knowledge",
+      "Science",
+      "Geography",
+      "Sports",
+      "Entertainment",
+    ]);
+
+    const allowedDifficulties = new Set([
+      "easy",
+      "medium",
+      "hard",
+    ]);
+
+    const cleanCategory = allowedCategories.has(category)
+      ? category
+      : "Mixed";
+
+    const cleanDifficulty = allowedDifficulties.has(difficulty)
+      ? difficulty
+      : "medium";
+
+    const requestedCount = Number(count) || 20;
+    const questionCount = Math.min(
+      Math.max(requestedCount, 1),
+      50,
     );
 
-    const invalidTokenRefs = [];
+    const outputLanguage =
+      language === "ar" ? "Arabic" : "English";
 
-    response.responses.forEach((result, index) => {
-      if (result.success) {
-        return;
-      }
+    const difficultyInstruction = {
+      easy:
+        "Use familiar knowledge suitable for younger players and adults. Questions should be straightforward.",
+      medium:
+        "Use moderately challenging general knowledge suitable for a mixed-age family.",
+      hard:
+        "Use challenging but reasonable knowledge. Avoid obscure specialist facts.",
+    }[cleanDifficulty];
 
-      const code = result.error?.code;
+    const categoryInstruction =
+      cleanCategory === "Mixed"
+        ? "Use a balanced mixture of general knowledge, science, geography, sports, and entertainment."
+        : `Focus questions on ${cleanCategory}.`;
 
-      if (
-        code ===
-          "messaging/registration-token-not-registered" ||
-        code === "messaging/invalid-registration-token"
-      ) {
-invalidTokenRefs.push(
-  devices[index].ref,
-);
-      }
+    const prompt = `
+Generate exactly ${questionCount} unique multiple-choice questions for a competitive family game called Attack or Defend.
+
+Write all visible question and answer text in ${outputLanguage}.
+
+CATEGORY:
+${cleanCategory}
+
+DIFFICULTY:
+${cleanDifficulty}
+
+${categoryInstruction}
+${difficultyInstruction}
+
+HOW THE GAME WORKS:
+- Exactly two players compete.
+- Correct answers earn energy.
+- Players spend energy to attack each other.
+- When attacked, the defender receives one of these questions and must answer quickly to block the attack.
+- Questions therefore need to be clear enough to answer under time pressure.
+
+RULES:
+- Family friendly
+- Suitable for children and adults
+- Exactly 4 answer options
+- Exactly one correct option
+- No duplicate questions
+- No trick wording
+- No ambiguous answers
+- Keep question text concise
+- Keep answer options concise
+- No politics
+- No sexual content
+- No graphic violence
+- No drugs or alcohol
+- No hateful content
+- Avoid questions whose answers could quickly become outdated
+- Do not mention AI
+- Do not mention Attack, Shield, Energy, or gameplay mechanics inside the question itself
+
+Return ONLY valid JSON.
+`;
+
+    const response = await ai.models.generateContent({
+      model: "gemini-3.5-flash",
+      contents: prompt,
+      config: {
+        responseMimeType: "application/json",
+        responseJsonSchema: {
+          type: "object",
+          properties: {
+           questions: {
+            type: "array",
+            items: {
+                type: "object",
+                properties: {
+                  question: {
+                    type: "string",
+                  },
+                  options: {
+                    type: "array",
+                    minItems: 4,
+                    maxItems: 4,
+                    items: {
+                      type: "string",
+                    },
+                  },
+                  correctIndex: {
+                    type: "integer",
+                    minimum: 0,
+                    maximum: 3,
+                  },
+                },
+                required: [
+                  "question",
+                  "options",
+                  "correctIndex",
+                ],
+              },
+            },
+          },
+          required: ["questions"],
+        },
+      },
     });
 
-    await Promise.all(
-      invalidTokenRefs.map((ref) => ref.delete()),
-    );
+    const result = JSON.parse(response.text);
 
-    await notificationDoc.ref.update({
-      pushPending: false,
-      pushStatus:
-        response.successCount > 0
-          ? "sent"
-          : "failed",
-      pushSuccessCount: response.successCount,
-      pushFailureCount: response.failureCount,
+    if (
+      !Array.isArray(result.questions) ||
+      result.questions.length !== questionCount
+    ) {
+      throw new Error(
+        "Gemini returned an invalid Attack or Defend question count",
+      );
+    }
+
+    res.json({
+      questions: result.questions,
     });
   } catch (error) {
     console.error(
-      `Could not send push ${notificationDoc.id}:`,
+      "Attack or Defend generation error:",
       error,
     );
 
-    await notificationDoc.ref.update({
-      pushStatus: "error",
-      pushError:
-        error.message?.toString() ??
-        "Unknown error",
+    res.status(500).json({
+      error: "Failed to generate Attack or Defend questions",
     });
   }
-}
-async function checkWishlistGoalsForUser(userDoc) {
-  const userData = userDoc.data();
-  const userId = userDoc.id;
-
-  const familyId = userData.familyId?.toString();
-
-  if (!familyId) {
-    return;
-  }
-
-  const proposalsSnapshot = await db
-    .collection("families")
-    .doc(familyId)
-    .collection("rewardWishlistProposals")
-    .where("requesterId", "==", userId)
-    .get();
-
-  for (const proposalDoc of proposalsSnapshot.docs) {
-    const proposal = proposalDoc.data();
-
-    if (proposal.status !== "accepted") {
-      continue;
-    }
-
-    const currentTokens = Number(userData.tokens ?? 0);
-    const dailyWins = Number(userData.dailyWins ?? 0);
-    const weeklyWins = Number(userData.weeklyWins ?? 0);
-    const monthlyWins = Number(userData.monthlyWins ?? 0);
-    const missionsCompleted = Number(
-      userData.missionsCompleted ?? 0,
-    );
-
-    const tokenRequirement = Number(
-      proposal.tokenRequirement ?? 0,
-    );
-    const dailyWinsRequired = Number(
-      proposal.dailyWinsRequired ?? 0,
-    );
-    const weeklyWinsRequired = Number(
-      proposal.weeklyWinsRequired ?? 0,
-    );
-    const monthlyWinsRequired = Number(
-      proposal.monthlyWinsRequired ?? 0,
-    );
-    const missionsRequired = Number(
-      proposal.missionsRequired ?? 0,
-    );
-    const dailyWinsBaseline = Number(
-      proposal.dailyWinsBaseline ?? 0,
-    );
-    const weeklyWinsBaseline = Number(
-      proposal.weeklyWinsBaseline ?? 0,
-    );
-    const monthlyWinsBaseline = Number(
-      proposal.monthlyWinsBaseline ?? 0,
-    );
-    const missionsBaseline = Number(
-      proposal.missionsBaseline ?? 0,
-    );
-
-    const hasRequirement =
-      tokenRequirement > 0 ||
-      dailyWinsRequired > 0 ||
-      weeklyWinsRequired > 0 ||
-      monthlyWinsRequired > 0 ||
-      missionsRequired > 0;
-
-    const complete =
-      hasRequirement &&
-      currentTokens >= tokenRequirement &&
-      dailyWins - dailyWinsBaseline >= dailyWinsRequired &&
-      weeklyWins - weeklyWinsBaseline >= weeklyWinsRequired &&
-      monthlyWins - monthlyWinsBaseline >= monthlyWinsRequired &&
-      missionsCompleted - missionsBaseline >= missionsRequired;
-
-    if (!complete) {
-      continue;
-    }
-
-    await db.runTransaction(async (transaction) => {
-      const latestProposalDoc =
-        await transaction.get(proposalDoc.ref);
-
-      const latestUserDoc =
-        await transaction.get(userDoc.ref);
-
-      if (!latestProposalDoc.exists ||
-          !latestUserDoc.exists) {
-        return;
-      }
-
-      const latestProposal = latestProposalDoc.data();
-      const latestUser = latestUserDoc.data();
-
-      if (latestProposal.status !== "accepted") {
-        return;
-      }
-
-      const stillComplete =
-        Number(latestUser.tokens ?? 0) >=
-          Number(latestProposal.tokenRequirement ?? 0) &&
-        Number(latestUser.dailyWins ?? 0) -
-          Number(latestProposal.dailyWinsBaseline ?? 0) >=
-          Number(latestProposal.dailyWinsRequired ?? 0) &&
-        Number(latestUser.weeklyWins ?? 0) -
-          Number(latestProposal.weeklyWinsBaseline ?? 0) >=
-          Number(latestProposal.weeklyWinsRequired ?? 0) &&
-        Number(latestUser.monthlyWins ?? 0) -
-          Number(latestProposal.monthlyWinsBaseline ?? 0) >=
-          Number(latestProposal.monthlyWinsRequired ?? 0) &&
-        Number(latestUser.missionsCompleted ?? 0) -
-          Number(latestProposal.missionsBaseline ?? 0) >=
-          Number(latestProposal.missionsRequired ?? 0);
-
-      if (!stillComplete) {
-        return;
-      }
-
-      transaction.update(proposalDoc.ref, {
-        status: "readyToRedeem",
-        readyToRedeemAt: FieldValue.serverTimestamp(),
-        updatedAt: FieldValue.serverTimestamp(),
-      });
-
-      const notificationRef = db
-        .collection("users")
-        .doc(userId)
-        .collection("notifications")
-        .doc();
-
-      transaction.set(notificationRef, {
-        userId,
-        type: "wishlistGoalReady",
-        title: "Wishlist Goal Ready",
-        message:
-          `${latestProposal.title ?? "Your reward"} is ready to redeem.`,
-        familyId,
-        proposalId: proposalDoc.id,
-        destination: "rewardsGoals",
-        read: false,
-        pushPending: true,
-        createdAt: FieldValue.serverTimestamp(),
-      });
-    });
-  }
-}
-
-function startWishlistGoalReadyListener() {
-  return db.collection("users").onSnapshot(
-    (snapshot) => {
-      for (const change of snapshot.docChanges()) {
-        if (
-          change.type === "added" ||
-          change.type === "modified"
-        ) {
-          void checkWishlistGoalsForUser(
-            change.doc,
-          ).catch((error) => {
-            console.error(
-              `Could not check Wishlist goals for ${change.doc.id}:`,
-              error,
-            );
-          });
-        }
-      }
-    },
-    (error) => {
-      console.error(
-        "Wishlist goal listener error:",
-        error,
-      );
-    },
-  );
-}
-function startNotificationListener() {
-  let fallbackUnsubscribe = null;
-
-  const collectionGroupUnsubscribe = db
-    .collectionGroup("notifications")
-    .where("pushPending", "==", true)
-    .onSnapshot(
-      (snapshot) => {
-        for (const change of snapshot.docChanges()) {
-          if (
-            change.type === "added" ||
-            change.type === "modified"
-          ) {
-            void sendPendingNotification(change.doc);
-          }
-        }
-      },
-      (error) => {
-        console.error(
-          "Notification listener error:",
-          error,
-        );
-
-        if (
-          !fallbackUnsubscribe &&
-          (error.code === 9 || error.code === "failed-precondition")
-        ) {
-          console.warn(
-            "Notification collection-group index is unavailable. " +
-              "Falling back to per-user listeners while the index is built.",
-          );
-          fallbackUnsubscribe =
-            startPerUserNotificationListeners();
-        }
-      },
-    );
-
-  return () => {
-    collectionGroupUnsubscribe();
-    fallbackUnsubscribe?.();
-  };
-}
-
-function startPerUserNotificationListeners() {
-  const notificationListeners = new Map();
-
-  const usersUnsubscribe = db.collection("users").onSnapshot(
-    (snapshot) => {
-      for (const change of snapshot.docChanges()) {
-        const userId = change.doc.id;
-
-        if (change.type === "removed") {
-          notificationListeners.get(userId)?.();
-          notificationListeners.delete(userId);
-          continue;
-        }
-
-        if (notificationListeners.has(userId)) {
-          continue;
-        }
-
-        const unsubscribe = change.doc.ref
-          .collection("notifications")
-          .where("pushPending", "==", true)
-          .onSnapshot(
-            (notificationSnapshot) => {
-              for (const notificationChange of
-                notificationSnapshot.docChanges()) {
-                if (
-                  notificationChange.type === "added" ||
-                  notificationChange.type === "modified"
-                ) {
-                  void sendPendingNotification(notificationChange.doc);
-                }
-              }
-            },
-            (error) => {
-              console.error(
-                `Notification fallback listener error for ${userId}:`,
-                error,
-              );
-            },
-          );
-
-        notificationListeners.set(userId, unsubscribe);
-      }
-    },
-    (error) => {
-      console.error("Notification user fallback error:", error);
-    },
-  );
-
-  return () => {
-    usersUnsubscribe();
-    for (const unsubscribe of notificationListeners.values()) {
-      unsubscribe();
-    }
-    notificationListeners.clear();
-  };
-}
-
-const PORT = process.env.PORT || 3000;
-
-app.use((error, request, response, next) => {
-  if (error instanceof SyntaxError && "body" in error) {
-    return response.status(400).json({ error: "Request body must be valid JSON." });
-  }
-
-  return next(error);
 });
 
-if (require.main === module) {
-  startNotificationListener();
-  startWishlistGoalReadyListener();
+app.post("/api/risk-it", async (req, res) => {
+  try {
+    const { category, difficulty, count, language } = req.body;
 
-  app.listen(PORT, () => {
-    console.log(`Sila AI service running on port ${PORT}`);
-    console.log("FCM notification listeners started.");
-  });
+    const allowedCategories = new Set([
+      "Mixed",
+      "General Knowledge",
+      "Science",
+      "Geography",
+      "Sports",
+      "Entertainment",
+    ]);
+
+    const allowedDifficulties = new Set([
+      "easy",
+      "medium",
+      "hard",
+    ]);
+
+    const cleanCategory = allowedCategories.has(category)
+      ? category
+      : "Mixed";
+
+    const cleanDifficulty = allowedDifficulties.has(difficulty)
+      ? difficulty
+      : "medium";
+
+    const requestedCount = Number(count) || 20;
+    const questionCount = Math.min(
+      Math.max(requestedCount, 1),
+      40,
+    );
+
+    const outputLanguage =
+      language === "ar" ? "Arabic" : "English";
+
+    const difficultyInstruction = {
+      easy:
+        "Use familiar, straightforward knowledge suitable for children and adults.",
+      medium:
+        "Use moderately challenging knowledge suitable for a mixed-age family.",
+      hard:
+        "Use challenging but reasonable knowledge. Avoid obscure specialist facts.",
+    }[cleanDifficulty];
+
+    const categoryInstruction =
+      cleanCategory === "Mixed"
+        ? "Use a balanced mixture of general knowledge, science, geography, sports, and entertainment."
+        : `Focus on ${cleanCategory}.`;
+
+    const prompt = `
+Generate exactly ${questionCount} unique multiple-choice questions for a family duel game called Risk It.
+
+Write all visible question and answer text in ${outputLanguage}.
+
+CATEGORY:
+${cleanCategory}
+
+DIFFICULTY:
+${cleanDifficulty}
+
+${categoryInstruction}
+${difficultyInstruction}
+
+HOW THE GAME WORKS:
+- Exactly two players compete on one shared phone.
+- Players answer questions privately during their turn.
+- Correct answers increase an unbanked point pot.
+- The player can bank the pot safely or risk it on another question.
+- A wrong answer destroys the current unbanked pot.
+- Questions must therefore be clear and fair under pressure.
+
+RULES:
+- Family friendly
+- Suitable for children and adults
+- Exactly 4 answer options
+- Exactly one correct answer
+- No duplicate questions
+- No trick wording
+- No ambiguous answers
+- Keep questions concise
+- Keep answers concise
+- Avoid facts that quickly become outdated
+- No politics
+- No sexual content
+- No drugs or alcohol
+- No graphic violence
+- No hateful content
+- Do not mention AI
+- Do not mention Risk It gameplay inside the questions
+
+Return ONLY valid JSON in this structure:
+
+{
+  "questions": [
+    {
+      "question": "Question text",
+      "options": [
+        "Answer 1",
+        "Answer 2",
+        "Answer 3",
+        "Answer 4"
+      ],
+      "correctIndex": 0
+    }
+  ]
 }
+`;
 
-module.exports = app;
+    const response = await ai.models.generateContent({
+      model: "gemini-3.5-flash",
+      contents: prompt,
+      config: {
+        responseMimeType: "application/json",
+      },
+    });
+
+    const result = JSON.parse(response.text);
+
+    if (!Array.isArray(result.questions)) {
+      throw new Error(
+        "Gemini returned an invalid Risk It response",
+      );
+    }
+
+    const questions = result.questions
+      .filter(
+        (question) =>
+          typeof question.question === "string" &&
+          Array.isArray(question.options) &&
+          question.options.length === 4 &&
+          Number.isInteger(question.correctIndex) &&
+          question.correctIndex >= 0 &&
+          question.correctIndex <= 3,
+      )
+      .slice(0, questionCount);
+
+    if (questions.length < questionCount) {
+      throw new Error(
+        "Gemini returned too few valid Risk It questions",
+      );
+    }
+
+    res.json({ questions });
+  } catch (error) {
+    console.error("Risk It generation error:", error);
+
+    res.status(500).json({
+      error: "Failed to generate Risk It questions",
+    });
+  }
+});
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+  console.log(`KinQuest Gemini server running on port ${PORT}`);
+});

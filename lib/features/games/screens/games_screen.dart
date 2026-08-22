@@ -16,6 +16,11 @@ import 'secret_mission_screen.dart';
 import 'trivia_screen.dart';
 import 'truth_or_dare_screen.dart';
 import 'would_you_rather_screen.dart';
+import 'code_breaker_screen.dart';
+import 'attack_or_defend_screen.dart';
+import 'risk_it_screen.dart';
+
+enum _GameCategory { family, party, duel }
 
 class GamesScreen extends StatelessWidget {
   const GamesScreen({
@@ -28,6 +33,36 @@ class GamesScreen extends StatelessWidget {
   final Set<String>? participantIds;
   static const List<_GameItem> _games = [
     _GameItem(
+      icon: Icons.lock_open_rounded,
+      accent: AppTheme.tealColor,
+      title: 'Code Breaker',
+      description:
+          'Crack hidden codes using logic. Fewer attempts and faster solves earn more points.',
+      eyebrow: 'LOGIC DUEL',
+      category: _GameCategory.duel,
+      isAvailable: true,
+    ),
+    _GameItem(
+      icon: Icons.sports_martial_arts_rounded,
+      accent: AppTheme.coralColor,
+      title: 'Attack or Defend',
+      description:
+          'Build energy, attack your rival, defend your hearts, and survive the battle.',
+      eyebrow: 'BATTLE DUEL',
+      category: _GameCategory.duel,
+      isAvailable: true,
+    ),
+    _GameItem(
+      icon: Icons.casino_rounded,
+      accent: AppTheme.goldColor,
+      title: 'Risk It',
+      description:
+          'Build a points pot, bank it safely, or risk everything for a massive score.',
+      eyebrow: 'HIGH-STAKES DUEL',
+      category: _GameCategory.duel,
+      isAvailable: true,
+    ),
+    _GameItem(
       icon: Icons.favorite_rounded,
       accent: AppTheme.coralColor,
       title: 'Family Quiz',
@@ -35,6 +70,7 @@ class GamesScreen extends StatelessWidget {
           'Share real answers and discover how well your family knows one another.',
       eyebrow: 'CONNECTED PLAY',
       isAvailable: true,
+      category: _GameCategory.family,
     ),
     _GameItem(
       icon: Icons.quiz_rounded,
@@ -44,6 +80,7 @@ class GamesScreen extends StatelessWidget {
           'Team up, choose a category, and race through family-friendly questions.',
       eyebrow: 'KNOWLEDGE',
       isAvailable: true,
+      category: _GameCategory.family,
     ),
     _GameItem(
       icon: Icons.emoji_emotions_rounded,
@@ -53,14 +90,7 @@ class GamesScreen extends StatelessWidget {
           'Decode playful emoji puzzles with your team before time runs out.',
       eyebrow: 'GUESSING GAME',
       isAvailable: true,
-    ),
-    _GameItem(
-      icon: Icons.celebration_rounded,
-      accent: Color(0xFFE35EAB),
-      title: 'Party Games',
-      description: 'Quick family games for laughs and fun.',
-      eyebrow: '4 GAMES INSIDE',
-      isAvailable: true,
+      category: _GameCategory.family,
     ),
     _GameItem(
       icon: Icons.person_search_rounded,
@@ -70,6 +100,7 @@ class GamesScreen extends StatelessWidget {
           'Find the hidden impostor through clues, discussion, and family voting.',
       eyebrow: 'SOCIAL DEDUCTION',
       isAvailable: true,
+      category: _GameCategory.family,
     ),
     _GameItem(
       icon: Icons.visibility_off_rounded,
@@ -79,15 +110,17 @@ class GamesScreen extends StatelessWidget {
           'Complete a hidden mission without your family figuring out what you are doing.',
       eyebrow: 'SECRET CHALLENGE',
       isAvailable: true,
+      category: _GameCategory.family,
     ),
     _GameItem(
       icon: Icons.add_comment_rounded,
       accent: AppTheme.goldColor,
       title: 'Caption Battle',
       description:
-          'Caption real family photos, vote anonymously, and crown the funniest family member.',
+          'Caption real family photos, vote anonymously, and crown the best caption.',
       eyebrow: 'PHOTO PARTY',
       isAvailable: true,
+      category: _GameCategory.family,
     ),
     _GameItem(
       icon: Icons.timer_rounded,
@@ -97,14 +130,16 @@ class GamesScreen extends StatelessWidget {
           'Answer quickly, pass the phone, and avoid being caught when the hidden timer explodes.',
       eyebrow: 'FAST FAMILY FUN',
       isAvailable: true,
+      category: _GameCategory.family,
     ),
     _GameItem(
       icon: Icons.draw_outlined,
       accent: AppTheme.coralColor,
       title: 'Draw & Guess',
-      description: 'Draw AI-generated prompts while your family guesses aloud.',
+      description: 'Draw prompts while your family guesses aloud.',
       eyebrow: 'CREATIVE PLAY',
       isAvailable: true,
+      category: _GameCategory.family,
     ),
     _GameItem(
       icon: Icons.record_voice_over_outlined,
@@ -114,13 +149,69 @@ class GamesScreen extends StatelessWidget {
           'Describe the secret word without saying any of the forbidden words.',
       eyebrow: 'WORD CHALLENGE',
       isAvailable: true,
+      category: _GameCategory.family,
+    ),
+
+    _GameItem(
+      icon: Icons.compare_arrows_rounded,
+      accent: AppTheme.coralColor,
+      title: 'Would You Rather',
+      description: 'Choose between two playful options.',
+      eyebrow: 'CHOICE GAME',
+      category: _GameCategory.party,
+      isAvailable: true,
+    ),
+
+    _GameItem(
+      icon: Icons.theater_comedy_rounded,
+      accent: AppTheme.tealColor,
+      title: 'Charades',
+      description: 'Act out creative prompts for the whole family.',
+      eyebrow: 'ACT IT OUT',
+      category: _GameCategory.party,
+      isAvailable: true,
+    ),
+
+    _GameItem(
+      icon: Icons.sentiment_satisfied_alt_rounded,
+      accent: Color(0xFF4B91F1),
+      title: 'Never Have I Ever',
+      description: 'Share family-friendly moments and surprises.',
+      eyebrow: 'PARTY TALK',
+      category: _GameCategory.party,
+      isAvailable: true,
+    ),
+
+    _GameItem(
+      icon: Icons.casino_rounded,
+      accent: Color(0xFFE35EAB),
+      title: 'Truth or Dare',
+      description: 'Pick a friendly truth or a fun challenge.',
+      eyebrow: 'PARTY CHALLENGE',
+      category: _GameCategory.party,
+      isAvailable: true,
     ),
   ];
+  List<_GameItem> _gamesFor(_GameCategory category) {
+    return _games.where((game) => game.category == category).toList();
+  }
 
   void _openGame(BuildContext context, _GameItem game) {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) => switch (game.title) {
+          'Risk It' => RiskItScreen(
+            participantIds: participantIds,
+            developerPreview: developerPreview,
+          ),
+          'Code Breaker' => CodeBreakerScreen(
+            participantIds: participantIds,
+            developerPreview: developerPreview,
+          ),
+          'Attack or Defend' => AttackOrDefendScreen(
+            participantIds: participantIds,
+            developerPreview: developerPreview,
+          ),
           'Family Quiz' => FamilyQuizScreen(
             developerPreview: developerPreview,
             participantIds: participantIds,
@@ -157,7 +248,10 @@ class GamesScreen extends StatelessWidget {
             participantIds: participantIds,
             developerPreview: developerPreview,
           ),
-          'Party Games' => const PartyGamesScreen(),
+          'Would You Rather' => const WouldYouRatherScreen(),
+          'Charades' => const CharadesScreen(),
+          'Never Have I Ever' => const NeverHaveIEverScreen(),
+          'Truth or Dare' => const TruthOrDareScreen(),
           _ => GamePlaceholderScreen(gameTitle: game.title),
         },
       ),
@@ -193,23 +287,39 @@ class GamesScreen extends StatelessWidget {
                     children: [
                       const _GamesHeader(),
                       const SizedBox(height: 28),
-                      GridView.builder(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemCount: _games.length,
-                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: columns,
-                          crossAxisSpacing: 16,
-                          mainAxisSpacing: 16,
-                          mainAxisExtent: cardHeight,
-                        ),
-                        itemBuilder: (context, index) {
-                          final game = _games[index];
-                          return _GameCard(
-                            game: game,
-                            onOpen: () => _openGame(context, game),
-                          );
-                        },
+                      _GameSection(
+                        icon: Icons.sports_kabaddi_rounded,
+                        title: 'Duel Games',
+                        subtitle:
+                            'Head-to-head games built specifically for 2 players.',
+                        games: _gamesFor(_GameCategory.duel),
+                        columns: columns,
+                        cardHeight: cardHeight,
+                        onOpen: (game) => _openGame(context, game),
+                      ),
+
+                      const SizedBox(height: 38),
+                      _GameSection(
+                        icon: Icons.groups_2_rounded,
+                        title: 'Family Games',
+                        subtitle:
+                            'Play together with 2 or more family members.',
+                        games: _gamesFor(_GameCategory.family),
+                        columns: columns,
+                        cardHeight: cardHeight,
+                        onOpen: (game) => _openGame(context, game),
+                      ),
+
+                      const SizedBox(height: 38),
+
+                      _GameSection(
+                        icon: Icons.celebration_rounded,
+                        title: 'Party Games',
+                        subtitle: 'Casual games made for laughs and group fun.',
+                        games: _gamesFor(_GameCategory.party),
+                        columns: columns,
+                        cardHeight: cardHeight,
+                        onOpen: (game) => _openGame(context, game),
                       ),
                     ],
                   ),
@@ -219,6 +329,73 @@ class GamesScreen extends StatelessWidget {
           },
         ),
       ),
+    );
+  }
+}
+
+class _GameSection extends StatelessWidget {
+  const _GameSection({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.games,
+    required this.columns,
+    required this.cardHeight,
+    required this.onOpen,
+  });
+
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final List<_GameItem> games;
+  final int columns;
+  final double cardHeight;
+  final ValueChanged<_GameItem> onOpen;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(icon, color: colorScheme.primary, size: 24),
+            const SizedBox(width: 10),
+            Text(
+              title,
+              style: Theme.of(
+                context,
+              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
+            ),
+          ],
+        ),
+        const SizedBox(height: 5),
+        Text(
+          subtitle,
+          style: Theme.of(
+            context,
+          ).textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant),
+        ),
+        const SizedBox(height: 16),
+        GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: games.length,
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: columns,
+            crossAxisSpacing: 16,
+            mainAxisSpacing: 16,
+            mainAxisExtent: cardHeight,
+          ),
+          itemBuilder: (context, index) {
+            final game = games[index];
+
+            return _GameCard(game: game, onOpen: () => onOpen(game));
+          },
+        ),
+      ],
     );
   }
 }
@@ -650,6 +827,7 @@ class _GameItem {
     required this.title,
     required this.description,
     required this.eyebrow,
+    required this.category,
     this.isAvailable = false,
   });
 
@@ -658,6 +836,7 @@ class _GameItem {
   final String title;
   final String description;
   final String eyebrow;
+  final _GameCategory category;
   final bool isAvailable;
 }
 
