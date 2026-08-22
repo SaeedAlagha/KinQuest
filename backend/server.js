@@ -2031,6 +2031,159 @@ Return ONLY valid JSON.
     });
   }
 });
+
+app.post("/api/risk-it", async (req, res) => {
+  try {
+    const { category, difficulty, count, language } = req.body;
+
+    const allowedCategories = new Set([
+      "Mixed",
+      "General Knowledge",
+      "Science",
+      "Geography",
+      "Sports",
+      "Entertainment",
+    ]);
+
+    const allowedDifficulties = new Set([
+      "easy",
+      "medium",
+      "hard",
+    ]);
+
+    const cleanCategory = allowedCategories.has(category)
+      ? category
+      : "Mixed";
+
+    const cleanDifficulty = allowedDifficulties.has(difficulty)
+      ? difficulty
+      : "medium";
+
+    const requestedCount = Number(count) || 20;
+    const questionCount = Math.min(
+      Math.max(requestedCount, 1),
+      40,
+    );
+
+    const outputLanguage =
+      language === "ar" ? "Arabic" : "English";
+
+    const difficultyInstruction = {
+      easy:
+        "Use familiar, straightforward knowledge suitable for children and adults.",
+      medium:
+        "Use moderately challenging knowledge suitable for a mixed-age family.",
+      hard:
+        "Use challenging but reasonable knowledge. Avoid obscure specialist facts.",
+    }[cleanDifficulty];
+
+    const categoryInstruction =
+      cleanCategory === "Mixed"
+        ? "Use a balanced mixture of general knowledge, science, geography, sports, and entertainment."
+        : `Focus on ${cleanCategory}.`;
+
+    const prompt = `
+Generate exactly ${questionCount} unique multiple-choice questions for a family duel game called Risk It.
+
+Write all visible question and answer text in ${outputLanguage}.
+
+CATEGORY:
+${cleanCategory}
+
+DIFFICULTY:
+${cleanDifficulty}
+
+${categoryInstruction}
+${difficultyInstruction}
+
+HOW THE GAME WORKS:
+- Exactly two players compete on one shared phone.
+- Players answer questions privately during their turn.
+- Correct answers increase an unbanked point pot.
+- The player can bank the pot safely or risk it on another question.
+- A wrong answer destroys the current unbanked pot.
+- Questions must therefore be clear and fair under pressure.
+
+RULES:
+- Family friendly
+- Suitable for children and adults
+- Exactly 4 answer options
+- Exactly one correct answer
+- No duplicate questions
+- No trick wording
+- No ambiguous answers
+- Keep questions concise
+- Keep answers concise
+- Avoid facts that quickly become outdated
+- No politics
+- No sexual content
+- No drugs or alcohol
+- No graphic violence
+- No hateful content
+- Do not mention AI
+- Do not mention Risk It gameplay inside the questions
+
+Return ONLY valid JSON in this structure:
+
+{
+  "questions": [
+    {
+      "question": "Question text",
+      "options": [
+        "Answer 1",
+        "Answer 2",
+        "Answer 3",
+        "Answer 4"
+      ],
+      "correctIndex": 0
+    }
+  ]
+}
+`;
+
+    const response = await ai.models.generateContent({
+      model: "gemini-3.5-flash",
+      contents: prompt,
+      config: {
+        responseMimeType: "application/json",
+      },
+    });
+
+    const result = JSON.parse(response.text);
+
+    if (!Array.isArray(result.questions)) {
+      throw new Error(
+        "Gemini returned an invalid Risk It response",
+      );
+    }
+
+    const questions = result.questions
+      .filter(
+        (question) =>
+          typeof question.question === "string" &&
+          Array.isArray(question.options) &&
+          question.options.length === 4 &&
+          Number.isInteger(question.correctIndex) &&
+          question.correctIndex >= 0 &&
+          question.correctIndex <= 3,
+      )
+      .slice(0, questionCount);
+
+    if (questions.length < questionCount) {
+      throw new Error(
+        "Gemini returned too few valid Risk It questions",
+      );
+    }
+
+    res.json({ questions });
+  } catch (error) {
+    console.error("Risk It generation error:", error);
+
+    res.status(500).json({
+      error: "Failed to generate Risk It questions",
+    });
+  }
+});
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {

@@ -18,6 +18,7 @@ import 'truth_or_dare_screen.dart';
 import 'would_you_rather_screen.dart';
 import 'code_breaker_screen.dart';
 import 'attack_or_defend_screen.dart';
+import 'risk_it_screen.dart';
 
 enum _GameCategory { family, party, duel }
 
@@ -48,6 +49,16 @@ class GamesScreen extends StatelessWidget {
       description:
           'Build energy, attack your rival, defend your hearts, and survive the battle.',
       eyebrow: 'BATTLE DUEL',
+      category: _GameCategory.duel,
+      isAvailable: true,
+    ),
+    _GameItem(
+      icon: Icons.casino_rounded,
+      accent: AppTheme.goldColor,
+      title: 'Risk It',
+      description:
+          'Build a points pot, bank it safely, or risk everything for a massive score.',
+      eyebrow: 'HIGH-STAKES DUEL',
       category: _GameCategory.duel,
       isAvailable: true,
     ),
@@ -189,6 +200,10 @@ class GamesScreen extends StatelessWidget {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) => switch (game.title) {
+          'Risk It' => RiskItScreen(
+            participantIds: participantIds,
+            developerPreview: developerPreview,
+          ),
           'Code Breaker' => CodeBreakerScreen(
             participantIds: participantIds,
             developerPreview: developerPreview,
