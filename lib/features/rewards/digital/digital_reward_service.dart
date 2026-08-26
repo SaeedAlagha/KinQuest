@@ -9,6 +9,30 @@ import 'equipped_digital_rewards.dart';
 typedef DigitalRewardEndpointBuilder = Uri Function(String path);
 typedef DigitalRewardHeadersProvider = Future<Map<String, String>> Function();
 
+enum DigitalRewardFailure {
+  signInRequired,
+  unavailable,
+  userNotFound,
+  familyRequired,
+  familyNotFound,
+  notFamilyMember,
+  alreadyOwned,
+  insufficientTokens,
+  notOwned,
+  invalidReward,
+  updateFailed,
+}
+
+class DigitalRewardException implements Exception {
+  const DigitalRewardException(this.failure, {this.debugMessage});
+
+  final DigitalRewardFailure failure;
+  final String? debugMessage;
+
+  @override
+  String toString() => 'DigitalRewardException($failure)';
+}
+
 class DigitalRewardService {
   DigitalRewardService({
     http.Client? client,
@@ -67,6 +91,47 @@ class DigitalRewardService {
       // Keep the privacy-safe fallback when a proxy returns a non-JSON body.
     }
 
-    throw Exception(message);
+    throw DigitalRewardException(
+      _failureFor(response.statusCode, message),
+      debugMessage: message,
+    );
+  }
+
+  DigitalRewardFailure _failureFor(int statusCode, String message) {
+    final normalized = message.toLowerCase();
+
+    if (statusCode == 401 ||
+        normalized.contains('sign in') ||
+        normalized.contains('session')) {
+      return DigitalRewardFailure.signInRequired;
+    }
+    if (normalized.contains('not currently available')) {
+      return DigitalRewardFailure.unavailable;
+    }
+    if (normalized.contains('user not found')) {
+      return DigitalRewardFailure.userNotFound;
+    }
+    if (normalized.contains('join a family')) {
+      return DigitalRewardFailure.familyRequired;
+    }
+    if (normalized.contains('family not found')) {
+      return DigitalRewardFailure.familyNotFound;
+    }
+    if (normalized.contains('not a member')) {
+      return DigitalRewardFailure.notFamilyMember;
+    }
+    if (normalized.contains('already own')) {
+      return DigitalRewardFailure.alreadyOwned;
+    }
+    if (normalized.contains('enough tokens')) {
+      return DigitalRewardFailure.insufficientTokens;
+    }
+    if (normalized.contains('do not own')) {
+      return DigitalRewardFailure.notOwned;
+    }
+    if (normalized.contains('invalid')) {
+      return DigitalRewardFailure.invalidReward;
+    }
+    return DigitalRewardFailure.updateFailed;
   }
 }

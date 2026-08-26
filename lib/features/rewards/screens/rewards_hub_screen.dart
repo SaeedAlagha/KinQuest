@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../../../l10n/app_localizations.dart';
 import '../digital/digital_reward_catalog.dart';
 import '../digital/digital_reward_definition.dart';
+import '../digital/digital_reward_error_localization.dart';
 import '../digital/digital_reward_localization.dart';
 import '../digital/digital_reward_service.dart';
 import '../digital/digital_reward_visuals.dart';
@@ -82,9 +83,9 @@ class _RewardsHubScreenState extends State<RewardsHubScreen> {
     } catch (error) {
       if (!mounted) return;
 
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(_messageFromError(error))));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(localizedDigitalRewardError(context, error))),
+      );
     } finally {
       if (mounted) {
         setState(() {
@@ -112,9 +113,9 @@ class _RewardsHubScreenState extends State<RewardsHubScreen> {
       );
     } catch (error) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(_messageFromError(error))));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(localizedDigitalRewardError(context, error))),
+      );
     } finally {
       if (mounted) {
         setState(() {
@@ -122,16 +123,6 @@ class _RewardsHubScreenState extends State<RewardsHubScreen> {
         });
       }
     }
-  }
-
-  String _messageFromError(Object error) {
-    final text = error.toString();
-
-    if (text.startsWith('Exception: ')) {
-      return text.substring('Exception: '.length);
-    }
-
-    return AppLocalizations.of(context)!.somethingWentWrong;
   }
 
   @override
@@ -367,7 +358,11 @@ class _RewardsHubScreenState extends State<RewardsHubScreen> {
                         } catch (error) {
                           if (!context.mounted) return;
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text(_messageFromError(error))),
+                            SnackBar(
+                              content: Text(
+                                localizedDigitalRewardError(context, error),
+                              ),
+                            ),
                           );
                         }
                       },
