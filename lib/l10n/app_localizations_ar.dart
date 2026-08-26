@@ -4138,4 +4138,360 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get tokenAdjusted => 'مُعدّل';
+
+  @override
+  String get codeBreakerTitle => 'كاسر الشفرة';
+
+  @override
+  String get codeBreakerDescription => 'اكسر الشفرة المخفية بالمنطق. المحاولات الأقل والحل الأسرع يمنحان نقاطًا أكثر.';
+
+  @override
+  String get chooseExactlyTwoPlayers => 'اختر لاعبين اثنين بالضبط.';
+
+  @override
+  String get codeBreakerRoundsDescription => 'يفك كل لاعب شفرة جديدة في كل جولة.';
+
+  @override
+  String get startCodeBreaker => 'ابدأ كاسر الشفرة';
+
+  @override
+  String get difficulty => 'الصعوبة';
+
+  @override
+  String get difficultyHard => 'صعب';
+
+  @override
+  String get codeEasyDescription => 'شفرة من 3 رموز بلا تكرار.';
+
+  @override
+  String get codeMediumDescription => 'شفرة من 4 رموز مع مجموعة رموز أكبر.';
+
+  @override
+  String get codeHardDescription => 'شفرة من 5 رموز قد تتكرر فيها الرموز.';
+
+  @override
+  String difficultyValue(String difficulty) {
+    return 'الصعوبة: $difficulty';
+  }
+
+  @override
+  String get otherPlayerLookAway => 'على اللاعب الآخر ألا ينظر حتى تنتهي هذه النوبة.';
+
+  @override
+  String playerRound(String name, int round) {
+    return '$name — الجولة $round';
+  }
+
+  @override
+  String codeDifficultySummary(String difficulty, int length) {
+    return '$difficulty • شفرة من $length رموز';
+  }
+
+  @override
+  String get chooseSymbols => 'اختر الرموز';
+
+  @override
+  String get tryCode => 'جرّب الشفرة';
+
+  @override
+  String attemptsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count محاولات',
+      two: 'محاولتان',
+      one: 'محاولة واحدة',
+      zero: 'لا محاولات',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get previousGuesses => 'المحاولات السابقة';
+
+  @override
+  String correctPositions(int count) {
+    return '✅ $count في الموضع الصحيح';
+  }
+
+  @override
+  String misplacedSymbols(int count) {
+    return '🔄 $count صحيح لكن في موضع خاطئ';
+  }
+
+  @override
+  String get codeCracked => 'تم كسر الشفرة!';
+
+  @override
+  String secondsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count ثوانٍ',
+      two: 'ثانيتان',
+      one: 'ثانية واحدة',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pointsEarned(int count) {
+    return '+$count نقطة';
+  }
+
+  @override
+  String passToPlayer(String name) {
+    return 'مرّر إلى $name';
+  }
+
+  @override
+  String roundDifficultySummary(int rounds, String difficulty) {
+    String _temp0 = intl.Intl.pluralLogic(
+      rounds,
+      locale: localeName,
+      other: '$rounds جولات',
+      two: 'جولتان',
+      one: 'جولة واحدة',
+    );
+    return '$_temp0 • $difficulty';
+  }
+
+  @override
+  String attemptTimeSummary(int attempts, int seconds) {
+    String _temp0 = intl.Intl.pluralLogic(
+      attempts,
+      locale: localeName,
+      other: '$attempts محاولات',
+      two: 'محاولتان',
+      one: 'محاولة واحدة',
+    );
+    return '$_temp0 • $seconds ث';
+  }
+
+  @override
+  String get returnToCompetitionAction => 'العودة إلى المنافسة';
+
+  @override
+  String get riskItTitle => 'غامر بها';
+
+  @override
+  String get riskItDescription => 'اجمع رصيدًا من النقاط واحفظه بأمان أو خاطر به كله للحصول على نتيجة أكبر.';
+
+  @override
+  String get riskItRoundsDescription => 'يحصل كل لاعب على نوبة خاصة واحدة في كل جولة.';
+
+  @override
+  String get startRiskIt => 'ابدأ غامر بها';
+
+  @override
+  String get categoryEntertainment => 'ترفيه';
+
+  @override
+  String get preparingAiQuestions => 'يجهّز الذكاء الاصطناعي أسئلتك...';
+
+  @override
+  String get privateTurnLookAway => 'على اللاعب الآخر ألا ينظر خلال هذه النوبة.';
+
+  @override
+  String roundDifficulty(int round, String difficulty) {
+    return 'الجولة $round • $difficulty';
+  }
+
+  @override
+  String get currentPot => 'الرصيد الحالي';
+
+  @override
+  String questionWorth(int points) {
+    return 'قيمة هذا السؤال +$points';
+  }
+
+  @override
+  String get unbankedPot => 'الرصيد غير المحفوظ';
+
+  @override
+  String nextCorrectWorth(int points) {
+    return 'الإجابة الصحيحة التالية: +$points';
+  }
+
+  @override
+  String bankPoints(int points) {
+    return 'احفظ $points نقطة';
+  }
+
+  @override
+  String get riskItAction => 'غامر بها';
+
+  @override
+  String get riskWarning => 'إجابة خاطئة واحدة وستفقد رصيدك غير المحفوظ بالكامل.';
+
+  @override
+  String get bust => 'خسرت الرصيد!';
+
+  @override
+  String get pointsBanked => 'تم حفظ النقاط!';
+
+  @override
+  String playerLostPot(String name) {
+    return 'فقد $name الرصيد غير المحفوظ.';
+  }
+
+  @override
+  String playerBankedPoints(String name, int points) {
+    return 'حفظ $name $points نقطة.';
+  }
+
+  @override
+  String get seeRoundResults => 'عرض نتائج الجولة';
+
+  @override
+  String playerScore(String name, int score) {
+    return '$name: $score';
+  }
+
+  @override
+  String riskFinalSummary(int rounds, String difficulty, String category) {
+    String _temp0 = intl.Intl.pluralLogic(
+      rounds,
+      locale: localeName,
+      other: '$rounds جولات',
+      two: 'جولتان',
+      one: 'جولة واحدة',
+    );
+    return '$_temp0 • $difficulty • $category';
+  }
+
+  @override
+  String get couldNotPrepareAiQuestions => 'تعذر تجهيز أسئلة الذكاء الاصطناعي. حاول مجددًا.';
+
+  @override
+  String get attackOrDefendTitle => 'هاجم أو دافع';
+
+  @override
+  String get attackOrDefendDescription => 'أجب عن تحديات الذكاء الاصطناعي واجمع الطاقة وهاجم منافسك ودافع عن قلوبك.';
+
+  @override
+  String get whoIsBattling => 'من سيتنافس؟';
+
+  @override
+  String get bestOf => 'الأفضل من';
+
+  @override
+  String get bestOfDescription => 'الأفضل من معركة واحدة أو 3 أو 5. تنتهي المواجهة فور وصول أحد اللاعبين إلى عدد الانتصارات المطلوب.';
+
+  @override
+  String get startBattle => 'ابدأ المعركة';
+
+  @override
+  String get preparingAiBattle => 'يجهّز الذكاء الاصطناعي معركتك...';
+
+  @override
+  String battleBestOf(int battle, int rounds) {
+    return 'المعركة $battle • الأفضل من $rounds';
+  }
+
+  @override
+  String playerIsAttacking(String name) {
+    return '$name يهاجم!';
+  }
+
+  @override
+  String playerMustBlock(String name) {
+    return 'على $name الإجابة بشكل صحيح لصد الهجوم.';
+  }
+
+  @override
+  String get otherPlayerLookAwayShort => 'على اللاعب الآخر ألا ينظر.';
+
+  @override
+  String get defendAction => '🛡️ دافع!';
+
+  @override
+  String get earnEnergyAction => '⚡ اجمع الطاقة';
+
+  @override
+  String get shieldActive => '🛡️ درع';
+
+  @override
+  String chooseYourMove(String name) {
+    return '$name، اختر حركتك';
+  }
+
+  @override
+  String energyAvailable(int count) {
+    return 'الطاقة المتاحة: ⚡ $count';
+  }
+
+  @override
+  String get attackMove => '⚔️ هجوم';
+
+  @override
+  String get attackMoveDescription => 'يكلف طاقة واحدة • يحصل المدافع على 10 ثوانٍ';
+
+  @override
+  String get shieldMove => '🛡️ درع';
+
+  @override
+  String get shieldMoveDescription => 'يكلف طاقة واحدة • يصد إخفاقك التالي في الدفاع';
+
+  @override
+  String get powerAttackMove => '🔥 هجوم قوي';
+
+  @override
+  String get powerAttackMoveDescription => 'يكلف طاقتين • يحصل المدافع على 7 ثوانٍ';
+
+  @override
+  String get superAttackMove => '💥 هجوم خارق';
+
+  @override
+  String get superAttackMoveDescription => 'يكلف 3 طاقات • 5 ثوانٍ • ضرران عند الإخفاق';
+
+  @override
+  String get saveEnergyEndTurn => 'احفظ الطاقة وأنهِ النوبة';
+
+  @override
+  String battleNumberComplete(int number) {
+    return 'اكتملت المعركة $number!';
+  }
+
+  @override
+  String startBattleNumber(int number) {
+    return 'ابدأ المعركة $number';
+  }
+
+  @override
+  String playerWinsBattle(String name) {
+    return 'فاز $name بالمعركة!';
+  }
+
+  @override
+  String battleFinalSummary(int rounds, String difficulty, String category) {
+    return 'الأفضل من $rounds • $difficulty • $category';
+  }
+
+  @override
+  String get couldNotPrepareAiBattle => 'تعذر تجهيز معركة الذكاء الاصطناعي. حاول مجددًا.';
+
+  @override
+  String get duelGames => 'ألعاب المواجهة';
+
+  @override
+  String get duelGamesSubtitle => 'ألعاب وجهًا لوجه مصممة خصيصًا للاعبين اثنين.';
+
+  @override
+  String get familyGames => 'ألعاب العائلة';
+
+  @override
+  String get familyGamesSubtitle => 'العبوا معًا مع فردين أو أكثر من العائلة.';
+
+  @override
+  String get partyGamesSectionSubtitle => 'ألعاب خفيفة للضحك والمرح الجماعي.';
+
+  @override
+  String get logicDuel => 'مواجهة منطقية';
+
+  @override
+  String get battleDuel => 'مواجهة قتالية';
+
+  @override
+  String get highStakesDuel => 'مواجهة عالية المخاطر';
 }

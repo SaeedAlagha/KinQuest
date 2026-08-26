@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
+import '../../../l10n/app_localizations.dart';
 import '../widgets/sila_game_coach.dart';
 
 import '../../competitions/models/competition_game_result.dart';
@@ -246,11 +247,38 @@ class _AttackOrDefendScreenState extends State<AttackOrDefendScreen> {
     _BattleDifficulty.hard => 'hard',
   };
 
-  String get _difficultyName => switch (_difficulty) {
-    _BattleDifficulty.easy => 'Easy',
-    _BattleDifficulty.medium => 'Medium',
-    _BattleDifficulty.hard => 'Hard',
-  };
+  String get _difficultyName {
+    final strings = AppLocalizations.of(context)!;
+    return switch (_difficulty) {
+      _BattleDifficulty.easy => strings.difficultyEasy,
+      _BattleDifficulty.medium => strings.difficultyMedium,
+      _BattleDifficulty.hard => strings.difficultyHard,
+    };
+  }
+
+  String _localizedCategory(String category) {
+    final strings = AppLocalizations.of(context)!;
+    return switch (category) {
+      'Mixed' => strings.categoryMixed,
+      'General Knowledge' => strings.categoryGeneralKnowledge,
+      'Science' => strings.categoryScience,
+      'Geography' => strings.categoryGeography,
+      'Sports' => strings.categorySports,
+      'Entertainment' => strings.categoryEntertainment,
+      _ => category,
+    };
+  }
+
+  String _localizedLoadError(String error) {
+    final strings = AppLocalizations.of(context)!;
+    return switch (error) {
+      'You must be signed in to play.' => strings.noUserSignedIn,
+      'Join a family before playing Attack or Defend.' =>
+        strings.joinOrCreateFamilyBeforeGame(strings.attackOrDefendTitle),
+      'Could not load family members.' => strings.couldNotLoadFamilyMembers,
+      _ => error,
+    };
+  }
 
   int get _winsNeeded => (_selectedRounds ~/ 2) + 1;
 
@@ -310,8 +338,8 @@ class _AttackOrDefendScreenState extends State<AttackOrDefendScreen> {
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Could not prepare the AI battle. Please try again.'),
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.couldNotPrepareAiBattle),
         ),
       );
     }
@@ -549,7 +577,7 @@ class _AttackOrDefendScreenState extends State<AttackOrDefendScreen> {
 
     return CompetitionGameResult(
       gameId: 'attack_or_defend',
-      gameName: 'Attack or Defend',
+      gameName: AppLocalizations.of(context)!.attackOrDefendTitle,
       players: [
         CompetitionPlayerResult(
           userId: winner.id,
@@ -585,9 +613,10 @@ class _AttackOrDefendScreenState extends State<AttackOrDefendScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context)!;
     return Scaffold(
       floatingActionButton: const SilaGameCoachButton(),
-      appBar: AppBar(title: const Text('Attack or Defend')),
+      appBar: AppBar(title: Text(strings.attackOrDefendTitle)),
       body: SafeArea(
         child: switch (_phase) {
           _BattlePhase.setup => _buildSetup(),
@@ -604,6 +633,7 @@ class _AttackOrDefendScreenState extends State<AttackOrDefendScreen> {
   }
 
   Widget _buildSetup() {
+    final strings = AppLocalizations.of(context)!;
     if (_isLoadingFamily) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -612,27 +642,29 @@ class _AttackOrDefendScreenState extends State<AttackOrDefendScreen> {
       return Center(
         child: Padding(
           padding: const EdgeInsets.all(24),
-          child: Text(_loadError!, textAlign: TextAlign.center),
+          child: Text(
+            _localizedLoadError(_loadError!),
+            textAlign: TextAlign.center,
+          ),
         ),
       );
     }
 
     return GameSetupView(
       icon: Icons.sports_kabaddi_rounded,
-      title: 'Attack or Defend',
-      description:
-          'Answer AI challenges, build energy, attack your rival, and defend your hearts.',
+      title: strings.attackOrDefendTitle,
+      description: strings.attackOrDefendDescription,
       children: [
         GameSetupSectionCard(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Who is battling?',
+                strings.whoIsBattling,
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               const SizedBox(height: 6),
-              const Text('Choose exactly 2 players.'),
+              Text(strings.chooseExactlyTwoPlayers),
               const SizedBox(height: 12),
               for (final player in _familyMembers)
                 CheckboxListTile(
@@ -655,9 +687,8 @@ class _AttackOrDefendScreenState extends State<AttackOrDefendScreen> {
               _selectedRounds = rounds;
             });
           },
-          title: 'Best Of',
-          description:
-              'Best of 1, 3, or 5 battles. The match ends as soon as someone reaches the required wins.',
+          title: strings.bestOf,
+          description: strings.bestOfDescription,
         ),
         const SizedBox(height: 16),
         _buildDifficultySelector(),
@@ -667,27 +698,31 @@ class _AttackOrDefendScreenState extends State<AttackOrDefendScreen> {
         FilledButton.icon(
           onPressed: _selectedPlayerIds.length == 2 ? _startGame : null,
           icon: const Icon(Icons.flash_on_rounded),
-          label: const Text('Start Battle'),
+          label: Text(strings.startBattle),
         ),
       ],
     );
   }
 
   Widget _buildDifficultySelector() {
+    final strings = AppLocalizations.of(context)!;
     return GameSetupSectionCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Difficulty', style: Theme.of(context).textTheme.titleLarge),
+          Text(
+            strings.difficulty,
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
           const SizedBox(height: 12),
           Wrap(
             spacing: 10,
             runSpacing: 10,
             children: _BattleDifficulty.values.map((difficulty) {
               final label = switch (difficulty) {
-                _BattleDifficulty.easy => 'Easy',
-                _BattleDifficulty.medium => 'Medium',
-                _BattleDifficulty.hard => 'Hard',
+                _BattleDifficulty.easy => strings.difficultyEasy,
+                _BattleDifficulty.medium => strings.difficultyMedium,
+                _BattleDifficulty.hard => strings.difficultyHard,
               };
 
               return ChoiceChip(
@@ -707,18 +742,21 @@ class _AttackOrDefendScreenState extends State<AttackOrDefendScreen> {
   }
 
   Widget _buildCategorySelector() {
+    final strings = AppLocalizations.of(context)!;
     return GameSetupSectionCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Category', style: Theme.of(context).textTheme.titleLarge),
+          Text(strings.category, style: Theme.of(context).textTheme.titleLarge),
           const SizedBox(height: 12),
           DropdownButtonFormField<String>(
             initialValue: _selectedCategory,
             items: _categories
                 .map(
-                  (category) =>
-                      DropdownMenuItem(value: category, child: Text(category)),
+                  (category) => DropdownMenuItem(
+                    value: category,
+                    child: Text(_localizedCategory(category)),
+                  ),
                 )
                 .toList(),
             onChanged: (value) {
@@ -735,19 +773,21 @@ class _AttackOrDefendScreenState extends State<AttackOrDefendScreen> {
   }
 
   Widget _buildLoading() {
-    return const Center(
+    final strings = AppLocalizations.of(context)!;
+    return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          CircularProgressIndicator(),
-          SizedBox(height: 20),
-          Text('AI is preparing your battle...'),
+          const CircularProgressIndicator(),
+          const SizedBox(height: 20),
+          Text(strings.preparingAiBattle),
         ],
       ),
     );
   }
 
   Widget _buildPassPhone() {
+    final strings = AppLocalizations.of(context)!;
     final defending = _pendingAttack != null;
 
     final player = defending ? _defender : _attacker;
@@ -766,14 +806,14 @@ class _AttackOrDefendScreenState extends State<AttackOrDefendScreen> {
             ),
             const SizedBox(height: 20),
             Text(
-              'Battle $_currentBattle • Best of $_selectedRounds',
+              strings.battleBestOf(_currentBattle, _selectedRounds),
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 18),
             Text(
               defending
-                  ? '${_attacker.name} is attacking!'
-                  : 'Pass the phone to ${player.name}',
+                  ? strings.playerIsAttacking(_attacker.name)
+                  : strings.passPhoneTo(player.name),
               textAlign: TextAlign.center,
               style: Theme.of(
                 context,
@@ -782,18 +822,18 @@ class _AttackOrDefendScreenState extends State<AttackOrDefendScreen> {
             const SizedBox(height: 10),
             if (defending)
               Text(
-                '${player.name} must answer correctly to block the attack.',
+                strings.playerMustBlock(player.name),
                 textAlign: TextAlign.center,
               )
             else
-              const Text(
-                'The other player should look away.',
+              Text(
+                strings.otherPlayerLookAwayShort,
                 textAlign: TextAlign.center,
               ),
             const SizedBox(height: 28),
             FilledButton(
               onPressed: defending ? _beginDefense : _beginTurn,
-              child: Text('I\'m ${player.name}'),
+              child: Text(strings.iAmPlayer(player.name)),
             ),
           ],
         ),
@@ -802,6 +842,7 @@ class _AttackOrDefendScreenState extends State<AttackOrDefendScreen> {
   }
 
   Widget _buildQuestion({required bool defending}) {
+    final strings = AppLocalizations.of(context)!;
     final question = _activeQuestion!;
 
     final player = defending ? _defender : _attacker;
@@ -817,7 +858,7 @@ class _AttackOrDefendScreenState extends State<AttackOrDefendScreen> {
               _buildBattleStatus(),
               const SizedBox(height: 24),
               Text(
-                defending ? '🛡️ DEFEND!' : '⚡ EARN ENERGY',
+                defending ? strings.defendAction : strings.earnEnergyAction,
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                   fontWeight: FontWeight.bold,
@@ -826,7 +867,7 @@ class _AttackOrDefendScreenState extends State<AttackOrDefendScreen> {
               if (defending) ...[
                 const SizedBox(height: 8),
                 Text(
-                  '$_secondsRemaining seconds',
+                  strings.secondsCount(_secondsRemaining),
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
@@ -893,6 +934,7 @@ class _AttackOrDefendScreenState extends State<AttackOrDefendScreen> {
   }
 
   Widget _playerStatus(_BattlePlayer player) {
+    final strings = AppLocalizations.of(context)!;
     final health = _health[player.id] ?? 0;
     final energy = _energy[player.id] ?? 0;
 
@@ -911,7 +953,7 @@ class _AttackOrDefendScreenState extends State<AttackOrDefendScreen> {
             Text('❤️' * health, maxLines: 1, overflow: TextOverflow.fade),
             const SizedBox(height: 6),
             Text('⚡ $energy'),
-            if (_shield[player.id] == true) const Text('🛡️ Shield'),
+            if (_shield[player.id] == true) Text(strings.shieldActive),
           ],
         ),
       ),
@@ -919,6 +961,7 @@ class _AttackOrDefendScreenState extends State<AttackOrDefendScreen> {
   }
 
   Widget _buildActionChoice() {
+    final strings = AppLocalizations.of(context)!;
     final energy = _energy[_attacker.id] ?? 0;
 
     return SingleChildScrollView(
@@ -932,46 +975,49 @@ class _AttackOrDefendScreenState extends State<AttackOrDefendScreen> {
               _buildBattleStatus(),
               const SizedBox(height: 26),
               Text(
-                '${_attacker.name}, choose your move',
+                strings.chooseYourMove(_attacker.name),
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
               ),
               const SizedBox(height: 10),
-              Text('Energy available: ⚡ $energy', textAlign: TextAlign.center),
+              Text(
+                strings.energyAvailable(energy),
+                textAlign: TextAlign.center,
+              ),
               const SizedBox(height: 24),
               _actionButton(
                 action: _BattleAction.attack,
-                title: '⚔️ Attack',
-                subtitle: 'Costs 1 energy • Defender gets 10 seconds',
+                title: strings.attackMove,
+                subtitle: strings.attackMoveDescription,
                 cost: 1,
               ),
               const SizedBox(height: 12),
               _actionButton(
                 action: _BattleAction.shield,
-                title: '🛡️ Shield',
-                subtitle: 'Costs 1 energy • Blocks your next failed defense',
+                title: strings.shieldMove,
+                subtitle: strings.shieldMoveDescription,
                 cost: 1,
               ),
               const SizedBox(height: 12),
               _actionButton(
                 action: _BattleAction.powerAttack,
-                title: '🔥 Power Attack',
-                subtitle: 'Costs 2 energy • Defender gets 7 seconds',
+                title: strings.powerAttackMove,
+                subtitle: strings.powerAttackMoveDescription,
                 cost: 2,
               ),
               const SizedBox(height: 12),
               _actionButton(
                 action: _BattleAction.superAttack,
-                title: '💥 Super Attack',
-                subtitle: 'Costs 3 energy • 5 seconds • 2 damage if missed',
+                title: strings.superAttackMove,
+                subtitle: strings.superAttackMoveDescription,
                 cost: 3,
               ),
               const SizedBox(height: 14),
               OutlinedButton(
                 onPressed: _finishTurn,
-                child: const Text('Save Energy & End Turn'),
+                child: Text(strings.saveEnergyEndTurn),
               ),
             ],
           ),
@@ -1004,6 +1050,7 @@ class _AttackOrDefendScreenState extends State<AttackOrDefendScreen> {
   }
 
   Widget _buildBattleResult() {
+    final strings = AppLocalizations.of(context)!;
     final first = _players[0];
     final second = _players[1];
 
@@ -1016,23 +1063,23 @@ class _AttackOrDefendScreenState extends State<AttackOrDefendScreen> {
             const Icon(Icons.sports_martial_arts_rounded, size: 80),
             const SizedBox(height: 20),
             Text(
-              'Battle $_currentBattle Complete!',
+              strings.battleNumberComplete(_currentBattle),
               style: Theme.of(context).textTheme.headlineMedium,
             ),
             const SizedBox(height: 24),
             Text(
-              '${first.name}: ${_battleWins[first.id] ?? 0}',
+              strings.playerScore(first.name, _battleWins[first.id] ?? 0),
               style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: 8),
             Text(
-              '${second.name}: ${_battleWins[second.id] ?? 0}',
+              strings.playerScore(second.name, _battleWins[second.id] ?? 0),
               style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: 28),
             FilledButton(
               onPressed: _startNextBattle,
-              child: Text('Start Battle ${_currentBattle + 1}'),
+              child: Text(strings.startBattleNumber(_currentBattle + 1)),
             ),
           ],
         ),
@@ -1041,6 +1088,7 @@ class _AttackOrDefendScreenState extends State<AttackOrDefendScreen> {
   }
 
   Widget _buildFinalResults() {
+    final strings = AppLocalizations.of(context)!;
     final winner = _matchWinner;
     final first = _players[0];
     final second = _players[1];
@@ -1056,7 +1104,7 @@ class _AttackOrDefendScreenState extends State<AttackOrDefendScreen> {
               const Icon(Icons.emoji_events_rounded, size: 88),
               const SizedBox(height: 20),
               Text(
-                '${winner.name} wins the battle!',
+                strings.playerWinsBattle(winner.name),
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                   fontWeight: FontWeight.bold,
@@ -1064,7 +1112,11 @@ class _AttackOrDefendScreenState extends State<AttackOrDefendScreen> {
               ),
               const SizedBox(height: 12),
               Text(
-                'Best of $_selectedRounds • $_difficultyName • $_selectedCategory',
+                strings.battleFinalSummary(
+                  _selectedRounds,
+                  _difficultyName,
+                  _localizedCategory(_selectedCategory),
+                ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 28),
@@ -1104,14 +1156,14 @@ class _AttackOrDefendScreenState extends State<AttackOrDefendScreen> {
                 ),
                 label: Text(
                   widget.playMode.isOfficial
-                      ? 'Return to Competition'
-                      : 'Play Again',
+                      ? strings.returnToCompetitionAction
+                      : strings.playAgain,
                 ),
               ),
               const SizedBox(height: 12),
               OutlinedButton(
                 onPressed: () => Navigator.of(context).pop(),
-                child: const Text('Back to Games'),
+                child: Text(strings.backToGames),
               ),
             ],
           ),
