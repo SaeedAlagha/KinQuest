@@ -52,6 +52,8 @@ class HomeScreen extends StatelessWidget {
                 memberCount: 0,
                 tokens: tokens.toString(),
                 mascotAccessory: equippedRewards.mascotAccessory,
+                mascotOutfit: equippedRewards.mascotOutfit,
+                mascotAura: equippedRewards.mascotAura,
                 onFamilyOverview: onFamilyOverview,
               );
             }
@@ -75,6 +77,8 @@ class HomeScreen extends StatelessWidget {
                   memberCount: members.length,
                   tokens: tokens.toString(),
                   mascotAccessory: equippedRewards.mascotAccessory,
+                  mascotOutfit: equippedRewards.mascotOutfit,
+                  mascotAura: equippedRewards.mascotAura,
                   onFamilyOverview: onFamilyOverview,
                 );
               },
@@ -96,6 +100,8 @@ class HomeDashboard extends StatelessWidget {
     this.developerPreview = false,
     this.onFamilyOverview,
     this.mascotAccessory = SilaMascotAccessories.none,
+    this.mascotOutfit = SilaMascotOutfits.none,
+    this.mascotAura = SilaMascotAuras.none,
   });
 
   final String name;
@@ -105,6 +111,8 @@ class HomeDashboard extends StatelessWidget {
   final bool developerPreview;
   final VoidCallback? onFamilyOverview;
   final String mascotAccessory;
+  final String mascotOutfit;
+  final String mascotAura;
 
   void _showPreviewNotice(BuildContext context) {
     final strings = AppLocalizations.of(context)!;
@@ -161,6 +169,8 @@ class HomeDashboard extends StatelessWidget {
                           pose: SilaMascotPose.idle,
                           compact: constraints.maxWidth < 480,
                           accessoryAssetKey: mascotAccessory,
+                          outfitAssetKey: mascotOutfit,
+                          auraAssetKey: mascotAura,
                         ),
                         const SizedBox(height: 22),
                         if (isWide)

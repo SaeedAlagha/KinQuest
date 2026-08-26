@@ -4,6 +4,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
+import '../widgets/sila_game_coach.dart';
+
 import '../../../core/theme/app_theme.dart';
 import '../../../l10n/app_localizations.dart';
 import '../services/memory_challenge_ai_service.dart';
@@ -200,6 +202,7 @@ class _MemoryChallengeScreenState extends State<MemoryChallengeScreen> {
   Widget build(BuildContext context) {
     final strings = AppLocalizations.of(context)!;
     return Scaffold(
+      floatingActionButton: const SilaGameCoachButton(),
       appBar: AppBar(title: Text(strings.memoryChallenge)),
       body: SafeArea(
         child: _showResults

@@ -2,21 +2,125 @@ const express = require("express");
 const cors = require("cors");
 const dotenv = require("dotenv");
 const { GoogleGenAI } = require("@google/genai");
+const { getFirestore } = require("firebase-admin/firestore");
+const {
+  createCorsOptions,
+  createFirebaseAuthMiddleware,
+  createRateLimiter,
+  securityHeaders,
+} = require("./security");
+const { ensureFirebaseAdmin } = require("./firebase_admin");
+const {
+  DigitalRewardError,
+  digitalRewardCatalog,
+  equipDigitalReward,
+  purchaseDigitalReward,
+  unequipDigitalReward,
+} = require("./digital_rewards");
 
-dotenv.config();
+dotenv.config({ quiet: true });
+
+ensureFirebaseAdmin();
+const db = getFirestore();
 
 const app = express();
 
-app.use(cors());
-app.use(express.json({ limit: "2mb" }));
+app.disable("x-powered-by");
+
+if (process.env.NODE_ENV === "production") {
+  app.set("trust proxy", 1);
+}
+
+app.use(securityHeaders);
+app.use(cors(createCorsOptions()));
+app.use("/api", createRateLimiter());
+app.use("/api", createFirebaseAuthMiddleware());
+app.use("/api", express.json({ limit: "2mb", type: "application/json" }));
 const ai = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY,
 });
 
 app.get("/", (req, res) => {
   res.json({
-    message: "KinQuest Gemini server is running",
+    message: "Sila AI service is running",
+    authentication: "Firebase ID token required in production",
   });
+});
+
+app.get("/api/digital-rewards", (request, response) => {
+  response.json({ rewards: digitalRewardCatalog });
+});
+
+function requireDigitalRewardUser(request, response) {
+  const userId = request.auth?.uid;
+  if (typeof userId !== "string" || !userId) {
+    response.status(401).json({
+      error: "Sign in is required to manage Digital Rewards.",
+    });
+    return null;
+  }
+  return userId;
+}
+
+function sendDigitalRewardError(error, response) {
+  if (error instanceof DigitalRewardError) {
+    return response.status(error.statusCode).json({ error: error.message });
+  }
+
+  console.error("Digital Reward mutation failed:", error);
+  return response.status(500).json({
+    error: "Digital Reward could not be updated.",
+  });
+}
+
+app.post("/api/digital-rewards/purchase", async (request, response) => {
+  const userId = requireDigitalRewardUser(request, response);
+  if (!userId) return;
+
+  try {
+    const result = await purchaseDigitalReward({
+      database: db,
+      userId,
+      rewardId: request.body?.rewardId,
+    });
+    response.status(201).json(result);
+  } catch (error) {
+    sendDigitalRewardError(error, response);
+  }
+});
+
+app.post("/api/digital-rewards/equip", async (request, response) => {
+  const userId = requireDigitalRewardUser(request, response);
+  if (!userId) return;
+
+  try {
+    response.json(
+      await equipDigitalReward({
+        database: db,
+        userId,
+        rewardId: request.body?.rewardId,
+      }),
+    );
+  } catch (error) {
+    sendDigitalRewardError(error, response);
+  }
+});
+
+app.post("/api/digital-rewards/unequip", async (request, response) => {
+  const userId = requireDigitalRewardUser(request, response);
+  if (!userId) return;
+
+  try {
+    response.json(
+      await unequipDigitalReward({
+        database: db,
+        userId,
+        rewardId: request.body?.rewardId,
+      }),
+    );
+  } catch (error) {
+    sendDigitalRewardError(error, response);
+  }
 });
 
 app.post("/api/would-you-rather", async (req, res) => {
@@ -2184,8 +2288,22 @@ Return ONLY valid JSON in this structure:
     });
   }
 });
+app.use((error, request, response, next) => {
+  if (error instanceof SyntaxError && 'body' in error) {
+    return response.status(400).json({
+      error: 'Request body must be valid JSON.',
+    });
+  }
+
+  return next(error);
+});
+
 const PORT = process.env.PORT || 3000;
 
-app.listen(PORT, () => {
-  console.log(`KinQuest Gemini server running on port ${PORT}`);
-});
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`KinQuest Gemini server running on port ${PORT}`);
+  });
+}
+
+module.exports = app;

@@ -2,6 +2,8 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 
+import '../widgets/sila_game_coach.dart';
+
 import '../../../l10n/app_localizations.dart';
 import '../services/never_have_i_ever_ai_service.dart';
 import '../utils/game_localization.dart';
@@ -186,6 +188,7 @@ class _NeverHaveIEverScreenState extends State<NeverHaveIEverScreen> {
     final strings = AppLocalizations.of(context)!;
 
     return Scaffold(
+      floatingActionButton: const SilaGameCoachButton(),
       appBar: AppBar(title: Text(strings.neverHaveIEver)),
       body: _showResults || _isPlaying
           ? Padding(

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_theme.dart';
-import '../../../core/mascot/sila_mascot.dart';
 import '../../../core/widgets/family_year_banner.dart';
 import '../../../core/widgets/sila_page_backdrop.dart';
 import '../../../l10n/app_localizations.dart';
+import 'sila_game_coach.dart';
 
 const List<int> gameRoundOptions = [1, 3, 5];
 
@@ -160,13 +160,9 @@ class GameSetupHero extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 18),
-                SilaMascotGuide(
+                SilaGameCoachBanner(
                   key: const ValueKey('game-setup-mascot-guide'),
-                  title: strings.mascotName,
                   message: strings.mascotGameSetupMessage,
-                  semanticLabel: strings.mascotSemanticLabel,
-                  pose: SilaMascotPose.welcome,
-                  compact: true,
                 ),
               ],
             ),

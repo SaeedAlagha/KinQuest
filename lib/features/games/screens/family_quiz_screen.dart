@@ -4,6 +4,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
+import '../widgets/sila_game_coach.dart';
+
 import '../../../l10n/app_localizations.dart';
 import '../services/family_quiz_ai_service.dart';
 import '../utils/game_localization.dart';
@@ -783,6 +785,7 @@ class _FamilyQuizScreenState extends State<FamilyQuizScreen> {
   Widget build(BuildContext context) {
     final strings = AppLocalizations.of(context)!;
     return Scaffold(
+      floatingActionButton: const SilaGameCoachButton(),
       appBar: AppBar(title: Text(strings.familyQuiz)),
       body: SafeArea(
         child: Center(

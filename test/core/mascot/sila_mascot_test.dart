@@ -102,6 +102,34 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('outfits and auras can render together with headwear', (
+    tester,
+  ) async {
+    for (final outfit in SilaMascotOutfits.supported) {
+      for (final aura in SilaMascotAuras.supported) {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: SilaMascot(
+                animate: false,
+                accessoryAssetKey: SilaMascotAccessories.guardianCrown,
+                outfitAssetKey: outfit,
+                auraAssetKey: aura,
+              ),
+            ),
+          ),
+        );
+
+        expect(
+          find.byKey(ValueKey('sila-mascot-outfit-$outfit')),
+          findsOneWidget,
+        );
+        expect(find.byKey(ValueKey('sila-mascot-aura-$aura')), findsOneWidget);
+        expect(tester.takeException(), isNull);
+      }
+    }
+  });
+
   testWidgets('Arabic mascot guide is RTL and fits a narrow screen', (
     tester,
   ) async {

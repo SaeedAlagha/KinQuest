@@ -2,6 +2,8 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 
+import '../widgets/sila_game_coach.dart';
+
 import '../../../l10n/app_localizations.dart';
 import '../services/charades_ai_service.dart';
 import '../utils/game_localization.dart';
@@ -123,6 +125,7 @@ class _CharadesScreenState extends State<CharadesScreen> {
     final strings = AppLocalizations.of(context)!;
 
     return Scaffold(
+      floatingActionButton: const SilaGameCoachButton(),
       appBar: AppBar(title: Text(strings.charades)),
       body: _isPlaying
           ? Padding(padding: const EdgeInsets.all(24), child: _buildGame())

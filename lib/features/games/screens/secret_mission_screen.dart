@@ -4,6 +4,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
+import '../widgets/sila_game_coach.dart';
+
 import '../../../l10n/app_localizations.dart';
 import '../services/secret_mission_ai_service.dart';
 import '../widgets/game_setup_widgets.dart';
@@ -556,6 +558,7 @@ class _SecretMissionScreenState extends State<SecretMissionScreen> {
   Widget build(BuildContext context) {
     final strings = AppLocalizations.of(context)!;
     return Scaffold(
+      floatingActionButton: const SilaGameCoachButton(),
       appBar: AppBar(title: Text(strings.secretMission)),
       body: SafeArea(child: _buildBody()),
     );
