@@ -12,6 +12,7 @@ import '../../competitions/screens/daily_challenge_screen.dart';
 import '../../games/screens/games_screen.dart';
 import '../../memories/screens/add_memory_screen.dart';
 import '../../profile/screens/profile_screen.dart';
+import '../../rewards/digital/digital_reward_visuals.dart';
 import '../../rewards/screens/rewards_hub_screen.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -30,46 +31,53 @@ class HomeScreen extends StatelessWidget {
       );
     }
 
-    return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-      stream: FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .snapshots(),
-      builder: (context, userSnapshot) {
-        final userData = userSnapshot.data?.data();
-        final name = userData?['name'] as String? ?? strings.silaMember;
-        final tokens = userData?['tokens'] ?? 0;
-        final familyId = userData?['familyId'] as String?;
-
-        if (familyId == null || familyId.isEmpty) {
-          return HomeDashboard(
-            name: name,
-            familyName: strings.noFamilyJoined,
-            memberCount: 0,
-            tokens: tokens.toString(),
-            onFamilyOverview: onFamilyOverview,
-          );
-        }
-
+    return DigitalRewardStyleBuilder(
+      userId: user.uid,
+      builder: (context, equippedRewards) {
         return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
           stream: FirebaseFirestore.instance
-              .collection('families')
-              .doc(familyId)
+              .collection('users')
+              .doc(user.uid)
               .snapshots(),
-          builder: (context, familySnapshot) {
-            final familyData = familySnapshot.data?.data();
-            final familyName =
-                familyData?['name'] as String? ?? strings.yourFamily;
-            final members = List<String>.from(
-              familyData?['members'] ?? const [],
-            );
+          builder: (context, userSnapshot) {
+            final userData = userSnapshot.data?.data();
+            final name = userData?['name'] as String? ?? strings.silaMember;
+            final tokens = userData?['tokens'] ?? 0;
+            final familyId = userData?['familyId'] as String?;
 
-            return HomeDashboard(
-              name: name,
-              familyName: familyName,
-              memberCount: members.length,
-              tokens: tokens.toString(),
-              onFamilyOverview: onFamilyOverview,
+            if (familyId == null || familyId.isEmpty) {
+              return HomeDashboard(
+                name: name,
+                familyName: strings.noFamilyJoined,
+                memberCount: 0,
+                tokens: tokens.toString(),
+                mascotAccessory: equippedRewards.mascotAccessory,
+                onFamilyOverview: onFamilyOverview,
+              );
+            }
+
+            return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+              stream: FirebaseFirestore.instance
+                  .collection('families')
+                  .doc(familyId)
+                  .snapshots(),
+              builder: (context, familySnapshot) {
+                final familyData = familySnapshot.data?.data();
+                final familyName =
+                    familyData?['name'] as String? ?? strings.yourFamily;
+                final members = List<String>.from(
+                  familyData?['members'] ?? const [],
+                );
+
+                return HomeDashboard(
+                  name: name,
+                  familyName: familyName,
+                  memberCount: members.length,
+                  tokens: tokens.toString(),
+                  mascotAccessory: equippedRewards.mascotAccessory,
+                  onFamilyOverview: onFamilyOverview,
+                );
+              },
             );
           },
         );
@@ -87,6 +95,7 @@ class HomeDashboard extends StatelessWidget {
     required this.tokens,
     this.developerPreview = false,
     this.onFamilyOverview,
+    this.mascotAccessory = SilaMascotAccessories.none,
   });
 
   final String name;
@@ -95,6 +104,7 @@ class HomeDashboard extends StatelessWidget {
   final String tokens;
   final bool developerPreview;
   final VoidCallback? onFamilyOverview;
+  final String mascotAccessory;
 
   void _showPreviewNotice(BuildContext context) {
     final strings = AppLocalizations.of(context)!;
@@ -150,6 +160,7 @@ class HomeDashboard extends StatelessWidget {
                           semanticLabel: strings.mascotSemanticLabel,
                           pose: SilaMascotPose.idle,
                           compact: constraints.maxWidth < 480,
+                          accessoryAssetKey: mascotAccessory,
                         ),
                         const SizedBox(height: 22),
                         if (isWide)

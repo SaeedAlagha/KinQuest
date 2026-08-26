@@ -1004,6 +1004,10 @@ class _DigitalRewardCategoryHeader extends StatelessWidget {
         Icons.celebration_rounded,
       ),
       DigitalRewardCategory.nameplate => ('Nameplates', Icons.badge_rounded),
+      DigitalRewardCategory.mascotAccessory => (
+        'Sila Wardrobe',
+        Icons.smart_toy_rounded,
+      ),
     };
 
     return Row(

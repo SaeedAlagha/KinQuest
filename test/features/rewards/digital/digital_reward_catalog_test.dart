@@ -5,11 +5,11 @@ import 'package:kinquest/features/rewards/digital/digital_reward_definition.dart
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  test('built-in catalog contains 15 unique functional rewards', () async {
+  test('built-in catalog contains 18 unique functional rewards', () async {
     final rewards = await DigitalRewardCatalog.load();
 
-    expect(rewards, hasLength(15));
-    expect(rewards.map((reward) => reward.id).toSet(), hasLength(15));
+    expect(rewards, hasLength(18));
+    expect(rewards.map((reward) => reward.id).toSet(), hasLength(18));
     expect(
       rewards.map((reward) => reward.category).toSet(),
       containsAll(DigitalRewardCategory.values),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:kinquest/core/mascot/sila_mascot.dart';
 import 'package:kinquest/core/theme/app_theme.dart';
 import 'package:kinquest/features/games/screens/games_screen.dart';
 import 'package:kinquest/features/home/screens/home_screen.dart';
@@ -14,6 +15,10 @@ void main() {
 
     expect(find.text('Welcome, Demo User'), findsOneWidget);
     expect(find.text('Demo Family'), findsWidgets);
+    expect(
+      find.byKey(const ValueKey('sila-mascot-accessory-guardian_crown')),
+      findsOneWidget,
+    );
     expect(tester.takeException(), isNull);
 
     await _pumpScreen(tester, const GamesScreen());
@@ -43,6 +48,7 @@ const _homeDashboard = HomeDashboard(
   familyName: 'Demo Family',
   memberCount: 4,
   tokens: '120',
+  mascotAccessory: SilaMascotAccessories.guardianCrown,
 );
 
 Future<void> _setViewport(WidgetTester tester, Size size) async {

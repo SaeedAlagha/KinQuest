@@ -7,6 +7,7 @@ class EquippedDigitalRewards {
     this.profileTheme = 'default',
     this.celebrationEffect = 'default',
     this.nameplate = 'default',
+    this.mascotAccessory = 'none',
   });
 
   final String profileFrame;
@@ -14,6 +15,7 @@ class EquippedDigitalRewards {
   final String profileTheme;
   final String celebrationEffect;
   final String nameplate;
+  final String mascotAccessory;
 
   factory EquippedDigitalRewards.fromMap(Map<String, dynamic>? data) {
     String value(String key, String fallback) {
@@ -27,6 +29,7 @@ class EquippedDigitalRewards {
       profileTheme: value('profileTheme', 'default'),
       celebrationEffect: value('celebrationEffect', 'default'),
       nameplate: value('nameplate', 'default'),
+      mascotAccessory: value('mascotAccessory', 'none'),
     );
   }
 
@@ -37,6 +40,7 @@ class EquippedDigitalRewards {
       DigitalRewardCategory.profileTheme => profileTheme,
       DigitalRewardCategory.celebrationEffect => celebrationEffect,
       DigitalRewardCategory.nameplate => nameplate,
+      DigitalRewardCategory.mascotAccessory => mascotAccessory,
     };
   }
 
@@ -46,6 +50,7 @@ class EquippedDigitalRewards {
     String? profileTheme,
     String? celebrationEffect,
     String? nameplate,
+    String? mascotAccessory,
   }) {
     return EquippedDigitalRewards(
       profileFrame: profileFrame ?? this.profileFrame,
@@ -53,6 +58,7 @@ class EquippedDigitalRewards {
       profileTheme: profileTheme ?? this.profileTheme,
       celebrationEffect: celebrationEffect ?? this.celebrationEffect,
       nameplate: nameplate ?? this.nameplate,
+      mascotAccessory: mascotAccessory ?? this.mascotAccessory,
     );
   }
 
@@ -68,6 +74,9 @@ class EquippedDigitalRewards {
         celebrationEffect: assetKey,
       ),
       DigitalRewardCategory.nameplate => copyWith(nameplate: assetKey),
+      DigitalRewardCategory.mascotAccessory => copyWith(
+        mascotAccessory: assetKey,
+      ),
     };
   }
 }
