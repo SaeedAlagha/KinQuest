@@ -10,6 +10,7 @@ import '../../../core/widgets/sila_page_backdrop.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../rewards/digital/digital_reward_catalog.dart';
 import '../../rewards/digital/digital_reward_definition.dart';
+import '../../rewards/digital/digital_reward_error_localization.dart';
 import '../../rewards/digital/digital_reward_localization.dart';
 import '../../rewards/digital/digital_reward_service.dart';
 import '../../rewards/digital/equipped_digital_rewards.dart';
@@ -76,13 +77,6 @@ class _SilaStudioScreenState extends State<SilaStudioScreen> {
     _playReaction(motions[(motions.indexOf(_motion) + 1) % motions.length]);
   }
 
-  String _errorMessage(Object error) {
-    final text = error.toString();
-    return text.startsWith('Exception: ')
-        ? text.substring('Exception: '.length)
-        : AppLocalizations.of(context)!.silaStudioLoadError;
-  }
-
   Future<void> _updateReward({
     required DigitalRewardDefinition reward,
     required bool owned,
@@ -143,9 +137,9 @@ class _SilaStudioScreenState extends State<SilaStudioScreen> {
       _playReaction(SilaMascotMotion.excited);
     } catch (error) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(_errorMessage(error))));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(localizedDigitalRewardError(context, error))),
+      );
     } finally {
       if (mounted) setState(() => _processingRewardId = null);
     }

@@ -4105,6 +4105,39 @@ class AppLocalizationsEn extends AppLocalizations {
   String get digitalRewardsLoadFailed => 'Digital Rewards could not be loaded';
 
   @override
+  String get digitalRewardSignInRequired => 'Sign in again to manage your Sila rewards.';
+
+  @override
+  String get digitalRewardUnavailable => 'This reward is not available right now.';
+
+  @override
+  String get digitalRewardUserNotFound => 'We could not find your Sila account. Please sign in again.';
+
+  @override
+  String get digitalRewardFamilyRequired => 'Join or create a family before unlocking rewards.';
+
+  @override
+  String get digitalRewardFamilyNotFound => 'We could not find your family. Please check your family settings.';
+
+  @override
+  String get digitalRewardNotFamilyMember => 'Your family membership needs to be refreshed before unlocking rewards.';
+
+  @override
+  String get digitalRewardAlreadyOwned => 'This reward is already in your collection.';
+
+  @override
+  String get digitalRewardInsufficientTokens => 'Keep playing together to earn enough Family Tokens for this reward.';
+
+  @override
+  String get digitalRewardNotOwned => 'Unlock this reward before equipping it.';
+
+  @override
+  String get digitalRewardInvalid => 'This reward needs to be refreshed before it can be used.';
+
+  @override
+  String get digitalRewardUpdateFailed => 'Your reward could not be updated. No Tokens were spent.';
+
+  @override
   String get profileFrames => 'Profile Frames';
 
   @override

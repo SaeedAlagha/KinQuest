@@ -4140,6 +4140,39 @@ class AppLocalizationsAr extends AppLocalizations {
   String get digitalRewardsLoadFailed => 'تعذر تحميل المكافآت الرقمية';
 
   @override
+  String get digitalRewardSignInRequired => 'سجّل الدخول مجددًا لإدارة مكافآت صلة.';
+
+  @override
+  String get digitalRewardUnavailable => 'هذه المكافأة غير متاحة حاليًا.';
+
+  @override
+  String get digitalRewardUserNotFound => 'تعذر العثور على حسابك في صلة. سجّل الدخول مجددًا.';
+
+  @override
+  String get digitalRewardFamilyRequired => 'انضم إلى عائلة أو أنشئ عائلة قبل فتح المكافآت.';
+
+  @override
+  String get digitalRewardFamilyNotFound => 'تعذر العثور على عائلتك. تحقّق من إعدادات العائلة.';
+
+  @override
+  String get digitalRewardNotFamilyMember => 'يجب تحديث عضويتك العائلية قبل فتح المكافآت.';
+
+  @override
+  String get digitalRewardAlreadyOwned => 'هذه المكافأة موجودة بالفعل في مجموعتك.';
+
+  @override
+  String get digitalRewardInsufficientTokens => 'واصلوا اللعب معًا لجمع ما يكفي من رموز العائلة لهذه المكافأة.';
+
+  @override
+  String get digitalRewardNotOwned => 'افتح هذه المكافأة قبل تجهيزها.';
+
+  @override
+  String get digitalRewardInvalid => 'يجب تحديث هذه المكافأة قبل استخدامها.';
+
+  @override
+  String get digitalRewardUpdateFailed => 'تعذر تحديث مكافأتك، ولم يتم خصم أي رمز.';
+
+  @override
   String get profileFrames => 'إطارات الملف الشخصي';
 
   @override

@@ -7367,6 +7367,72 @@ abstract class AppLocalizations {
   /// **'Digital Rewards could not be loaded'**
   String get digitalRewardsLoadFailed;
 
+  /// No description provided for @digitalRewardSignInRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in again to manage your Sila rewards.'**
+  String get digitalRewardSignInRequired;
+
+  /// No description provided for @digitalRewardUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'This reward is not available right now.'**
+  String get digitalRewardUnavailable;
+
+  /// No description provided for @digitalRewardUserNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'We could not find your Sila account. Please sign in again.'**
+  String get digitalRewardUserNotFound;
+
+  /// No description provided for @digitalRewardFamilyRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Join or create a family before unlocking rewards.'**
+  String get digitalRewardFamilyRequired;
+
+  /// No description provided for @digitalRewardFamilyNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'We could not find your family. Please check your family settings.'**
+  String get digitalRewardFamilyNotFound;
+
+  /// No description provided for @digitalRewardNotFamilyMember.
+  ///
+  /// In en, this message translates to:
+  /// **'Your family membership needs to be refreshed before unlocking rewards.'**
+  String get digitalRewardNotFamilyMember;
+
+  /// No description provided for @digitalRewardAlreadyOwned.
+  ///
+  /// In en, this message translates to:
+  /// **'This reward is already in your collection.'**
+  String get digitalRewardAlreadyOwned;
+
+  /// No description provided for @digitalRewardInsufficientTokens.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep playing together to earn enough Family Tokens for this reward.'**
+  String get digitalRewardInsufficientTokens;
+
+  /// No description provided for @digitalRewardNotOwned.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock this reward before equipping it.'**
+  String get digitalRewardNotOwned;
+
+  /// No description provided for @digitalRewardInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'This reward needs to be refreshed before it can be used.'**
+  String get digitalRewardInvalid;
+
+  /// No description provided for @digitalRewardUpdateFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Your reward could not be updated. No Tokens were spent.'**
+  String get digitalRewardUpdateFailed;
+
   /// No description provided for @profileFrames.
   ///
   /// In en, this message translates to:

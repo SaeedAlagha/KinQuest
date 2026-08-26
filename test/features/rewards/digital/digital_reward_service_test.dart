@@ -39,9 +39,39 @@ void main() {
       headersProvider: () async => {},
     );
 
-    expect(
-      () => service.purchase('frame_gold'),
-      throwsA(predicate((error) => error.toString().contains('already own'))),
+    await expectLater(
+      service.purchase('frame_gold'),
+      throwsA(
+        isA<DigitalRewardException>().having(
+          (error) => error.failure,
+          'failure',
+          DigitalRewardFailure.alreadyOwned,
+        ),
+      ),
+    );
+  });
+
+  test('authentication failures become a stable client failure', () async {
+    final service = DigitalRewardService(
+      client: MockClient(
+        (_) async => http.Response(
+          jsonEncode({'error': 'Your session is invalid or expired.'}),
+          401,
+        ),
+      ),
+      endpointBuilder: (path) => Uri.parse('https://api.sila.test$path'),
+      headersProvider: () async => {},
+    );
+
+    await expectLater(
+      service.equip('frame_gold'),
+      throwsA(
+        isA<DigitalRewardException>().having(
+          (error) => error.failure,
+          'failure',
+          DigitalRewardFailure.signInRequired,
+        ),
+      ),
     );
   });
 }
