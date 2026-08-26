@@ -4103,4 +4103,354 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get tokenAdjusted => 'Adjusted';
+
+  @override
+  String get codeBreakerTitle => 'Code Breaker';
+
+  @override
+  String get codeBreakerDescription => 'Crack the hidden code using logic. Fewer attempts and faster solves earn more points.';
+
+  @override
+  String get chooseExactlyTwoPlayers => 'Choose exactly 2 players.';
+
+  @override
+  String get codeBreakerRoundsDescription => 'Both players crack a new code in every round.';
+
+  @override
+  String get startCodeBreaker => 'Start Code Breaker';
+
+  @override
+  String get difficulty => 'Difficulty';
+
+  @override
+  String get difficultyHard => 'Hard';
+
+  @override
+  String get codeEasyDescription => '3-symbol codes with no repeated symbols.';
+
+  @override
+  String get codeMediumDescription => '4-symbol codes with a larger symbol pool.';
+
+  @override
+  String get codeHardDescription => '5-symbol codes where symbols may repeat.';
+
+  @override
+  String difficultyValue(String difficulty) {
+    return '$difficulty Difficulty';
+  }
+
+  @override
+  String get otherPlayerLookAway => 'The other player should look away until this turn is finished.';
+
+  @override
+  String playerRound(String name, int round) {
+    return '$name — Round $round';
+  }
+
+  @override
+  String codeDifficultySummary(String difficulty, int length) {
+    return '$difficulty • $length-symbol code';
+  }
+
+  @override
+  String get chooseSymbols => 'Choose symbols';
+
+  @override
+  String get tryCode => 'Try Code';
+
+  @override
+  String attemptsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count attempts',
+      one: '1 attempt',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get previousGuesses => 'Previous Guesses';
+
+  @override
+  String correctPositions(int count) {
+    return '✅ $count in the correct position';
+  }
+
+  @override
+  String misplacedSymbols(int count) {
+    return '🔄 $count correct but in the wrong position';
+  }
+
+  @override
+  String get codeCracked => 'Code Cracked!';
+
+  @override
+  String secondsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count seconds',
+      one: '1 second',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pointsEarned(int count) {
+    return '+$count points';
+  }
+
+  @override
+  String passToPlayer(String name) {
+    return 'Pass to $name';
+  }
+
+  @override
+  String roundDifficultySummary(int rounds, String difficulty) {
+    String _temp0 = intl.Intl.pluralLogic(
+      rounds,
+      locale: localeName,
+      other: '$rounds rounds',
+      one: '1 round',
+    );
+    return '$_temp0 • $difficulty';
+  }
+
+  @override
+  String attemptTimeSummary(int attempts, int seconds) {
+    String _temp0 = intl.Intl.pluralLogic(
+      attempts,
+      locale: localeName,
+      other: '$attempts attempts',
+      one: '1 attempt',
+    );
+    return '$_temp0 • $seconds s';
+  }
+
+  @override
+  String get returnToCompetitionAction => 'Return to Competition';
+
+  @override
+  String get riskItTitle => 'Risk It';
+
+  @override
+  String get riskItDescription => 'Build a points pot, bank it safely, or risk everything for a bigger score.';
+
+  @override
+  String get riskItRoundsDescription => 'Both players get one private turn per round.';
+
+  @override
+  String get startRiskIt => 'Start Risk It';
+
+  @override
+  String get categoryEntertainment => 'Entertainment';
+
+  @override
+  String get preparingAiQuestions => 'AI is preparing your questions...';
+
+  @override
+  String get privateTurnLookAway => 'The other player should look away during this turn.';
+
+  @override
+  String roundDifficulty(int round, String difficulty) {
+    return 'Round $round • $difficulty';
+  }
+
+  @override
+  String get currentPot => 'CURRENT POT';
+
+  @override
+  String questionWorth(int points) {
+    return 'This question is worth +$points';
+  }
+
+  @override
+  String get unbankedPot => 'Unbanked Pot';
+
+  @override
+  String nextCorrectWorth(int points) {
+    return 'Next correct answer: +$points';
+  }
+
+  @override
+  String bankPoints(int points) {
+    return 'Bank $points Points';
+  }
+
+  @override
+  String get riskItAction => 'RISK IT';
+
+  @override
+  String get riskWarning => 'One wrong answer and your entire unbanked pot is lost.';
+
+  @override
+  String get bust => 'BUST!';
+
+  @override
+  String get pointsBanked => 'Points Banked!';
+
+  @override
+  String playerLostPot(String name) {
+    return '$name lost the unbanked pot.';
+  }
+
+  @override
+  String playerBankedPoints(String name, int points) {
+    return '$name banked $points points.';
+  }
+
+  @override
+  String get seeRoundResults => 'See Round Results';
+
+  @override
+  String playerScore(String name, int score) {
+    return '$name: $score';
+  }
+
+  @override
+  String riskFinalSummary(int rounds, String difficulty, String category) {
+    String _temp0 = intl.Intl.pluralLogic(
+      rounds,
+      locale: localeName,
+      other: '$rounds rounds',
+      one: '1 round',
+    );
+    return '$_temp0 • $difficulty • $category';
+  }
+
+  @override
+  String get couldNotPrepareAiQuestions => 'Could not prepare the AI questions. Please try again.';
+
+  @override
+  String get attackOrDefendTitle => 'Attack or Defend';
+
+  @override
+  String get attackOrDefendDescription => 'Answer AI challenges, build energy, attack your rival, and defend your hearts.';
+
+  @override
+  String get whoIsBattling => 'Who is battling?';
+
+  @override
+  String get bestOf => 'Best Of';
+
+  @override
+  String get bestOfDescription => 'Best of 1, 3, or 5 battles. The match ends as soon as someone reaches the required wins.';
+
+  @override
+  String get startBattle => 'Start Battle';
+
+  @override
+  String get preparingAiBattle => 'AI is preparing your battle...';
+
+  @override
+  String battleBestOf(int battle, int rounds) {
+    return 'Battle $battle • Best of $rounds';
+  }
+
+  @override
+  String playerIsAttacking(String name) {
+    return '$name is attacking!';
+  }
+
+  @override
+  String playerMustBlock(String name) {
+    return '$name must answer correctly to block the attack.';
+  }
+
+  @override
+  String get otherPlayerLookAwayShort => 'The other player should look away.';
+
+  @override
+  String get defendAction => '🛡️ DEFEND!';
+
+  @override
+  String get earnEnergyAction => '⚡ EARN ENERGY';
+
+  @override
+  String get shieldActive => '🛡️ Shield';
+
+  @override
+  String chooseYourMove(String name) {
+    return '$name, choose your move';
+  }
+
+  @override
+  String energyAvailable(int count) {
+    return 'Energy available: ⚡ $count';
+  }
+
+  @override
+  String get attackMove => '⚔️ Attack';
+
+  @override
+  String get attackMoveDescription => 'Costs 1 energy • Defender gets 10 seconds';
+
+  @override
+  String get shieldMove => '🛡️ Shield';
+
+  @override
+  String get shieldMoveDescription => 'Costs 1 energy • Blocks your next failed defense';
+
+  @override
+  String get powerAttackMove => '🔥 Power Attack';
+
+  @override
+  String get powerAttackMoveDescription => 'Costs 2 energy • Defender gets 7 seconds';
+
+  @override
+  String get superAttackMove => '💥 Super Attack';
+
+  @override
+  String get superAttackMoveDescription => 'Costs 3 energy • 5 seconds • 2 damage if missed';
+
+  @override
+  String get saveEnergyEndTurn => 'Save Energy & End Turn';
+
+  @override
+  String battleNumberComplete(int number) {
+    return 'Battle $number Complete!';
+  }
+
+  @override
+  String startBattleNumber(int number) {
+    return 'Start Battle $number';
+  }
+
+  @override
+  String playerWinsBattle(String name) {
+    return '$name wins the battle!';
+  }
+
+  @override
+  String battleFinalSummary(int rounds, String difficulty, String category) {
+    return 'Best of $rounds • $difficulty • $category';
+  }
+
+  @override
+  String get couldNotPrepareAiBattle => 'Could not prepare the AI battle. Please try again.';
+
+  @override
+  String get duelGames => 'Duel Games';
+
+  @override
+  String get duelGamesSubtitle => 'Head-to-head games built specifically for 2 players.';
+
+  @override
+  String get familyGames => 'Family Games';
+
+  @override
+  String get familyGamesSubtitle => 'Play together with 2 or more family members.';
+
+  @override
+  String get partyGamesSectionSubtitle => 'Casual games made for laughs and group fun.';
+
+  @override
+  String get logicDuel => 'LOGIC DUEL';
+
+  @override
+  String get battleDuel => 'BATTLE DUEL';
+
+  @override
+  String get highStakesDuel => 'HIGH-STAKES DUEL';
 }

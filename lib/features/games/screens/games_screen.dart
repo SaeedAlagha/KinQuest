@@ -292,9 +292,8 @@ class GamesScreen extends StatelessWidget {
                       const SizedBox(height: 28),
                       _GameSection(
                         icon: Icons.sports_kabaddi_rounded,
-                        title: 'Duel Games',
-                        subtitle:
-                            'Head-to-head games built specifically for 2 players.',
+                        title: strings.duelGames,
+                        subtitle: strings.duelGamesSubtitle,
                         games: _gamesFor(_GameCategory.duel),
                         columns: columns,
                         cardHeight: cardHeight,
@@ -304,9 +303,8 @@ class GamesScreen extends StatelessWidget {
                       const SizedBox(height: 38),
                       _GameSection(
                         icon: Icons.groups_2_rounded,
-                        title: 'Family Games',
-                        subtitle:
-                            'Play together with 2 or more family members.',
+                        title: strings.familyGames,
+                        subtitle: strings.familyGamesSubtitle,
                         games: _gamesFor(_GameCategory.family),
                         columns: columns,
                         cardHeight: cardHeight,
@@ -317,8 +315,8 @@ class GamesScreen extends StatelessWidget {
 
                       _GameSection(
                         icon: Icons.celebration_rounded,
-                        title: 'Party Games',
-                        subtitle: 'Casual games made for laughs and group fun.',
+                        title: strings.partyGames,
+                        subtitle: strings.partyGamesSectionSubtitle,
                         games: _gamesFor(_GameCategory.party),
                         columns: columns,
                         cardHeight: cardHeight,
@@ -869,6 +867,9 @@ String _localizedGameTitle(AppLocalizations strings, String title) =>
       'Pass the Bomb' => strings.passTheBomb,
       'Draw & Guess' => strings.drawAndGuess,
       'Don\'t Say It' => strings.dontSayIt,
+      'Code Breaker' => strings.codeBreakerTitle,
+      'Attack or Defend' => strings.attackOrDefendTitle,
+      'Risk It' => strings.riskItTitle,
       _ => title,
     };
 
@@ -887,6 +888,9 @@ String _localizedGameDescription(
   'Pass the Bomb' => strings.passTheBombDescription,
   'Draw & Guess' => strings.drawAndGuessDescription,
   'Don\'t Say It' => strings.dontSayItDescription,
+  'Code Breaker' => strings.codeBreakerDescription,
+  'Attack or Defend' => strings.attackOrDefendDescription,
+  'Risk It' => strings.riskItDescription,
   _ => fallback,
 };
 
@@ -905,6 +909,9 @@ String _localizedGameEyebrow(
   'Pass the Bomb' => strings.fastFamilyFun,
   'Draw & Guess' => strings.creativePlay,
   'Don\'t Say It' => strings.wordChallenge,
+  'Code Breaker' => strings.logicDuel,
+  'Attack or Defend' => strings.battleDuel,
+  'Risk It' => strings.highStakesDuel,
   _ => fallback,
 };
 

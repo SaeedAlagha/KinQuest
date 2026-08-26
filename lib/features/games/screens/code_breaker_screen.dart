@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
+import '../../../l10n/app_localizations.dart';
 import '../widgets/sila_game_coach.dart';
 
 import '../../competitions/models/competition_game_result.dart';
@@ -234,18 +235,32 @@ class _CodeBreakerScreenState extends State<CodeBreakerScreen> {
 
   bool get _allowDuplicates => _difficulty == _CodeBreakerDifficulty.hard;
 
-  String get _difficultyName => switch (_difficulty) {
-    _CodeBreakerDifficulty.easy => 'Easy',
-    _CodeBreakerDifficulty.medium => 'Medium',
-    _CodeBreakerDifficulty.hard => 'Hard',
-  };
+  String get _difficultyName {
+    final strings = AppLocalizations.of(context)!;
+    return switch (_difficulty) {
+      _CodeBreakerDifficulty.easy => strings.difficultyEasy,
+      _CodeBreakerDifficulty.medium => strings.difficultyMedium,
+      _CodeBreakerDifficulty.hard => strings.difficultyHard,
+    };
+  }
 
   String _difficultyDescription(_CodeBreakerDifficulty difficulty) {
+    final strings = AppLocalizations.of(context)!;
     return switch (difficulty) {
-      _CodeBreakerDifficulty.easy => '3-symbol codes with no repeated symbols.',
-      _CodeBreakerDifficulty.medium =>
-        '4-symbol codes with a larger symbol pool.',
-      _CodeBreakerDifficulty.hard => '5-symbol codes where symbols may repeat.',
+      _CodeBreakerDifficulty.easy => strings.codeEasyDescription,
+      _CodeBreakerDifficulty.medium => strings.codeMediumDescription,
+      _CodeBreakerDifficulty.hard => strings.codeHardDescription,
+    };
+  }
+
+  String _localizedLoadError(String error) {
+    final strings = AppLocalizations.of(context)!;
+    return switch (error) {
+      'You must be signed in to play.' => strings.noUserSignedIn,
+      'Join a family before playing Code Breaker.' =>
+        strings.joinOrCreateFamilyBeforeGame(strings.codeBreakerTitle),
+      'Could not load family members.' => strings.couldNotLoadFamilyMembers,
+      _ => error,
     };
   }
 
@@ -540,7 +555,7 @@ class _CodeBreakerScreenState extends State<CodeBreakerScreen> {
     if (_isTie) {
       return CompetitionGameResult(
         gameId: 'code_breaker',
-        gameName: 'Code Breaker',
+        gameName: AppLocalizations.of(context)!.codeBreakerTitle,
         players: [
           CompetitionPlayerResult(
             userId: player1.id,
@@ -564,7 +579,7 @@ class _CodeBreakerScreenState extends State<CodeBreakerScreen> {
 
     return CompetitionGameResult(
       gameId: 'code_breaker',
-      gameName: 'Code Breaker',
+      gameName: AppLocalizations.of(context)!.codeBreakerTitle,
       players: [
         CompetitionPlayerResult(
           userId: winner.id,
@@ -605,9 +620,10 @@ class _CodeBreakerScreenState extends State<CodeBreakerScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context)!;
     return Scaffold(
       floatingActionButton: const SilaGameCoachButton(),
-      appBar: AppBar(title: const Text('Code Breaker')),
+      appBar: AppBar(title: Text(strings.codeBreakerTitle)),
       body: SafeArea(
         child: switch (_phase) {
           _CodeBreakerPhase.setup => _buildSetup(),
@@ -621,6 +637,7 @@ class _CodeBreakerScreenState extends State<CodeBreakerScreen> {
   }
 
   Widget _buildSetup() {
+    final strings = AppLocalizations.of(context)!;
     if (_isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -629,27 +646,29 @@ class _CodeBreakerScreenState extends State<CodeBreakerScreen> {
       return Center(
         child: Padding(
           padding: const EdgeInsets.all(24),
-          child: Text(_loadError!, textAlign: TextAlign.center),
+          child: Text(
+            _localizedLoadError(_loadError!),
+            textAlign: TextAlign.center,
+          ),
         ),
       );
     }
 
     return GameSetupView(
       icon: Icons.lock_open_rounded,
-      title: 'Code Breaker',
-      description:
-          'Crack the hidden code using logic. Fewer attempts and faster solves earn more points.',
+      title: strings.codeBreakerTitle,
+      description: strings.codeBreakerDescription,
       children: [
         GameSetupSectionCard(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Who is playing?',
+                strings.whoIsPlaying,
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               const SizedBox(height: 6),
-              const Text('Choose exactly 2 players.'),
+              Text(strings.chooseExactlyTwoPlayers),
               const SizedBox(height: 12),
               for (final player in _familyMembers)
                 CheckboxListTile(
@@ -672,7 +691,7 @@ class _CodeBreakerScreenState extends State<CodeBreakerScreen> {
               _selectedRounds = rounds;
             });
           },
-          description: 'Both players crack a new code in every round.',
+          description: strings.codeBreakerRoundsDescription,
         ),
         const SizedBox(height: 16),
         _buildDifficultySelector(),
@@ -680,18 +699,22 @@ class _CodeBreakerScreenState extends State<CodeBreakerScreen> {
         FilledButton.icon(
           onPressed: _selectedPlayerIds.length == 2 ? _startGame : null,
           icon: const Icon(Icons.play_arrow_rounded),
-          label: const Text('Start Code Breaker'),
+          label: Text(strings.startCodeBreaker),
         ),
       ],
     );
   }
 
   Widget _buildDifficultySelector() {
+    final strings = AppLocalizations.of(context)!;
     return GameSetupSectionCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Difficulty', style: Theme.of(context).textTheme.titleLarge),
+          Text(
+            strings.difficulty,
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
           const SizedBox(height: 6),
           Text(
             _difficultyDescription(_difficulty),
@@ -706,7 +729,7 @@ class _CodeBreakerScreenState extends State<CodeBreakerScreen> {
             children: [
               ChoiceChip(
                 avatar: const Icon(Icons.sentiment_satisfied_rounded, size: 18),
-                label: const Text('Easy'),
+                label: Text(strings.difficultyEasy),
                 selected: _difficulty == _CodeBreakerDifficulty.easy,
                 onSelected: (_) {
                   setState(() {
@@ -716,7 +739,7 @@ class _CodeBreakerScreenState extends State<CodeBreakerScreen> {
               ),
               ChoiceChip(
                 avatar: const Icon(Icons.psychology_rounded, size: 18),
-                label: const Text('Medium'),
+                label: Text(strings.difficultyMedium),
                 selected: _difficulty == _CodeBreakerDifficulty.medium,
                 onSelected: (_) {
                   setState(() {
@@ -729,7 +752,7 @@ class _CodeBreakerScreenState extends State<CodeBreakerScreen> {
                   Icons.local_fire_department_rounded,
                   size: 18,
                 ),
-                label: const Text('Hard'),
+                label: Text(strings.difficultyHard),
                 selected: _difficulty == _CodeBreakerDifficulty.hard,
                 onSelected: (_) {
                   setState(() {
@@ -745,6 +768,7 @@ class _CodeBreakerScreenState extends State<CodeBreakerScreen> {
   }
 
   Widget _buildPassPhone() {
+    final strings = AppLocalizations.of(context)!;
     return Center(
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
@@ -756,32 +780,29 @@ class _CodeBreakerScreenState extends State<CodeBreakerScreen> {
               const Icon(Icons.phone_android_rounded, size: 72),
               const SizedBox(height: 20),
               Text(
-                'Round $_currentRound of $_selectedRounds',
+                strings.roundProgress(_currentRound, _selectedRounds),
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               const SizedBox(height: 8),
               Text(
-                '$_difficultyName Difficulty',
+                strings.difficultyValue(_difficultyName),
                 style: Theme.of(context).textTheme.labelLarge,
               ),
               const SizedBox(height: 24),
               Text(
-                'Pass the phone to ${_currentPlayer.name}',
+                strings.passPhoneTo(_currentPlayer.name),
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
               ),
               const SizedBox(height: 12),
-              const Text(
-                'The other player should look away until this turn is finished.',
-                textAlign: TextAlign.center,
-              ),
+              Text(strings.otherPlayerLookAway, textAlign: TextAlign.center),
               const SizedBox(height: 30),
               FilledButton.icon(
                 onPressed: _prepareTurn,
                 icon: const Icon(Icons.visibility_rounded),
-                label: Text('I\'m ${_currentPlayer.name}'),
+                label: Text(strings.iAmPlayer(_currentPlayer.name)),
               ),
             ],
           ),
@@ -791,6 +812,7 @@ class _CodeBreakerScreenState extends State<CodeBreakerScreen> {
   }
 
   Widget _buildPlaying() {
+    final strings = AppLocalizations.of(context)!;
     final availableSymbols = _symbolPool.take(_availableSymbolCount).toList();
 
     return SingleChildScrollView(
@@ -802,7 +824,7 @@ class _CodeBreakerScreenState extends State<CodeBreakerScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
-                '${_currentPlayer.name} — Round $_currentRound',
+                strings.playerRound(_currentPlayer.name, _currentRound),
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                   fontWeight: FontWeight.bold,
@@ -810,14 +832,14 @@ class _CodeBreakerScreenState extends State<CodeBreakerScreen> {
               ),
               const SizedBox(height: 6),
               Text(
-                '$_difficultyName • $_codeLength-symbol code',
+                strings.codeDifficultySummary(_difficultyName, _codeLength),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 28),
               _buildCurrentGuess(),
               const SizedBox(height: 26),
               Text(
-                'Choose symbols',
+                strings.chooseSymbols,
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               const SizedBox(height: 12),
@@ -839,7 +861,7 @@ class _CodeBreakerScreenState extends State<CodeBreakerScreen> {
                     child: OutlinedButton.icon(
                       onPressed: _removeLastSymbol,
                       icon: const Icon(Icons.backspace_outlined),
-                      label: const Text('Undo'),
+                      label: Text(strings.undo),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -847,7 +869,7 @@ class _CodeBreakerScreenState extends State<CodeBreakerScreen> {
                     child: OutlinedButton.icon(
                       onPressed: _clearGuess,
                       icon: const Icon(Icons.restart_alt_rounded),
-                      label: const Text('Clear'),
+                      label: Text(strings.clear),
                     ),
                   ),
                 ],
@@ -858,18 +880,18 @@ class _CodeBreakerScreenState extends State<CodeBreakerScreen> {
                     ? null
                     : _submitGuess,
                 icon: const Icon(Icons.key_rounded),
-                label: const Text('Try Code'),
+                label: Text(strings.tryCode),
               ),
               const SizedBox(height: 20),
               Text(
-                'Attempts: $_attempts',
+                strings.attemptsCount(_attempts),
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               if (_guessHistory.isNotEmpty) ...[
                 const SizedBox(height: 28),
                 Text(
-                  'Previous Guesses',
+                  strings.previousGuesses,
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
                 const SizedBox(height: 12),
@@ -912,6 +934,7 @@ class _CodeBreakerScreenState extends State<CodeBreakerScreen> {
   }
 
   Widget _buildGuessHistoryCard(_GuessResult result) {
+    final strings = AppLocalizations.of(context)!;
     return Card(
       margin: const EdgeInsets.only(bottom: 10),
       child: Padding(
@@ -929,9 +952,9 @@ class _CodeBreakerScreenState extends State<CodeBreakerScreen> {
                   .toList(),
             ),
             const SizedBox(height: 10),
-            Text('✅ ${result.exact} correct position'),
+            Text(strings.correctPositions(result.exact)),
             const SizedBox(height: 4),
-            Text('🔄 ${result.misplaced} correct symbol, wrong position'),
+            Text(strings.misplacedSymbols(result.misplaced)),
           ],
         ),
       ),
@@ -939,6 +962,7 @@ class _CodeBreakerScreenState extends State<CodeBreakerScreen> {
   }
 
   Widget _buildTurnResult() {
+    final strings = AppLocalizations.of(context)!;
     final result = _turnResults.last;
 
     return Center(
@@ -951,9 +975,12 @@ class _CodeBreakerScreenState extends State<CodeBreakerScreen> {
             children: [
               const Icon(Icons.lock_open_rounded, size: 80),
               const SizedBox(height: 18),
-              const Text(
-                'Code Cracked!',
-                style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+              Text(
+                strings.codeCracked,
+                style: const TextStyle(
+                  fontSize: 30,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(height: 16),
               Wrap(
@@ -972,12 +999,12 @@ class _CodeBreakerScreenState extends State<CodeBreakerScreen> {
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               const SizedBox(height: 12),
-              Text('${result.attempts} attempts'),
+              Text(strings.attemptsCount(result.attempts)),
               const SizedBox(height: 6),
-              Text('${result.seconds} seconds'),
+              Text(strings.secondsCount(result.seconds)),
               const SizedBox(height: 14),
               Text(
-                '+${result.score} points',
+                strings.pointsEarned(result.score),
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
@@ -987,10 +1014,10 @@ class _CodeBreakerScreenState extends State<CodeBreakerScreen> {
                 onPressed: _continueAfterTurn,
                 child: Text(
                   _currentPlayerIndex == 0
-                      ? 'Pass to ${_players[1].name}'
+                      ? strings.passToPlayer(_players[1].name)
                       : _currentRound == _selectedRounds
-                      ? 'See Final Results'
-                      : 'Next Round',
+                      ? strings.seeFinalResults
+                      : strings.nextRound,
                 ),
               ),
             ],
@@ -1001,6 +1028,7 @@ class _CodeBreakerScreenState extends State<CodeBreakerScreen> {
   }
 
   Widget _buildFinalResults() {
+    final strings = AppLocalizations.of(context)!;
     final player1 = _players[0];
     final player2 = _players[1];
 
@@ -1015,14 +1043,19 @@ class _CodeBreakerScreenState extends State<CodeBreakerScreen> {
               const Icon(Icons.emoji_events_rounded, size: 86),
               const SizedBox(height: 20),
               Text(
-                _isTie ? 'It\'s a tie!' : '${_winner.name} wins!',
+                _isTie ? strings.gameTie : strings.playerWins(_winner.name),
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
               ),
               const SizedBox(height: 8),
-              Text('$_selectedRounds rounds • $_difficultyName'),
+              Text(
+                strings.roundDifficultySummary(
+                  _selectedRounds,
+                  _difficultyName,
+                ),
+              ),
               const SizedBox(height: 28),
               _buildScoreCard(player1),
               const SizedBox(height: 12),
@@ -1044,14 +1077,14 @@ class _CodeBreakerScreenState extends State<CodeBreakerScreen> {
                 ),
                 label: Text(
                   widget.playMode.isOfficial
-                      ? 'Return to Competition'
-                      : 'Play Again',
+                      ? strings.returnToCompetitionAction
+                      : strings.playAgain,
                 ),
               ),
               const SizedBox(height: 12),
               OutlinedButton(
                 onPressed: () => Navigator.of(context).pop(),
-                child: const Text('Back to Games'),
+                child: Text(strings.backToGames),
               ),
             ],
           ),
@@ -1061,6 +1094,7 @@ class _CodeBreakerScreenState extends State<CodeBreakerScreen> {
   }
 
   Widget _buildScoreCard(_CodeBreakerPlayer player) {
+    final strings = AppLocalizations.of(context)!;
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(8),
@@ -1075,8 +1109,10 @@ class _CodeBreakerScreenState extends State<CodeBreakerScreen> {
             style: const TextStyle(fontWeight: FontWeight.bold),
           ),
           subtitle: Text(
-            '${_totalAttempts[player.id] ?? 0} attempts • '
-            '${_totalSeconds[player.id] ?? 0}s',
+            strings.attemptTimeSummary(
+              _totalAttempts[player.id] ?? 0,
+              _totalSeconds[player.id] ?? 0,
+            ),
           ),
           trailing: Text(
             '${_scores[player.id] ?? 0}',

@@ -7354,6 +7354,534 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Adjusted'**
   String get tokenAdjusted;
+
+  /// No description provided for @codeBreakerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Code Breaker'**
+  String get codeBreakerTitle;
+
+  /// No description provided for @codeBreakerDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Crack the hidden code using logic. Fewer attempts and faster solves earn more points.'**
+  String get codeBreakerDescription;
+
+  /// No description provided for @chooseExactlyTwoPlayers.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose exactly 2 players.'**
+  String get chooseExactlyTwoPlayers;
+
+  /// No description provided for @codeBreakerRoundsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Both players crack a new code in every round.'**
+  String get codeBreakerRoundsDescription;
+
+  /// No description provided for @startCodeBreaker.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Code Breaker'**
+  String get startCodeBreaker;
+
+  /// No description provided for @difficulty.
+  ///
+  /// In en, this message translates to:
+  /// **'Difficulty'**
+  String get difficulty;
+
+  /// No description provided for @difficultyHard.
+  ///
+  /// In en, this message translates to:
+  /// **'Hard'**
+  String get difficultyHard;
+
+  /// No description provided for @codeEasyDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'3-symbol codes with no repeated symbols.'**
+  String get codeEasyDescription;
+
+  /// No description provided for @codeMediumDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'4-symbol codes with a larger symbol pool.'**
+  String get codeMediumDescription;
+
+  /// No description provided for @codeHardDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'5-symbol codes where symbols may repeat.'**
+  String get codeHardDescription;
+
+  /// No description provided for @difficultyValue.
+  ///
+  /// In en, this message translates to:
+  /// **'{difficulty} Difficulty'**
+  String difficultyValue(String difficulty);
+
+  /// No description provided for @otherPlayerLookAway.
+  ///
+  /// In en, this message translates to:
+  /// **'The other player should look away until this turn is finished.'**
+  String get otherPlayerLookAway;
+
+  /// No description provided for @playerRound.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} — Round {round}'**
+  String playerRound(String name, int round);
+
+  /// No description provided for @codeDifficultySummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{difficulty} • {length}-symbol code'**
+  String codeDifficultySummary(String difficulty, int length);
+
+  /// No description provided for @chooseSymbols.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose symbols'**
+  String get chooseSymbols;
+
+  /// No description provided for @tryCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Try Code'**
+  String get tryCode;
+
+  /// No description provided for @attemptsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 attempt} other{{count} attempts}}'**
+  String attemptsCount(int count);
+
+  /// No description provided for @previousGuesses.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous Guesses'**
+  String get previousGuesses;
+
+  /// No description provided for @correctPositions.
+  ///
+  /// In en, this message translates to:
+  /// **'✅ {count} in the correct position'**
+  String correctPositions(int count);
+
+  /// No description provided for @misplacedSymbols.
+  ///
+  /// In en, this message translates to:
+  /// **'🔄 {count} correct but in the wrong position'**
+  String misplacedSymbols(int count);
+
+  /// No description provided for @codeCracked.
+  ///
+  /// In en, this message translates to:
+  /// **'Code Cracked!'**
+  String get codeCracked;
+
+  /// No description provided for @secondsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 second} other{{count} seconds}}'**
+  String secondsCount(int count);
+
+  /// No description provided for @pointsEarned.
+  ///
+  /// In en, this message translates to:
+  /// **'+{count} points'**
+  String pointsEarned(int count);
+
+  /// No description provided for @passToPlayer.
+  ///
+  /// In en, this message translates to:
+  /// **'Pass to {name}'**
+  String passToPlayer(String name);
+
+  /// No description provided for @roundDifficultySummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{rounds, plural, =1{1 round} other{{rounds} rounds}} • {difficulty}'**
+  String roundDifficultySummary(int rounds, String difficulty);
+
+  /// No description provided for @attemptTimeSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{attempts, plural, =1{1 attempt} other{{attempts} attempts}} • {seconds} s'**
+  String attemptTimeSummary(int attempts, int seconds);
+
+  /// No description provided for @returnToCompetitionAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Return to Competition'**
+  String get returnToCompetitionAction;
+
+  /// No description provided for @riskItTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Risk It'**
+  String get riskItTitle;
+
+  /// No description provided for @riskItDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Build a points pot, bank it safely, or risk everything for a bigger score.'**
+  String get riskItDescription;
+
+  /// No description provided for @riskItRoundsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Both players get one private turn per round.'**
+  String get riskItRoundsDescription;
+
+  /// No description provided for @startRiskIt.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Risk It'**
+  String get startRiskIt;
+
+  /// No description provided for @categoryEntertainment.
+  ///
+  /// In en, this message translates to:
+  /// **'Entertainment'**
+  String get categoryEntertainment;
+
+  /// No description provided for @preparingAiQuestions.
+  ///
+  /// In en, this message translates to:
+  /// **'AI is preparing your questions...'**
+  String get preparingAiQuestions;
+
+  /// No description provided for @privateTurnLookAway.
+  ///
+  /// In en, this message translates to:
+  /// **'The other player should look away during this turn.'**
+  String get privateTurnLookAway;
+
+  /// No description provided for @roundDifficulty.
+  ///
+  /// In en, this message translates to:
+  /// **'Round {round} • {difficulty}'**
+  String roundDifficulty(int round, String difficulty);
+
+  /// No description provided for @currentPot.
+  ///
+  /// In en, this message translates to:
+  /// **'CURRENT POT'**
+  String get currentPot;
+
+  /// No description provided for @questionWorth.
+  ///
+  /// In en, this message translates to:
+  /// **'This question is worth +{points}'**
+  String questionWorth(int points);
+
+  /// No description provided for @unbankedPot.
+  ///
+  /// In en, this message translates to:
+  /// **'Unbanked Pot'**
+  String get unbankedPot;
+
+  /// No description provided for @nextCorrectWorth.
+  ///
+  /// In en, this message translates to:
+  /// **'Next correct answer: +{points}'**
+  String nextCorrectWorth(int points);
+
+  /// No description provided for @bankPoints.
+  ///
+  /// In en, this message translates to:
+  /// **'Bank {points} Points'**
+  String bankPoints(int points);
+
+  /// No description provided for @riskItAction.
+  ///
+  /// In en, this message translates to:
+  /// **'RISK IT'**
+  String get riskItAction;
+
+  /// No description provided for @riskWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'One wrong answer and your entire unbanked pot is lost.'**
+  String get riskWarning;
+
+  /// No description provided for @bust.
+  ///
+  /// In en, this message translates to:
+  /// **'BUST!'**
+  String get bust;
+
+  /// No description provided for @pointsBanked.
+  ///
+  /// In en, this message translates to:
+  /// **'Points Banked!'**
+  String get pointsBanked;
+
+  /// No description provided for @playerLostPot.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} lost the unbanked pot.'**
+  String playerLostPot(String name);
+
+  /// No description provided for @playerBankedPoints.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} banked {points} points.'**
+  String playerBankedPoints(String name, int points);
+
+  /// No description provided for @seeRoundResults.
+  ///
+  /// In en, this message translates to:
+  /// **'See Round Results'**
+  String get seeRoundResults;
+
+  /// No description provided for @playerScore.
+  ///
+  /// In en, this message translates to:
+  /// **'{name}: {score}'**
+  String playerScore(String name, int score);
+
+  /// No description provided for @riskFinalSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{rounds, plural, =1{1 round} other{{rounds} rounds}} • {difficulty} • {category}'**
+  String riskFinalSummary(int rounds, String difficulty, String category);
+
+  /// No description provided for @couldNotPrepareAiQuestions.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not prepare the AI questions. Please try again.'**
+  String get couldNotPrepareAiQuestions;
+
+  /// No description provided for @attackOrDefendTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Attack or Defend'**
+  String get attackOrDefendTitle;
+
+  /// No description provided for @attackOrDefendDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Answer AI challenges, build energy, attack your rival, and defend your hearts.'**
+  String get attackOrDefendDescription;
+
+  /// No description provided for @whoIsBattling.
+  ///
+  /// In en, this message translates to:
+  /// **'Who is battling?'**
+  String get whoIsBattling;
+
+  /// No description provided for @bestOf.
+  ///
+  /// In en, this message translates to:
+  /// **'Best Of'**
+  String get bestOf;
+
+  /// No description provided for @bestOfDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Best of 1, 3, or 5 battles. The match ends as soon as someone reaches the required wins.'**
+  String get bestOfDescription;
+
+  /// No description provided for @startBattle.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Battle'**
+  String get startBattle;
+
+  /// No description provided for @preparingAiBattle.
+  ///
+  /// In en, this message translates to:
+  /// **'AI is preparing your battle...'**
+  String get preparingAiBattle;
+
+  /// No description provided for @battleBestOf.
+  ///
+  /// In en, this message translates to:
+  /// **'Battle {battle} • Best of {rounds}'**
+  String battleBestOf(int battle, int rounds);
+
+  /// No description provided for @playerIsAttacking.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} is attacking!'**
+  String playerIsAttacking(String name);
+
+  /// No description provided for @playerMustBlock.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} must answer correctly to block the attack.'**
+  String playerMustBlock(String name);
+
+  /// No description provided for @otherPlayerLookAwayShort.
+  ///
+  /// In en, this message translates to:
+  /// **'The other player should look away.'**
+  String get otherPlayerLookAwayShort;
+
+  /// No description provided for @defendAction.
+  ///
+  /// In en, this message translates to:
+  /// **'🛡️ DEFEND!'**
+  String get defendAction;
+
+  /// No description provided for @earnEnergyAction.
+  ///
+  /// In en, this message translates to:
+  /// **'⚡ EARN ENERGY'**
+  String get earnEnergyAction;
+
+  /// No description provided for @shieldActive.
+  ///
+  /// In en, this message translates to:
+  /// **'🛡️ Shield'**
+  String get shieldActive;
+
+  /// No description provided for @chooseYourMove.
+  ///
+  /// In en, this message translates to:
+  /// **'{name}, choose your move'**
+  String chooseYourMove(String name);
+
+  /// No description provided for @energyAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Energy available: ⚡ {count}'**
+  String energyAvailable(int count);
+
+  /// No description provided for @attackMove.
+  ///
+  /// In en, this message translates to:
+  /// **'⚔️ Attack'**
+  String get attackMove;
+
+  /// No description provided for @attackMoveDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Costs 1 energy • Defender gets 10 seconds'**
+  String get attackMoveDescription;
+
+  /// No description provided for @shieldMove.
+  ///
+  /// In en, this message translates to:
+  /// **'🛡️ Shield'**
+  String get shieldMove;
+
+  /// No description provided for @shieldMoveDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Costs 1 energy • Blocks your next failed defense'**
+  String get shieldMoveDescription;
+
+  /// No description provided for @powerAttackMove.
+  ///
+  /// In en, this message translates to:
+  /// **'🔥 Power Attack'**
+  String get powerAttackMove;
+
+  /// No description provided for @powerAttackMoveDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Costs 2 energy • Defender gets 7 seconds'**
+  String get powerAttackMoveDescription;
+
+  /// No description provided for @superAttackMove.
+  ///
+  /// In en, this message translates to:
+  /// **'💥 Super Attack'**
+  String get superAttackMove;
+
+  /// No description provided for @superAttackMoveDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Costs 3 energy • 5 seconds • 2 damage if missed'**
+  String get superAttackMoveDescription;
+
+  /// No description provided for @saveEnergyEndTurn.
+  ///
+  /// In en, this message translates to:
+  /// **'Save Energy & End Turn'**
+  String get saveEnergyEndTurn;
+
+  /// No description provided for @battleNumberComplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Battle {number} Complete!'**
+  String battleNumberComplete(int number);
+
+  /// No description provided for @startBattleNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Battle {number}'**
+  String startBattleNumber(int number);
+
+  /// No description provided for @playerWinsBattle.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} wins the battle!'**
+  String playerWinsBattle(String name);
+
+  /// No description provided for @battleFinalSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Best of {rounds} • {difficulty} • {category}'**
+  String battleFinalSummary(int rounds, String difficulty, String category);
+
+  /// No description provided for @couldNotPrepareAiBattle.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not prepare the AI battle. Please try again.'**
+  String get couldNotPrepareAiBattle;
+
+  /// No description provided for @duelGames.
+  ///
+  /// In en, this message translates to:
+  /// **'Duel Games'**
+  String get duelGames;
+
+  /// No description provided for @duelGamesSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Head-to-head games built specifically for 2 players.'**
+  String get duelGamesSubtitle;
+
+  /// No description provided for @familyGames.
+  ///
+  /// In en, this message translates to:
+  /// **'Family Games'**
+  String get familyGames;
+
+  /// No description provided for @familyGamesSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Play together with 2 or more family members.'**
+  String get familyGamesSubtitle;
+
+  /// No description provided for @partyGamesSectionSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Casual games made for laughs and group fun.'**
+  String get partyGamesSectionSubtitle;
+
+  /// No description provided for @logicDuel.
+  ///
+  /// In en, this message translates to:
+  /// **'LOGIC DUEL'**
+  String get logicDuel;
+
+  /// No description provided for @battleDuel.
+  ///
+  /// In en, this message translates to:
+  /// **'BATTLE DUEL'**
+  String get battleDuel;
+
+  /// No description provided for @highStakesDuel.
+  ///
+  /// In en, this message translates to:
+  /// **'HIGH-STAKES DUEL'**
+  String get highStakesDuel;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
+import '../../../l10n/app_localizations.dart';
 import '../widgets/sila_game_coach.dart';
 
 import '../../competitions/models/competition_game_result.dart';
@@ -236,11 +237,38 @@ class _RiskItScreenState extends State<RiskItScreen> {
     _RiskItDifficulty.hard => 'hard',
   };
 
-  String get _difficultyName => switch (_difficulty) {
-    _RiskItDifficulty.easy => 'Easy',
-    _RiskItDifficulty.medium => 'Medium',
-    _RiskItDifficulty.hard => 'Hard',
-  };
+  String get _difficultyName {
+    final strings = AppLocalizations.of(context)!;
+    return switch (_difficulty) {
+      _RiskItDifficulty.easy => strings.difficultyEasy,
+      _RiskItDifficulty.medium => strings.difficultyMedium,
+      _RiskItDifficulty.hard => strings.difficultyHard,
+    };
+  }
+
+  String _localizedCategory(String category) {
+    final strings = AppLocalizations.of(context)!;
+    return switch (category) {
+      'Mixed' => strings.categoryMixed,
+      'General Knowledge' => strings.categoryGeneralKnowledge,
+      'Science' => strings.categoryScience,
+      'Geography' => strings.categoryGeography,
+      'Sports' => strings.categorySports,
+      'Entertainment' => strings.categoryEntertainment,
+      _ => category,
+    };
+  }
+
+  String _localizedLoadError(String error) {
+    final strings = AppLocalizations.of(context)!;
+    return switch (error) {
+      'You must be signed in to play.' => strings.noUserSignedIn,
+      'Join a family before playing Risk It.' =>
+        strings.joinOrCreateFamilyBeforeGame(strings.riskItTitle),
+      'Could not load family members.' => strings.couldNotLoadFamilyMembers,
+      _ => error,
+    };
+  }
 
   _RiskPlayer get _currentPlayer => _players[_currentPlayerIndex];
 
@@ -323,9 +351,9 @@ class _RiskItScreenState extends State<RiskItScreen> {
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text(
-            'Could not prepare the AI questions. Please try again.',
+            AppLocalizations.of(context)!.couldNotPrepareAiQuestions,
           ),
         ),
       );
@@ -469,7 +497,7 @@ class _RiskItScreenState extends State<RiskItScreen> {
     if (_isTie) {
       return CompetitionGameResult(
         gameId: 'risk_it',
-        gameName: 'Risk It',
+        gameName: AppLocalizations.of(context)!.riskItTitle,
         players: [
           CompetitionPlayerResult(
             userId: first.id,
@@ -493,7 +521,7 @@ class _RiskItScreenState extends State<RiskItScreen> {
 
     return CompetitionGameResult(
       gameId: 'risk_it',
-      gameName: 'Risk It',
+      gameName: AppLocalizations.of(context)!.riskItTitle,
       players: [
         CompetitionPlayerResult(
           userId: winner.id,
@@ -531,9 +559,10 @@ class _RiskItScreenState extends State<RiskItScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context)!;
     return Scaffold(
       floatingActionButton: const SilaGameCoachButton(),
-      appBar: AppBar(title: const Text('Risk It')),
+      appBar: AppBar(title: Text(strings.riskItTitle)),
       body: SafeArea(
         child: switch (_phase) {
           _RiskItPhase.setup => _buildSetup(),
@@ -550,6 +579,7 @@ class _RiskItScreenState extends State<RiskItScreen> {
   }
 
   Widget _buildSetup() {
+    final strings = AppLocalizations.of(context)!;
     if (_isLoadingFamily) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -558,27 +588,29 @@ class _RiskItScreenState extends State<RiskItScreen> {
       return Center(
         child: Padding(
           padding: const EdgeInsets.all(24),
-          child: Text(_loadError!, textAlign: TextAlign.center),
+          child: Text(
+            _localizedLoadError(_loadError!),
+            textAlign: TextAlign.center,
+          ),
         ),
       );
     }
 
     return GameSetupView(
       icon: Icons.casino_rounded,
-      title: 'Risk It',
-      description:
-          'Build a points pot, bank it safely, or risk everything for a bigger score.',
+      title: strings.riskItTitle,
+      description: strings.riskItDescription,
       children: [
         GameSetupSectionCard(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Who is playing?',
+                strings.whoIsPlaying,
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               const SizedBox(height: 6),
-              const Text('Choose exactly 2 players.'),
+              Text(strings.chooseExactlyTwoPlayers),
               const SizedBox(height: 12),
               for (final player in _familyMembers)
                 CheckboxListTile(
@@ -601,7 +633,7 @@ class _RiskItScreenState extends State<RiskItScreen> {
               _selectedRounds = rounds;
             });
           },
-          description: 'Both players get one private turn per round.',
+          description: strings.riskItRoundsDescription,
         ),
         const SizedBox(height: 16),
         _buildDifficultySelector(),
@@ -611,27 +643,31 @@ class _RiskItScreenState extends State<RiskItScreen> {
         FilledButton.icon(
           onPressed: _selectedPlayerIds.length == 2 ? _startGame : null,
           icon: const Icon(Icons.local_fire_department_rounded),
-          label: const Text('Start Risk It'),
+          label: Text(strings.startRiskIt),
         ),
       ],
     );
   }
 
   Widget _buildDifficultySelector() {
+    final strings = AppLocalizations.of(context)!;
     return GameSetupSectionCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Difficulty', style: Theme.of(context).textTheme.titleLarge),
+          Text(
+            strings.difficulty,
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
           const SizedBox(height: 12),
           Wrap(
             spacing: 10,
             runSpacing: 10,
             children: _RiskItDifficulty.values.map((difficulty) {
               final label = switch (difficulty) {
-                _RiskItDifficulty.easy => 'Easy',
-                _RiskItDifficulty.medium => 'Medium',
-                _RiskItDifficulty.hard => 'Hard',
+                _RiskItDifficulty.easy => strings.difficultyEasy,
+                _RiskItDifficulty.medium => strings.difficultyMedium,
+                _RiskItDifficulty.hard => strings.difficultyHard,
               };
 
               return ChoiceChip(
@@ -651,18 +687,21 @@ class _RiskItScreenState extends State<RiskItScreen> {
   }
 
   Widget _buildCategorySelector() {
+    final strings = AppLocalizations.of(context)!;
     return GameSetupSectionCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Category', style: Theme.of(context).textTheme.titleLarge),
+          Text(strings.category, style: Theme.of(context).textTheme.titleLarge),
           const SizedBox(height: 12),
           DropdownButtonFormField<String>(
             initialValue: _selectedCategory,
             items: _categories
                 .map(
-                  (category) =>
-                      DropdownMenuItem(value: category, child: Text(category)),
+                  (category) => DropdownMenuItem(
+                    value: category,
+                    child: Text(_localizedCategory(category)),
+                  ),
                 )
                 .toList(),
             onChanged: (value) {
@@ -679,19 +718,21 @@ class _RiskItScreenState extends State<RiskItScreen> {
   }
 
   Widget _buildLoading() {
-    return const Center(
+    final strings = AppLocalizations.of(context)!;
+    return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          CircularProgressIndicator(),
-          SizedBox(height: 20),
-          Text('AI is preparing your questions...'),
+          const CircularProgressIndicator(),
+          const SizedBox(height: 20),
+          Text(strings.preparingAiQuestions),
         ],
       ),
     );
   }
 
   Widget _buildPassPhone() {
+    final strings = AppLocalizations.of(context)!;
     return Center(
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
@@ -703,26 +744,23 @@ class _RiskItScreenState extends State<RiskItScreen> {
               const Icon(Icons.phone_android_rounded, size: 76),
               const SizedBox(height: 20),
               Text(
-                'Round $_currentRound of $_selectedRounds',
+                strings.roundProgress(_currentRound, _selectedRounds),
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               const SizedBox(height: 20),
               Text(
-                'Pass the phone to ${_currentPlayer.name}',
+                strings.passPhoneTo(_currentPlayer.name),
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
               ),
               const SizedBox(height: 10),
-              const Text(
-                'The other player should look away during this turn.',
-                textAlign: TextAlign.center,
-              ),
+              Text(strings.privateTurnLookAway, textAlign: TextAlign.center),
               const SizedBox(height: 28),
               FilledButton(
                 onPressed: _beginTurn,
-                child: Text('I\'m ${_currentPlayer.name}'),
+                child: Text(strings.iAmPlayer(_currentPlayer.name)),
               ),
             ],
           ),
@@ -732,6 +770,7 @@ class _RiskItScreenState extends State<RiskItScreen> {
   }
 
   Widget _buildQuestion() {
+    final strings = AppLocalizations.of(context)!;
     final question = _activeQuestion!;
 
     return SingleChildScrollView(
@@ -751,7 +790,7 @@ class _RiskItScreenState extends State<RiskItScreen> {
               ),
               const SizedBox(height: 8),
               Text(
-                'Round $_currentRound • $_difficultyName',
+                strings.roundDifficulty(_currentRound, _difficultyName),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 24),
@@ -760,9 +799,9 @@ class _RiskItScreenState extends State<RiskItScreen> {
                   padding: const EdgeInsets.all(20),
                   child: Column(
                     children: [
-                      const Text(
-                        'CURRENT POT',
-                        style: TextStyle(fontWeight: FontWeight.bold),
+                      Text(
+                        strings.currentPot,
+                        style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 8),
                       Text(
@@ -771,7 +810,7 @@ class _RiskItScreenState extends State<RiskItScreen> {
                             ?.copyWith(fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 8),
-                      Text('This question is worth +$_currentQuestionValue'),
+                      Text(strings.questionWorth(_currentQuestionValue)),
                     ],
                   ),
                 ),
@@ -801,6 +840,7 @@ class _RiskItScreenState extends State<RiskItScreen> {
   }
 
   Widget _buildDecision() {
+    final strings = AppLocalizations.of(context)!;
     return Center(
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
@@ -811,13 +851,16 @@ class _RiskItScreenState extends State<RiskItScreen> {
             children: [
               const Icon(Icons.local_fire_department_rounded, size: 78),
               const SizedBox(height: 18),
-              const Text(
-                'Correct!',
-                style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+              Text(
+                strings.correct,
+                style: const TextStyle(
+                  fontSize: 30,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(height: 20),
               Text(
-                'Unbanked Pot',
+                strings.unbankedPot,
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               const SizedBox(height: 6),
@@ -829,7 +872,11 @@ class _RiskItScreenState extends State<RiskItScreen> {
               ),
               const SizedBox(height: 10),
               Text(
-                'Next correct answer: +${_riskLevel < _maximumRiskLevel - 1 ? _currentQuestionValue * 2 : _currentQuestionValue}',
+                strings.nextCorrectWorth(
+                  _riskLevel < _maximumRiskLevel - 1
+                      ? _currentQuestionValue * 2
+                      : _currentQuestionValue,
+                ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 30),
@@ -838,7 +885,7 @@ class _RiskItScreenState extends State<RiskItScreen> {
                 child: FilledButton.icon(
                   onPressed: _bankPoints,
                   icon: const Icon(Icons.savings_rounded),
-                  label: Text('Bank $_unbankedPot Points'),
+                  label: Text(strings.bankPoints(_unbankedPot)),
                 ),
               ),
               const SizedBox(height: 12),
@@ -847,14 +894,11 @@ class _RiskItScreenState extends State<RiskItScreen> {
                 child: FilledButton.tonalIcon(
                   onPressed: _riskAgain,
                   icon: const Icon(Icons.local_fire_department_rounded),
-                  label: const Text('RISK IT'),
+                  label: Text(strings.riskItAction),
                 ),
               ),
               const SizedBox(height: 12),
-              const Text(
-                'One wrong answer and your entire unbanked pot is lost.',
-                textAlign: TextAlign.center,
-              ),
+              Text(strings.riskWarning, textAlign: TextAlign.center),
             ],
           ),
         ),
@@ -863,6 +907,7 @@ class _RiskItScreenState extends State<RiskItScreen> {
   }
 
   Widget _buildTurnResult() {
+    final strings = AppLocalizations.of(context)!;
     final earned = _roundScores[_currentPlayer.id] ?? 0;
 
     return Center(
@@ -877,7 +922,7 @@ class _RiskItScreenState extends State<RiskItScreen> {
             ),
             const SizedBox(height: 20),
             Text(
-              _turnBusted ? 'BUST!' : 'Points Banked!',
+              _turnBusted ? strings.bust : strings.pointsBanked,
               style: Theme.of(
                 context,
               ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
@@ -885,8 +930,8 @@ class _RiskItScreenState extends State<RiskItScreen> {
             const SizedBox(height: 12),
             Text(
               _turnBusted
-                  ? '${_currentPlayer.name} lost the unbanked pot.'
-                  : '${_currentPlayer.name} banked $earned points.',
+                  ? strings.playerLostPot(_currentPlayer.name)
+                  : strings.playerBankedPoints(_currentPlayer.name, earned),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 28),
@@ -894,8 +939,8 @@ class _RiskItScreenState extends State<RiskItScreen> {
               onPressed: _finishTurn,
               child: Text(
                 _currentPlayerIndex == 0
-                    ? 'Pass to ${_players[1].name}'
-                    : 'See Round Results',
+                    ? strings.passToPlayer(_players[1].name)
+                    : strings.seeRoundResults,
               ),
             ),
           ],
@@ -905,6 +950,7 @@ class _RiskItScreenState extends State<RiskItScreen> {
   }
 
   Widget _buildRoundResult() {
+    final strings = AppLocalizations.of(context)!;
     final first = _players[0];
     final second = _players[1];
 
@@ -917,17 +963,17 @@ class _RiskItScreenState extends State<RiskItScreen> {
             const Icon(Icons.leaderboard_rounded, size: 76),
             const SizedBox(height: 20),
             Text(
-              'Round $_currentRound Complete',
+              strings.roundNumberComplete(_currentRound),
               style: Theme.of(context).textTheme.headlineMedium,
             ),
             const SizedBox(height: 24),
             Text(
-              '${first.name}: ${_roundScores[first.id] ?? 0}',
+              strings.playerScore(first.name, _roundScores[first.id] ?? 0),
               style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: 10),
             Text(
-              '${second.name}: ${_roundScores[second.id] ?? 0}',
+              strings.playerScore(second.name, _roundScores[second.id] ?? 0),
               style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: 28),
@@ -935,8 +981,8 @@ class _RiskItScreenState extends State<RiskItScreen> {
               onPressed: _finishRound,
               child: Text(
                 _currentRound >= _selectedRounds
-                    ? 'See Final Results'
-                    : 'Next Round',
+                    ? strings.seeFinalResults
+                    : strings.nextRound,
               ),
             ),
           ],
@@ -946,6 +992,7 @@ class _RiskItScreenState extends State<RiskItScreen> {
   }
 
   Widget _buildFinalResults() {
+    final strings = AppLocalizations.of(context)!;
     final first = _players[0];
     final second = _players[1];
 
@@ -960,7 +1007,7 @@ class _RiskItScreenState extends State<RiskItScreen> {
               const Icon(Icons.emoji_events_rounded, size: 88),
               const SizedBox(height: 20),
               Text(
-                _isTie ? 'It\'s a tie!' : '${_winner.name} wins!',
+                _isTie ? strings.gameTie : strings.playerWins(_winner.name),
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                   fontWeight: FontWeight.bold,
@@ -968,7 +1015,11 @@ class _RiskItScreenState extends State<RiskItScreen> {
               ),
               const SizedBox(height: 10),
               Text(
-                '$_selectedRounds rounds • $_difficultyName • $_selectedCategory',
+                strings.riskFinalSummary(
+                  _selectedRounds,
+                  _difficultyName,
+                  _localizedCategory(_selectedCategory),
+                ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 28),
@@ -992,14 +1043,14 @@ class _RiskItScreenState extends State<RiskItScreen> {
                 ),
                 label: Text(
                   widget.playMode.isOfficial
-                      ? 'Return to Competition'
-                      : 'Play Again',
+                      ? strings.returnToCompetitionAction
+                      : strings.playAgain,
                 ),
               ),
               const SizedBox(height: 12),
               OutlinedButton(
                 onPressed: () => Navigator.of(context).pop(),
-                child: const Text('Back to Games'),
+                child: Text(strings.backToGames),
               ),
             ],
           ),
