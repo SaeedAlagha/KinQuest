@@ -37,6 +37,16 @@ void main() {
     expect(find.text('التقدم الشخصي • 0/6'), findsOneWidget);
     expect(find.text('تقدم العائلة • 0/4'), findsOneWidget);
     expect(find.textContaining('هذا الأسبوع •'), findsOneWidget);
+    expect(
+      find.text(
+        'اختاروا مهمة، وساعدوا بعضكم، وحوّلوا خطوة بسيطة إلى إنجاز عائلي!',
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const ValueKey('sila-game-coach-banner')),
+      findsOneWidget,
+    );
 
     await tester.scrollUntilVisible(
       find.text('أظهر تقديرك'),
@@ -97,6 +107,11 @@ void main() {
         500,
         scrollable: find.byType(Scrollable).first,
       );
+      await Scrollable.ensureVisible(
+        tester.element(familyWalk),
+        alignment: 0.5,
+      );
+      await tester.pumpAndSettle();
       await tester.tap(familyWalk);
       await tester.pumpAndSettle();
 

@@ -650,6 +650,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get mascotCelebrationMessage => 'عمل جماعي رائع! كل لحظة تجمعكم تجعل رابطتكم أقوى.';
 
   @override
+  String get silaMissionsMessage => 'اختاروا مهمة، وساعدوا بعضكم، وحوّلوا خطوة بسيطة إلى إنجاز عائلي!';
+
+  @override
   String get silaStudioTitle => 'استوديو صلة';
 
   @override

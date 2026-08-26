@@ -11,6 +11,7 @@ import '../../../l10n/app_localizations.dart';
 import '../models/family_mission.dart';
 import '../models/family_mission_localizations.dart';
 import '../services/family_mission_ai_service.dart';
+import '../widgets/sila_game_coach.dart';
 
 class FamilyMissionsScreen extends StatefulWidget {
   const FamilyMissionsScreen({super.key, this.developerPreview = false});
@@ -1559,12 +1560,10 @@ class _FamilyMissionsScreenState extends State<FamilyMissionsScreen> {
       ),
       child: Column(
         children: [
-          const Icon(
-            Icons.flag_circle_rounded,
-            size: 58,
-            color: AppTheme.primaryColor,
+          SilaGameCoachBanner(
+            message: strings.silaMissionsMessage,
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 18),
           Text(
             strings.doMoreTogether,
             style: Theme.of(

@@ -643,6 +643,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mascotCelebrationMessage => 'Amazing teamwork! Every moment together makes your bond stronger.';
 
   @override
+  String get silaMissionsMessage => 'Pick a mission, help each other, and turn a small action into a family win!';
+
+  @override
   String get silaStudioTitle => 'Sila Studio';
 
   @override
