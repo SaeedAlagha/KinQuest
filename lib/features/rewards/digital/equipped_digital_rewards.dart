@@ -8,6 +8,8 @@ class EquippedDigitalRewards {
     this.celebrationEffect = 'default',
     this.nameplate = 'default',
     this.mascotAccessory = 'none',
+    this.mascotOutfit = 'none',
+    this.mascotAura = 'none',
   });
 
   final String profileFrame;
@@ -16,6 +18,8 @@ class EquippedDigitalRewards {
   final String celebrationEffect;
   final String nameplate;
   final String mascotAccessory;
+  final String mascotOutfit;
+  final String mascotAura;
 
   factory EquippedDigitalRewards.fromMap(Map<String, dynamic>? data) {
     String value(String key, String fallback) {
@@ -30,6 +34,8 @@ class EquippedDigitalRewards {
       celebrationEffect: value('celebrationEffect', 'default'),
       nameplate: value('nameplate', 'default'),
       mascotAccessory: value('mascotAccessory', 'none'),
+      mascotOutfit: value('mascotOutfit', 'none'),
+      mascotAura: value('mascotAura', 'none'),
     );
   }
 
@@ -41,6 +47,8 @@ class EquippedDigitalRewards {
       DigitalRewardCategory.celebrationEffect => celebrationEffect,
       DigitalRewardCategory.nameplate => nameplate,
       DigitalRewardCategory.mascotAccessory => mascotAccessory,
+      DigitalRewardCategory.mascotOutfit => mascotOutfit,
+      DigitalRewardCategory.mascotAura => mascotAura,
     };
   }
 
@@ -51,6 +59,8 @@ class EquippedDigitalRewards {
     String? celebrationEffect,
     String? nameplate,
     String? mascotAccessory,
+    String? mascotOutfit,
+    String? mascotAura,
   }) {
     return EquippedDigitalRewards(
       profileFrame: profileFrame ?? this.profileFrame,
@@ -59,6 +69,8 @@ class EquippedDigitalRewards {
       celebrationEffect: celebrationEffect ?? this.celebrationEffect,
       nameplate: nameplate ?? this.nameplate,
       mascotAccessory: mascotAccessory ?? this.mascotAccessory,
+      mascotOutfit: mascotOutfit ?? this.mascotOutfit,
+      mascotAura: mascotAura ?? this.mascotAura,
     );
   }
 
@@ -77,6 +89,8 @@ class EquippedDigitalRewards {
       DigitalRewardCategory.mascotAccessory => copyWith(
         mascotAccessory: assetKey,
       ),
+      DigitalRewardCategory.mascotOutfit => copyWith(mascotOutfit: assetKey),
+      DigitalRewardCategory.mascotAura => copyWith(mascotAura: assetKey),
     };
   }
 }

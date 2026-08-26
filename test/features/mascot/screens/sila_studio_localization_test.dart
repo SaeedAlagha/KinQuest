@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kinquest/core/theme/app_theme.dart';
-import 'package:kinquest/features/home/screens/main_navigation_screen.dart';
+import 'package:kinquest/features/mascot/screens/sila_studio_screen.dart';
 import 'package:kinquest/l10n/app_localizations.dart';
 
 void main() {
-  testWidgets('Family Overview opens the family profile from Home', (
+  testWidgets('Sila Studio is localized and responsive in Arabic', (
     tester,
   ) async {
     tester.view.physicalSize = const Size(390, 844);
@@ -16,27 +16,26 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: AppTheme.lightTheme,
+        locale: const Locale('ar'),
         supportedLocales: AppLocalizations.supportedLocales,
         localizationsDelegates: AppLocalizations.localizationsDelegates,
-        home: const MainNavigationScreen(developerPreview: true),
+        home: const TickerMode(
+          enabled: false,
+          child: SilaStudioScreen(developerPreview: true),
+        ),
       ),
     );
+    for (var frame = 0; frame < 5; frame += 1) {
+      await tester.pump(const Duration(milliseconds: 100));
+    }
     await tester.pumpAndSettle();
 
-    final overviewButton = find.widgetWithText(FilledButton, 'Family Overview');
-    await tester.ensureVisible(overviewButton);
-    await tester.tap(overviewButton);
-    await tester.pumpAndSettle();
-
+    expect(find.text('استوديو صلة'), findsOneWidget);
+    expect(find.text('أغطية الرأس'), findsOneWidget);
+    expect(find.text('تاج حارس العائلة'), findsOneWidget);
     expect(
-      find.descendant(of: find.byType(AppBar), matching: find.text('Profile')),
-      findsOneWidget,
-    );
-    expect(find.text('Developer Family'), findsWidgets);
-    expect(find.text('5 family members'), findsOneWidget);
-    expect(
-      tester.widget<NavigationBar>(find.byType(NavigationBar)).selectedIndex,
-      6,
+      Directionality.of(tester.element(find.text('استوديو صلة'))),
+      TextDirection.rtl,
     );
     expect(tester.takeException(), isNull);
   });

@@ -461,6 +461,12 @@ abstract class AppLocalizations {
   /// **'Home'**
   String get navHome;
 
+  /// No description provided for @navSila.
+  ///
+  /// In en, this message translates to:
+  /// **'Sila'**
+  String get navSila;
+
   /// No description provided for @navMemories.
   ///
   /// In en, this message translates to:
@@ -478,6 +484,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Missions'**
   String get navMissions;
+
+  /// No description provided for @navRewards.
+  ///
+  /// In en, this message translates to:
+  /// **'Rewards'**
+  String get navRewards;
 
   /// No description provided for @navProfile.
   ///
@@ -1252,6 +1264,156 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Amazing teamwork! Every moment together makes your bond stronger.'**
   String get mascotCelebrationMessage;
+
+  /// No description provided for @silaStudioTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sila Studio'**
+  String get silaStudioTitle;
+
+  /// No description provided for @silaStudioSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Make your family companion feel uniquely yours.'**
+  String get silaStudioSubtitle;
+
+  /// No description provided for @silaStudioTapHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap Sila or choose a reaction to bring him to life.'**
+  String get silaStudioTapHint;
+
+  /// No description provided for @silaStudioCloset.
+  ///
+  /// In en, this message translates to:
+  /// **'Closet'**
+  String get silaStudioCloset;
+
+  /// No description provided for @silaStudioClosetDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Try combinations before unlocking them permanently with Family Tokens.'**
+  String get silaStudioClosetDescription;
+
+  /// No description provided for @silaStudioHeadwear.
+  ///
+  /// In en, this message translates to:
+  /// **'Headwear'**
+  String get silaStudioHeadwear;
+
+  /// No description provided for @silaStudioOutfits.
+  ///
+  /// In en, this message translates to:
+  /// **'Outfits'**
+  String get silaStudioOutfits;
+
+  /// No description provided for @silaStudioAuras.
+  ///
+  /// In en, this message translates to:
+  /// **'Auras'**
+  String get silaStudioAuras;
+
+  /// No description provided for @silaStudioOwned.
+  ///
+  /// In en, this message translates to:
+  /// **'Owned'**
+  String get silaStudioOwned;
+
+  /// No description provided for @silaStudioEquipped.
+  ///
+  /// In en, this message translates to:
+  /// **'Equipped'**
+  String get silaStudioEquipped;
+
+  /// No description provided for @silaStudioEquip.
+  ///
+  /// In en, this message translates to:
+  /// **'Equip'**
+  String get silaStudioEquip;
+
+  /// No description provided for @silaStudioUnequip.
+  ///
+  /// In en, this message translates to:
+  /// **'Unequip'**
+  String get silaStudioUnequip;
+
+  /// No description provided for @silaStudioUnlock.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock for {tokens}'**
+  String silaStudioUnlock(int tokens);
+
+  /// No description provided for @silaStudioNotEnoughTokens.
+  ///
+  /// In en, this message translates to:
+  /// **'Need {tokens} more Tokens'**
+  String silaStudioNotEnoughTokens(int tokens);
+
+  /// No description provided for @silaStudioPermanent.
+  ///
+  /// In en, this message translates to:
+  /// **'Permanent'**
+  String get silaStudioPermanent;
+
+  /// No description provided for @silaStudioTryOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Try on'**
+  String get silaStudioTryOn;
+
+  /// No description provided for @silaStudioReactionHover.
+  ///
+  /// In en, this message translates to:
+  /// **'Hover'**
+  String get silaStudioReactionHover;
+
+  /// No description provided for @silaStudioReactionReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Game ready'**
+  String get silaStudioReactionReady;
+
+  /// No description provided for @silaStudioReactionThink.
+  ///
+  /// In en, this message translates to:
+  /// **'Think'**
+  String get silaStudioReactionThink;
+
+  /// No description provided for @silaStudioReactionCelebrate.
+  ///
+  /// In en, this message translates to:
+  /// **'Celebrate'**
+  String get silaStudioReactionCelebrate;
+
+  /// No description provided for @silaStudioWelcomeMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome to my studio! Mix a look, test a reaction, and take me into your next game.'**
+  String get silaStudioWelcomeMessage;
+
+  /// No description provided for @silaStudioUpdateSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Sila\'s look is ready everywhere.'**
+  String get silaStudioUpdateSuccess;
+
+  /// No description provided for @silaStudioUnlockSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlocked and equipped! Sila has a new look.'**
+  String get silaStudioUnlockSuccess;
+
+  /// No description provided for @silaStudioLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Sila\'s closet could not be loaded. Please try again.'**
+  String get silaStudioLoadError;
+
+  /// No description provided for @silaGameCoachMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'I’m right here with you—play fair, cheer loudly, and have fun together!'**
+  String get silaGameCoachMessage;
 
   /// No description provided for @uaeYearOfFamily2026.
   ///

@@ -273,12 +273,24 @@ class DigitalRewardPreview extends StatelessWidget {
             ),
           ),
         ),
-        DigitalRewardCategory.mascotAccessory => Center(
+        DigitalRewardCategory.mascotAccessory ||
+        DigitalRewardCategory.mascotOutfit ||
+        DigitalRewardCategory.mascotAura => Center(
           child: SilaMascot(
             pose: SilaMascotPose.idle,
             height: 100,
             animate: false,
-            accessoryAssetKey: reward.assetKey,
+            accessoryAssetKey:
+                reward.category == DigitalRewardCategory.mascotAccessory
+                ? reward.assetKey
+                : SilaMascotAccessories.none,
+            outfitAssetKey:
+                reward.category == DigitalRewardCategory.mascotOutfit
+                ? reward.assetKey
+                : SilaMascotOutfits.none,
+            auraAssetKey: reward.category == DigitalRewardCategory.mascotAura
+                ? reward.assetKey
+                : SilaMascotAuras.none,
           ),
         ),
       },

@@ -6,7 +6,9 @@ enum DigitalRewardCategory {
   profileTheme,
   celebrationEffect,
   nameplate,
-  mascotAccessory;
+  mascotAccessory,
+  mascotOutfit,
+  mascotAura;
 
   static DigitalRewardCategory? tryParse(String? value) {
     for (final category in values) {

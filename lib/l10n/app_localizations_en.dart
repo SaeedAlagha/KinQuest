@@ -206,6 +206,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get navHome => 'Home';
 
   @override
+  String get navSila => 'Sila';
+
+  @override
   String get navMemories => 'Memories';
 
   @override
@@ -213,6 +216,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get navMissions => 'Missions';
+
+  @override
+  String get navRewards => 'Rewards';
 
   @override
   String get navProfile => 'Profile';
@@ -623,6 +629,85 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get mascotCelebrationMessage => 'Amazing teamwork! Every moment together makes your bond stronger.';
+
+  @override
+  String get silaStudioTitle => 'Sila Studio';
+
+  @override
+  String get silaStudioSubtitle => 'Make your family companion feel uniquely yours.';
+
+  @override
+  String get silaStudioTapHint => 'Tap Sila or choose a reaction to bring him to life.';
+
+  @override
+  String get silaStudioCloset => 'Closet';
+
+  @override
+  String get silaStudioClosetDescription => 'Try combinations before unlocking them permanently with Family Tokens.';
+
+  @override
+  String get silaStudioHeadwear => 'Headwear';
+
+  @override
+  String get silaStudioOutfits => 'Outfits';
+
+  @override
+  String get silaStudioAuras => 'Auras';
+
+  @override
+  String get silaStudioOwned => 'Owned';
+
+  @override
+  String get silaStudioEquipped => 'Equipped';
+
+  @override
+  String get silaStudioEquip => 'Equip';
+
+  @override
+  String get silaStudioUnequip => 'Unequip';
+
+  @override
+  String silaStudioUnlock(int tokens) {
+    return 'Unlock for $tokens';
+  }
+
+  @override
+  String silaStudioNotEnoughTokens(int tokens) {
+    return 'Need $tokens more Tokens';
+  }
+
+  @override
+  String get silaStudioPermanent => 'Permanent';
+
+  @override
+  String get silaStudioTryOn => 'Try on';
+
+  @override
+  String get silaStudioReactionHover => 'Hover';
+
+  @override
+  String get silaStudioReactionReady => 'Game ready';
+
+  @override
+  String get silaStudioReactionThink => 'Think';
+
+  @override
+  String get silaStudioReactionCelebrate => 'Celebrate';
+
+  @override
+  String get silaStudioWelcomeMessage => 'Welcome to my studio! Mix a look, test a reaction, and take me into your next game.';
+
+  @override
+  String get silaStudioUpdateSuccess => 'Sila\'s look is ready everywhere.';
+
+  @override
+  String get silaStudioUnlockSuccess => 'Unlocked and equipped! Sila has a new look.';
+
+  @override
+  String get silaStudioLoadError => 'Sila\'s closet could not be loaded. Please try again.';
+
+  @override
+  String get silaGameCoachMessage => 'I’m right here with you—play fair, cheer loudly, and have fun together!';
 
   @override
   String get uaeYearOfFamily2026 => 'UAE YEAR OF FAMILY 2026';

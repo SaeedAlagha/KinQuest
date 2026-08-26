@@ -7,6 +7,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../competitions/screens/competitions_screen.dart';
 import '../../games/screens/family_missions_screen.dart';
 import '../../memories/screens/memories_screen.dart';
+import '../../mascot/screens/sila_studio_screen.dart';
 import '../../profile/screens/profile_screen.dart';
 import 'home_screen.dart';
 import '../../rewards/screens/rewards_hub_screen.dart';
@@ -28,6 +29,11 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       label: strings.navHome,
     ),
     NavigationDestination(
+      icon: const Icon(Icons.smart_toy_outlined),
+      selectedIcon: const Icon(Icons.smart_toy_rounded),
+      label: strings.navSila,
+    ),
+    NavigationDestination(
       icon: const Icon(Icons.photo_library_outlined),
       selectedIcon: const Icon(Icons.photo_library_rounded),
       label: strings.navMemories,
@@ -45,7 +51,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     NavigationDestination(
       icon: const Icon(Icons.redeem_outlined),
       selectedIcon: const Icon(Icons.redeem_rounded),
-      label: 'Rewards',
+      label: strings.navRewards,
     ),
     NavigationDestination(
       icon: const Icon(Icons.person_outline_rounded),
@@ -61,6 +67,11 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       icon: const Icon(Icons.home_outlined),
       selectedIcon: const Icon(Icons.home_rounded),
       label: Text(strings.navHome),
+    ),
+    NavigationRailDestination(
+      icon: const Icon(Icons.smart_toy_outlined),
+      selectedIcon: const Icon(Icons.smart_toy_rounded),
+      label: Text(strings.navSila),
     ),
     NavigationRailDestination(
       icon: const Icon(Icons.photo_library_outlined),
@@ -80,7 +91,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     NavigationRailDestination(
       icon: const Icon(Icons.redeem_outlined),
       selectedIcon: const Icon(Icons.redeem_rounded),
-      label: const Text('Rewards'),
+      label: Text(strings.navRewards),
     ),
     NavigationRailDestination(
       icon: const Icon(Icons.person_outline_rounded),
@@ -102,6 +113,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
               developerPreview: true,
               onFamilyOverview: _openFamilyOverview,
             ),
+            const SilaStudioScreen(developerPreview: true),
             const MemoriesScreen(developerPreview: true),
             const CompetitionsScreen(developerPreview: true),
             const FamilyMissionsScreen(developerPreview: true),
@@ -110,6 +122,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
           ]
         : [
             HomeScreen(onFamilyOverview: _openFamilyOverview),
+            const SilaStudioScreen(),
             const MemoriesScreen(),
             const CompetitionsScreen(),
             const FamilyMissionsScreen(),
@@ -119,7 +132,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   }
 
   void _openFamilyOverview() {
-    _selectScreen(5);
+    _selectScreen(6);
   }
 
   void _selectScreen(int index) {
@@ -129,9 +142,13 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   }
 
   Widget _buildScreenStack(BuildContext context, AppLocalizations strings) {
+    final screens = _screens(strings);
     final screenStack = IndexedStack(
       index: _selectedIndex,
-      children: _screens(strings),
+      children: [
+        for (var index = 0; index < screens.length; index += 1)
+          TickerMode(enabled: index == _selectedIndex, child: screens[index]),
+      ],
     );
 
     if (!widget.developerPreview) {

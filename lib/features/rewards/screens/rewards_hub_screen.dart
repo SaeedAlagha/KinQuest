@@ -1008,6 +1008,14 @@ class _DigitalRewardCategoryHeader extends StatelessWidget {
         'Sila Wardrobe',
         Icons.smart_toy_rounded,
       ),
+      DigitalRewardCategory.mascotOutfit => (
+        'Sila Outfits',
+        Icons.checkroom_rounded,
+      ),
+      DigitalRewardCategory.mascotAura => (
+        'Sila Auras',
+        Icons.auto_awesome_rounded,
+      ),
     };
 
     return Row(

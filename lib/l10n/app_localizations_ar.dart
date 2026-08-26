@@ -206,6 +206,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get navHome => 'الرئيسية';
 
   @override
+  String get navSila => 'صلة';
+
+  @override
   String get navMemories => 'الذكريات';
 
   @override
@@ -213,6 +216,9 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get navMissions => 'المهام';
+
+  @override
+  String get navRewards => 'المكافآت';
 
   @override
   String get navProfile => 'الملف الشخصي';
@@ -630,6 +636,85 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get mascotCelebrationMessage => 'عمل جماعي رائع! كل لحظة تجمعكم تجعل رابطتكم أقوى.';
+
+  @override
+  String get silaStudioTitle => 'استوديو صلة';
+
+  @override
+  String get silaStudioSubtitle => 'اجعلوا رفيق العائلة مميزًا بطريقتكم.';
+
+  @override
+  String get silaStudioTapHint => 'اضغطوا على صلة أو اختاروا حركة لتشاهدوه ينبض بالحياة.';
+
+  @override
+  String get silaStudioCloset => 'الخزانة';
+
+  @override
+  String get silaStudioClosetDescription => 'جرّبوا التنسيقات قبل فتحها نهائيًا بعملات العائلة.';
+
+  @override
+  String get silaStudioHeadwear => 'أغطية الرأس';
+
+  @override
+  String get silaStudioOutfits => 'الأزياء';
+
+  @override
+  String get silaStudioAuras => 'الهالات';
+
+  @override
+  String get silaStudioOwned => 'مملوك';
+
+  @override
+  String get silaStudioEquipped => 'مجهّز';
+
+  @override
+  String get silaStudioEquip => 'تجهيز';
+
+  @override
+  String get silaStudioUnequip => 'إزالة';
+
+  @override
+  String silaStudioUnlock(int tokens) {
+    return 'افتح مقابل $tokens';
+  }
+
+  @override
+  String silaStudioNotEnoughTokens(int tokens) {
+    return 'تحتاج $tokens عملة إضافية';
+  }
+
+  @override
+  String get silaStudioPermanent => 'دائم';
+
+  @override
+  String get silaStudioTryOn => 'تجربة';
+
+  @override
+  String get silaStudioReactionHover => 'تحليق';
+
+  @override
+  String get silaStudioReactionReady => 'جاهز للعب';
+
+  @override
+  String get silaStudioReactionThink => 'تفكير';
+
+  @override
+  String get silaStudioReactionCelebrate => 'احتفال';
+
+  @override
+  String get silaStudioWelcomeMessage => 'أهلًا بكم في استوديو صلة! نسّقوا مظهري وجرّبوا حركاتي وخذوني إلى لعبتكم التالية.';
+
+  @override
+  String get silaStudioUpdateSuccess => 'مظهر صلة الجديد جاهز في كل مكان.';
+
+  @override
+  String get silaStudioUnlockSuccess => 'تم الفتح والتجهيز! لدى صلة مظهر جديد.';
+
+  @override
+  String get silaStudioLoadError => 'تعذر تحميل خزانة صلة. حاولوا مرة أخرى.';
+
+  @override
+  String get silaGameCoachMessage => 'أنا معكم—العبوا بإنصاف وشجّعوا بحماس واستمتعوا معًا!';
 
   @override
   String get uaeYearOfFamily2026 => 'عام الأسرة في الإمارات ٢٠٢٦';

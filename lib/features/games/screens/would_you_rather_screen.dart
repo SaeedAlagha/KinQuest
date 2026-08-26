@@ -2,6 +2,8 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 
+import '../widgets/sila_game_coach.dart';
+
 import '../../../l10n/app_localizations.dart';
 import '../services/ai_question_service.dart';
 import '../utils/game_localization.dart';
@@ -429,6 +431,7 @@ class _WouldYouRatherScreenState extends State<WouldYouRatherScreen> {
     final strings = AppLocalizations.of(context)!;
 
     return Scaffold(
+      floatingActionButton: const SilaGameCoachButton(),
       appBar: AppBar(title: Text(strings.wouldYouRather)),
       body: SafeArea(
         child: LayoutBuilder(

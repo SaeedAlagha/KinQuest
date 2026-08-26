@@ -71,6 +71,13 @@ function rewardById(rewardId) {
   return reward;
 }
 
+function unequippedAssetFor(category) {
+  return ["profileBadge", "mascotAccessory", "mascotOutfit", "mascotAura"]
+    .includes(category)
+    ? "none"
+    : "default";
+}
+
 async function purchaseDigitalReward({ database, userId, rewardId }) {
   const reward = rewardById(rewardId);
   const userRef = database.collection("users").doc(userId);
@@ -212,8 +219,9 @@ async function unequipDigitalReward({ database, userId, rewardId }) {
     transaction.set(
       settingsRef,
       {
-        [canonicalReward.category]:
-          canonicalReward.category === "profileBadge" ? "none" : "default",
+        [canonicalReward.category]: unequippedAssetFor(
+          canonicalReward.category,
+        ),
         updatedAt: FieldValue.serverTimestamp(),
       },
       { merge: true },
@@ -229,5 +237,6 @@ module.exports = {
   equipDigitalReward,
   purchaseDigitalReward,
   rewardById,
+  unequippedAssetFor,
   unequipDigitalReward,
 };

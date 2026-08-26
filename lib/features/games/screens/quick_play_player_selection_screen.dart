@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../../../l10n/app_localizations.dart';
 import 'games_screen.dart';
+import '../widgets/sila_game_coach.dart';
 
 enum _QuickPlayLoadError { signedOut, noFamily, loadFailed }
 
@@ -257,6 +258,8 @@ class _QuickPlayPlayerSelectionScreenState
                 strings.chooseQuickPlayMembers,
                 style: Theme.of(context).textTheme.bodyLarge,
               ),
+              const SizedBox(height: 18),
+              const SilaGameCoachBanner(),
               const SizedBox(height: 24),
               ..._members.map((member) {
                 final selected = _selectedIds.contains(member.id);

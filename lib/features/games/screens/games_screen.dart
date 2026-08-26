@@ -19,6 +19,7 @@ import 'would_you_rather_screen.dart';
 import 'code_breaker_screen.dart';
 import 'attack_or_defend_screen.dart';
 import 'risk_it_screen.dart';
+import '../widgets/sila_game_coach.dart';
 
 enum _GameCategory { family, party, duel }
 
@@ -286,6 +287,8 @@ class GamesScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const _GamesHeader(),
+                      const SizedBox(height: 18),
+                      const SilaGameCoachBanner(),
                       const SizedBox(height: 28),
                       _GameSection(
                         icon: Icons.sports_kabaddi_rounded,
