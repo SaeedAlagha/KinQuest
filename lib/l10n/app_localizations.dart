@@ -7084,6 +7084,276 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The match returned a winner who was not one of the two selected competitors. Please replay the match.'**
   String get monthlyInvalidWinner;
+
+  /// No description provided for @myDigitalRewards.
+  ///
+  /// In en, this message translates to:
+  /// **'My Digital Rewards'**
+  String get myDigitalRewards;
+
+  /// No description provided for @tokenHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Token History'**
+  String get tokenHistory;
+
+  /// No description provided for @unlockRewardTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock reward?'**
+  String get unlockRewardTitle;
+
+  /// No description provided for @unlockRewardMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Spend {cost} Tokens to permanently unlock \"{reward}\"?'**
+  String unlockRewardMessage(int cost, String reward);
+
+  /// No description provided for @unlock.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock'**
+  String get unlock;
+
+  /// No description provided for @rewardUnlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'{reward} unlocked!'**
+  String rewardUnlocked(String reward);
+
+  /// No description provided for @rewardEquippedOnSila.
+  ///
+  /// In en, this message translates to:
+  /// **'{reward} equipped across Sila.'**
+  String rewardEquippedOnSila(String reward);
+
+  /// No description provided for @rewardUnequipped.
+  ///
+  /// In en, this message translates to:
+  /// **'{reward} unequipped.'**
+  String rewardUnequipped(String reward);
+
+  /// No description provided for @collectionLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Your collection could not be loaded'**
+  String get collectionLoadFailed;
+
+  /// No description provided for @restartAndTryAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Please restart the app and try again.'**
+  String get restartAndTryAgain;
+
+  /// No description provided for @checkConnectionTryAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Check your connection and try again.'**
+  String get checkConnectionTryAgain;
+
+  /// No description provided for @noDigitalRewards.
+  ///
+  /// In en, this message translates to:
+  /// **'No digital rewards yet'**
+  String get noDigitalRewards;
+
+  /// No description provided for @noDigitalRewardsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock cosmetics from Rewards and they will appear here.'**
+  String get noDigitalRewardsDescription;
+
+  /// No description provided for @yourSilaStyle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your Sila style'**
+  String get yourSilaStyle;
+
+  /// No description provided for @silaStyleDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Equip one reward from each category. Changes appear everywhere immediately.'**
+  String get silaStyleDescription;
+
+  /// No description provided for @legacyRewardsSafe.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 legacy reward kept safe} other{{count} legacy rewards kept safe}}'**
+  String legacyRewardsSafe(int count);
+
+  /// No description provided for @legacyRewardsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'These purchases remain owned but are no longer in the active catalog.'**
+  String get legacyRewardsDescription;
+
+  /// No description provided for @currentlyEquipped.
+  ///
+  /// In en, this message translates to:
+  /// **'Currently equipped'**
+  String get currentlyEquipped;
+
+  /// No description provided for @ownedPermanently.
+  ///
+  /// In en, this message translates to:
+  /// **'Owned permanently'**
+  String get ownedPermanently;
+
+  /// No description provided for @updating.
+  ///
+  /// In en, this message translates to:
+  /// **'Updating…'**
+  String get updating;
+
+  /// No description provided for @equip.
+  ///
+  /// In en, this message translates to:
+  /// **'Equip'**
+  String get equip;
+
+  /// No description provided for @unequip.
+  ///
+  /// In en, this message translates to:
+  /// **'Unequip'**
+  String get unequip;
+
+  /// No description provided for @digitalRewards.
+  ///
+  /// In en, this message translates to:
+  /// **'Digital Rewards'**
+  String get digitalRewards;
+
+  /// No description provided for @digitalRewardsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock permanent Sila cosmetics instantly. No approval needed.'**
+  String get digitalRewardsDescription;
+
+  /// No description provided for @digitalRewardsLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Digital Rewards could not be loaded'**
+  String get digitalRewardsLoadFailed;
+
+  /// No description provided for @profileFrames.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile Frames'**
+  String get profileFrames;
+
+  /// No description provided for @profileBadges.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile Badges'**
+  String get profileBadges;
+
+  /// No description provided for @profileThemes.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile Themes'**
+  String get profileThemes;
+
+  /// No description provided for @celebrationEffects.
+  ///
+  /// In en, this message translates to:
+  /// **'Celebration Effects'**
+  String get celebrationEffects;
+
+  /// No description provided for @nameplates.
+  ///
+  /// In en, this message translates to:
+  /// **'Nameplates'**
+  String get nameplates;
+
+  /// No description provided for @silaWardrobe.
+  ///
+  /// In en, this message translates to:
+  /// **'Sila Wardrobe'**
+  String get silaWardrobe;
+
+  /// No description provided for @silaOutfits.
+  ///
+  /// In en, this message translates to:
+  /// **'Sila Outfits'**
+  String get silaOutfits;
+
+  /// No description provided for @silaAuras.
+  ///
+  /// In en, this message translates to:
+  /// **'Sila Auras'**
+  String get silaAuras;
+
+  /// No description provided for @tokensAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} Tokens'**
+  String tokensAmount(int count);
+
+  /// No description provided for @limited.
+  ///
+  /// In en, this message translates to:
+  /// **'Limited'**
+  String get limited;
+
+  /// No description provided for @permanent.
+  ///
+  /// In en, this message translates to:
+  /// **'Permanent'**
+  String get permanent;
+
+  /// No description provided for @needMoreTokens.
+  ///
+  /// In en, this message translates to:
+  /// **'Need {count} more Tokens'**
+  String needMoreTokens(int count);
+
+  /// No description provided for @buyForTokens.
+  ///
+  /// In en, this message translates to:
+  /// **'Buy for {count}'**
+  String buyForTokens(int count);
+
+  /// No description provided for @noTokenActivity.
+  ///
+  /// In en, this message translates to:
+  /// **'No Token activity yet'**
+  String get noTokenActivity;
+
+  /// No description provided for @tokenActivityDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Token earnings and spending will appear here.'**
+  String get tokenActivityDescription;
+
+  /// No description provided for @tokenHistoryLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load Token history.'**
+  String get tokenHistoryLoadFailed;
+
+  /// No description provided for @tokenEarned.
+  ///
+  /// In en, this message translates to:
+  /// **'Earned'**
+  String get tokenEarned;
+
+  /// No description provided for @tokenSpent.
+  ///
+  /// In en, this message translates to:
+  /// **'Spent'**
+  String get tokenSpent;
+
+  /// No description provided for @tokenRefunded.
+  ///
+  /// In en, this message translates to:
+  /// **'Refunded'**
+  String get tokenRefunded;
+
+  /// No description provided for @tokenAdjusted.
+  ///
+  /// In en, this message translates to:
+  /// **'Adjusted'**
+  String get tokenAdjusted;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

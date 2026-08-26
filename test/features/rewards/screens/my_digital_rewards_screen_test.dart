@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kinquest/features/rewards/screens/my_digital_rewards_screen.dart';
+import 'package:kinquest/l10n/app_localizations.dart';
 
 void main() {
   testWidgets('owned collection groups cosmetics and supports live actions', (
@@ -12,9 +13,13 @@ void main() {
     addTearDown(tester.view.resetDevicePixelRatio);
 
     await tester.pumpWidget(
-      const MaterialApp(home: MyDigitalRewardsScreen(developerPreview: true)),
+      const MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: MyDigitalRewardsScreen(developerPreview: true),
+      ),
     );
-    await tester.pumpAndSettle();
+    await _pumpUntilFound(tester, find.text('Your Sila style'));
 
     expect(find.text('Your Sila style'), findsOneWidget);
     expect(find.text('Profile Frames'), findsOneWidget);
@@ -25,7 +30,17 @@ void main() {
     await tester.tap(find.widgetWithText(FilledButton, 'Equip').first);
     await tester.pump();
 
-    expect(find.text('Developer Preview is read-only.'), findsOneWidget);
+    expect(
+      find.text('Developer preview is read-only. No data was changed.'),
+      findsOneWidget,
+    );
     expect(tester.takeException(), isNull);
   });
+
+}
+
+Future<void> _pumpUntilFound(WidgetTester tester, Finder finder) async {
+  for (var frame = 0; frame < 100 && finder.evaluate().isEmpty; frame += 1) {
+    await tester.pump(const Duration(milliseconds: 100));
+  }
 }

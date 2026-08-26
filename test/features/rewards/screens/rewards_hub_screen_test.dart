@@ -42,7 +42,10 @@ void main() {
     await tester.tap(buyButton);
     await tester.pump();
 
-    expect(find.text('Developer Preview is read-only.'), findsOneWidget);
+    expect(
+      find.text('Developer preview is read-only. No data was changed.'),
+      findsOneWidget,
+    );
     expect(tester.takeException(), isNull);
   });
 }

@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
+import '../../../l10n/app_localizations.dart';
 import '../models/token_transaction.dart';
 
 class TokenHistoryScreen extends StatelessWidget {
@@ -10,15 +11,16 @@ class TokenHistoryScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
+    final strings = AppLocalizations.of(context)!;
 
     if (user == null) {
-      return const Scaffold(
-        body: SafeArea(child: Center(child: Text('No user is signed in.'))),
+      return Scaffold(
+        body: SafeArea(child: Center(child: Text(strings.noUserSignedIn))),
       );
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Token History')),
+      appBar: AppBar(title: Text(strings.tokenHistory)),
       body: SafeArea(
         child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
           stream: FirebaseFirestore.instance
@@ -34,11 +36,11 @@ class TokenHistoryScreen extends StatelessWidget {
             }
 
             if (snapshot.hasError) {
-              return const Center(
+              return Center(
                 child: Padding(
-                  padding: EdgeInsets.all(24),
+                  padding: const EdgeInsets.all(24),
                   child: Text(
-                    'Could not load Token history.',
+                    strings.tokenHistoryLoadFailed,
                     textAlign: TextAlign.center,
                   ),
                 ),
@@ -52,24 +54,24 @@ class TokenHistoryScreen extends StatelessWidget {
                 [];
 
             if (transactions.isEmpty) {
-              return const Center(
+              return Center(
                 child: Padding(
-                  padding: EdgeInsets.all(32),
+                  padding: const EdgeInsets.all(32),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.receipt_long_outlined, size: 52),
-                      SizedBox(height: 14),
+                      const Icon(Icons.receipt_long_outlined, size: 52),
+                      const SizedBox(height: 14),
                       Text(
-                        'No Token activity yet',
-                        style: TextStyle(
+                        strings.noTokenActivity,
+                        style: const TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      SizedBox(height: 6),
+                      const SizedBox(height: 6),
                       Text(
-                        'Token earnings and spending will appear here.',
+                        strings.tokenActivityDescription,
                         textAlign: TextAlign.center,
                       ),
                     ],
@@ -103,21 +105,22 @@ class _TokenTransactionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isPositive = transaction.amount > 0;
-    final amountText = '${isPositive ? '+' : ''}${transaction.amount} Tokens';
+    final strings = AppLocalizations.of(context)!;
+    final localizedAmount = strings.tokensAmount(transaction.amount.abs());
+    final prefix = transaction.amount == 0 ? '' : (isPositive ? '+' : '-');
+    final amountText = '$prefix$localizedAmount';
+    final typeLabel = _labelForType(strings, transaction.type);
 
     return Card(
       child: ListTile(
         leading: CircleAvatar(child: Icon(_iconForType(transaction.type))),
         title: Text(
-          transaction.reason.isEmpty
-              ? _labelForType(transaction.type)
-              : transaction.reason,
+          transaction.reason.isEmpty ? typeLabel : transaction.reason,
         ),
         subtitle: transaction.createdAt == null
-            ? Text(_labelForType(transaction.type))
+            ? Text(typeLabel)
             : Text(
-                '${_labelForType(transaction.type)} • '
-                '${_formatDate(transaction.createdAt!)}',
+                '$typeLabel • ${_formatDate(context, transaction.createdAt!)}',
               ),
         trailing: Text(
           amountText,
@@ -142,29 +145,22 @@ class _TokenTransactionCard extends StatelessWidget {
     }
   }
 
-  String _labelForType(TokenTransactionType type) {
+  String _labelForType(AppLocalizations strings, TokenTransactionType type) {
     switch (type) {
       case TokenTransactionType.earned:
-        return 'Earned';
+        return strings.tokenEarned;
       case TokenTransactionType.spent:
-        return 'Spent';
+        return strings.tokenSpent;
       case TokenTransactionType.refunded:
-        return 'Refunded';
+        return strings.tokenRefunded;
       case TokenTransactionType.adjusted:
-        return 'Adjusted';
+        return strings.tokenAdjusted;
     }
   }
 
-  String _formatDate(Timestamp timestamp) {
+  String _formatDate(BuildContext context, Timestamp timestamp) {
     final date = timestamp.toDate();
-
-    final day = date.day.toString().padLeft(2, '0');
-    final month = date.month.toString().padLeft(2, '0');
-    final year = date.year.toString();
-
-    final hour = date.hour.toString().padLeft(2, '0');
-    final minute = date.minute.toString().padLeft(2, '0');
-
-    return '$day/$month/$year $hour:$minute';
+    final material = MaterialLocalizations.of(context);
+    return '${material.formatCompactDate(date)} ${material.formatTimeOfDay(TimeOfDay.fromDateTime(date))}';
   }
 }

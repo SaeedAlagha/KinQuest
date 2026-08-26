@@ -2,8 +2,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
+import '../../../l10n/app_localizations.dart';
 import '../digital/digital_reward_catalog.dart';
 import '../digital/digital_reward_definition.dart';
+import '../digital/digital_reward_localization.dart';
 import '../digital/digital_reward_service.dart';
 import '../digital/digital_reward_visuals.dart';
 
@@ -29,7 +31,7 @@ class _MyDigitalRewardsScreenState extends State<MyDigitalRewardsScreen> {
       return text.substring('Exception: '.length);
     }
 
-    return 'Something went wrong. Please try again.';
+    return AppLocalizations.of(context)!.somethingWentWrong;
   }
 
   Future<void> _updateReward(
@@ -37,6 +39,8 @@ class _MyDigitalRewardsScreenState extends State<MyDigitalRewardsScreen> {
     required bool unequip,
   }) async {
     if (_processingRewardId != null) return;
+    final strings = AppLocalizations.of(context)!;
+    final rewardName = localizedDigitalRewardName(context, reward);
 
     setState(() => _processingRewardId = reward.id);
     try {
@@ -51,8 +55,8 @@ class _MyDigitalRewardsScreenState extends State<MyDigitalRewardsScreen> {
         SnackBar(
           content: Text(
             unequip
-                ? '${reward.name} unequipped.'
-                : '${reward.name} equipped across Sila.',
+                ? strings.rewardUnequipped(rewardName)
+                : strings.rewardEquippedOnSila(rewardName),
           ),
         ),
       );
@@ -68,18 +72,19 @@ class _MyDigitalRewardsScreenState extends State<MyDigitalRewardsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context)!;
     final userId = widget.developerPreview
         ? null
         : FirebaseAuth.instance.currentUser?.uid;
 
     if (!widget.developerPreview && userId == null) {
-      return const Scaffold(
-        body: SafeArea(child: Center(child: Text('No user is signed in.'))),
+      return Scaffold(
+        body: SafeArea(child: Center(child: Text(strings.noUserSignedIn))),
       );
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text('My Digital Rewards')),
+      appBar: AppBar(title: Text(strings.myDigitalRewards)),
       body: SafeArea(
         child: FutureBuilder<List<DigitalRewardDefinition>>(
           future: _catalog,
@@ -89,10 +94,10 @@ class _MyDigitalRewardsScreenState extends State<MyDigitalRewardsScreen> {
             }
 
             if (catalogSnapshot.hasError) {
-              return const _CollectionMessage(
+              return _CollectionMessage(
                 icon: Icons.error_outline_rounded,
-                title: 'Your collection could not be loaded',
-                message: 'Please restart the app and try again.',
+                title: strings.collectionLoadFailed,
+                message: strings.restartAndTryAgain,
               );
             }
 
@@ -113,9 +118,7 @@ class _MyDigitalRewardsScreenState extends State<MyDigitalRewardsScreen> {
                 onUpdate: (_, {required unequip}) async {
                   if (!mounted) return;
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Developer Preview is read-only.'),
-                    ),
+                    SnackBar(content: Text(strings.developerPreviewReadOnly)),
                   );
                 },
               );
@@ -133,10 +136,10 @@ class _MyDigitalRewardsScreenState extends State<MyDigitalRewardsScreen> {
                 }
 
                 if (ownedSnapshot.hasError) {
-                  return const _CollectionMessage(
+                  return _CollectionMessage(
                     icon: Icons.cloud_off_rounded,
-                    title: 'Your collection could not be loaded',
-                    message: 'Check your connection and try again.',
+                    title: strings.collectionLoadFailed,
+                    message: strings.checkConnectionTryAgain,
                   );
                 }
 
@@ -181,16 +184,17 @@ class _OwnedRewardsCollection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context)!;
     final knownRewards = catalog
         .where((reward) => owned.containsKey(reward.id))
         .toList();
     final unknownRewardCount = owned.length - knownRewards.length;
 
     if (owned.isEmpty) {
-      return const _CollectionMessage(
+      return _CollectionMessage(
         icon: Icons.workspace_premium_outlined,
-        title: 'No digital rewards yet',
-        message: 'Unlock cosmetics from Rewards and they will appear here.',
+        title: strings.noDigitalRewards,
+        message: strings.noDigitalRewardsDescription,
       );
     }
 
@@ -204,22 +208,20 @@ class _OwnedRewardsCollection extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Text(
-                  'Your Sila style',
+                  strings.yourSilaStyle,
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.w900,
                   ),
                 ),
                 const SizedBox(height: 6),
-                const Text(
-                  'Equip one reward from each category. Changes appear everywhere immediately.',
-                ),
+                Text(strings.silaStyleDescription),
                 const SizedBox(height: 24),
                 for (final category in DigitalRewardCategory.values)
                   if (knownRewards.any(
                     (reward) => reward.category == category,
                   )) ...[
                     Text(
-                      _categoryLabel(category),
+                      localizedDigitalRewardCategoryLabel(strings, category),
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.w800,
                       ),
@@ -247,11 +249,9 @@ class _OwnedRewardsCollection extends StatelessWidget {
                     child: ListTile(
                       leading: const Icon(Icons.inventory_2_outlined),
                       title: Text(
-                        '$unknownRewardCount legacy reward${unknownRewardCount == 1 ? '' : 's'} kept safe',
+                        strings.legacyRewardsSafe(unknownRewardCount),
                       ),
-                      subtitle: const Text(
-                        'These purchases remain owned but are no longer in the active catalog.',
-                      ),
+                      subtitle: Text(strings.legacyRewardsDescription),
                     ),
                   ),
               ],
@@ -280,6 +280,8 @@ class _OwnedRewardCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context)!;
+    final rewardName = localizedDigitalRewardName(context, reward);
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -292,13 +294,17 @@ class _OwnedRewardCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    reward.name,
+                    rewardName,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w900,
                     ),
                   ),
                   const SizedBox(height: 4),
-                  Text(equipped ? 'Currently equipped' : 'Owned permanently'),
+                  Text(
+                    equipped
+                        ? strings.currentlyEquipped
+                        : strings.ownedPermanently,
+                  ),
                   const SizedBox(height: 10),
                   FilledButton.tonalIcon(
                     key: ValueKey('owned-reward-action-${reward.id}'),
@@ -317,10 +323,10 @@ class _OwnedRewardCard extends StatelessWidget {
                           ),
                     label: Text(
                       processing
-                          ? 'Updating…'
+                          ? strings.updating
                           : equipped
-                          ? 'Unequip'
-                          : 'Equip',
+                          ? strings.unequip
+                          : strings.equip,
                     ),
                   ),
                 ],
@@ -368,17 +374,4 @@ class _CollectionMessage extends StatelessWidget {
       ),
     );
   }
-}
-
-String _categoryLabel(DigitalRewardCategory category) {
-  return switch (category) {
-    DigitalRewardCategory.profileFrame => 'Profile Frames',
-    DigitalRewardCategory.profileBadge => 'Profile Badges',
-    DigitalRewardCategory.profileTheme => 'Profile Themes',
-    DigitalRewardCategory.celebrationEffect => 'Celebration Effects',
-    DigitalRewardCategory.nameplate => 'Nameplates',
-    DigitalRewardCategory.mascotAccessory => 'Sila Wardrobe',
-    DigitalRewardCategory.mascotOutfit => 'Sila Outfits',
-    DigitalRewardCategory.mascotAura => 'Sila Auras',
-  };
 }

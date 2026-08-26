@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../../../l10n/app_localizations.dart';
 import '../digital/digital_reward_catalog.dart';
 import '../digital/digital_reward_definition.dart';
+import '../digital/digital_reward_localization.dart';
 import '../digital/digital_reward_service.dart';
 import '../digital/digital_reward_visuals.dart';
 import '../models/reward_wishlist_proposal.dart';
@@ -41,24 +42,23 @@ class _RewardsHubScreenState extends State<RewardsHubScreen> {
     required DigitalRewardDefinition reward,
   }) async {
     if (_processingRewardId != null) return;
+    final strings = AppLocalizations.of(context)!;
+    final rewardName = localizedDigitalRewardName(context, reward);
 
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('Unlock reward?'),
-          content: Text(
-            'Spend ${reward.cost} Tokens to permanently unlock '
-            '"${reward.name}"?',
-          ),
+          title: Text(strings.unlockRewardTitle),
+          content: Text(strings.unlockRewardMessage(reward.cost, rewardName)),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: const Text('Cancel'),
+              child: Text(strings.cancel),
             ),
             FilledButton(
               onPressed: () => Navigator.pop(context, true),
-              child: const Text('Unlock'),
+              child: Text(strings.unlock),
             ),
           ],
         );
@@ -76,9 +76,9 @@ class _RewardsHubScreenState extends State<RewardsHubScreen> {
 
       if (!mounted) return;
 
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('${reward.name} unlocked!')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(strings.rewardUnlocked(rewardName))),
+      );
     } catch (error) {
       if (!mounted) return;
 
@@ -96,6 +96,8 @@ class _RewardsHubScreenState extends State<RewardsHubScreen> {
 
   Future<void> _equipDigitalReward(DigitalRewardDefinition reward) async {
     if (_processingRewardId != null) return;
+    final strings = AppLocalizations.of(context)!;
+    final rewardName = localizedDigitalRewardName(context, reward);
 
     setState(() {
       _processingRewardId = reward.id;
@@ -106,7 +108,7 @@ class _RewardsHubScreenState extends State<RewardsHubScreen> {
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('${reward.name} equipped across Sila.')),
+        SnackBar(content: Text(strings.rewardEquippedOnSila(rewardName))),
       );
     } catch (error) {
       if (!mounted) return;
@@ -129,7 +131,7 @@ class _RewardsHubScreenState extends State<RewardsHubScreen> {
       return text.substring('Exception: '.length);
     }
 
-    return 'Something went wrong. Please try again.';
+    return AppLocalizations.of(context)!.somethingWentWrong;
   }
 
   @override
@@ -280,7 +282,7 @@ class _RewardsHubScreenState extends State<RewardsHubScreen> {
                       ),
                     ),
                     icon: const Icon(Icons.workspace_premium_outlined),
-                    label: const Text('My Digital Rewards'),
+                    label: Text(strings.myDigitalRewards),
                   ),
                   FilledButton.tonalIcon(
                     onPressed: () => Navigator.push(
@@ -290,7 +292,7 @@ class _RewardsHubScreenState extends State<RewardsHubScreen> {
                       ),
                     ),
                     icon: const Icon(Icons.receipt_long_rounded),
-                    label: const Text('Token History'),
+                    label: Text(strings.tokenHistory),
                   ),
                 ],
               ),
@@ -378,6 +380,7 @@ class _RewardsHubScreenState extends State<RewardsHubScreen> {
   }
 
   Widget _buildDeveloperPreview() {
+    final strings = AppLocalizations.of(context)!;
     return _RewardsScaffold(
       tokens: 1350,
       child: Column(
@@ -394,7 +397,7 @@ class _RewardsHubScreenState extends State<RewardsHubScreen> {
               ),
             ),
             icon: const Icon(Icons.workspace_premium_outlined),
-            label: const Text('My Digital Rewards'),
+            label: Text(strings.myDigitalRewards),
           ),
           const SizedBox(height: 30),
           _DigitalRewardsStore(
@@ -404,16 +407,12 @@ class _RewardsHubScreenState extends State<RewardsHubScreen> {
             processingRewardId: null,
             onPurchase: (_) async {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Developer Preview is read-only.'),
-                ),
+                SnackBar(content: Text(strings.developerPreviewReadOnly)),
               );
             },
             onEquip: (_) async {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Developer Preview is read-only.'),
-                ),
+                SnackBar(content: Text(strings.developerPreviewReadOnly)),
               );
             },
           ),
@@ -820,6 +819,7 @@ class _DigitalRewardsStore extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context)!;
     return FutureBuilder<List<DigitalRewardDefinition>>(
       future: catalog,
       builder: (context, catalogSnapshot) {
@@ -833,10 +833,10 @@ class _DigitalRewardsStore extends StatelessWidget {
         }
 
         if (catalogSnapshot.hasError) {
-          return const _RewardsMessage(
+          return _RewardsMessage(
             icon: Icons.error_outline_rounded,
-            title: 'Digital Rewards could not be loaded',
-            message: 'Please restart the app and try again.',
+            title: strings.digitalRewardsLoadFailed,
+            message: strings.restartAndTryAgain,
           );
         }
 
@@ -870,10 +870,10 @@ class _DigitalRewardsStore extends StatelessWidget {
             }
 
             if (ownedSnapshot.hasError) {
-              return const _RewardsMessage(
+              return _RewardsMessage(
                 icon: Icons.cloud_off_rounded,
-                title: 'Your collection could not be loaded',
-                message: 'Check your connection and try again.',
+                title: strings.collectionLoadFailed,
+                message: strings.checkConnectionTryAgain,
               );
             }
 
@@ -921,18 +921,19 @@ class _DigitalRewardsCatalogView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context)!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Digital Rewards',
+          strings.digitalRewards,
           style: Theme.of(
             context,
           ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w900),
         ),
         const SizedBox(height: 6),
         Text(
-          'Unlock permanent Sila cosmetics instantly. No approval needed.',
+          strings.digitalRewardsDescription,
           style: Theme.of(context).textTheme.bodyLarge,
         ),
         const SizedBox(height: 22),
@@ -986,34 +987,38 @@ class _DigitalRewardCategoryHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context)!;
     final (label, icon) = switch (category) {
       DigitalRewardCategory.profileFrame => (
-        'Profile Frames',
+        strings.profileFrames,
         Icons.filter_frames_rounded,
       ),
       DigitalRewardCategory.profileBadge => (
-        'Profile Badges',
+        strings.profileBadges,
         Icons.verified_rounded,
       ),
       DigitalRewardCategory.profileTheme => (
-        'Profile Themes',
+        strings.profileThemes,
         Icons.palette_rounded,
       ),
       DigitalRewardCategory.celebrationEffect => (
-        'Celebration Effects',
+        strings.celebrationEffects,
         Icons.celebration_rounded,
       ),
-      DigitalRewardCategory.nameplate => ('Nameplates', Icons.badge_rounded),
+      DigitalRewardCategory.nameplate => (
+        strings.nameplates,
+        Icons.badge_rounded,
+      ),
       DigitalRewardCategory.mascotAccessory => (
-        'Sila Wardrobe',
+        strings.silaWardrobe,
         Icons.smart_toy_rounded,
       ),
       DigitalRewardCategory.mascotOutfit => (
-        'Sila Outfits',
+        strings.silaOutfits,
         Icons.checkroom_rounded,
       ),
       DigitalRewardCategory.mascotAura => (
-        'Sila Auras',
+        strings.silaAuras,
         Icons.auto_awesome_rounded,
       ),
     };
@@ -1061,6 +1066,12 @@ class _DigitalRewardCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final canAfford = tokens >= reward.cost;
     final disabled = processing || anotherRewardProcessing || equipped;
+    final strings = AppLocalizations.of(context)!;
+    final rewardName = localizedDigitalRewardName(context, reward);
+    final rewardDescription = localizedDigitalRewardDescription(
+      context,
+      reward,
+    );
 
     return Card(
       clipBehavior: Clip.antiAlias,
@@ -1072,13 +1083,13 @@ class _DigitalRewardCard extends StatelessWidget {
             Center(child: DigitalRewardPreview(reward: reward)),
             const SizedBox(height: 14),
             Text(
-              reward.name,
+              rewardName,
               style: Theme.of(
                 context,
               ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900),
             ),
             const SizedBox(height: 5),
-            Text(reward.description),
+            Text(rewardDescription),
             const SizedBox(height: 12),
             Wrap(
               spacing: 8,
@@ -1086,9 +1097,13 @@ class _DigitalRewardCard extends StatelessWidget {
               children: [
                 Chip(
                   avatar: const Icon(Icons.stars_rounded, size: 18),
-                  label: Text('${reward.cost} Tokens'),
+                  label: Text(strings.tokensAmount(reward.cost)),
                 ),
-                Chip(label: Text(reward.isLimited ? 'Limited' : 'Permanent')),
+                Chip(
+                  label: Text(
+                    reward.isLimited ? strings.limited : strings.permanent,
+                  ),
+                ),
               ],
             ),
             const SizedBox(height: 12),
@@ -1113,14 +1128,14 @@ class _DigitalRewardCard extends StatelessWidget {
                     ),
               label: Text(
                 processing
-                    ? 'Updating…'
+                    ? strings.updating
                     : equipped
-                    ? 'Equipped'
+                    ? strings.silaStudioEquipped
                     : owned
-                    ? 'Equip'
+                    ? strings.equip
                     : !canAfford
-                    ? 'Need ${reward.cost - tokens} more Tokens'
-                    : 'Buy for ${reward.cost}',
+                    ? strings.needMoreTokens(reward.cost - tokens)
+                    : strings.buyForTokens(reward.cost),
               ),
             ),
           ],

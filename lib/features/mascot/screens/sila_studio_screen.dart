@@ -10,6 +10,7 @@ import '../../../core/widgets/sila_page_backdrop.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../rewards/digital/digital_reward_catalog.dart';
 import '../../rewards/digital/digital_reward_definition.dart';
+import '../../rewards/digital/digital_reward_localization.dart';
 import '../../rewards/digital/digital_reward_service.dart';
 import '../../rewards/digital/equipped_digital_rewards.dart';
 
@@ -799,8 +800,8 @@ class _StudioRewardCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final strings = AppLocalizations.of(context)!;
     final canAfford = tokens >= reward.cost;
-    final name = _localizedRewardName(context, reward);
-    final description = _localizedRewardDescription(context, reward);
+    final name = localizedDigitalRewardName(context, reward);
+    final description = localizedDigitalRewardDescription(context, reward);
 
     return Card(
       key: ValueKey('sila-studio-reward-${reward.id}'),
@@ -940,45 +941,5 @@ _StudioCategory _studioCategoryFor(DigitalRewardCategory category) {
     DigitalRewardCategory.mascotOutfit => _StudioCategory.outfits,
     DigitalRewardCategory.mascotAura => _StudioCategory.auras,
     _ => throw ArgumentError.value(category),
-  };
-}
-
-String _localizedRewardName(
-  BuildContext context,
-  DigitalRewardDefinition reward,
-) {
-  if (Localizations.localeOf(context).languageCode != 'ar') return reward.name;
-  return switch (reward.id) {
-    'mascot_guardian_crown' => 'تاج حارس العائلة',
-    'mascot_explorer_cap' => 'قبعة مستكشف العائلة',
-    'mascot_star_halo' => 'هالة نجمة الإرث',
-    'mascot_family_cape' => 'رداء بطل العائلة',
-    'mascot_game_jersey' => 'زي ليلة الألعاب',
-    'mascot_memory_keeper' => 'عدة حارس الذكريات',
-    'mascot_family_sparkles' => 'هالة بريق العائلة',
-    'mascot_cosmic_orbit' => 'هالة المدار الكوني',
-    'mascot_uae_ribbon' => 'شريط وحدة الإمارات',
-    _ => reward.name,
-  };
-}
-
-String _localizedRewardDescription(
-  BuildContext context,
-  DigitalRewardDefinition reward,
-) {
-  if (Localizations.localeOf(context).languageCode != 'ar') {
-    return reward.description;
-  }
-  return switch (reward.id) {
-    'mascot_guardian_crown' => 'تاج ذهبي لانتصارات العائلة المميزة.',
-    'mascot_explorer_cap' => 'قبعة خضراء لمغامرة صلة العائلية التالية.',
-    'mascot_star_halo' => 'مدار متوهج من نجوم العائلة حول صلة.',
-    'mascot_family_cape' => 'رداء أخضر وذهبي للحظات العائلة البطولية.',
-    'mascot_game_jersey' => 'زي رياضي مرح عندما يقود صلة الألعاب.',
-    'mascot_memory_keeper' => 'حقيبة كاميرا صغيرة لذكريات العائلة.',
-    'mascot_family_sparkles' => 'ألوان الجذور والروابط والنمو تدور حول صلة.',
-    'mascot_cosmic_orbit' => 'مدار فضائي متحرك لمغامرات صلة.',
-    'mascot_uae_ribbon' => 'قوس بألوان الإمارات يحتفي بوحدة العائلة.',
-    _ => reward.description,
   };
 }
