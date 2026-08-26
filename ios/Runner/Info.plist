@@ -26,6 +26,12 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>Sila uses the camera only when you choose to capture a family memory or mission photo.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Sila accesses photos only when you choose one for a family memory, profile, or mission.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Sila saves an image only when you ask to keep a family memory on this device.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

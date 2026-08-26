@@ -1229,6 +1229,30 @@ abstract class AppLocalizations {
   /// **'Sila, your family companion'**
   String get mascotSemanticLabel;
 
+  /// No description provided for @silaLogoSemanticLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Sila family connection logo'**
+  String get silaLogoSemanticLabel;
+
+  /// No description provided for @familyYearSemanticLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'UAE Year of Family 2026, Growing in Unity'**
+  String get familyYearSemanticLabel;
+
+  /// No description provided for @uaeFlagSemanticLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'United Arab Emirates flag'**
+  String get uaeFlagSemanticLabel;
+
+  /// No description provided for @profileFrameEquippedSemanticLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile frame equipped'**
+  String get profileFrameEquippedSemanticLabel;
+
   /// No description provided for @mascotWelcomeMessage.
   ///
   /// In en, this message translates to:

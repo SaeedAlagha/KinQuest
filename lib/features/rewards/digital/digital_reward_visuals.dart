@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/mascot/sila_mascot.dart';
+import '../../../l10n/app_localizations.dart';
 import 'digital_reward_definition.dart';
 import 'equipped_digital_rewards.dart';
 
@@ -86,7 +87,9 @@ class DigitalRewardAvatar extends StatelessWidget {
     if (frame == null) return avatar;
 
     return Semantics(
-      label: '${rewards.profileFrame} profile frame equipped',
+      label:
+          AppLocalizations.of(context)?.profileFrameEquippedSemanticLabel ??
+          'Profile frame equipped',
       child: Container(
         key: ValueKey('digital-frame-${rewards.profileFrame}'),
         padding: EdgeInsets.all(radius * 0.12 + 3),
