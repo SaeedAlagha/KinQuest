@@ -1289,6 +1289,12 @@ abstract class AppLocalizations {
   /// **'Amazing teamwork! Every moment together makes your bond stronger.'**
   String get mascotCelebrationMessage;
 
+  /// No description provided for @silaMissionsMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a mission, help each other, and turn a small action into a family win!'**
+  String get silaMissionsMessage;
+
   /// No description provided for @silaStudioTitle.
   ///
   /// In en, this message translates to:
