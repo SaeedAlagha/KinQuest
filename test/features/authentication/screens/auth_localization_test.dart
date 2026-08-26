@@ -66,6 +66,47 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('Arabic password recovery sends a real reset request', (
+    tester,
+  ) async {
+    await _setViewport(tester, const Size(390, 844));
+    String? requestedEmail;
+    await _pumpArabic(
+      tester,
+      LoginScreen(
+        sendPasswordReset: (email) async => requestedEmail = email,
+      ),
+    );
+
+    await tester.enterText(
+      find.byType(TextFormField).first,
+      'family@example.com',
+    );
+    await tester.tap(find.text('نسيت كلمة المرور؟'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('إعادة تعيين كلمة المرور'), findsOneWidget);
+    expect(
+      find.text(
+        'أدخل بريد حسابك وسنرسل إليك رابطًا آمنًا لإعادة تعيين كلمة المرور.',
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const ValueKey('password-reset-email')),
+      findsOneWidget,
+    );
+
+    await tester.tap(
+      find.widgetWithText(FilledButton, 'إرسال رسالة لإعادة تعيين كلمة المرور'),
+    );
+    await tester.pumpAndSettle();
+
+    expect(requestedEmail, 'family@example.com');
+    expect(find.text('تم إرسال رسالة إعادة تعيين كلمة المرور.'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('Arabic family setup routes and validates on a narrow screen', (
     tester,
   ) async {

@@ -1520,8 +1520,14 @@ abstract class AppLocalizations {
   /// No description provided for @passwordRecoveryComing.
   ///
   /// In en, this message translates to:
-  /// **'Password recovery will be added with Firebase.'**
+  /// **'Enter your account email and we’ll send you a secure password reset link.'**
   String get passwordRecoveryComing;
+
+  /// No description provided for @resetPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset Password'**
+  String get resetPassword;
 
   /// No description provided for @loggingIn.
   ///

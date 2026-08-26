@@ -768,7 +768,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get forgotPassword => 'نسيت كلمة المرور؟';
 
   @override
-  String get passwordRecoveryComing => 'ستتم إضافة استعادة كلمة المرور عبر Firebase.';
+  String get passwordRecoveryComing => 'أدخل بريد حسابك وسنرسل إليك رابطًا آمنًا لإعادة تعيين كلمة المرور.';
+
+  @override
+  String get resetPassword => 'إعادة تعيين كلمة المرور';
 
   @override
   String get loggingIn => 'جارٍ تسجيل الدخول...';
