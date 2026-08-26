@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/branding/app_brand.dart';
+import '../../../core/mascot/sila_mascot.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/family_year_banner.dart';
-import '../../../core/widgets/sila_brand_mark.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../demo/screens/competition_demo_screen.dart';
 import 'login_screen.dart';
@@ -136,8 +136,18 @@ class _WelcomeHero extends StatelessWidget {
           ),
         ),
         SizedBox(height: isWide ? 26 : 22),
-        const SilaBrandMark(),
-        SizedBox(height: isWide ? 30 : 22),
+        ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 620),
+          child: SilaMascotGuide(
+            key: const ValueKey('welcome-mascot-guide'),
+            title: strings.mascotName,
+            message: strings.mascotWelcomeMessage,
+            semanticLabel: strings.mascotSemanticLabel,
+            pose: SilaMascotPose.welcome,
+            compact: !isWide,
+          ),
+        ),
+        SizedBox(height: isWide ? 26 : 22),
         Wrap(
           alignment: isWide ? WrapAlignment.start : WrapAlignment.center,
           textDirection: TextDirection.ltr,

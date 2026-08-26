@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/mascot/sila_mascot.dart';
 import '../../../core/widgets/family_year_banner.dart';
 import '../../../core/widgets/sila_brand_mark.dart';
 import '../../../core/widgets/sila_page_backdrop.dart';
@@ -141,6 +142,15 @@ class HomeDashboard extends StatelessWidget {
                         _HomeHeader(name: name, familyName: familyName),
                         const SizedBox(height: 18),
                         FamilyYearBanner(compact: constraints.maxWidth < 480),
+                        const SizedBox(height: 18),
+                        SilaMascotGuide(
+                          key: const ValueKey('home-mascot-guide'),
+                          title: strings.mascotName,
+                          message: strings.mascotHomeMessage(name),
+                          semanticLabel: strings.mascotSemanticLabel,
+                          pose: SilaMascotPose.idle,
+                          compact: constraints.maxWidth < 480,
+                        ),
                         const SizedBox(height: 22),
                         if (isWide)
                           Row(

@@ -36,7 +36,7 @@ void main() {
     expect(find.text('5 family members'), findsOneWidget);
     expect(
       tester.widget<NavigationBar>(find.byType(NavigationBar)).selectedIndex,
-      4,
+      5,
     );
     expect(tester.takeException(), isNull);
   });

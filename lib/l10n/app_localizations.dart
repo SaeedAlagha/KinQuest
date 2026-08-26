@@ -1205,6 +1205,54 @@ abstract class AppLocalizations {
   /// **'A private family space for shared stories, playful challenges, and the moments that keep everyone connected.'**
   String get welcomePrivateFamilySpace;
 
+  /// No description provided for @mascotName.
+  ///
+  /// In en, this message translates to:
+  /// **'Sila'**
+  String get mascotName;
+
+  /// No description provided for @mascotSemanticLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Sila, your family companion'**
+  String get mascotSemanticLabel;
+
+  /// No description provided for @mascotWelcomeMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Hi! I’m Sila. I’ll help your family play, create, and grow closer.'**
+  String get mascotWelcomeMessage;
+
+  /// No description provided for @mascotHomeMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready for a small family moment together, {name}?'**
+  String mascotHomeMessage(String name);
+
+  /// No description provided for @mascotGameSetupMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'I’ll guide everyone. Choose your setup and let’s play!'**
+  String get mascotGameSetupMessage;
+
+  /// No description provided for @mascotThinkingMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'I’m preparing something special for your family...'**
+  String get mascotThinkingMessage;
+
+  /// No description provided for @mascotOopsMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'That did not work yet. Let’s try again together!'**
+  String get mascotOopsMessage;
+
+  /// No description provided for @mascotCelebrationMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Amazing teamwork! Every moment together makes your bond stronger.'**
+  String get mascotCelebrationMessage;
+
   /// No description provided for @uaeYearOfFamily2026.
   ///
   /// In en, this message translates to:
