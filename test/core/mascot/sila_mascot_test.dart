@@ -66,6 +66,42 @@ void main() {
     }
   });
 
+  testWidgets('every supported wardrobe accessory renders on Sila', (
+    tester,
+  ) async {
+    for (final accessory in SilaMascotAccessories.supported) {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: SilaMascot(animate: false, accessoryAssetKey: accessory),
+          ),
+        ),
+      );
+
+      expect(
+        find.byKey(ValueKey('sila-mascot-accessory-$accessory')),
+        findsOneWidget,
+      );
+      expect(tester.takeException(), isNull);
+    }
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: SilaMascot(
+            animate: false,
+            accessoryAssetKey: 'retired-accessory',
+          ),
+        ),
+      ),
+    );
+    expect(
+      find.byKey(const ValueKey('sila-mascot-accessory-retired-accessory')),
+      findsNothing,
+    );
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('Arabic mascot guide is RTL and fits a narrow screen', (
     tester,
   ) async {

@@ -377,5 +377,6 @@ String _categoryLabel(DigitalRewardCategory category) {
     DigitalRewardCategory.profileTheme => 'Profile Themes',
     DigitalRewardCategory.celebrationEffect => 'Celebration Effects',
     DigitalRewardCategory.nameplate => 'Nameplates',
+    DigitalRewardCategory.mascotAccessory => 'Sila Wardrobe',
   };
 }

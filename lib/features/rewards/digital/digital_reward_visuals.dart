@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
+import '../../../core/mascot/sila_mascot.dart';
 import 'digital_reward_definition.dart';
 import 'equipped_digital_rewards.dart';
 
@@ -270,6 +271,14 @@ class DigitalRewardPreview extends StatelessWidget {
               color: const Color(0xFFFFD77A),
               size: 46,
             ),
+          ),
+        ),
+        DigitalRewardCategory.mascotAccessory => Center(
+          child: SilaMascot(
+            pose: SilaMascotPose.idle,
+            height: 100,
+            animate: false,
+            accessoryAssetKey: reward.assetKey,
           ),
         ),
       },

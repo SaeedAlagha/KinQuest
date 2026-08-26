@@ -26,6 +26,15 @@ class SilaMascotPalette {
   static const pearl = Color(0xFFFFF5DF);
 }
 
+abstract final class SilaMascotAccessories {
+  static const none = 'none';
+  static const guardianCrown = 'guardian_crown';
+  static const explorerCap = 'explorer_cap';
+  static const starHalo = 'star_halo';
+
+  static const supported = {guardianCrown, explorerCap, starHalo};
+}
+
 /// The fixed Sila character artwork. App themes may style the surrounding
 /// surface, but never recolor or replace the mascot itself.
 class SilaMascot extends StatefulWidget {
@@ -35,12 +44,14 @@ class SilaMascot extends StatefulWidget {
     this.height = 128,
     this.animate = true,
     this.semanticLabel,
+    this.accessoryAssetKey = SilaMascotAccessories.none,
   });
 
   final SilaMascotPose pose;
   final double height;
   final bool animate;
   final String? semanticLabel;
+  final String accessoryAssetKey;
 
   @override
   State<SilaMascot> createState() => _SilaMascotState();
@@ -88,15 +99,24 @@ class _SilaMascotState extends State<SilaMascot>
 
   @override
   Widget build(BuildContext context) {
-    final image = Image.asset(
-      widget.pose.assetPath,
-      height: widget.height,
+    final image = SizedBox(
       width: widget.height * 0.75,
-      fit: BoxFit.contain,
-      filterQuality: FilterQuality.high,
-      gaplessPlayback: true,
-      excludeFromSemantics: widget.semanticLabel == null,
-      semanticLabel: widget.semanticLabel,
+      height: widget.height,
+      child: Stack(
+        clipBehavior: Clip.none,
+        fit: StackFit.expand,
+        children: [
+          Image.asset(
+            widget.pose.assetPath,
+            fit: BoxFit.contain,
+            filterQuality: FilterQuality.high,
+            gaplessPlayback: true,
+            excludeFromSemantics: widget.semanticLabel == null,
+            semanticLabel: widget.semanticLabel,
+          ),
+          _SilaAccessoryOverlay(assetKey: widget.accessoryAssetKey),
+        ],
+      ),
     );
 
     if (!widget.animate || MediaQuery.disableAnimationsOf(context)) {
@@ -120,6 +140,180 @@ class _SilaMascotState extends State<SilaMascot>
   }
 }
 
+class _SilaAccessoryOverlay extends StatelessWidget {
+  const _SilaAccessoryOverlay({required this.assetKey});
+
+  final String assetKey;
+
+  @override
+  Widget build(BuildContext context) {
+    if (!SilaMascotAccessories.supported.contains(assetKey)) {
+      return const SizedBox.shrink();
+    }
+
+    return IgnorePointer(
+      child: CustomPaint(
+        key: ValueKey('sila-mascot-accessory-$assetKey'),
+        painter: _SilaAccessoryPainter(assetKey),
+      ),
+    );
+  }
+}
+
+class _SilaAccessoryPainter extends CustomPainter {
+  const _SilaAccessoryPainter(this.assetKey);
+
+  final String assetKey;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    switch (assetKey) {
+      case SilaMascotAccessories.guardianCrown:
+        _paintCrown(canvas, size);
+      case SilaMascotAccessories.explorerCap:
+        _paintExplorerCap(canvas, size);
+      case SilaMascotAccessories.starHalo:
+        _paintStarHalo(canvas, size);
+    }
+  }
+
+  void _paintCrown(Canvas canvas, Size size) {
+    final centerX = size.width / 2;
+    final baseY = size.height * 0.205;
+    final halfWidth = size.width * 0.23;
+    final crownHeight = size.height * 0.105;
+    final crown = Path()
+      ..moveTo(centerX - halfWidth, baseY)
+      ..lineTo(centerX - halfWidth * 0.86, baseY - crownHeight * 0.92)
+      ..lineTo(centerX - halfWidth * 0.3, baseY - crownHeight * 0.47)
+      ..lineTo(centerX, baseY - crownHeight * 1.18)
+      ..lineTo(centerX + halfWidth * 0.3, baseY - crownHeight * 0.47)
+      ..lineTo(centerX + halfWidth * 0.86, baseY - crownHeight * 0.92)
+      ..lineTo(centerX + halfWidth, baseY)
+      ..close();
+    final bounds = crown.getBounds();
+    final paint = Paint()
+      ..shader = const LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [Color(0xFFFFF0A6), Color(0xFFF0B62F), Color(0xFFB77612)],
+      ).createShader(bounds)
+      ..style = PaintingStyle.fill;
+    canvas.drawShadow(crown, const Color(0xAA5B3900), 5, false);
+    canvas.drawPath(crown, paint);
+    canvas.drawPath(
+      crown,
+      Paint()
+        ..color = const Color(0xFFFFF2B7)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = math.max(1.2, size.width * 0.012),
+    );
+
+    for (final point in [
+      Offset(centerX - halfWidth * 0.82, baseY - crownHeight * 0.88),
+      Offset(centerX, baseY - crownHeight * 1.13),
+      Offset(centerX + halfWidth * 0.82, baseY - crownHeight * 0.88),
+    ]) {
+      canvas.drawCircle(
+        point,
+        size.width * 0.026,
+        Paint()..color = const Color(0xFFFF6B52),
+      );
+    }
+  }
+
+  void _paintExplorerCap(Canvas canvas, Size size) {
+    final centerX = size.width / 2;
+    final crown = RRect.fromRectAndRadius(
+      Rect.fromCenter(
+        center: Offset(centerX, size.height * 0.155),
+        width: size.width * 0.43,
+        height: size.height * 0.105,
+      ),
+      Radius.circular(size.width * 0.12),
+    );
+    final crownPaint = Paint()
+      ..shader = const LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [Color(0xFF16A56A), Color(0xFF006B49), Color(0xFF064C39)],
+      ).createShader(crown.outerRect);
+    canvas.drawShadow(
+      Path()..addRRect(crown),
+      const Color(0x9900271B),
+      4,
+      false,
+    );
+    canvas.drawRRect(crown, crownPaint);
+    canvas.drawOval(
+      Rect.fromCenter(
+        center: Offset(centerX + size.width * 0.13, size.height * 0.19),
+        width: size.width * 0.34,
+        height: size.height * 0.052,
+      ),
+      Paint()..color = const Color(0xFF074D39),
+    );
+    canvas.drawCircle(
+      Offset(centerX - size.width * 0.07, size.height * 0.15),
+      size.width * 0.035,
+      Paint()..color = const Color(0xFFFFD77A),
+    );
+  }
+
+  void _paintStarHalo(Canvas canvas, Size size) {
+    final haloRect = Rect.fromCenter(
+      center: Offset(size.width / 2, size.height * 0.255),
+      width: size.width * 0.86,
+      height: size.height * 0.29,
+    );
+    final haloPaint = Paint()
+      ..color = const Color(0xFFFFD77A).withValues(alpha: 0.82)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = math.max(1.3, size.width * 0.012);
+    canvas.drawOval(haloRect, haloPaint);
+
+    final sparklePaint = Paint()..color = const Color(0xFFFFE9A8);
+    for (final angle in [-2.5, -1.35, -0.25, 0.7, 2.25]) {
+      final point = Offset(
+        haloRect.center.dx + math.cos(angle) * haloRect.width / 2,
+        haloRect.center.dy + math.sin(angle) * haloRect.height / 2,
+      );
+      final radius = size.width * (angle == -1.35 ? 0.035 : 0.024);
+      canvas.save();
+      canvas.translate(point.dx, point.dy);
+      canvas.rotate(math.pi / 4);
+      canvas.drawRRect(
+        RRect.fromRectAndRadius(
+          Rect.fromCenter(
+            center: Offset.zero,
+            width: radius * 1.2,
+            height: radius * 2.6,
+          ),
+          Radius.circular(radius),
+        ),
+        sparklePaint,
+      );
+      canvas.drawRRect(
+        RRect.fromRectAndRadius(
+          Rect.fromCenter(
+            center: Offset.zero,
+            width: radius * 2.6,
+            height: radius * 1.2,
+          ),
+          Radius.circular(radius),
+        ),
+        sparklePaint,
+      );
+      canvas.restore();
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _SilaAccessoryPainter oldDelegate) {
+    return oldDelegate.assetKey != assetKey;
+  }
+}
+
 class SilaMascotGuide extends StatelessWidget {
   const SilaMascotGuide({
     super.key,
@@ -130,6 +324,7 @@ class SilaMascotGuide extends StatelessWidget {
     this.compact = false,
     this.animate = true,
     this.action,
+    this.accessoryAssetKey = SilaMascotAccessories.none,
   });
 
   final String message;
@@ -139,6 +334,7 @@ class SilaMascotGuide extends StatelessWidget {
   final bool compact;
   final bool animate;
   final Widget? action;
+  final String accessoryAssetKey;
 
   @override
   Widget build(BuildContext context) {
@@ -150,6 +346,7 @@ class SilaMascotGuide extends StatelessWidget {
           height: compact ? 118 : 164,
           animate: animate,
           semanticLabel: semanticLabel,
+          accessoryAssetKey: accessoryAssetKey,
         );
         final bubble = _MascotSpeechBubble(
           title: title,
