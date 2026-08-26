@@ -3946,4 +3946,161 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get monthlyInvalidWinner => 'The match returned a winner who was not one of the two selected competitors. Please replay the match.';
+
+  @override
+  String get myDigitalRewards => 'My Digital Rewards';
+
+  @override
+  String get tokenHistory => 'Token History';
+
+  @override
+  String get unlockRewardTitle => 'Unlock reward?';
+
+  @override
+  String unlockRewardMessage(int cost, String reward) {
+    return 'Spend $cost Tokens to permanently unlock \"$reward\"?';
+  }
+
+  @override
+  String get unlock => 'Unlock';
+
+  @override
+  String rewardUnlocked(String reward) {
+    return '$reward unlocked!';
+  }
+
+  @override
+  String rewardEquippedOnSila(String reward) {
+    return '$reward equipped across Sila.';
+  }
+
+  @override
+  String rewardUnequipped(String reward) {
+    return '$reward unequipped.';
+  }
+
+  @override
+  String get collectionLoadFailed => 'Your collection could not be loaded';
+
+  @override
+  String get restartAndTryAgain => 'Please restart the app and try again.';
+
+  @override
+  String get checkConnectionTryAgain => 'Check your connection and try again.';
+
+  @override
+  String get noDigitalRewards => 'No digital rewards yet';
+
+  @override
+  String get noDigitalRewardsDescription => 'Unlock cosmetics from Rewards and they will appear here.';
+
+  @override
+  String get yourSilaStyle => 'Your Sila style';
+
+  @override
+  String get silaStyleDescription => 'Equip one reward from each category. Changes appear everywhere immediately.';
+
+  @override
+  String legacyRewardsSafe(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count legacy rewards kept safe',
+      one: '1 legacy reward kept safe',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get legacyRewardsDescription => 'These purchases remain owned but are no longer in the active catalog.';
+
+  @override
+  String get currentlyEquipped => 'Currently equipped';
+
+  @override
+  String get ownedPermanently => 'Owned permanently';
+
+  @override
+  String get updating => 'Updating…';
+
+  @override
+  String get equip => 'Equip';
+
+  @override
+  String get unequip => 'Unequip';
+
+  @override
+  String get digitalRewards => 'Digital Rewards';
+
+  @override
+  String get digitalRewardsDescription => 'Unlock permanent Sila cosmetics instantly. No approval needed.';
+
+  @override
+  String get digitalRewardsLoadFailed => 'Digital Rewards could not be loaded';
+
+  @override
+  String get profileFrames => 'Profile Frames';
+
+  @override
+  String get profileBadges => 'Profile Badges';
+
+  @override
+  String get profileThemes => 'Profile Themes';
+
+  @override
+  String get celebrationEffects => 'Celebration Effects';
+
+  @override
+  String get nameplates => 'Nameplates';
+
+  @override
+  String get silaWardrobe => 'Sila Wardrobe';
+
+  @override
+  String get silaOutfits => 'Sila Outfits';
+
+  @override
+  String get silaAuras => 'Sila Auras';
+
+  @override
+  String tokensAmount(int count) {
+    return '$count Tokens';
+  }
+
+  @override
+  String get limited => 'Limited';
+
+  @override
+  String get permanent => 'Permanent';
+
+  @override
+  String needMoreTokens(int count) {
+    return 'Need $count more Tokens';
+  }
+
+  @override
+  String buyForTokens(int count) {
+    return 'Buy for $count';
+  }
+
+  @override
+  String get noTokenActivity => 'No Token activity yet';
+
+  @override
+  String get tokenActivityDescription => 'Token earnings and spending will appear here.';
+
+  @override
+  String get tokenHistoryLoadFailed => 'Could not load Token history.';
+
+  @override
+  String get tokenEarned => 'Earned';
+
+  @override
+  String get tokenSpent => 'Spent';
+
+  @override
+  String get tokenRefunded => 'Refunded';
+
+  @override
+  String get tokenAdjusted => 'Adjusted';
 }

@@ -3979,4 +3979,163 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get monthlyInvalidWinner => 'أعادت المباراة فائزًا ليس أحد المتنافسين المحددين. يُرجى إعادة المباراة.';
+
+  @override
+  String get myDigitalRewards => 'مكافآتي الرقمية';
+
+  @override
+  String get tokenHistory => 'سجل الرموز';
+
+  @override
+  String get unlockRewardTitle => 'فتح المكافأة؟';
+
+  @override
+  String unlockRewardMessage(int cost, String reward) {
+    return 'أنفق $cost من الرموز لفتح \"$reward\" بشكل دائم؟';
+  }
+
+  @override
+  String get unlock => 'فتح';
+
+  @override
+  String rewardUnlocked(String reward) {
+    return 'تم فتح $reward!';
+  }
+
+  @override
+  String rewardEquippedOnSila(String reward) {
+    return 'تم تجهيز $reward على صلة في كل مكان.';
+  }
+
+  @override
+  String rewardUnequipped(String reward) {
+    return 'تمت إزالة $reward.';
+  }
+
+  @override
+  String get collectionLoadFailed => 'تعذر تحميل مجموعتك';
+
+  @override
+  String get restartAndTryAgain => 'أعد تشغيل التطبيق وحاول مجددًا.';
+
+  @override
+  String get checkConnectionTryAgain => 'تحقق من اتصالك وحاول مجددًا.';
+
+  @override
+  String get noDigitalRewards => 'لا توجد مكافآت رقمية بعد';
+
+  @override
+  String get noDigitalRewardsDescription => 'افتح مستحضرات التجميل من المكافآت وستظهر هنا.';
+
+  @override
+  String get yourSilaStyle => 'إطلالة صلة الخاصة بك';
+
+  @override
+  String get silaStyleDescription => 'جهّز مكافأة واحدة من كل فئة. تظهر التغييرات في كل مكان فورًا.';
+
+  @override
+  String legacyRewardsSafe(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'تم حفظ $count مكافآت قديمة',
+      two: 'تم حفظ مكافأتين قديمتين',
+      one: 'تم حفظ مكافأة قديمة واحدة',
+      zero: 'لا مكافآت قديمة',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get legacyRewardsDescription => 'تبقى هذه المشتريات مملوكة لك لكنها لم تعد ضمن الكتالوج النشط.';
+
+  @override
+  String get currentlyEquipped => 'مجهّز حاليًا';
+
+  @override
+  String get ownedPermanently => 'مملوك بشكل دائم';
+
+  @override
+  String get updating => 'جارٍ التحديث…';
+
+  @override
+  String get equip => 'تجهيز';
+
+  @override
+  String get unequip => 'إزالة';
+
+  @override
+  String get digitalRewards => 'المكافآت الرقمية';
+
+  @override
+  String get digitalRewardsDescription => 'افتح مستحضرات صلة الدائمة فورًا من دون الحاجة إلى موافقة.';
+
+  @override
+  String get digitalRewardsLoadFailed => 'تعذر تحميل المكافآت الرقمية';
+
+  @override
+  String get profileFrames => 'إطارات الملف الشخصي';
+
+  @override
+  String get profileBadges => 'شارات الملف الشخصي';
+
+  @override
+  String get profileThemes => 'سمات الملف الشخصي';
+
+  @override
+  String get celebrationEffects => 'مؤثرات الاحتفال';
+
+  @override
+  String get nameplates => 'لوحات الأسماء';
+
+  @override
+  String get silaWardrobe => 'خزانة صلة';
+
+  @override
+  String get silaOutfits => 'أزياء صلة';
+
+  @override
+  String get silaAuras => 'هالات صلة';
+
+  @override
+  String tokensAmount(int count) {
+    return '$count من الرموز';
+  }
+
+  @override
+  String get limited => 'محدود';
+
+  @override
+  String get permanent => 'دائم';
+
+  @override
+  String needMoreTokens(int count) {
+    return 'تحتاج إلى $count رمزًا إضافيًا';
+  }
+
+  @override
+  String buyForTokens(int count) {
+    return 'شراء مقابل $count';
+  }
+
+  @override
+  String get noTokenActivity => 'لا يوجد نشاط للرموز بعد';
+
+  @override
+  String get tokenActivityDescription => 'ستظهر الرموز المكتسبة والمُنفقة هنا.';
+
+  @override
+  String get tokenHistoryLoadFailed => 'تعذر تحميل سجل الرموز.';
+
+  @override
+  String get tokenEarned => 'مكتسب';
+
+  @override
+  String get tokenSpent => 'مُنفَق';
+
+  @override
+  String get tokenRefunded => 'مُسترد';
+
+  @override
+  String get tokenAdjusted => 'مُعدّل';
 }
