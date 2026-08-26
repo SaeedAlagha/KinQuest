@@ -831,6 +831,48 @@ class AppLocalizationsAr extends AppLocalizations {
   String get acceptTerms => 'أوافق على شروط الخدمة وسياسة الخصوصية.';
 
   @override
+  String get readTermsPrivacy => 'قراءة الشروط والخصوصية';
+
+  @override
+  String get legalPrivacyCenter => 'الشروط والخصوصية';
+
+  @override
+  String get legalIntro => 'صُممت صلة لتكون مساحة عائلية خاصة. يوضح هذا الملخص كيفية تعامل التطبيق مع معلومات العائلة والقواعد التي تحافظ على تجربة آمنة.';
+
+  @override
+  String get legalEffectiveDate => 'ساري من أغسطس 2026';
+
+  @override
+  String get legalAccountDataTitle => 'معلومات الحساب';
+
+  @override
+  String get legalAccountDataBody => 'تستخدم صلة الاسم والبريد الإلكتروني وتاريخ الميلاد وإعدادات الملف الشخصي ومعلومات تسجيل الدخول التي تقدمها لتشغيل حسابك وحمايته.';
+
+  @override
+  String get legalFamilyDataTitle => 'محتوى العائلة الخاص';
+
+  @override
+  String get legalFamilyDataBody => 'تُحفظ ملفات العائلة وذكرياتها ونتائج الألعاب ومهماتها وأمنياتها ورموزها ودعواتها مع حساب العائلة في Firebase، وتخضع لعضوية العائلة وأدوار أفرادها.';
+
+  @override
+  String get legalAiTitle => 'الميزات المدعومة بالذكاء الاصطناعي';
+
+  @override
+  String get legalAiBody => 'عند استخدام لعبة ذكية أو إثبات مهمة، ترسل صلة فقط النص أو الصورة المختارة اللازمة للطلب عبر خادمها إلى Google Gemini. يتم تقييم صور إثبات المهمات من دون أن تخزنها صلة.';
+
+  @override
+  String get legalControlsTitle => 'خيارات التحكم';
+
+  @override
+  String get legalControlsBody => 'يمكنك تعديل ملفك وذكرياتك وإدارة عضوية العائلة وفق دورك والتحكم في الإشعارات واختيار لغة التطبيق ومظهره.';
+
+  @override
+  String get legalTermsTitle => 'استخدام عائلي آمن';
+
+  @override
+  String get legalTermsBody => 'استخدم صلة باحترام ولا تشارك إلا المحتوى المسموح لك باستخدامه. رموز العائلة ونقاط الترتيب تقدم داخل التطبيق وليست لها قيمة نقدية. يتحمل المالكون والمشرفون مسؤولية العضوية والأدوار.';
+
+  @override
   String get creatingAccount => 'جارٍ إنشاء الحساب...';
 
   @override

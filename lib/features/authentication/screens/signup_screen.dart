@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../../../core/validation/form_validators.dart';
 import '../../../core/widgets/sila_brand_mark.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../profile/screens/legal_privacy_screen.dart';
 import 'family_choice_screen.dart';
 import 'login_screen.dart';
 
@@ -346,6 +347,20 @@ class _SignupScreenState extends State<SignupScreen> {
                         });
                       },
                       title: Text(strings.acceptTerms),
+                    ),
+
+                    Align(
+                      alignment: AlignmentDirectional.centerStart,
+                      child: TextButton.icon(
+                        onPressed: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const LegalPrivacyScreen(),
+                          ),
+                        ),
+                        icon: const Icon(Icons.policy_outlined),
+                        label: Text(strings.readTermsPrivacy),
+                      ),
                     ),
 
                     const SizedBox(height: 18),

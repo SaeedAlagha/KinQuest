@@ -9,6 +9,7 @@ import '../../../core/theme/app_theme_catalog.dart';
 import '../../../core/theme/theme_unlock_service.dart';
 import '../../../core/widgets/sila_page_backdrop.dart';
 import '../../../l10n/app_localizations.dart';
+import 'legal_privacy_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key, this.developerPreview = false});
@@ -998,6 +999,11 @@ class PrivacySecurityScreen extends StatelessWidget {
             leading: const Icon(Icons.shield_outlined),
             title: Text(strings.privacy),
             subtitle: Text(strings.privacyDescription),
+            trailing: const Icon(Icons.chevron_right_rounded),
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const LegalPrivacyScreen()),
+            ),
           ),
           const Divider(height: 1),
           ListTile(
