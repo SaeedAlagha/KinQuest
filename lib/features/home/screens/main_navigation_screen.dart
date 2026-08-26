@@ -29,11 +29,6 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       label: strings.navHome,
     ),
     NavigationDestination(
-      icon: const Icon(Icons.smart_toy_outlined),
-      selectedIcon: const Icon(Icons.smart_toy_rounded),
-      label: strings.navSila,
-    ),
-    NavigationDestination(
       icon: const Icon(Icons.photo_library_outlined),
       selectedIcon: const Icon(Icons.photo_library_rounded),
       label: strings.navMemories,
@@ -47,6 +42,11 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       icon: const Icon(Icons.groups_outlined),
       selectedIcon: const Icon(Icons.groups_rounded),
       label: strings.navMissions,
+    ),
+    NavigationDestination(
+      icon: const Icon(Icons.checkroom_outlined),
+      selectedIcon: const Icon(Icons.checkroom_rounded),
+      label: strings.navSila,
     ),
     NavigationDestination(
       icon: const Icon(Icons.redeem_outlined),
@@ -69,11 +69,6 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       label: Text(strings.navHome),
     ),
     NavigationRailDestination(
-      icon: const Icon(Icons.smart_toy_outlined),
-      selectedIcon: const Icon(Icons.smart_toy_rounded),
-      label: Text(strings.navSila),
-    ),
-    NavigationRailDestination(
       icon: const Icon(Icons.photo_library_outlined),
       selectedIcon: const Icon(Icons.photo_library_rounded),
       label: Text(strings.navMemories),
@@ -87,6 +82,11 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       icon: const Icon(Icons.groups_outlined),
       selectedIcon: const Icon(Icons.groups_rounded),
       label: Text(strings.navMissions),
+    ),
+    NavigationRailDestination(
+      icon: const Icon(Icons.checkroom_outlined),
+      selectedIcon: const Icon(Icons.checkroom_rounded),
+      label: Text(strings.navSila),
     ),
     NavigationRailDestination(
       icon: const Icon(Icons.redeem_outlined),
@@ -113,19 +113,19 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
               developerPreview: true,
               onFamilyOverview: _openFamilyOverview,
             ),
-            const SilaStudioScreen(developerPreview: true),
             const MemoriesScreen(developerPreview: true),
             const CompetitionsScreen(developerPreview: true),
             const FamilyMissionsScreen(developerPreview: true),
+            const SilaStudioScreen(developerPreview: true),
             const RewardsHubScreen(developerPreview: true),
             const ProfileScreen(developerPreview: true),
           ]
         : [
             HomeScreen(onFamilyOverview: _openFamilyOverview),
-            const SilaStudioScreen(),
             const MemoriesScreen(),
             const CompetitionsScreen(),
             const FamilyMissionsScreen(),
+            const SilaStudioScreen(),
             const RewardsHubScreen(),
             const ProfileScreen(),
           ];

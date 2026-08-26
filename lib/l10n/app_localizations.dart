@@ -464,7 +464,7 @@ abstract class AppLocalizations {
   /// No description provided for @navSila.
   ///
   /// In en, this message translates to:
-  /// **'Sila'**
+  /// **'Wardrobe'**
   String get navSila;
 
   /// No description provided for @navMemories.

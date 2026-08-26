@@ -33,7 +33,9 @@ void main() {
     final mascot = tester.widgetList<SilaMascot>(find.byType(SilaMascot)).first;
     expect(mascot.motion, SilaMascotMotion.celebrate);
 
-    await tester.tap(find.byKey(const ValueKey('sila-category-outfits')));
+    final outfitsCategory = find.byKey(const ValueKey('sila-category-outfits'));
+    await tester.ensureVisible(outfitsCategory);
+    await tester.tap(outfitsCategory);
     await tester.pump(const Duration(milliseconds: 400));
     expect(find.text('Game Night Jersey'), findsOneWidget);
     expect(find.text('Memory Keeper Kit'), findsOneWidget);
