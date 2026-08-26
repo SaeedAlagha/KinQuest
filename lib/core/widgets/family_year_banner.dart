@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../theme/app_theme.dart';
 
 class FamilyYearBanner extends StatelessWidget {
@@ -13,7 +14,8 @@ class FamilyYearBanner extends StatelessWidget {
 
     return Semantics(
       label:
-          'UAE Year of Family 2026. Growing in Unity. عام الأسرة، نماء وانتماء.',
+          AppLocalizations.of(context)?.familyYearSemanticLabel ??
+          'UAE Year of Family 2026, Growing in Unity',
       child: Container(
         width: double.infinity,
         padding: EdgeInsets.symmetric(
@@ -149,7 +151,9 @@ class _UaeFlag extends StatelessWidget {
 
     return Semantics(
       image: true,
-      label: 'United Arab Emirates flag',
+      label:
+          AppLocalizations.of(context)?.uaeFlagSemanticLabel ??
+          'United Arab Emirates flag',
       child: Container(
         width: width,
         height: height,

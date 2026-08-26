@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../theme/app_theme.dart';
 
 class SilaBrandMark extends StatelessWidget {
@@ -12,7 +13,9 @@ class SilaBrandMark extends StatelessWidget {
   Widget build(BuildContext context) {
     return Semantics(
       image: true,
-      label: 'Sila family connection logo',
+      label:
+          AppLocalizations.of(context)?.silaLogoSemanticLabel ??
+          'Sila family connection logo',
       child: Container(
         width: size,
         height: size,
