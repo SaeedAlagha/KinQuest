@@ -7,6 +7,7 @@ import 'package:kinquest/features/authentication/screens/family_choice_screen.da
 import 'package:kinquest/features/authentication/screens/login_screen.dart';
 import 'package:kinquest/features/authentication/screens/signup_screen.dart';
 import 'package:kinquest/features/authentication/screens/welcome_screen.dart';
+import 'package:kinquest/features/profile/screens/legal_privacy_screen.dart';
 import 'package:kinquest/l10n/app_localizations.dart';
 
 void main() {
@@ -73,9 +74,7 @@ void main() {
     String? requestedEmail;
     await _pumpArabic(
       tester,
-      LoginScreen(
-        sendPasswordReset: (email) async => requestedEmail = email,
-      ),
+      LoginScreen(sendPasswordReset: (email) async => requestedEmail = email),
     );
 
     await tester.enterText(
@@ -92,10 +91,7 @@ void main() {
       ),
       findsOneWidget,
     );
-    expect(
-      find.byKey(const ValueKey('password-reset-email')),
-      findsOneWidget,
-    );
+    expect(find.byKey(const ValueKey('password-reset-email')), findsOneWidget);
 
     await tester.tap(
       find.widgetWithText(FilledButton, 'إرسال رسالة لإعادة تعيين كلمة المرور'),
@@ -103,7 +99,10 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(requestedEmail, 'family@example.com');
-    expect(find.text('تم إرسال رسالة إعادة تعيين كلمة المرور.'), findsOneWidget);
+    expect(
+      find.text('تم إرسال رسالة إعادة تعيين كلمة المرور.'),
+      findsOneWidget,
+    );
     expect(tester.takeException(), isNull);
   });
 
@@ -134,6 +133,25 @@ void main() {
     await tester.tap(find.widgetWithText(FilledButton, 'الانضمام إلى عائلة'));
     await tester.pump();
     expect(find.text('رمز الدعوة مطلوب.'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Arabic legal and privacy center is readable on a phone', (
+    tester,
+  ) async {
+    await _setViewport(tester, const Size(320, 568));
+    await _pumpArabic(tester, const LegalPrivacyScreen());
+
+    expect(find.text('الشروط والخصوصية'), findsWidgets);
+    expect(find.text('معلومات الحساب'), findsOneWidget);
+    expect(find.text('محتوى العائلة الخاص'), findsOneWidget);
+
+    await tester.scrollUntilVisible(
+      find.text('استخدام عائلي آمن'),
+      400,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(find.text('استخدام عائلي آمن'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 }

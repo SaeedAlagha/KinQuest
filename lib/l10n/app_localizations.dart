@@ -1643,6 +1643,90 @@ abstract class AppLocalizations {
   /// **'I agree to the Terms of Service and Privacy Policy.'**
   String get acceptTerms;
 
+  /// No description provided for @readTermsPrivacy.
+  ///
+  /// In en, this message translates to:
+  /// **'Read Terms & Privacy'**
+  String get readTermsPrivacy;
+
+  /// No description provided for @legalPrivacyCenter.
+  ///
+  /// In en, this message translates to:
+  /// **'Terms & Privacy'**
+  String get legalPrivacyCenter;
+
+  /// No description provided for @legalIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Sila is designed as a private family space. This summary explains how the app handles family information and the rules that keep the experience safe.'**
+  String get legalIntro;
+
+  /// No description provided for @legalEffectiveDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Effective August 2026'**
+  String get legalEffectiveDate;
+
+  /// No description provided for @legalAccountDataTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Account information'**
+  String get legalAccountDataTitle;
+
+  /// No description provided for @legalAccountDataBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Sila uses the name, email address, date of birth, profile settings, and sign-in information you provide to run and protect your account.'**
+  String get legalAccountDataBody;
+
+  /// No description provided for @legalFamilyDataTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Private family content'**
+  String get legalFamilyDataTitle;
+
+  /// No description provided for @legalFamilyDataBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Family profiles, memories, game results, missions, Wishes, Tokens, and invitations are stored with your family account in Firebase and are governed by family membership and roles.'**
+  String get legalFamilyDataBody;
+
+  /// No description provided for @legalAiTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'AI-assisted features'**
+  String get legalAiTitle;
+
+  /// No description provided for @legalAiBody.
+  ///
+  /// In en, this message translates to:
+  /// **'When you use an AI game or mission proof, Sila sends only the text or selected image needed for that request through its server to Google Gemini. Mission proof images are evaluated without being stored by Sila.'**
+  String get legalAiBody;
+
+  /// No description provided for @legalControlsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your controls'**
+  String get legalControlsTitle;
+
+  /// No description provided for @legalControlsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You can edit your profile and memories, manage family membership according to your role, control notifications, and choose the app language and appearance.'**
+  String get legalControlsBody;
+
+  /// No description provided for @legalTermsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Family-safe use'**
+  String get legalTermsTitle;
+
+  /// No description provided for @legalTermsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Use Sila respectfully and only share content you have permission to use. Family Tokens and Ranking Points are in-app progress with no cash value. Owners and admins are responsible for family membership and roles.'**
+  String get legalTermsBody;
+
   /// No description provided for @creatingAccount.
   ///
   /// In en, this message translates to:

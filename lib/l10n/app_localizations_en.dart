@@ -824,6 +824,48 @@ class AppLocalizationsEn extends AppLocalizations {
   String get acceptTerms => 'I agree to the Terms of Service and Privacy Policy.';
 
   @override
+  String get readTermsPrivacy => 'Read Terms & Privacy';
+
+  @override
+  String get legalPrivacyCenter => 'Terms & Privacy';
+
+  @override
+  String get legalIntro => 'Sila is designed as a private family space. This summary explains how the app handles family information and the rules that keep the experience safe.';
+
+  @override
+  String get legalEffectiveDate => 'Effective August 2026';
+
+  @override
+  String get legalAccountDataTitle => 'Account information';
+
+  @override
+  String get legalAccountDataBody => 'Sila uses the name, email address, date of birth, profile settings, and sign-in information you provide to run and protect your account.';
+
+  @override
+  String get legalFamilyDataTitle => 'Private family content';
+
+  @override
+  String get legalFamilyDataBody => 'Family profiles, memories, game results, missions, Wishes, Tokens, and invitations are stored with your family account in Firebase and are governed by family membership and roles.';
+
+  @override
+  String get legalAiTitle => 'AI-assisted features';
+
+  @override
+  String get legalAiBody => 'When you use an AI game or mission proof, Sila sends only the text or selected image needed for that request through its server to Google Gemini. Mission proof images are evaluated without being stored by Sila.';
+
+  @override
+  String get legalControlsTitle => 'Your controls';
+
+  @override
+  String get legalControlsBody => 'You can edit your profile and memories, manage family membership according to your role, control notifications, and choose the app language and appearance.';
+
+  @override
+  String get legalTermsTitle => 'Family-safe use';
+
+  @override
+  String get legalTermsBody => 'Use Sila respectfully and only share content you have permission to use. Family Tokens and Ranking Points are in-app progress with no cash value. Owners and admins are responsible for family membership and roles.';
+
+  @override
   String get creatingAccount => 'Creating Account...';
 
   @override
