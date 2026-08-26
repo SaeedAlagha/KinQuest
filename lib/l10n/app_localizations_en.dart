@@ -599,6 +599,32 @@ class AppLocalizationsEn extends AppLocalizations {
   String get welcomePrivateFamilySpace => 'A private family space for shared stories, playful challenges, and the moments that keep everyone connected.';
 
   @override
+  String get mascotName => 'Sila';
+
+  @override
+  String get mascotSemanticLabel => 'Sila, your family companion';
+
+  @override
+  String get mascotWelcomeMessage => 'Hi! I’m Sila. I’ll help your family play, create, and grow closer.';
+
+  @override
+  String mascotHomeMessage(String name) {
+    return 'Ready for a small family moment together, $name?';
+  }
+
+  @override
+  String get mascotGameSetupMessage => 'I’ll guide everyone. Choose your setup and let’s play!';
+
+  @override
+  String get mascotThinkingMessage => 'I’m preparing something special for your family...';
+
+  @override
+  String get mascotOopsMessage => 'That did not work yet. Let’s try again together!';
+
+  @override
+  String get mascotCelebrationMessage => 'Amazing teamwork! Every moment together makes your bond stronger.';
+
+  @override
   String get uaeYearOfFamily2026 => 'UAE YEAR OF FAMILY 2026';
 
   @override

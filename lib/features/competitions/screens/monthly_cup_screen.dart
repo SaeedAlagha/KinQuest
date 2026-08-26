@@ -949,7 +949,10 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
         ),
         const SizedBox(height: 20),
         Text(
-          '${_selectedIds.length} competitors selected',
+          strings.competitorsSelected(
+            _selectedIds.length,
+            _familyMembers.length,
+          ),
           style: Theme.of(
             context,
           ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
@@ -957,7 +960,7 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
         const SizedBox(height: 8),
         const SizedBox(height: 20),
         Text(
-          'Choose competitors',
+          strings.selectExactlyFourMembers,
           style: Theme.of(
             context,
           ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
@@ -1102,7 +1105,7 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
 
         const SizedBox(height: 8),
 
-        Text('${_matches.length} / $totalMatches matches completed'),
+        Text(strings.competitionProgress(_matches.length, totalMatches)),
 
         const SizedBox(height: 8),
 

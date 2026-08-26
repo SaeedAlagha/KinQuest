@@ -606,6 +606,32 @@ class AppLocalizationsAr extends AppLocalizations {
   String get welcomePrivateFamilySpace => 'مساحة عائلية خاصة للقصص المشتركة والتحديات الممتعة واللحظات التي تبقي الجميع على تواصل.';
 
   @override
+  String get mascotName => 'صلة';
+
+  @override
+  String get mascotSemanticLabel => 'صلة، رفيق عائلتك';
+
+  @override
+  String get mascotWelcomeMessage => 'مرحبًا! أنا صلة. سأساعد عائلتكم على اللعب وصنع الذكريات والتقارب.';
+
+  @override
+  String mascotHomeMessage(String name) {
+    return 'هل أنت مستعد للحظة عائلية جميلة يا $name؟';
+  }
+
+  @override
+  String get mascotGameSetupMessage => 'سأرشدكم خطوة بخطوة. اختاروا الإعدادات ولنبدأ اللعب!';
+
+  @override
+  String get mascotThinkingMessage => 'أجهّز شيئًا مميزًا لعائلتكم...';
+
+  @override
+  String get mascotOopsMessage => 'لم تنجح هذه المحاولة بعد. لنجرب معًا مرة أخرى!';
+
+  @override
+  String get mascotCelebrationMessage => 'عمل جماعي رائع! كل لحظة تجمعكم تجعل رابطتكم أقوى.';
+
+  @override
   String get uaeYearOfFamily2026 => 'عام الأسرة في الإمارات ٢٠٢٦';
 
   @override

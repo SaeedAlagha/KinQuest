@@ -2,6 +2,8 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import '../../l10n/app_localizations.dart';
+import '../mascot/sila_mascot.dart';
 import '../theme/app_theme.dart';
 import 'family_year_banner.dart';
 
@@ -116,30 +118,42 @@ class _SilaCelebrationCardState extends State<SilaCelebrationCard>
                       end: 1,
                     ).animate(_entrance),
                     child: Center(
-                      child: Container(
-                        width: 94,
-                        height: 94,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.white.withValues(alpha: 0.14),
-                          border: Border.all(
-                            color: const Color(0xFFFFD77A),
-                            width: 2,
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: const Color(
-                                0xFFFFD77A,
-                              ).withValues(alpha: 0.22),
-                              blurRadius: 26,
-                              spreadRadius: 2,
+                      child: SizedBox(
+                        width: 150,
+                        height: 150,
+                        child: Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            SilaMascot(
+                              pose: SilaMascotPose.winner,
+                              height: 150,
+                              animate: false,
+                              semanticLabel: AppLocalizations.of(
+                                context,
+                              )?.mascotSemanticLabel,
+                            ),
+                            PositionedDirectional(
+                              end: 3,
+                              bottom: 10,
+                              child: Container(
+                                width: 38,
+                                height: 38,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: const Color(0xFF163E32),
+                                  border: Border.all(
+                                    color: const Color(0xFFFFD77A),
+                                    width: 2,
+                                  ),
+                                ),
+                                child: Icon(
+                                  widget.icon,
+                                  size: 21,
+                                  color: const Color(0xFFFFD77A),
+                                ),
+                              ),
                             ),
                           ],
-                        ),
-                        child: Icon(
-                          widget.icon,
-                          size: 52,
-                          color: const Color(0xFFFFD77A),
                         ),
                       ),
                     ),

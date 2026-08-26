@@ -66,6 +66,7 @@ flutter:
   uses-material-design: true
   assets:
     - assets/config/digital_rewards.json
+    - assets/mascot/
   fonts:
     - family: NotoSansArabic
       fonts:

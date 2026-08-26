@@ -13,7 +13,7 @@ void main() {
   testWidgets('shows the Sila welcome screen', (tester) async {
     await tester.pumpWidget(const SilaApp());
 
-    expect(find.text('Sila'), findsOneWidget);
+    expect(find.text('Sila'), findsWidgets);
     expect(find.text('صِلَة'), findsOneWidget);
     expect(find.text('Closer, one moment at a time.'), findsOneWidget);
     expect(find.text('Log In'), findsOneWidget);
@@ -85,13 +85,14 @@ void main() {
     await tester.pumpWidget(
       _testApp(const MainNavigationScreen(developerPreview: true)),
     );
+    await tester.pump(const Duration(seconds: 1));
 
     final navigationBar = find.byType(NavigationBar);
 
     await tester.tap(
       find.descendant(of: navigationBar, matching: find.text('Memories')),
     );
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 400));
 
     expect(find.text('Developer Family memories'), findsOneWidget);
     expect(
@@ -103,7 +104,7 @@ void main() {
     await tester.tap(
       find.descendant(of: navigationBar, matching: find.text('Play')),
     );
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 400));
 
     await tester.scrollUntilVisible(
       find.text('Developer Family Leaderboard'),
@@ -116,7 +117,7 @@ void main() {
     await tester.tap(
       find.descendant(of: navigationBar, matching: find.text('Profile')),
     );
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 400));
 
     expect(find.text('preview@sila.local'), findsOneWidget);
     expect(tester.takeException(), isNull);

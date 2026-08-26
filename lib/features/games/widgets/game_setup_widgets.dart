@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/mascot/sila_mascot.dart';
 import '../../../core/widgets/family_year_banner.dart';
 import '../../../core/widgets/sila_page_backdrop.dart';
 import '../../../l10n/app_localizations.dart';
@@ -157,6 +158,15 @@ class GameSetupHero extends StatelessWidget {
                       ),
                     ),
                   ],
+                ),
+                const SizedBox(height: 18),
+                SilaMascotGuide(
+                  key: const ValueKey('game-setup-mascot-guide'),
+                  title: strings.mascotName,
+                  message: strings.mascotGameSetupMessage,
+                  semanticLabel: strings.mascotSemanticLabel,
+                  pose: SilaMascotPose.welcome,
+                  compact: true,
                 ),
               ],
             ),

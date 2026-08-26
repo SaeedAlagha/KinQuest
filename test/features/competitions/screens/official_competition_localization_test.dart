@@ -63,7 +63,7 @@ void main() {
     final title = find.text('الكأس الشهري');
     expect(title, findsWidgets);
     expect(find.text('تم اختيار 4 من أصل 4 متنافسين'), findsOneWidget);
-    expect(find.text('اختر 4 متنافسين بالضبط'), findsOneWidget);
+    expect(find.text('اختر 4 أفراد من العائلة بالضبط.'), findsOneWidget);
     await tester.drag(find.byType(ListView), const Offset(0, -620));
     await tester.pump();
     expect(find.text('ابدأ الكأس الشهري'), findsOneWidget);
