@@ -23,6 +23,22 @@ void main() {
     );
     await tester.pumpAndSettle();
 
+    final navigation = tester.widget<NavigationBar>(find.byType(NavigationBar));
+    expect(
+      navigation.destinations
+          .map((destination) => (destination as NavigationDestination).label)
+          .toList(),
+      [
+        'Home',
+        'Memories',
+        'Play',
+        'Missions',
+        'Wardrobe',
+        'Rewards',
+        'Profile',
+      ],
+    );
+
     final overviewButton = find.widgetWithText(FilledButton, 'Family Overview');
     await tester.ensureVisible(overviewButton);
     await tester.tap(overviewButton);

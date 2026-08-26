@@ -206,7 +206,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get navHome => 'الرئيسية';
 
   @override
-  String get navSila => 'صلة';
+  String get navSila => 'الخزانة';
 
   @override
   String get navMemories => 'الذكريات';

@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -255,7 +257,6 @@ class _SilaStudioScreenState extends State<SilaStudioScreen> {
     return SilaPageBackdrop(
       child: LayoutBuilder(
         builder: (context, constraints) {
-          final wide = constraints.maxWidth >= 980;
           final stage = _SilaStage(
             pose: _pose,
             motion: _motion,
@@ -313,20 +314,9 @@ class _SilaStudioScreenState extends State<SilaStudioScreen> {
                       style: Theme.of(context).textTheme.bodyLarge,
                     ),
                     const SizedBox(height: 22),
-                    if (wide)
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(flex: 5, child: stage),
-                          const SizedBox(width: 22),
-                          Expanded(flex: 7, child: closet),
-                        ],
-                      )
-                    else ...[
-                      stage,
-                      const SizedBox(height: 20),
-                      closet,
-                    ],
+                    stage,
+                    const SizedBox(height: 24),
+                    closet,
                   ],
                 ),
               ),
@@ -338,7 +328,7 @@ class _SilaStudioScreenState extends State<SilaStudioScreen> {
   }
 }
 
-class _SilaStage extends StatelessWidget {
+class _SilaStage extends StatefulWidget {
   const _SilaStage({
     required this.pose,
     required this.motion,
@@ -354,6 +344,29 @@ class _SilaStage extends StatelessWidget {
   final int tokens;
   final VoidCallback onTapSila;
   final ValueChanged<SilaMascotMotion> onReaction;
+
+  @override
+  State<_SilaStage> createState() => _SilaStageState();
+}
+
+class _SilaStageState extends State<_SilaStage>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _ambientController;
+
+  @override
+  void initState() {
+    super.initState();
+    _ambientController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 10),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _ambientController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -382,118 +395,269 @@ class _SilaStage extends StatelessWidget {
       ),
     ];
 
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        gradient: AppTheme.heroGradientFor(context),
-        borderRadius: BorderRadius.circular(32),
-        boxShadow: [
-          BoxShadow(
-            color: colors.shadow.withValues(alpha: 0.2),
-            blurRadius: 30,
-            offset: const Offset(0, 16),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: Container(
-                  padding: const EdgeInsets.all(13),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.13),
-                    borderRadius: BorderRadius.circular(18),
-                  ),
-                  child: Text(
-                    strings.silaStudioWelcomeMessage,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Chip(
-                avatar: const Icon(Icons.stars_rounded, size: 18),
-                label: Text('$tokens'),
-                backgroundColor: Colors.white,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final compact = constraints.maxWidth < 700;
+        final frameHeight = compact ? 520.0 : 590.0;
+        final mascotHeight = compact ? 305.0 : 435.0;
+
+        return Container(
+          height: frameHeight,
+          padding: const EdgeInsets.all(3),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [Color(0xFFFFD879), Color(0xFF64E7C2), Color(0xFFFF8D73)],
+            ),
+            borderRadius: BorderRadius.circular(38),
+            boxShadow: [
+              BoxShadow(
+                color: colors.primary.withValues(alpha: 0.24),
+                blurRadius: 42,
+                spreadRadius: 2,
+                offset: const Offset(0, 18),
               ),
             ],
           ),
-          const SizedBox(height: 12),
-          GestureDetector(
-            key: const ValueKey('sila-studio-mascot'),
-            onTap: onTapSila,
-            child: Semantics(
-              button: true,
-              label: strings.silaStudioTapHint,
-              child: SizedBox(
-                height: 340,
-                child: Stack(
-                  alignment: Alignment.bottomCenter,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(35),
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: AppTheme.heroGradientFor(context),
+              ),
+              child: AnimatedBuilder(
+                animation: _ambientController,
+                builder: (context, _) => Stack(
                   children: [
-                    Positioned(
-                      bottom: 22,
-                      child: Container(
-                        width: 230,
-                        height: 54,
-                        decoration: BoxDecoration(
-                          gradient: RadialGradient(
-                            colors: [
-                              Colors.white.withValues(alpha: 0.48),
-                              Colors.white.withValues(alpha: 0.05),
-                            ],
-                          ),
-                          borderRadius: BorderRadius.circular(999),
+                    Positioned.fill(
+                      child: CustomPaint(
+                        painter: _StudioAtmospherePainter(
+                          progress: _ambientController.value,
                         ),
                       ),
                     ),
-                    SilaMascot(
-                      key: ValueKey('studio-${pose.name}-${motion.name}'),
-                      pose: pose,
-                      motion: motion,
-                      loop: true,
-                      height: 310,
-                      semanticLabel: strings.mascotSemanticLabel,
-                      accessoryAssetKey: rewards.mascotAccessory,
-                      outfitAssetKey: rewards.mascotOutfit,
-                      auraAssetKey: rewards.mascotAura,
+                    PositionedDirectional(
+                      top: compact ? 14 : 20,
+                      start: compact ? 14 : 22,
+                      end: compact ? 14 : 22,
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: Container(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: compact ? 12 : 16,
+                                vertical: compact ? 10 : 13,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withValues(alpha: 0.14),
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(
+                                  color: Colors.white.withValues(alpha: 0.16),
+                                ),
+                              ),
+                              child: Text(
+                                strings.silaStudioWelcomeMessage,
+                                maxLines: compact ? 2 : 3,
+                                overflow: TextOverflow.ellipsis,
+                                style: Theme.of(context).textTheme.bodyMedium
+                                    ?.copyWith(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w800,
+                                    ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Chip(
+                            avatar: const Icon(Icons.stars_rounded, size: 18),
+                            label: Text('${widget.tokens}'),
+                            backgroundColor: Colors.white,
+                            side: BorderSide.none,
+                          ),
+                        ],
+                      ),
+                    ),
+                    Positioned.fill(
+                      top: compact ? 70 : 64,
+                      bottom: compact ? 104 : 98,
+                      child: GestureDetector(
+                        key: const ValueKey('sila-studio-mascot'),
+                        onTap: widget.onTapSila,
+                        child: Semantics(
+                          button: true,
+                          label: strings.silaStudioTapHint,
+                          child: Stack(
+                            alignment: Alignment.bottomCenter,
+                            children: [
+                              Positioned(
+                                bottom: compact ? 12 : 18,
+                                child: Container(
+                                  width: compact ? 245 : 360,
+                                  height: compact ? 55 : 76,
+                                  decoration: BoxDecoration(
+                                    gradient: RadialGradient(
+                                      colors: [
+                                        Colors.white.withValues(alpha: 0.58),
+                                        Colors.white.withValues(alpha: 0.04),
+                                      ],
+                                    ),
+                                    borderRadius: BorderRadius.circular(999),
+                                  ),
+                                ),
+                              ),
+                              SilaMascot(
+                                key: ValueKey(
+                                  'studio-${widget.pose.name}-${widget.motion.name}',
+                                ),
+                                pose: widget.pose,
+                                motion: widget.motion,
+                                loop: true,
+                                height: mascotHeight,
+                                semanticLabel: strings.mascotSemanticLabel,
+                                accessoryAssetKey:
+                                    widget.rewards.mascotAccessory,
+                                outfitAssetKey: widget.rewards.mascotOutfit,
+                                auraAssetKey: widget.rewards.mascotAura,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    PositionedDirectional(
+                      start: 14,
+                      end: 14,
+                      bottom: 15,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            strings.silaStudioTapHint,
+                            textAlign: TextAlign.center,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: Theme.of(context).textTheme.labelLarge
+                                ?.copyWith(
+                                  color: Colors.white.withValues(alpha: 0.86),
+                                  fontWeight: FontWeight.w700,
+                                ),
+                          ),
+                          const SizedBox(height: 9),
+                          Wrap(
+                            alignment: WrapAlignment.center,
+                            spacing: 8,
+                            runSpacing: 7,
+                            children: [
+                              for (final reaction in reactions)
+                                ChoiceChip(
+                                  key: ValueKey(
+                                    'sila-motion-${reaction.$1.name}',
+                                  ),
+                                  selected: widget.motion == reaction.$1,
+                                  onSelected: (_) =>
+                                      widget.onReaction(reaction.$1),
+                                  avatar: Icon(reaction.$3, size: 18),
+                                  label: Text(reaction.$2),
+                                  side: BorderSide.none,
+                                ),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
               ),
             ),
           ),
-          Text(
-            strings.silaStudioTapHint,
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.labelLarge?.copyWith(
-              color: Colors.white.withValues(alpha: 0.82),
-            ),
-          ),
-          const SizedBox(height: 14),
-          Wrap(
-            alignment: WrapAlignment.center,
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              for (final reaction in reactions)
-                ChoiceChip(
-                  key: ValueKey('sila-motion-${reaction.$1.name}'),
-                  selected: motion == reaction.$1,
-                  onSelected: (_) => onReaction(reaction.$1),
-                  avatar: Icon(reaction.$3, size: 18),
-                  label: Text(reaction.$2),
-                ),
-            ],
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
+}
+
+class _StudioAtmospherePainter extends CustomPainter {
+  const _StudioAtmospherePainter({required this.progress});
+
+  final double progress;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width * 0.5, size.height * 0.51);
+    final shortest = math.min(size.width, size.height);
+    final pulse = (math.sin(progress * math.pi * 2) + 1) / 2;
+
+    canvas.drawCircle(
+      center,
+      shortest * (0.28 + pulse * 0.025),
+      Paint()
+        ..shader =
+            RadialGradient(
+              colors: [
+                Colors.white.withValues(alpha: 0.24),
+                const Color(0xFF66E6C4).withValues(alpha: 0.08),
+                Colors.transparent,
+              ],
+            ).createShader(
+              Rect.fromCircle(center: center, radius: shortest * 0.34),
+            ),
+    );
+
+    final orbitPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.4
+      ..color = Colors.white.withValues(alpha: 0.16);
+    canvas.save();
+    canvas.translate(center.dx, center.dy);
+    canvas.rotate(progress * math.pi * 0.22);
+    canvas.drawOval(
+      Rect.fromCenter(
+        center: Offset.zero,
+        width: size.width * 0.56,
+        height: shortest * 0.56,
+      ),
+      orbitPaint,
+    );
+    canvas.rotate(-progress * math.pi * 0.44);
+    canvas.drawOval(
+      Rect.fromCenter(
+        center: Offset.zero,
+        width: size.width * 0.43,
+        height: shortest * 0.72,
+      ),
+      orbitPaint..color = Colors.white.withValues(alpha: 0.11),
+    );
+    canvas.restore();
+
+    const particleColors = [
+      Color(0xFFFFD36A),
+      Color(0xFF65E7C1),
+      Color(0xFFFF8A73),
+      Color(0xFFC5B6FF),
+    ];
+    for (var index = 0; index < 14; index += 1) {
+      final angle = progress * math.pi * 2 + index * math.pi * 2 / 14;
+      final radiusX = size.width * (0.25 + (index % 3) * 0.045);
+      final radiusY = shortest * (0.24 + (index % 4) * 0.035);
+      final position = Offset(
+        center.dx + math.cos(angle * (index.isEven ? 1 : -1)) * radiusX,
+        center.dy + math.sin(angle) * radiusY,
+      );
+      final particlePulse = (math.sin(progress * math.pi * 2 + index) + 1) / 2;
+      canvas.drawCircle(
+        position,
+        2.5 + particlePulse * 3.2,
+        Paint()
+          ..color = particleColors[index % particleColors.length].withValues(
+            alpha: 0.45 + particlePulse * 0.45,
+          ),
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _StudioAtmospherePainter oldDelegate) =>
+      oldDelegate.progress != progress;
 }
 
 class _StudioCloset extends StatelessWidget {

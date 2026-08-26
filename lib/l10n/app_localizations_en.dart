@@ -206,7 +206,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get navHome => 'Home';
 
   @override
-  String get navSila => 'Sila';
+  String get navSila => 'Wardrobe';
 
   @override
   String get navMemories => 'Memories';
