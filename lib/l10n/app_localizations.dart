@@ -5189,6 +5189,12 @@ abstract class AppLocalizations {
   /// **'When a family member requests a reward from you, it will appear here.'**
   String get noReceivedRequestsDescription;
 
+  /// No description provided for @couldNotLoadWishlist.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load Wishlist requests.'**
+  String get couldNotLoadWishlist;
+
   /// No description provided for @requestedFrom.
   ///
   /// In en, this message translates to:
@@ -5506,6 +5512,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Accept a Wishlist offer and your goal will appear here.'**
   String get noActiveGoalsDescription;
+
+  /// No description provided for @couldNotLoadGoals.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load your goals.'**
+  String get couldNotLoadGoals;
 
   /// No description provided for @redemptionRequestSent.
   ///

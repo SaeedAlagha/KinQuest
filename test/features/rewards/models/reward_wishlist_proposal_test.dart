@@ -59,4 +59,58 @@ void main() {
       isFalse,
     );
   });
+
+  test('presents an accepted goal as ready when every milestone is met', () {
+    expect(
+      proposal.effectiveStatus(
+        tokens: 20,
+        dailyWins: 12,
+        weeklyWins: 5,
+        monthlyWins: 3,
+        missionsCompleted: 11,
+      ),
+      RewardWishlistStatus.readyToRedeem,
+    );
+
+    expect(
+      proposal.effectiveStatus(
+        tokens: 20,
+        dailyWins: 11,
+        weeklyWins: 5,
+        monthlyWins: 3,
+        missionsCompleted: 11,
+      ),
+      RewardWishlistStatus.accepted,
+    );
+  });
+
+  test('never rewrites terminal workflow states for display', () {
+    final completedProposal = RewardWishlistProposal(
+      id: proposal.id,
+      familyId: proposal.familyId,
+      requesterId: proposal.requesterId,
+      requesterName: proposal.requesterName,
+      recipientId: proposal.recipientId,
+      recipientName: proposal.recipientName,
+      title: proposal.title,
+      description: proposal.description,
+      status: RewardWishlistStatus.completed,
+      tokenRequirement: proposal.tokenRequirement,
+      dailyWinsRequired: proposal.dailyWinsRequired,
+      weeklyWinsRequired: proposal.weeklyWinsRequired,
+      monthlyWinsRequired: proposal.monthlyWinsRequired,
+      missionsRequired: proposal.missionsRequired,
+    );
+
+    expect(
+      completedProposal.effectiveStatus(
+        tokens: 100,
+        dailyWins: 100,
+        weeklyWins: 100,
+        monthlyWins: 100,
+        missionsCompleted: 100,
+      ),
+      RewardWishlistStatus.completed,
+    );
+  });
 }

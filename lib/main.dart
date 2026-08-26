@@ -17,12 +17,31 @@ import 'features/rewards/screens/rewards_hub_screen.dart';
 import 'firebase_options.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+WishlistNotificationRoute? _pendingNotificationRoute;
 
 void handleNotificationTap(RemoteMessage message) {
   final route = WishlistNotificationRoute.fromData(message.data);
+
+  if (route == null) return;
+
+  _openWishlistNotificationRoute(route);
+}
+
+void _openWishlistNotificationRoute(WishlistNotificationRoute route) {
   final navigator = navigatorKey.currentState;
 
-  if (route == null || navigator == null) return;
+  if (navigator == null) {
+    _pendingNotificationRoute = route;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final pendingRoute = _pendingNotificationRoute;
+      if (pendingRoute != null) {
+        _openWishlistNotificationRoute(pendingRoute);
+      }
+    });
+    return;
+  }
+
+  _pendingNotificationRoute = null;
 
   switch (route.destination) {
     case WishlistNotificationDestination.sent:
