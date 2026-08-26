@@ -339,7 +339,6 @@ class _WeeklyChampionshipScreenState extends State<WeeklyChampionshipScreen> {
           .doc(familyId)
           .collection('officialCompetitions')
           .doc(_competitionId);
-
       final saved = await firestore.runTransaction<bool>((transaction) async {
         final existing = await transaction.get(competitionRef);
         final existingData = existing.data();
@@ -579,6 +578,11 @@ class _WeeklyChampionshipScreenState extends State<WeeklyChampionshipScreen> {
           .doc(familyId)
           .collection('officialCompetitions')
           .doc(_competitionId);
+      final trophyRef = firestore
+          .collection('families')
+          .doc(familyId)
+          .collection('trophies')
+          .doc(_competitionId);
 
       final settled = await firestore.runTransaction<bool>((transaction) async {
         final existing = await transaction.get(competitionRef);
@@ -602,6 +606,17 @@ class _WeeklyChampionshipScreenState extends State<WeeklyChampionshipScreen> {
           'completedAt': FieldValue.serverTimestamp(),
           'updatedAt': FieldValue.serverTimestamp(),
         }, SetOptions(merge: true));
+
+        transaction.set(trophyRef, {
+          'id': _competitionId,
+          'type': 'weeklyChampionship',
+          'weekKey': _weekKey,
+          'title': 'Weekly Championship Winner',
+          'winnerId': champion.userId,
+          'winnerName': champion.name,
+          'familyId': familyId,
+          'earnedAt': FieldValue.serverTimestamp(),
+        });
 
         for (final placement in placements) {
           final userRef = firestore.collection('users').doc(placement.userId);

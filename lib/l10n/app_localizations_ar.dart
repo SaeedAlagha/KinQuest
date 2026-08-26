@@ -501,6 +501,26 @@ class AppLocalizationsAr extends AppLocalizations {
   String get familyTrophyCabinetDescription => 'سيظهر هنا أبطال البطولات الأسبوعية والشهرية السابقة.';
 
   @override
+  String get trophyCabinetSignIn => 'سجّل الدخول لعرض الجوائز التي حققتها عائلتك.';
+
+  @override
+  String get trophyCabinetJoinFamily => 'انضم إلى عائلة أو أنشئ واحدة لبدء ملء هذه الخزانة.';
+
+  @override
+  String get trophyCabinetLoadError => 'تعذر تحميل خزانة جوائز العائلة.';
+
+  @override
+  String get monthlyCupTrophy => 'كأس البطولة الشهرية';
+
+  @override
+  String get weeklyChampionTrophy => 'ميدالية بطل الأسبوع';
+
+  @override
+  String trophyWonBy(String name) {
+    return 'حققها للعائلة $name';
+  }
+
+  @override
   String get leaderboard => 'لوحة المتصدرين';
 
   @override
