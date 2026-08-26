@@ -761,7 +761,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get forgotPassword => 'Forgot password?';
 
   @override
-  String get passwordRecoveryComing => 'Password recovery will be added with Firebase.';
+  String get passwordRecoveryComing => 'Enter your account email and we’ll send you a secure password reset link.';
+
+  @override
+  String get resetPassword => 'Reset Password';
 
   @override
   String get loggingIn => 'Logging In...';

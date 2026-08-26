@@ -8,8 +8,12 @@ import '../../../l10n/app_localizations.dart';
 import '../../home/screens/main_navigation_screen.dart';
 import 'signup_screen.dart';
 
+typedef PasswordResetSender = Future<void> Function(String email);
+
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+  const LoginScreen({super.key, this.sendPasswordReset});
+
+  final PasswordResetSender? sendPasswordReset;
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -121,6 +125,23 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
+  Future<void> _openPasswordRecovery() async {
+    final strings = AppLocalizations.of(context)!;
+    final sent = await showDialog<bool>(
+      context: context,
+      builder: (_) => _PasswordResetDialog(
+        initialEmail: _emailController.text.trim(),
+        sender: widget.sendPasswordReset,
+      ),
+    );
+
+    if (sent == true && mounted) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(strings.passwordResetSent)));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final strings = AppLocalizations.of(context)!;
@@ -203,13 +224,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     Align(
                       alignment: AlignmentDirectional.centerEnd,
                       child: TextButton(
-                        onPressed: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(strings.passwordRecoveryComing),
-                            ),
-                          );
-                        },
+                        onPressed: _isLoggingIn ? null : _openPasswordRecovery,
                         child: Text(strings.forgotPassword),
                       ),
                     ),
@@ -268,6 +283,134 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _PasswordResetDialog extends StatefulWidget {
+  const _PasswordResetDialog({required this.initialEmail, this.sender});
+
+  final String initialEmail;
+  final PasswordResetSender? sender;
+
+  @override
+  State<_PasswordResetDialog> createState() => _PasswordResetDialogState();
+}
+
+class _PasswordResetDialogState extends State<_PasswordResetDialog> {
+  final _formKey = GlobalKey<FormState>();
+  late final TextEditingController _emailController;
+  bool _isSending = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _emailController = TextEditingController(text: widget.initialEmail);
+  }
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _submit() async {
+    if (_isSending || !(_formKey.currentState?.validate() ?? false)) return;
+
+    setState(() => _isSending = true);
+    final strings = AppLocalizations.of(context)!;
+    final email = _emailController.text.trim();
+
+    try {
+      final sender = widget.sender;
+      if (sender != null) {
+        await sender(email);
+      } else {
+        await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
+      }
+
+      if (mounted) Navigator.pop(context, true);
+    } on FirebaseAuthException catch (error) {
+      if (!mounted) return;
+
+      if (error.code == 'user-not-found') {
+        Navigator.pop(context, true);
+        return;
+      }
+
+      final message = switch (error.code) {
+        'invalid-email' => strings.pleaseEnterValidEmail,
+        'too-many-requests' => strings.tooManyLoginAttempts,
+        'network-request-failed' => strings.noInternetConnection,
+        _ => strings.couldNotSendReset,
+      };
+      setState(() => _isSending = false);
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(message)));
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _isSending = false);
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(strings.couldNotSendReset)));
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context)!;
+    final validators = LocalizedFormValidators(strings);
+
+    return AlertDialog(
+      scrollable: true,
+      icon: const Icon(Icons.mark_email_read_outlined),
+      title: Text(strings.resetPassword),
+      content: Form(
+        key: _formKey,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(strings.passwordRecoveryComing),
+            const SizedBox(height: 18),
+            TextFormField(
+              key: const ValueKey('password-reset-email'),
+              controller: _emailController,
+              enabled: !_isSending,
+              autofocus: _emailController.text.isEmpty,
+              keyboardType: TextInputType.emailAddress,
+              textInputAction: TextInputAction.done,
+              autocorrect: false,
+              validator: validators.validateEmail,
+              onFieldSubmitted: (_) => _submit(),
+              decoration: InputDecoration(
+                labelText: strings.emailAddress,
+                hintText: strings.emailAddressHint,
+                prefixIcon: const Icon(Icons.email_outlined),
+              ),
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: _isSending ? null : () => Navigator.pop(context, false),
+          child: Text(strings.cancel),
+        ),
+        FilledButton.icon(
+          onPressed: _isSending ? null : _submit,
+          icon: _isSending
+              ? const SizedBox.square(
+                  dimension: 16,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : const Icon(Icons.send_outlined),
+          label: Text(
+            _isSending ? strings.sending : strings.sendPasswordReset,
+          ),
+        ),
+      ],
     );
   }
 }
