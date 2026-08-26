@@ -498,6 +498,26 @@ class AppLocalizationsEn extends AppLocalizations {
   String get familyTrophyCabinetDescription => 'Previous weekly and monthly champions will appear here.';
 
   @override
+  String get trophyCabinetSignIn => 'Sign in to see the trophies your family has earned.';
+
+  @override
+  String get trophyCabinetJoinFamily => 'Join or create a family to start filling this cabinet.';
+
+  @override
+  String get trophyCabinetLoadError => 'The trophy cabinet could not be loaded.';
+
+  @override
+  String get monthlyCupTrophy => 'Monthly Cup Trophy';
+
+  @override
+  String get weeklyChampionTrophy => 'Weekly Champion Medal';
+
+  @override
+  String trophyWonBy(String name) {
+    return 'Won for the family by $name';
+  }
+
+  @override
   String get leaderboard => 'Leaderboard';
 
   @override

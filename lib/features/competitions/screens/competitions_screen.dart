@@ -81,11 +81,7 @@ class CompetitionsScreen extends StatelessWidget {
                   const SizedBox(height: 8),
                   _FamilyLeaderboard(developerPreview: developerPreview),
                   const SizedBox(height: 16),
-                  _SectionPlaceholder(
-                    icon: Icons.military_tech,
-                    title: strings.familyTrophyCabinet,
-                    description: strings.familyTrophyCabinetDescription,
-                  ),
+                  _FamilyTrophyCabinet(developerPreview: developerPreview),
                 ],
               ),
             ),
@@ -535,6 +531,208 @@ class _DeveloperFamilyLeaderboard extends StatelessWidget {
       ),
     );
   }
+}
+
+class _FamilyTrophyCabinet extends StatelessWidget {
+  const _FamilyTrophyCabinet({required this.developerPreview});
+
+  final bool developerPreview;
+
+  @override
+  Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context)!;
+
+    if (developerPreview) {
+      return _TrophyCabinetCard(
+        trophies: [
+          _TrophyEntry(
+            type: 'monthlyCup',
+            winnerName: 'Amal',
+            period: '2026-08',
+          ),
+          _TrophyEntry(
+            type: 'weeklyChampionship',
+            winnerName: 'Omar',
+            period: '2026-W34',
+          ),
+        ],
+      );
+    }
+
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      return _SectionPlaceholder(
+        icon: Icons.emoji_events_outlined,
+        title: strings.familyTrophyCabinet,
+        description: strings.trophyCabinetSignIn,
+      );
+    }
+
+    return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+      stream: FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .snapshots(),
+      builder: (context, userSnapshot) {
+        if (!userSnapshot.hasData && !userSnapshot.hasError) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        final familyId = userSnapshot.data?.data()?['familyId']?.toString();
+        if (userSnapshot.hasError || familyId == null || familyId.isEmpty) {
+          return _SectionPlaceholder(
+            icon: Icons.emoji_events_outlined,
+            title: strings.familyTrophyCabinet,
+            description: userSnapshot.hasError
+                ? strings.trophyCabinetLoadError
+                : strings.trophyCabinetJoinFamily,
+          );
+        }
+
+        return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+          stream: FirebaseFirestore.instance
+              .collection('families')
+              .doc(familyId)
+              .collection('trophies')
+              .orderBy('earnedAt', descending: true)
+              .limit(6)
+              .snapshots(),
+          builder: (context, trophySnapshot) {
+            if (!trophySnapshot.hasData && !trophySnapshot.hasError) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            if (trophySnapshot.hasError) {
+              return _SectionPlaceholder(
+                icon: Icons.emoji_events_outlined,
+                title: strings.familyTrophyCabinet,
+                description: strings.trophyCabinetLoadError,
+              );
+            }
+
+            final trophies =
+                trophySnapshot.data?.docs.map((document) {
+                  final data = document.data();
+                  return _TrophyEntry(
+                    type: data['type']?.toString() ?? '',
+                    winnerName:
+                        data['winnerName']?.toString() ?? strings.familyMember,
+                    period:
+                        data['monthKey']?.toString() ??
+                        data['weekKey']?.toString() ??
+                        '',
+                  );
+                }).toList() ??
+                const <_TrophyEntry>[];
+
+            if (trophies.isEmpty) {
+              return _SectionPlaceholder(
+                icon: Icons.emoji_events_outlined,
+                title: strings.familyTrophyCabinet,
+                description: strings.familyTrophyCabinetDescription,
+              );
+            }
+            return _TrophyCabinetCard(trophies: trophies);
+          },
+        );
+      },
+    );
+  }
+}
+
+class _TrophyCabinetCard extends StatelessWidget {
+  const _TrophyCabinetCard({required this.trophies});
+
+  final List<_TrophyEntry> trophies;
+
+  @override
+  Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context)!;
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Card(
+      margin: EdgeInsets.zero,
+      clipBehavior: Clip.antiAlias,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              AppTheme.goldColor.withValues(alpha: 0.2),
+              colorScheme.surface,
+            ],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(18),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  const Icon(
+                    Icons.emoji_events_rounded,
+                    color: AppTheme.goldColor,
+                    size: 30,
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      strings.familyTrophyCabinet,
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              ...trophies.map(
+                (trophy) => ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: CircleAvatar(
+                    backgroundColor: AppTheme.goldColor.withValues(alpha: 0.18),
+                    child: Icon(
+                      trophy.type == 'monthlyCup'
+                          ? Icons.workspace_premium_rounded
+                          : Icons.military_tech_rounded,
+                      color: AppTheme.goldColor,
+                    ),
+                  ),
+                  title: Text(
+                    trophy.type == 'monthlyCup'
+                        ? strings.monthlyCupTrophy
+                        : strings.weeklyChampionTrophy,
+                    style: const TextStyle(fontWeight: FontWeight.w700),
+                  ),
+                  subtitle: Text(strings.trophyWonBy(trophy.winnerName)),
+                  trailing: trophy.period.isEmpty
+                      ? null
+                      : Text(
+                          trophy.period,
+                          textDirection: TextDirection.ltr,
+                          style: Theme.of(context).textTheme.labelMedium,
+                        ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _TrophyEntry {
+  const _TrophyEntry({
+    required this.type,
+    required this.winnerName,
+    required this.period,
+  });
+
+  final String type;
+  final String winnerName;
+  final String period;
 }
 
 class _SectionPlaceholder extends StatelessWidget {

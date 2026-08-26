@@ -32,6 +32,10 @@ void main() {
 
     await tester.scrollUntilVisible(find.text('Monthly Cup'), 300);
     expect(find.text('Monthly Cup'), findsOneWidget);
+
+    await tester.scrollUntilVisible(find.text('Family Trophy Cabinet'), 300);
+    expect(find.text('Monthly Cup Trophy'), findsOneWidget);
+    expect(find.text('Weekly Champion Medal'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 }

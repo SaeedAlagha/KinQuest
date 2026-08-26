@@ -1019,6 +1019,42 @@ abstract class AppLocalizations {
   /// **'Previous weekly and monthly champions will appear here.'**
   String get familyTrophyCabinetDescription;
 
+  /// No description provided for @trophyCabinetSignIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to see the trophies your family has earned.'**
+  String get trophyCabinetSignIn;
+
+  /// No description provided for @trophyCabinetJoinFamily.
+  ///
+  /// In en, this message translates to:
+  /// **'Join or create a family to start filling this cabinet.'**
+  String get trophyCabinetJoinFamily;
+
+  /// No description provided for @trophyCabinetLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'The trophy cabinet could not be loaded.'**
+  String get trophyCabinetLoadError;
+
+  /// No description provided for @monthlyCupTrophy.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly Cup Trophy'**
+  String get monthlyCupTrophy;
+
+  /// No description provided for @weeklyChampionTrophy.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly Champion Medal'**
+  String get weeklyChampionTrophy;
+
+  /// No description provided for @trophyWonBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Won for the family by {name}'**
+  String trophyWonBy(String name);
+
   /// No description provided for @leaderboard.
   ///
   /// In en, this message translates to:
