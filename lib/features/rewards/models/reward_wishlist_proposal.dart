@@ -94,6 +94,27 @@ class RewardWishlistProposal {
         missionProgress(missionsCompleted) >= missionsRequired;
   }
 
+  RewardWishlistStatus effectiveStatus({
+    required int tokens,
+    required int dailyWins,
+    required int weeklyWins,
+    required int monthlyWins,
+    required int missionsCompleted,
+  }) {
+    if (status == RewardWishlistStatus.accepted &&
+        requirementsMet(
+          tokens: tokens,
+          dailyWins: dailyWins,
+          weeklyWins: weeklyWins,
+          monthlyWins: monthlyWins,
+          missionsCompleted: missionsCompleted,
+        )) {
+      return RewardWishlistStatus.readyToRedeem;
+    }
+
+    return status;
+  }
+
   static int _progressSince(int current, int baseline) {
     return current > baseline ? current - baseline : 0;
   }

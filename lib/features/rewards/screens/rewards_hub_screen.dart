@@ -223,6 +223,17 @@ class _RewardsHubScreenState extends State<RewardsHubScreen> {
           .where('requesterId', isEqualTo: userId)
           .snapshots(),
       builder: (context, proposalSnapshot) {
+        if (proposalSnapshot.hasError) {
+          return _RewardsScaffold(
+            tokens: tokens,
+            child: _RewardsMessage(
+              icon: Icons.cloud_off_rounded,
+              title: strings.couldNotLoadGoals,
+              message: strings.tryAgain,
+            ),
+          );
+        }
+
         final goals =
             proposalSnapshot.data?.docs
                 .map(RewardWishlistProposal.fromDocument)
@@ -624,15 +635,18 @@ class _WishlistGoalCard extends StatelessWidget {
         requirements.every(
           (requirement) => requirement.current >= requirement.required,
         );
-
-    final canRedeem =
-        complete &&
-        (proposal.status == RewardWishlistStatus.accepted ||
-            proposal.status == RewardWishlistStatus.readyToRedeem);
+    final effectiveStatus = proposal.effectiveStatus(
+      tokens: tokens,
+      dailyWins: dailyWins,
+      weeklyWins: weeklyWins,
+      monthlyWins: monthlyWins,
+      missionsCompleted: missionsCompleted,
+    );
+    final canRedeem = effectiveStatus == RewardWishlistStatus.readyToRedeem;
     final completedMilestones = requirements
         .where((requirement) => requirement.current >= requirement.required)
         .length;
-    final statusLabel = switch (proposal.status) {
+    final statusLabel = switch (effectiveStatus) {
       RewardWishlistStatus.readyToRedeem => strings.goalReadyToRedeem,
       RewardWishlistStatus.redemptionRequested =>
         strings.goalAwaitingConfirmation,

@@ -32,8 +32,10 @@ class _RewardWishlistNegotiationScreenState
 
   String? _familyId;
   String? _currentUserName;
+  String? _processingProposalId;
 
   bool _loading = true;
+  bool _loadFailed = false;
   int _initialTabIndex = 0;
 
   @override
@@ -54,10 +56,21 @@ class _RewardWishlistNegotiationScreenState
       return;
     }
 
-    final userDoc = await FirebaseFirestore.instance
-        .collection('users')
-        .doc(user.uid)
-        .get();
+    DocumentSnapshot<Map<String, dynamic>> userDoc;
+    try {
+      userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
+    } catch (_) {
+      if (mounted) {
+        setState(() {
+          _loading = false;
+          _loadFailed = true;
+        });
+      }
+      return;
+    }
 
     if (!mounted) return;
 
@@ -85,12 +98,23 @@ class _RewardWishlistNegotiationScreenState
         resolvedFamilyId.isNotEmpty &&
         proposalId != null &&
         proposalId.isNotEmpty) {
-      final proposalDoc = await FirebaseFirestore.instance
-          .collection('families')
-          .doc(resolvedFamilyId)
-          .collection('rewardWishlistProposals')
-          .doc(proposalId)
-          .get();
+      DocumentSnapshot<Map<String, dynamic>> proposalDoc;
+      try {
+        proposalDoc = await FirebaseFirestore.instance
+            .collection('families')
+            .doc(resolvedFamilyId)
+            .collection('rewardWishlistProposals')
+            .doc(proposalId)
+            .get();
+      } catch (_) {
+        if (mounted) {
+          setState(() {
+            _loading = false;
+            _loadFailed = true;
+          });
+        }
+        return;
+      }
 
       if (proposalDoc.exists) {
         final proposal = RewardWishlistProposal.fromDocument(proposalDoc);
@@ -123,12 +147,36 @@ class _RewardWishlistNegotiationScreenState
     ).showSnackBar(SnackBar(content: Text(message)));
   }
 
+  String _messageFromError(Object error) {
+    final strings = AppLocalizations.of(context)!;
+    if (Localizations.localeOf(context).languageCode == 'ar') {
+      return strings.somethingWentWrong;
+    }
+
+    return error.toString().replaceFirst('Exception: ', '');
+  }
+
   @override
   Widget build(BuildContext context) {
     final strings = AppLocalizations.of(context)!;
 
     if (_loading) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
+    if (_loadFailed) {
+      return Scaffold(
+        appBar: AppBar(title: Text(strings.wishlist)),
+        body: _WishlistLoadError(
+          onRetry: () {
+            setState(() {
+              _loading = true;
+              _loadFailed = false;
+            });
+            _loadCurrentUser();
+          },
+        ),
+      );
     }
 
     final user = FirebaseAuth.instance.currentUser;
@@ -172,14 +220,34 @@ class _RewardWishlistNegotiationScreenState
     );
   }
 
-  bool _matchesNotificationProposal(RewardWishlistProposal proposal) {
+  bool _isNotificationProposal(RewardWishlistProposal proposal) {
     final proposalId = widget.proposalId?.trim();
 
     if (proposalId == null || proposalId.isEmpty) {
-      return true;
+      return false;
     }
 
     return proposal.id == proposalId;
+  }
+
+  void _prioritizeNotificationProposal(List<RewardWishlistProposal> proposals) {
+    final highlightedIndex = proposals.indexWhere(_isNotificationProposal);
+    if (highlightedIndex > 0) {
+      proposals.insert(0, proposals.removeAt(highlightedIndex));
+    }
+  }
+
+  bool _isProcessing(RewardWishlistProposal proposal) =>
+      _processingProposalId == proposal.id;
+
+  void _startProcessing(RewardWishlistProposal proposal) {
+    setState(() => _processingProposalId = proposal.id);
+  }
+
+  void _finishProcessing(RewardWishlistProposal proposal) {
+    if (mounted && _processingProposalId == proposal.id) {
+      setState(() => _processingProposalId = null);
+    }
   }
 
   Widget _buildNewRequestTab({
@@ -194,6 +262,10 @@ class _RewardWishlistNegotiationScreenState
           .doc(familyId)
           .get(),
       builder: (context, familySnapshot) {
+        if (familySnapshot.hasError) {
+          return const _WishlistLoadError();
+        }
+
         if (!familySnapshot.hasData) {
           return const Center(child: CircularProgressIndicator());
         }
@@ -226,6 +298,10 @@ class _RewardWishlistNegotiationScreenState
             fallbackName: strings.familyMemberFallback,
           ),
           builder: (context, membersSnapshot) {
+            if (membersSnapshot.hasError) {
+              return const _WishlistLoadError();
+            }
+
             if (!membersSnapshot.hasData) {
               return const Center(child: CircularProgressIndicator());
             }
@@ -255,9 +331,7 @@ class _RewardWishlistNegotiationScreenState
 
                       return true;
                     } catch (error) {
-                      _showMessage(
-                        error.toString().replaceFirst('Exception: ', ''),
-                      );
+                      _showMessage(_messageFromError(error));
 
                       return false;
                     }
@@ -319,17 +393,17 @@ class _RewardWishlistNegotiationScreenState
     return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
       stream: _proposalStream(familyId),
       builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return const _WishlistLoadError();
+        }
+
         if (!snapshot.hasData) {
           return const Center(child: CircularProgressIndicator());
         }
 
         final proposals = snapshot.data!.docs
             .map(RewardWishlistProposal.fromDocument)
-            .where(
-              (proposal) =>
-                  proposal.requesterId == userId &&
-                  _matchesNotificationProposal(proposal),
-            )
+            .where((proposal) => proposal.requesterId == userId)
             .toList();
 
         proposals.sort(
@@ -337,6 +411,7 @@ class _RewardWishlistNegotiationScreenState
             a.createdAt?.millisecondsSinceEpoch ?? 0,
           ),
         );
+        _prioritizeNotificationProposal(proposals);
 
         if (proposals.isEmpty) {
           return _EmptyState(
@@ -355,6 +430,8 @@ class _RewardWishlistNegotiationScreenState
 
             return _ProposalCard(
               proposal: proposal,
+              highlighted: _isNotificationProposal(proposal),
+              processing: _isProcessing(proposal),
               personLabel: strings.requestedFrom,
               personName: proposal.recipientName,
               showRequirements:
@@ -362,16 +439,20 @@ class _RewardWishlistNegotiationScreenState
               actions: proposal.status == RewardWishlistStatus.offered
                   ? [
                       FilledButton.icon(
-                        onPressed: () async {
-                          await _acceptOffer(familyId, proposal, userId);
-                        },
+                        onPressed: _isProcessing(proposal)
+                            ? null
+                            : () async {
+                                await _acceptOffer(familyId, proposal, userId);
+                              },
                         icon: const Icon(Icons.check),
                         label: Text(strings.accept),
                       ),
                       OutlinedButton.icon(
-                        onPressed: () async {
-                          await _rejectOffer(familyId, proposal, userId);
-                        },
+                        onPressed: _isProcessing(proposal)
+                            ? null
+                            : () async {
+                                await _rejectOffer(familyId, proposal, userId);
+                              },
                         icon: const Icon(Icons.close),
                         label: Text(strings.reject),
                       ),
@@ -390,17 +471,17 @@ class _RewardWishlistNegotiationScreenState
     return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
       stream: _proposalStream(familyId),
       builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return const _WishlistLoadError();
+        }
+
         if (!snapshot.hasData) {
           return const Center(child: CircularProgressIndicator());
         }
 
         final proposals = snapshot.data!.docs
             .map(RewardWishlistProposal.fromDocument)
-            .where(
-              (proposal) =>
-                  proposal.recipientId == userId &&
-                  _matchesNotificationProposal(proposal),
-            )
+            .where((proposal) => proposal.recipientId == userId)
             .toList();
 
         proposals.sort(
@@ -408,6 +489,7 @@ class _RewardWishlistNegotiationScreenState
             a.createdAt?.millisecondsSinceEpoch ?? 0,
           ),
         );
+        _prioritizeNotificationProposal(proposals);
 
         if (proposals.isEmpty) {
           return _EmptyState(
@@ -426,6 +508,8 @@ class _RewardWishlistNegotiationScreenState
 
             return _ProposalCard(
               proposal: proposal,
+              highlighted: _isNotificationProposal(proposal),
+              processing: _isProcessing(proposal),
               personLabel: strings.requestedBy,
               personName: proposal.requesterName,
               showRequirements:
@@ -433,20 +517,28 @@ class _RewardWishlistNegotiationScreenState
               actions: proposal.status == RewardWishlistStatus.requested
                   ? [
                       FilledButton.icon(
-                        onPressed: () {
-                          _showOfferDialog(
-                            familyId: familyId,
-                            proposal: proposal,
-                            recipientId: userId,
-                          );
-                        },
+                        onPressed: _isProcessing(proposal)
+                            ? null
+                            : () {
+                                _showOfferDialog(
+                                  familyId: familyId,
+                                  proposal: proposal,
+                                  recipientId: userId,
+                                );
+                              },
                         icon: const Icon(Icons.handshake_outlined),
                         label: Text(strings.makeOffer),
                       ),
                       OutlinedButton.icon(
-                        onPressed: () async {
-                          await _declineRequest(familyId, proposal, userId);
-                        },
+                        onPressed: _isProcessing(proposal)
+                            ? null
+                            : () async {
+                                await _declineRequest(
+                                  familyId,
+                                  proposal,
+                                  userId,
+                                );
+                              },
                         icon: const Icon(Icons.close),
                         label: Text(strings.decline),
                       ),
@@ -454,23 +546,13 @@ class _RewardWishlistNegotiationScreenState
                   : proposal.status == RewardWishlistStatus.redemptionRequested
                   ? [
                       FilledButton.icon(
-                        onPressed: () async {
-                          try {
-                            await _rewardsService.fulfillWishlistRedemption(
-                              familyId: familyId,
-                              proposalId: proposal.id,
-                              recipientId: userId,
-                            );
-
-                            _showMessage(
-                              strings.rewardMarkedFulfilled(proposal.title),
-                            );
-                          } catch (error) {
-                            _showMessage(
-                              error.toString().replaceFirst('Exception: ', ''),
-                            );
-                          }
-                        },
+                        onPressed: _isProcessing(proposal)
+                            ? null
+                            : () => _fulfillRedemption(
+                                familyId,
+                                proposal,
+                                userId,
+                              ),
                         icon: const Icon(Icons.check_circle_outline),
                         label: Text(strings.confirmFulfillment),
                       ),
@@ -489,6 +571,7 @@ class _RewardWishlistNegotiationScreenState
     String userId,
   ) async {
     final strings = AppLocalizations.of(context)!;
+    _startProcessing(proposal);
 
     try {
       await _rewardsService.acceptWishlistOffer(
@@ -506,7 +589,9 @@ class _RewardWishlistNegotiationScreenState
         ),
       );
     } catch (error) {
-      _showMessage(error.toString().replaceFirst('Exception: ', ''));
+      _showMessage(_messageFromError(error));
+    } finally {
+      _finishProcessing(proposal);
     }
   }
 
@@ -516,6 +601,7 @@ class _RewardWishlistNegotiationScreenState
     String userId,
   ) async {
     final strings = AppLocalizations.of(context)!;
+    _startProcessing(proposal);
 
     try {
       await _rewardsService.rejectWishlistOffer(
@@ -526,7 +612,9 @@ class _RewardWishlistNegotiationScreenState
 
       _showMessage(strings.offerRejected);
     } catch (error) {
-      _showMessage(error.toString().replaceFirst('Exception: ', ''));
+      _showMessage(_messageFromError(error));
+    } finally {
+      _finishProcessing(proposal);
     }
   }
 
@@ -536,6 +624,7 @@ class _RewardWishlistNegotiationScreenState
     String userId,
   ) async {
     final strings = AppLocalizations.of(context)!;
+    _startProcessing(proposal);
 
     try {
       await _rewardsService.declineWishlistProposal(
@@ -546,7 +635,31 @@ class _RewardWishlistNegotiationScreenState
 
       _showMessage(strings.wishlistRequestDeclined);
     } catch (error) {
-      _showMessage(error.toString().replaceFirst('Exception: ', ''));
+      _showMessage(_messageFromError(error));
+    } finally {
+      _finishProcessing(proposal);
+    }
+  }
+
+  Future<void> _fulfillRedemption(
+    String familyId,
+    RewardWishlistProposal proposal,
+    String userId,
+  ) async {
+    final strings = AppLocalizations.of(context)!;
+    _startProcessing(proposal);
+
+    try {
+      await _rewardsService.fulfillWishlistRedemption(
+        familyId: familyId,
+        proposalId: proposal.id,
+        recipientId: userId,
+      );
+      _showMessage(strings.rewardMarkedFulfilled(proposal.title));
+    } catch (error) {
+      _showMessage(_messageFromError(error));
+    } finally {
+      _finishProcessing(proposal);
     }
   }
 
@@ -654,6 +767,7 @@ class _RewardWishlistNegotiationScreenState
     }
 
     try {
+      _startProcessing(proposal);
       await _rewardsService.makeWishlistOffer(
         familyId: familyId,
         proposalId: proposal.id,
@@ -667,7 +781,9 @@ class _RewardWishlistNegotiationScreenState
 
       _showMessage(strings.offerSentTo(proposal.requesterName));
     } catch (error) {
-      _showMessage(error.toString().replaceFirst('Exception: ', ''));
+      _showMessage(_messageFromError(error));
+    } finally {
+      _finishProcessing(proposal);
     }
   }
 
@@ -859,6 +975,8 @@ class _ProposalCard extends StatelessWidget {
     required this.personName,
     required this.showRequirements,
     required this.actions,
+    this.highlighted = false,
+    this.processing = false,
   });
 
   final RewardWishlistProposal proposal;
@@ -866,12 +984,26 @@ class _ProposalCard extends StatelessWidget {
   final String personName;
   final bool showRequirements;
   final List<Widget> actions;
+  final bool highlighted;
+  final bool processing;
 
   @override
   Widget build(BuildContext context) {
     final strings = AppLocalizations.of(context)!;
 
     return Card(
+      color: highlighted
+          ? Theme.of(context).colorScheme.primaryContainer
+          : null,
+      shape: highlighted
+          ? RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(18),
+              side: BorderSide(
+                color: Theme.of(context).colorScheme.primary,
+                width: 2,
+              ),
+            )
+          : null,
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -898,6 +1030,13 @@ class _ProposalCard extends StatelessWidget {
               const SizedBox(height: 6),
               Text(proposal.description),
             ],
+            if (highlighted) ...[
+              const SizedBox(height: 10),
+              Chip(
+                avatar: const Icon(Icons.notifications_active_outlined),
+                label: Text(strings.openedFromNotification),
+              ),
+            ],
             if (showRequirements) ...[
               const SizedBox(height: 14),
               const Divider(),
@@ -907,6 +1046,10 @@ class _ProposalCard extends StatelessWidget {
             if (actions.isNotEmpty) ...[
               const SizedBox(height: 14),
               Wrap(spacing: 8, runSpacing: 8, children: actions),
+            ],
+            if (processing) ...[
+              const SizedBox(height: 12),
+              const LinearProgressIndicator(),
             ],
           ],
         ),
@@ -1010,6 +1153,49 @@ class _StatusChip extends StatelessWidget {
       case RewardWishlistStatus.cancelled:
         return strings.statusCancelled;
     }
+  }
+}
+
+class _WishlistLoadError extends StatelessWidget {
+  const _WishlistLoadError({this.onRetry});
+
+  final VoidCallback? onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context)!;
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.cloud_off_rounded,
+              size: 56,
+              color: Theme.of(context).colorScheme.error,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              strings.couldNotLoadWishlist,
+              textAlign: TextAlign.center,
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+            ),
+            if (onRetry != null) ...[
+              const SizedBox(height: 16),
+              FilledButton.icon(
+                onPressed: onRetry,
+                icon: const Icon(Icons.refresh_rounded),
+                label: Text(strings.tryAgain),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
   }
 }
 

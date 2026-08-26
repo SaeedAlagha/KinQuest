@@ -2802,6 +2802,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noReceivedRequestsDescription => 'When a family member requests a reward from you, it will appear here.';
 
   @override
+  String get couldNotLoadWishlist => 'Could not load Wishlist requests.';
+
+  @override
   String get requestedFrom => 'Requested from';
 
   @override
@@ -2979,6 +2982,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noActiveGoalsDescription => 'Accept a Wishlist offer and your goal will appear here.';
+
+  @override
+  String get couldNotLoadGoals => 'Could not load your goals.';
 
   @override
   String redemptionRequestSent(String name) {

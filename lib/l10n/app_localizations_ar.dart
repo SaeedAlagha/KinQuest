@@ -2826,6 +2826,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get noReceivedRequestsDescription => 'عندما يطلب منك أحد أفراد العائلة مكافأة، ستظهر هنا.';
 
   @override
+  String get couldNotLoadWishlist => 'تعذر تحميل طلبات قائمة الأمنيات.';
+
+  @override
   String get requestedFrom => 'طُلبت من';
 
   @override
@@ -3003,6 +3006,9 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get noActiveGoalsDescription => 'اقبل عرضًا من قائمة الأمنيات وسيظهر هدفك هنا.';
+
+  @override
+  String get couldNotLoadGoals => 'تعذر تحميل أهدافك.';
 
   @override
   String redemptionRequestSent(String name) {
