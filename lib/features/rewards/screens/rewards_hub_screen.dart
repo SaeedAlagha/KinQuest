@@ -951,16 +951,18 @@ class _DigitalRewardsCatalogView extends StatelessWidget {
           const SizedBox(height: 12),
           LayoutBuilder(
             builder: (context, constraints) {
-              final cardWidth = constraints.maxWidth < 700
+              final cardWidth = constraints.maxWidth < 300
                   ? constraints.maxWidth
-                  : (constraints.maxWidth - 16) / 2;
+                  : constraints.maxWidth < 700
+                  ? (constraints.maxWidth - 12) / 2
+                  : (constraints.maxWidth - 32) / 3;
               final categoryRewards = rewards
                   .where((reward) => reward.category == category)
                   .toList();
 
               return Wrap(
-                spacing: 16,
-                runSpacing: 16,
+                spacing: 12,
+                runSpacing: 12,
                 children: [
                   for (final reward in categoryRewards)
                     SizedBox(
@@ -1077,20 +1079,16 @@ class _DigitalRewardCard extends StatelessWidget {
     final disabled = processing || anotherRewardProcessing || equipped;
     final strings = AppLocalizations.of(context)!;
     final rewardName = localizedDigitalRewardName(context, reward);
-    final rewardDescription = localizedDigitalRewardDescription(
-      context,
-      reward,
-    );
 
     return Card(
       clipBehavior: Clip.antiAlias,
       child: Padding(
-        padding: const EdgeInsets.all(18),
+        padding: const EdgeInsets.all(15),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Center(child: DigitalRewardPreview(reward: reward)),
-            const SizedBox(height: 14),
+            const SizedBox(height: 9),
             Text(
               rewardName,
               style: Theme.of(
@@ -1098,8 +1096,7 @@ class _DigitalRewardCard extends StatelessWidget {
               ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900),
             ),
             const SizedBox(height: 5),
-            Text(rewardDescription),
-            const SizedBox(height: 12),
+            const SizedBox(height: 9),
             Wrap(
               spacing: 8,
               runSpacing: 7,
@@ -1115,7 +1112,7 @@ class _DigitalRewardCard extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 9),
             FilledButton.icon(
               key: ValueKey('digital-reward-action-${reward.id}'),
               onPressed: disabled || (!owned && !canAfford)

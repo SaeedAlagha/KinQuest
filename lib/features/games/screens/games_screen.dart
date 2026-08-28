@@ -276,7 +276,7 @@ class GamesScreen extends StatelessWidget {
                 : constraints.maxWidth >= 650
                 ? 2
                 : 1;
-            final cardHeight = columns == 1 ? 266.0 : 298.0;
+            final cardHeight = columns == 1 ? 220.0 : 270.0;
 
             return SingleChildScrollView(
               padding: EdgeInsets.fromLTRB(pagePadding, 28, pagePadding, 40),
@@ -498,7 +498,7 @@ class _GameCard extends StatelessWidget {
       child: InkWell(
         onTap: onOpen,
         child: Padding(
-          padding: const EdgeInsets.all(22),
+          padding: const EdgeInsets.all(18),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -539,12 +539,12 @@ class _GameCard extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 14),
               Text(
                 _localizedGameTitle(strings, game.title),
                 style: Theme.of(context).textTheme.titleLarge,
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 5),
               Text(
                 _localizedGameDescription(
                   strings,
