@@ -14,6 +14,7 @@ import '../../competitions/models/game_play_mode.dart';
 import '../services/family_impostor_ai_service.dart';
 import '../utils/game_localization.dart';
 import '../widgets/game_setup_widgets.dart';
+import '../widgets/game_exit_guard.dart';
 
 enum _GamePhase {
   setup,
@@ -292,10 +293,16 @@ class _FamilyImpostorScreenState extends State<FamilyImpostorScreen> {
   @override
   Widget build(BuildContext context) {
     final strings = AppLocalizations.of(context)!;
-    return Scaffold(
-      floatingActionButton: const SilaGameCoachButton(),
-      appBar: AppBar(title: Text(strings.familyImpostor)),
-      body: SafeArea(child: _buildBody()),
+    final gameInProgress =
+        _phase != _GamePhase.setup && _phase != _GamePhase.finalLeaderboard;
+
+    return GameExitGuard(
+      gameInProgress: gameInProgress,
+      child: Scaffold(
+        floatingActionButton: const SilaGameCoachButton(),
+        appBar: AppBar(title: Text(strings.familyImpostor)),
+        body: SafeArea(child: _buildBody()),
+      ),
     );
   }
 

@@ -13,6 +13,7 @@ import '../../competitions/models/competition_player_result.dart';
 import '../../competitions/models/game_play_mode.dart';
 import '../services/dont_say_it_ai_service.dart';
 import '../widgets/game_setup_widgets.dart';
+import '../widgets/game_exit_guard.dart';
 
 enum _DontSayItPhase {
   setup,
@@ -312,10 +313,17 @@ class _DontSayItScreenState extends State<DontSayItScreen> {
   @override
   Widget build(BuildContext context) {
     final strings = AppLocalizations.of(context)!;
-    return Scaffold(
-      floatingActionButton: const SilaGameCoachButton(),
-      appBar: AppBar(title: Text(strings.dontSayIt)),
-      body: SafeArea(child: _buildBody()),
+    final gameInProgress =
+        _phase != _DontSayItPhase.setup &&
+        _phase != _DontSayItPhase.finalLeaderboard;
+
+    return GameExitGuard(
+      gameInProgress: gameInProgress,
+      child: Scaffold(
+        floatingActionButton: const SilaGameCoachButton(),
+        appBar: AppBar(title: Text(strings.dontSayIt)),
+        body: SafeArea(child: _buildBody()),
+      ),
     );
   }
 

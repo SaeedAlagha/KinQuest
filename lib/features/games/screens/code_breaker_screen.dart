@@ -11,6 +11,7 @@ import '../../competitions/models/competition_game_result.dart';
 import '../../competitions/models/competition_player_result.dart';
 import '../../competitions/models/game_play_mode.dart';
 import '../widgets/game_setup_widgets.dart';
+import '../widgets/game_exit_guard.dart';
 
 enum _CodeBreakerPhase { setup, passPhone, playing, turnResult, finalResults }
 
@@ -621,17 +622,25 @@ class _CodeBreakerScreenState extends State<CodeBreakerScreen> {
   @override
   Widget build(BuildContext context) {
     final strings = AppLocalizations.of(context)!;
-    return Scaffold(
-      floatingActionButton: const SilaGameCoachButton(),
-      appBar: AppBar(title: Text(strings.codeBreakerTitle)),
-      body: SafeArea(
-        child: switch (_phase) {
-          _CodeBreakerPhase.setup => _buildSetup(),
-          _CodeBreakerPhase.passPhone => _buildPassPhone(),
-          _CodeBreakerPhase.playing => _buildPlaying(),
-          _CodeBreakerPhase.turnResult => _buildTurnResult(),
-          _CodeBreakerPhase.finalResults => _buildFinalResults(),
-        },
+
+    final gameInProgress =
+        _phase != _CodeBreakerPhase.setup &&
+        _phase != _CodeBreakerPhase.finalResults;
+
+    return GameExitGuard(
+      gameInProgress: gameInProgress,
+      child: Scaffold(
+        floatingActionButton: const SilaGameCoachButton(),
+        appBar: AppBar(title: Text(strings.codeBreakerTitle)),
+        body: SafeArea(
+          child: switch (_phase) {
+            _CodeBreakerPhase.setup => _buildSetup(),
+            _CodeBreakerPhase.passPhone => _buildPassPhone(),
+            _CodeBreakerPhase.playing => _buildPlaying(),
+            _CodeBreakerPhase.turnResult => _buildTurnResult(),
+            _CodeBreakerPhase.finalResults => _buildFinalResults(),
+          },
+        ),
       ),
     );
   }

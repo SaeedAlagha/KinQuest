@@ -8,6 +8,7 @@ import '../../../l10n/app_localizations.dart';
 import '../services/charades_ai_service.dart';
 import '../utils/game_localization.dart';
 import '../widgets/game_setup_widgets.dart';
+import '../widgets/game_exit_guard.dart';
 
 class CharadesScreen extends StatefulWidget {
   const CharadesScreen({super.key});
@@ -124,12 +125,15 @@ class _CharadesScreenState extends State<CharadesScreen> {
   Widget build(BuildContext context) {
     final strings = AppLocalizations.of(context)!;
 
-    return Scaffold(
-      floatingActionButton: const SilaGameCoachButton(),
-      appBar: AppBar(title: Text(strings.charades)),
-      body: _isPlaying
-          ? Padding(padding: const EdgeInsets.all(24), child: _buildGame())
-          : _buildSetup(),
+    return GameExitGuard(
+      gameInProgress: _isPlaying,
+      child: Scaffold(
+        floatingActionButton: const SilaGameCoachButton(),
+        appBar: AppBar(title: Text(strings.charades)),
+        body: _isPlaying
+            ? Padding(padding: const EdgeInsets.all(24), child: _buildGame())
+            : _buildSetup(),
+      ),
     );
   }
 

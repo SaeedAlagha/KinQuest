@@ -12,6 +12,7 @@ import '../../competitions/models/competition_player_result.dart';
 import '../../competitions/models/game_play_mode.dart';
 import '../services/risk_it_ai_service.dart';
 import '../widgets/game_setup_widgets.dart';
+import '../widgets/game_exit_guard.dart';
 
 enum _RiskItPhase {
   setup,
@@ -558,22 +559,29 @@ class _RiskItScreenState extends State<RiskItScreen> {
   }
 
   @override
+  @override
   Widget build(BuildContext context) {
     final strings = AppLocalizations.of(context)!;
-    return Scaffold(
-      floatingActionButton: const SilaGameCoachButton(),
-      appBar: AppBar(title: Text(strings.riskItTitle)),
-      body: SafeArea(
-        child: switch (_phase) {
-          _RiskItPhase.setup => _buildSetup(),
-          _RiskItPhase.loading => _buildLoading(),
-          _RiskItPhase.passPhone => _buildPassPhone(),
-          _RiskItPhase.question => _buildQuestion(),
-          _RiskItPhase.decision => _buildDecision(),
-          _RiskItPhase.turnResult => _buildTurnResult(),
-          _RiskItPhase.roundResult => _buildRoundResult(),
-          _RiskItPhase.finalResults => _buildFinalResults(),
-        },
+    final gameInProgress =
+        _phase != _RiskItPhase.setup && _phase != _RiskItPhase.finalResults;
+
+    return GameExitGuard(
+      gameInProgress: gameInProgress,
+      child: Scaffold(
+        floatingActionButton: const SilaGameCoachButton(),
+        appBar: AppBar(title: Text(strings.riskItTitle)),
+        body: SafeArea(
+          child: switch (_phase) {
+            _RiskItPhase.setup => _buildSetup(),
+            _RiskItPhase.loading => _buildLoading(),
+            _RiskItPhase.passPhone => _buildPassPhone(),
+            _RiskItPhase.question => _buildQuestion(),
+            _RiskItPhase.decision => _buildDecision(),
+            _RiskItPhase.turnResult => _buildTurnResult(),
+            _RiskItPhase.roundResult => _buildRoundResult(),
+            _RiskItPhase.finalResults => _buildFinalResults(),
+          },
+        ),
       ),
     );
   }

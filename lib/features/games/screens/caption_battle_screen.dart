@@ -16,6 +16,7 @@ import '../../competitions/models/competition_player_result.dart';
 import '../../competitions/models/game_play_mode.dart';
 import '../services/caption_battle_ai_service.dart';
 import '../widgets/game_setup_widgets.dart';
+import '../widgets/game_exit_guard.dart';
 
 enum _CaptionBattlePhase {
   setup,
@@ -501,14 +502,21 @@ class _CaptionBattleScreenState extends State<CaptionBattleScreen> {
   @override
   Widget build(BuildContext context) {
     final strings = AppLocalizations.of(context)!;
-    return Scaffold(
-      floatingActionButton: const SilaGameCoachButton(),
-      appBar: AppBar(title: Text(strings.captionBattle)),
-      body: SafeArea(
-        top: false,
-        child: AnimatedSwitcher(
-          duration: const Duration(milliseconds: 250),
-          child: _buildCurrentPhase(),
+    final gameInProgress =
+        _phase != _CaptionBattlePhase.setup &&
+        _phase != _CaptionBattlePhase.finalResults;
+
+    return GameExitGuard(
+      gameInProgress: gameInProgress,
+      child: Scaffold(
+        floatingActionButton: const SilaGameCoachButton(),
+        appBar: AppBar(title: Text(strings.captionBattle)),
+        body: SafeArea(
+          top: false,
+          child: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 250),
+            child: _buildCurrentPhase(),
+          ),
         ),
       ),
     );

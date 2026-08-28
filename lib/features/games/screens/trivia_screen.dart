@@ -15,6 +15,7 @@ import '../../competitions/models/game_play_mode.dart';
 import '../services/trivia_ai_service.dart';
 import '../utils/game_localization.dart';
 import '../widgets/game_setup_widgets.dart';
+import '../widgets/game_exit_guard.dart';
 
 enum _TriviaPhase {
   setup,
@@ -586,13 +587,19 @@ class _TriviaScreenState extends State<TriviaScreen> {
   Widget build(BuildContext context) {
     final strings = AppLocalizations.of(context)!;
 
-    return Scaffold(
-      floatingActionButton: const SilaGameCoachButton(),
-      appBar: AppBar(title: Text(strings.trivia)),
-      body: SafeArea(
-        child: _phase == _TriviaPhase.setup
-            ? _buildSetup()
-            : Padding(padding: const EdgeInsets.all(24), child: _buildBody()),
+    final gameInProgress =
+        _phase != _TriviaPhase.setup && _phase != _TriviaPhase.finalResults;
+
+    return GameExitGuard(
+      gameInProgress: gameInProgress,
+      child: Scaffold(
+        floatingActionButton: const SilaGameCoachButton(),
+        appBar: AppBar(title: Text(strings.trivia)),
+        body: SafeArea(
+          child: _phase == _TriviaPhase.setup
+              ? _buildSetup()
+              : Padding(padding: const EdgeInsets.all(24), child: _buildBody()),
+        ),
       ),
     );
   }

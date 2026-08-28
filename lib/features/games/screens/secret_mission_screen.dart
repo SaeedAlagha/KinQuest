@@ -13,6 +13,7 @@ import '../../competitions/config/competition_games.dart';
 import '../../competitions/models/competition_game_result.dart';
 import '../../competitions/models/competition_player_result.dart';
 import '../../competitions/models/game_play_mode.dart';
+import '../widgets/game_exit_guard.dart';
 
 enum _SecretMissionPhase {
   setup,
@@ -557,10 +558,17 @@ class _SecretMissionScreenState extends State<SecretMissionScreen> {
   @override
   Widget build(BuildContext context) {
     final strings = AppLocalizations.of(context)!;
-    return Scaffold(
-      floatingActionButton: const SilaGameCoachButton(),
-      appBar: AppBar(title: Text(strings.secretMission)),
-      body: SafeArea(child: _buildBody()),
+    final gameInProgress =
+        _phase != _SecretMissionPhase.setup &&
+        _phase != _SecretMissionPhase.leaderboard;
+
+    return GameExitGuard(
+      gameInProgress: gameInProgress,
+      child: Scaffold(
+        floatingActionButton: const SilaGameCoachButton(),
+        appBar: AppBar(title: Text(strings.secretMission)),
+        body: SafeArea(child: _buildBody()),
+      ),
     );
   }
 
