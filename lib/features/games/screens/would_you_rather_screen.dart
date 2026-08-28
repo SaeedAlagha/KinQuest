@@ -8,6 +8,7 @@ import '../../../l10n/app_localizations.dart';
 import '../services/ai_question_service.dart';
 import '../utils/game_localization.dart';
 import '../widgets/game_setup_widgets.dart';
+import '../widgets/game_exit_guard.dart';
 
 class WouldYouRatherScreen extends StatefulWidget {
   const WouldYouRatherScreen({super.key});
@@ -430,21 +431,26 @@ class _WouldYouRatherScreenState extends State<WouldYouRatherScreen> {
     final colors = theme.colorScheme;
     final strings = AppLocalizations.of(context)!;
 
-    return Scaffold(
-      floatingActionButton: const SilaGameCoachButton(),
-      appBar: AppBar(title: Text(strings.wouldYouRather)),
-      body: SafeArea(
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            return AnimatedSwitcher(
-              duration: const Duration(milliseconds: 200),
-              child: _phase == _GamePhase.setup
-                  ? _buildSetupView(context, colors)
-                  : _phase == _GamePhase.playing
-                  ? _buildQuestionView(context, colors, constraints)
-                  : _buildResultsView(context, colors, constraints),
-            );
-          },
+    final gameInProgress = _phase == _GamePhase.playing;
+
+    return GameExitGuard(
+      gameInProgress: gameInProgress,
+      child: Scaffold(
+        floatingActionButton: const SilaGameCoachButton(),
+        appBar: AppBar(title: Text(strings.wouldYouRather)),
+        body: SafeArea(
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return AnimatedSwitcher(
+                duration: const Duration(milliseconds: 200),
+                child: _phase == _GamePhase.setup
+                    ? _buildSetupView(context, colors)
+                    : _phase == _GamePhase.playing
+                    ? _buildQuestionView(context, colors, constraints)
+                    : _buildResultsView(context, colors, constraints),
+              );
+            },
+          ),
         ),
       ),
     );

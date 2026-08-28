@@ -14,6 +14,7 @@ import '../../competitions/config/competition_games.dart';
 import '../../competitions/models/competition_game_result.dart';
 import '../../competitions/models/competition_player_result.dart';
 import '../../competitions/models/game_play_mode.dart';
+import '../widgets/game_exit_guard.dart';
 
 enum _FamilyQuizPhase {
   setup,
@@ -784,14 +785,21 @@ class _FamilyQuizScreenState extends State<FamilyQuizScreen> {
   @override
   Widget build(BuildContext context) {
     final strings = AppLocalizations.of(context)!;
-    return Scaffold(
-      floatingActionButton: const SilaGameCoachButton(),
-      appBar: AppBar(title: Text(strings.familyQuiz)),
-      body: SafeArea(
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 760),
-            child: _buildBody(),
+    final gameInProgress =
+        _phase != _FamilyQuizPhase.setup &&
+        _phase != _FamilyQuizPhase.finalResults;
+
+    return GameExitGuard(
+      gameInProgress: gameInProgress,
+      child: Scaffold(
+        floatingActionButton: const SilaGameCoachButton(),
+        appBar: AppBar(title: Text(strings.familyQuiz)),
+        body: SafeArea(
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 760),
+              child: _buildBody(),
+            ),
           ),
         ),
       ),

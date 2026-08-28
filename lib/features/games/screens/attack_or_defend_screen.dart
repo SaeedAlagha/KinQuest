@@ -13,6 +13,7 @@ import '../../competitions/models/competition_player_result.dart';
 import '../../competitions/models/game_play_mode.dart';
 import '../services/attack_or_defend_ai_service.dart';
 import '../widgets/game_setup_widgets.dart';
+import '../widgets/game_exit_guard.dart';
 
 enum _BattlePhase {
   setup,
@@ -612,22 +613,30 @@ class _AttackOrDefendScreenState extends State<AttackOrDefendScreen> {
   }
 
   @override
+  @override
   Widget build(BuildContext context) {
     final strings = AppLocalizations.of(context)!;
-    return Scaffold(
-      floatingActionButton: const SilaGameCoachButton(),
-      appBar: AppBar(title: Text(strings.attackOrDefendTitle)),
-      body: SafeArea(
-        child: switch (_phase) {
-          _BattlePhase.setup => _buildSetup(),
-          _BattlePhase.loading => _buildLoading(),
-          _BattlePhase.passPhone => _buildPassPhone(),
-          _BattlePhase.earnEnergyQuestion => _buildQuestion(defending: false),
-          _BattlePhase.actionChoice => _buildActionChoice(),
-          _BattlePhase.defenseQuestion => _buildQuestion(defending: true),
-          _BattlePhase.battleResult => _buildBattleResult(),
-          _BattlePhase.finalResults => _buildFinalResults(),
-        },
+
+    final gameInProgress =
+        _phase != _BattlePhase.setup && _phase != _BattlePhase.finalResults;
+
+    return GameExitGuard(
+      gameInProgress: gameInProgress,
+      child: Scaffold(
+        floatingActionButton: const SilaGameCoachButton(),
+        appBar: AppBar(title: Text(strings.attackOrDefendTitle)),
+        body: SafeArea(
+          child: switch (_phase) {
+            _BattlePhase.setup => _buildSetup(),
+            _BattlePhase.loading => _buildLoading(),
+            _BattlePhase.passPhone => _buildPassPhone(),
+            _BattlePhase.earnEnergyQuestion => _buildQuestion(defending: false),
+            _BattlePhase.actionChoice => _buildActionChoice(),
+            _BattlePhase.defenseQuestion => _buildQuestion(defending: true),
+            _BattlePhase.battleResult => _buildBattleResult(),
+            _BattlePhase.finalResults => _buildFinalResults(),
+          },
+        ),
       ),
     );
   }

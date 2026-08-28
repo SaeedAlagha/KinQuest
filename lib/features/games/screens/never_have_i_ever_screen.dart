@@ -8,6 +8,7 @@ import '../../../l10n/app_localizations.dart';
 import '../services/never_have_i_ever_ai_service.dart';
 import '../utils/game_localization.dart';
 import '../widgets/game_setup_widgets.dart';
+import '../widgets/game_exit_guard.dart';
 
 class NeverHaveIEverScreen extends StatefulWidget {
   const NeverHaveIEverScreen({super.key});
@@ -187,15 +188,18 @@ class _NeverHaveIEverScreenState extends State<NeverHaveIEverScreen> {
   Widget build(BuildContext context) {
     final strings = AppLocalizations.of(context)!;
 
-    return Scaffold(
-      floatingActionButton: const SilaGameCoachButton(),
-      appBar: AppBar(title: Text(strings.neverHaveIEver)),
-      body: _showResults || _isPlaying
-          ? Padding(
-              padding: const EdgeInsets.all(24),
-              child: _showResults ? _buildResults() : _buildGame(),
-            )
-          : _buildSetup(),
+    return GameExitGuard(
+      gameInProgress: _isPlaying,
+      child: Scaffold(
+        floatingActionButton: const SilaGameCoachButton(),
+        appBar: AppBar(title: Text(strings.neverHaveIEver)),
+        body: _showResults || _isPlaying
+            ? Padding(
+                padding: const EdgeInsets.all(24),
+                child: _showResults ? _buildResults() : _buildGame(),
+              )
+            : _buildSetup(),
+      ),
     );
   }
 

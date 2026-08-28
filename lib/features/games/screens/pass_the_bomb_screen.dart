@@ -14,6 +14,7 @@ import '../../competitions/models/competition_player_result.dart';
 import '../../competitions/models/game_play_mode.dart';
 import '../services/pass_the_bomb_ai_service.dart';
 import '../widgets/game_setup_widgets.dart';
+import '../widgets/game_exit_guard.dart';
 
 enum _BombPhase { setup, playing, roundResult, finalLeaderboard }
 
@@ -470,10 +471,16 @@ class _PassTheBombScreenState extends State<PassTheBombScreen> {
   @override
   Widget build(BuildContext context) {
     final strings = AppLocalizations.of(context)!;
-    return Scaffold(
-      floatingActionButton: const SilaGameCoachButton(),
-      appBar: AppBar(title: Text(strings.passTheBomb)),
-      body: SafeArea(child: _buildBody()),
+    final gameInProgress =
+        _phase != _BombPhase.setup && _phase != _BombPhase.finalLeaderboard;
+
+    return GameExitGuard(
+      gameInProgress: gameInProgress,
+      child: Scaffold(
+        floatingActionButton: const SilaGameCoachButton(),
+        appBar: AppBar(title: Text(strings.passTheBomb)),
+        body: SafeArea(child: _buildBody()),
+      ),
     );
   }
 

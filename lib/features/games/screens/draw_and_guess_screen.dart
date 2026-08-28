@@ -13,6 +13,7 @@ import '../../competitions/models/competition_player_result.dart';
 import '../../competitions/models/game_play_mode.dart';
 import '../services/draw_and_guess_ai_service.dart';
 import '../widgets/game_setup_widgets.dart';
+import '../widgets/game_exit_guard.dart';
 
 enum _DrawGamePhase {
   setup,
@@ -301,10 +302,17 @@ class _DrawAndGuessScreenState extends State<DrawAndGuessScreen> {
   @override
   Widget build(BuildContext context) {
     final strings = AppLocalizations.of(context)!;
-    return Scaffold(
-      floatingActionButton: const SilaGameCoachButton(),
-      appBar: AppBar(title: Text(strings.drawAndGuess)),
-      body: SafeArea(child: _buildBody()),
+    final gameInProgress =
+        _phase != _DrawGamePhase.setup &&
+        _phase != _DrawGamePhase.finalLeaderboard;
+
+    return GameExitGuard(
+      gameInProgress: gameInProgress,
+      child: Scaffold(
+        floatingActionButton: const SilaGameCoachButton(),
+        appBar: AppBar(title: Text(strings.drawAndGuess)),
+        body: SafeArea(child: _buildBody()),
+      ),
     );
   }
 

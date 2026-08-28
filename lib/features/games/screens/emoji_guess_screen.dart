@@ -14,6 +14,7 @@ import '../../competitions/config/competition_games.dart';
 import '../../competitions/models/competition_game_result.dart';
 import '../../competitions/models/competition_player_result.dart';
 import '../../competitions/models/game_play_mode.dart';
+import '../widgets/game_exit_guard.dart';
 
 enum _EmojiGuessPhase {
   setup,
@@ -597,13 +598,20 @@ class _EmojiGuessScreenState extends State<EmojiGuessScreen> {
   Widget build(BuildContext context) {
     final strings = AppLocalizations.of(context)!;
 
-    return Scaffold(
-      floatingActionButton: const SilaGameCoachButton(),
-      appBar: AppBar(title: Text(strings.emojiGuess)),
-      body: SafeArea(
-        child: _phase == _EmojiGuessPhase.setup
-            ? _buildSetup()
-            : Padding(padding: const EdgeInsets.all(24), child: _buildBody()),
+    final gameInProgress =
+        _phase != _EmojiGuessPhase.setup &&
+        _phase != _EmojiGuessPhase.finalResults;
+
+    return GameExitGuard(
+      gameInProgress: gameInProgress,
+      child: Scaffold(
+        floatingActionButton: const SilaGameCoachButton(),
+        appBar: AppBar(title: Text(strings.emojiGuess)),
+        body: SafeArea(
+          child: _phase == _EmojiGuessPhase.setup
+              ? _buildSetup()
+              : Padding(padding: const EdgeInsets.all(24), child: _buildBody()),
+        ),
       ),
     );
   }
