@@ -10,4 +10,7 @@ class CompetitionGameIds {
   static const String drawAndGuess = 'draw_and_guess';
   static const String captionBattle = 'caption_battle';
   static const String dontSayIt = 'dont_say_it';
+  static const String codeBreaker = 'code_breaker';
+  static const String attackOrDefend = 'attack_or_defend';
+  static const String riskIt = 'risk_it';
 }

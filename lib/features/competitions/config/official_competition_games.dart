@@ -12,6 +12,9 @@ import '../../games/screens/pass_the_bomb_screen.dart';
 import '../../games/screens/secret_mission_screen.dart';
 import '../models/game_play_mode.dart';
 import 'competition_games.dart';
+import '../../games/screens/code_breaker_screen.dart';
+import '../../games/screens/attack_or_defend_screen.dart';
+import '../../games/screens/risk_it_screen.dart';
 
 typedef OfficialGameBuilder =
     Widget Function(GamePlayMode playMode, Set<String>? participantIds);
@@ -155,13 +158,47 @@ class OfficialCompetitionGames {
     ),
   ];
 
-  static final List<OfficialCompetitionGame> monthlyPool = dailyPool
-      .where(
-        (game) =>
-            game.gameId == CompetitionGameIds.familyQuiz ||
-            game.gameId == CompetitionGameIds.dontSayIt,
-      )
-      .toList();
+  static final OfficialCompetitionGame codeBreaker = OfficialCompetitionGame(
+    gameId: CompetitionGameIds.codeBreaker,
+    name: 'Code Breaker',
+    icon: Icons.lock_open_rounded,
+    description:
+        'Crack the hidden code faster and with fewer attempts than your rival.',
+    builder: (playMode, participantIds) =>
+        CodeBreakerScreen(playMode: playMode, participantIds: participantIds),
+  );
+
+  static final OfficialCompetitionGame attackOrDefend = OfficialCompetitionGame(
+    gameId: CompetitionGameIds.attackOrDefend,
+    name: 'Attack or Defend',
+    icon: Icons.sports_martial_arts_rounded,
+    description: 'Build energy, attack your rival, and defend your hearts.',
+    builder: (playMode, participantIds) => AttackOrDefendScreen(
+      playMode: playMode,
+      participantIds: participantIds,
+    ),
+  );
+
+  static final OfficialCompetitionGame riskIt = OfficialCompetitionGame(
+    gameId: CompetitionGameIds.riskIt,
+    name: 'Risk It',
+    icon: Icons.casino_rounded,
+    description: 'Build a points pot, bank it safely, or risk everything.',
+    builder: (playMode, participantIds) =>
+        RiskItScreen(playMode: playMode, participantIds: participantIds),
+  );
+
+  static final List<OfficialCompetitionGame> monthlyPool = [
+    ...dailyPool.where(
+      (game) =>
+          game.gameId == CompetitionGameIds.trivia ||
+          game.gameId == CompetitionGameIds.emojiGuess ||
+          game.gameId == CompetitionGameIds.passTheBomb,
+    ),
+    codeBreaker,
+    attackOrDefend,
+    riskIt,
+  ];
 
   static OfficialCompetitionGame dailyGameFor(DateTime date) {
     final normalizedDate = DateTime.utc(date.year, date.month, date.day);
@@ -175,7 +212,8 @@ class OfficialCompetitionGames {
   }
 
   static OfficialCompetitionGame? byId(String gameId) {
-    for (final game in dailyPool) {
+    final allGames = [...dailyPool, ...monthlyPool];
+    for (final game in allGames) {
       if (game.gameId == gameId) {
         return game;
       }
