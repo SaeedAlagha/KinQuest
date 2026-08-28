@@ -64,7 +64,11 @@ void main() {
     expect(theme.brightness, Brightness.light);
     expect(theme.extension<SilaThemeTokens>()?.isFamilyYear, isTrue);
     expect(find.text('UAE Family Year 2026'), findsOneWidget);
-    expect(find.text('1950 Family Tokens'), findsOneWidget);
+
+    await tester.tap(find.text('Appearance'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('1950 Family Tokens'), findsWidgets);
     expect(tester.takeException(), isNull);
   });
 
@@ -93,7 +97,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('Theme Studio reaches every premium theme on a narrow screen', (
+  testWidgets('Appearance reaches every premium theme on a narrow screen', (
     tester,
   ) async {
     tester.view.physicalSize = const Size(320, 568);

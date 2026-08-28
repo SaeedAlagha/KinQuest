@@ -22,7 +22,6 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   int _tokenBalance = 0;
-  bool _isLoadingThemeAccess = true;
   bool _isUnlockingTheme = false;
 
   @override
@@ -36,32 +35,33 @@ class _SettingsScreenState extends State<SettingsScreen> {
       if (mounted) {
         setState(() {
           _tokenBalance = 2400;
-          _isLoadingThemeAccess = false;
         });
       }
       return;
     }
 
     final user = FirebaseAuth.instance.currentUser;
+
     if (user == null) {
-      if (mounted) {
-        setState(() => _isLoadingThemeAccess = false);
-      }
       return;
     }
 
     try {
       await AppearanceController.instance.load(ownershipScope: user.uid);
+
       final snapshot = await FirebaseFirestore.instance
           .collection('users')
           .doc(user.uid)
           .get();
+
       final data = snapshot.data();
+
       final unlockedNames =
           (data?['unlockedAppearances'] as List<dynamic>?)
               ?.map((value) => value.toString())
               .toSet() ??
           const <String>{};
+
       final unlocked = AppAppearance.values.where(
         (appearance) => unlockedNames.contains(appearance.name),
       );
@@ -71,14 +71,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
       if (mounted) {
         setState(() {
           _tokenBalance = (data?['tokens'] as num?)?.toInt() ?? 0;
-          _isLoadingThemeAccess = false;
         });
       }
-    } catch (_) {
-      if (mounted) {
-        setState(() => _isLoadingThemeAccess = false);
-      }
-    }
+    } catch (_) {}
   }
 
   @override
@@ -111,11 +106,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         style: Theme.of(context).textTheme.titleLarge,
                       ),
                     ),
-                    _ThemeStudioCard(
-                      tokenBalance: _tokenBalance,
-                      isLoading: _isLoadingThemeAccess,
-                    ),
-                    const SizedBox(height: 12),
+
                     Card(
                       child: Column(
                         children: [
@@ -475,74 +466,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
         setState(() => _isUnlockingTheme = false);
       }
     }
-  }
-}
-
-class _ThemeStudioCard extends StatelessWidget {
-  const _ThemeStudioCard({required this.tokenBalance, required this.isLoading});
-
-  final int tokenBalance;
-  final bool isLoading;
-
-  @override
-  Widget build(BuildContext context) {
-    final strings = AppLocalizations.of(context)!;
-    final colorScheme = Theme.of(context).colorScheme;
-    final gradient = Theme.of(
-      context,
-    ).extension<SilaThemeTokens>()?.heroGradient;
-
-    return Container(
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        gradient: gradient,
-        borderRadius: BorderRadius.circular(26),
-        boxShadow: [
-          BoxShadow(
-            color: colorScheme.primary.withValues(alpha: 0.2),
-            blurRadius: 24,
-            offset: const Offset(0, 10),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.18),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
-            ),
-            child: const Icon(Icons.auto_awesome_rounded, color: Colors.white),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  strings.themeStudio,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.titleLarge?.copyWith(color: Colors.white),
-                ),
-                const SizedBox(height: 3),
-                Text(
-                  isLoading ? '•••' : strings.themeTokenBalance(tokenBalance),
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Colors.white.withValues(alpha: 0.88),
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const Icon(Icons.stars_rounded, color: Color(0xFFFFD66B)),
-        ],
-      ),
-    );
   }
 }
 

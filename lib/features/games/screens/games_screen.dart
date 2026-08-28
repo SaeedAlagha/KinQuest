@@ -276,7 +276,7 @@ class GamesScreen extends StatelessWidget {
                 : constraints.maxWidth >= 650
                 ? 2
                 : 1;
-            final cardHeight = columns == 1 ? 220.0 : 270.0;
+            final cardHeight = columns == 1 ? 250.0 : 270.0;
 
             return SingleChildScrollView(
               padding: EdgeInsets.fromLTRB(pagePadding, 28, pagePadding, 40),

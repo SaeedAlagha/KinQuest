@@ -167,13 +167,44 @@ Return ONLY valid JSON in this exact format:
 }
 `;
 
-    const response = await ai.models.generateContent({
+let response;
+let lastError;
+
+for (let attempt = 1; attempt <= 3; attempt += 1) {
+  try {
+    response = await ai.models.generateContent({
       model: "gemini-3.5-flash",
       contents: prompt,
       config: {
         responseMimeType: "application/json",
       },
     });
+
+    break;
+  } catch (error) {
+    lastError = error;
+
+    const temporary =
+      error?.status === 429 ||
+      error?.status === 503;
+
+    if (!temporary || attempt === 3) {
+      throw error;
+    }
+
+    console.warn(
+      `Risk It AI busy. Retry ${attempt}/3...`,
+    );
+
+    await new Promise((resolve) => {
+      setTimeout(resolve, attempt * 1500);
+    });
+  }
+}
+
+if (!response) {
+  throw lastError ?? new Error("AI returned no response");
+}
 
     const result = JSON.parse(response.text);
 
@@ -2280,13 +2311,20 @@ Return ONLY valid JSON in this structure:
     }
 
     res.json({ questions });
-  } catch (error) {
-    console.error("Risk It generation error:", error);
+} catch (error) {
+  console.error("Risk It generation error:", error);
 
-    res.status(500).json({
-      error: "Failed to generate Risk It questions",
+  if (error?.status === 429 || error?.status === 503) {
+    return res.status(503).json({
+      error:
+        "Risk It AI is temporarily busy. Please try again in a moment.",
     });
   }
+
+  return res.status(500).json({
+    error: "Failed to generate Risk It questions",
+  });
+}
 });
 app.use((error, request, response, next) => {
   if (error instanceof SyntaxError && 'body' in error) {
