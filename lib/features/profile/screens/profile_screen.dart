@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-
+import '../../mascot/screens/sila_studio_screen.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../authentication/screens/family_choice_screen.dart';
 import '../../authentication/screens/welcome_screen.dart';
@@ -82,10 +82,6 @@ class ProfileScreen extends StatelessWidget {
             const _DeveloperAchievementsSection()
           else
             const _AchievementsSection(),
-          const SizedBox(height: 24),
-          _SectionTitle(title: strings.familyWishes),
-          const SizedBox(height: 12),
-          const _FamilyWishesSection(),
           const SizedBox(height: 24),
           _SectionTitle(title: strings.familyTrophyCabinet),
           const SizedBox(height: 12),
@@ -889,64 +885,6 @@ class _AchievementCard extends StatelessWidget {
   }
 }
 
-class _FamilyWishesSection extends StatelessWidget {
-  const _FamilyWishesSection();
-
-  @override
-  Widget build(BuildContext context) {
-    final strings = AppLocalizations.of(context)!;
-
-    return _EmptyStateCard(
-      icon: Icons.auto_awesome,
-      title: strings.noFamilyWishesYet,
-      description: strings.familyWishesEmptyDescription,
-    );
-  }
-}
-
-class _EmptyStateCard extends StatelessWidget {
-  const _EmptyStateCard({
-    required this.icon,
-    required this.title,
-    required this.description,
-  });
-
-  final IconData icon;
-  final String title;
-  final String description;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return Container(
-      padding: const EdgeInsets.all(22),
-      decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Column(
-        children: [
-          Icon(icon, size: 44, color: colorScheme.primary),
-          const SizedBox(height: 12),
-          Text(
-            title,
-            style: Theme.of(
-              context,
-            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            description,
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.bodyMedium,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class _TrophyCabinetSection extends StatelessWidget {
   const _TrophyCabinetSection({required this.developerPreview});
 
@@ -1152,6 +1090,22 @@ class _SettingsSection extends StatelessWidget {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: Column(
         children: [
+          ListTile(
+            leading: const Icon(Icons.checkroom_rounded),
+            title: Text(strings.navSila),
+            subtitle: const Text('Customize your Sila avatar'),
+            trailing: const Icon(Icons.chevron_right_rounded),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) =>
+                      SilaStudioScreen(developerPreview: developerPreview),
+                ),
+              );
+            },
+          ),
+          const Divider(height: 1),
           ListTile(
             leading: const Icon(Icons.settings_rounded),
             title: Text(strings.appSettings),

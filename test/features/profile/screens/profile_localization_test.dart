@@ -36,13 +36,6 @@ void main() {
     expect(find.text('روح الفريق'), findsOneWidget);
 
     await tester.scrollUntilVisible(
-      find.text('لا توجد أمنيات عائلية بعد'),
-      300,
-      scrollable: scrollable,
-    );
-    expect(find.text('لا توجد أمنيات عائلية بعد'), findsOneWidget);
-
-    await tester.scrollUntilVisible(
       find.text('بطل الكأس الشهري'),
       300,
       scrollable: scrollable,
@@ -50,17 +43,20 @@ void main() {
     expect(find.text('بطل الكأس الشهري'), findsOneWidget);
     expect(find.textContaining('لاعب تجريبي'), findsOneWidget);
     expect(find.textContaining('2026-08'), findsOneWidget);
+    expect(find.byIcon(Icons.checkroom_rounded), findsOneWidget);
 
-    await tester.scrollUntilVisible(
-      find.text('إعدادات التطبيق'),
-      400,
-      scrollable: scrollable,
-    );
-    expect(tester.takeException(), isNull);
+    final appSettings = find.text('إعدادات التطبيق');
 
-    await tester.tap(find.text('إعدادات التطبيق'));
+    await tester.scrollUntilVisible(appSettings, 300, scrollable: scrollable);
+
+    await Scrollable.ensureVisible(tester.element(appSettings), alignment: 0.5);
+
     await tester.pumpAndSettle();
 
+    expect(tester.takeException(), isNull);
+
+    await tester.tap(appSettings);
+    await tester.pumpAndSettle();
     expect(find.text('الإعدادات'), findsOneWidget);
     expect(find.text('اللغة'), findsOneWidget);
     expect(find.text('الخصوصية والأمان'), findsOneWidget);

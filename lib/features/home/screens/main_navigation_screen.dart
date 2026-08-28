@@ -7,7 +7,6 @@ import '../../../l10n/app_localizations.dart';
 import '../../competitions/screens/competitions_screen.dart';
 import '../../games/screens/family_missions_screen.dart';
 import '../../memories/screens/memories_screen.dart';
-import '../../mascot/screens/sila_studio_screen.dart';
 import '../../profile/screens/profile_screen.dart';
 import 'home_screen.dart';
 import '../../rewards/screens/rewards_hub_screen.dart';
@@ -43,11 +42,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       selectedIcon: const Icon(Icons.groups_rounded),
       label: strings.navMissions,
     ),
-    NavigationDestination(
-      icon: const Icon(Icons.checkroom_outlined),
-      selectedIcon: const Icon(Icons.checkroom_rounded),
-      label: strings.navSila,
-    ),
+
     NavigationDestination(
       icon: const Icon(Icons.redeem_outlined),
       selectedIcon: const Icon(Icons.redeem_rounded),
@@ -83,11 +78,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       selectedIcon: const Icon(Icons.groups_rounded),
       label: Text(strings.navMissions),
     ),
-    NavigationRailDestination(
-      icon: const Icon(Icons.checkroom_outlined),
-      selectedIcon: const Icon(Icons.checkroom_rounded),
-      label: Text(strings.navSila),
-    ),
+
     NavigationRailDestination(
       icon: const Icon(Icons.redeem_outlined),
       selectedIcon: const Icon(Icons.redeem_rounded),
@@ -116,7 +107,6 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
             const MemoriesScreen(developerPreview: true),
             const CompetitionsScreen(developerPreview: true),
             const FamilyMissionsScreen(developerPreview: true),
-            const SilaStudioScreen(developerPreview: true),
             const RewardsHubScreen(developerPreview: true),
             const ProfileScreen(developerPreview: true),
           ]
@@ -125,14 +115,13 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
             const MemoriesScreen(),
             const CompetitionsScreen(),
             const FamilyMissionsScreen(),
-            const SilaStudioScreen(),
             const RewardsHubScreen(),
             const ProfileScreen(),
           ];
   }
 
   void _openFamilyOverview() {
-    _selectScreen(6);
+    _selectScreen(5);
   }
 
   void _selectScreen(int index) {

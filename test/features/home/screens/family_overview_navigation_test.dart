@@ -28,15 +28,7 @@ void main() {
       navigation.destinations
           .map((destination) => (destination as NavigationDestination).label)
           .toList(),
-      [
-        'Home',
-        'Memories',
-        'Play',
-        'Missions',
-        'Wardrobe',
-        'Rewards',
-        'Profile',
-      ],
+      ['Home', 'Memories', 'Play', 'Missions', 'Rewards', 'Profile'],
     );
 
     final overviewButton = find.widgetWithText(FilledButton, 'Family Overview');
@@ -52,7 +44,7 @@ void main() {
     expect(find.text('5 family members'), findsOneWidget);
     expect(
       tester.widget<NavigationBar>(find.byType(NavigationBar)).selectedIndex,
-      6,
+      5,
     );
     expect(tester.takeException(), isNull);
   });
