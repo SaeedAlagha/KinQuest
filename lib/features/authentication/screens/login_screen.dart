@@ -1,5 +1,4 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/validation/form_validators.dart';
@@ -112,16 +111,6 @@ class _LoginScreenState extends State<LoginScreen> {
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (context) => const SignupScreen()),
-    );
-  }
-
-  void _openDeveloperPreview() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) =>
-            const MainNavigationScreen(developerPreview: true),
-      ),
     );
   }
 
@@ -240,28 +229,6 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ),
                     ),
-
-                    if (kDebugMode) ...[
-                      const SizedBox(height: 12),
-                      SizedBox(
-                        width: double.infinity,
-                        child: OutlinedButton.icon(
-                          onPressed: _isLoggingIn
-                              ? null
-                              : _openDeveloperPreview,
-                          icon: const Icon(Icons.developer_mode_rounded),
-                          label: Text(strings.enterDeveloperFamily),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Center(
-                        child: Text(
-                          strings.debugPreviewDescription,
-                          textAlign: TextAlign.center,
-                          style: Theme.of(context).textTheme.bodySmall,
-                        ),
-                      ),
-                    ],
 
                     const SizedBox(height: 24),
 
@@ -406,9 +373,7 @@ class _PasswordResetDialogState extends State<_PasswordResetDialog> {
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
               : const Icon(Icons.send_outlined),
-          label: Text(
-            _isSending ? strings.sending : strings.sendPasswordReset,
-          ),
+          label: Text(_isSending ? strings.sending : strings.sendPasswordReset),
         ),
       ],
     );
