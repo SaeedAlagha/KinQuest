@@ -3,8 +3,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:kinquest/core/theme/app_theme.dart';
 import 'package:kinquest/features/mascot/screens/sila_studio_screen.dart';
 import 'package:kinquest/l10n/app_localizations.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
+  setUp(() => SharedPreferences.setMockInitialValues({}));
+
   testWidgets('Sila Studio is localized and responsive in Arabic', (
     tester,
   ) async {
@@ -35,6 +38,8 @@ void main() {
     expect(find.text('المستوى 2: صديق العائلة'), findsOneWidget);
     expect(find.text('أغطية الرأس'), findsOneWidget);
     expect(find.text('تاج حارس العائلة'), findsOneWidget);
+    expect(find.text('تحدث مع صلة'), findsOneWidget);
+    expect(find.textContaining('محادثة خاصة بحسابك'), findsOneWidget);
     expect(
       Directionality.of(tester.element(find.text('استوديو صلة'))),
       TextDirection.rtl,

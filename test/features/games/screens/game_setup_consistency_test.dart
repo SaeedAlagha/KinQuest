@@ -43,6 +43,14 @@ void main() {
       expect(find.text('1 round'), findsOneWidget);
       expect(find.text('3 rounds'), findsOneWidget);
       expect(find.text('5 rounds'), findsOneWidget);
+      expect(
+        find.byKey(const ValueKey('sila-game-coach-banner')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const ValueKey('sila-game-coach-button')),
+        findsNothing,
+      );
       expect(tester.takeException(), isNull);
     });
   }
@@ -156,6 +164,14 @@ void main() {
       );
       await tester.pump();
 
+      expect(
+        find.byKey(const ValueKey('sila-game-coach-banner')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const ValueKey('sila-game-coach-button')),
+        findsNothing,
+      );
       expect(find.text(game.key), findsOneWidget);
       expect(find.text('من سيلعب؟'), findsOneWidget);
 
@@ -168,6 +184,10 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('الجولة 1 من 3'), findsOneWidget);
+      expect(
+        find.byKey(const ValueKey('sila-game-coach-button')),
+        findsOneWidget,
+      );
       expect(tester.takeException(), isNull);
     });
   }

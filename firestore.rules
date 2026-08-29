@@ -169,6 +169,12 @@ service cloud.firestore {
           && get(/databases/$(database)/documents/users/$(userId))
             .data.familyId == currentUser().data.familyId;
       }
+
+      // Sila chat history is private and available only through the
+      // authenticated backend, which also applies family checks and limits.
+      match /silaChatMessages/{messageId} {
+        allow read, create, update, delete: if false;
+      }
     }
 
     match /families/{familyId} {

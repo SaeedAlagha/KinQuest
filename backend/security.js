@@ -3,6 +3,8 @@ const { ensureFirebaseAdmin } = require("./firebase_admin");
 
 const DEFAULT_RATE_LIMIT = 60;
 const DEFAULT_RATE_WINDOW_MS = 60_000;
+const DEFAULT_SILA_CHAT_RATE_LIMIT = 10;
+const DEFAULT_SILA_CHAT_RATE_WINDOW_MS = 60_000;
 
 function parsePositiveInteger(value, fallback) {
   const parsed = Number.parseInt(value, 10);
@@ -39,7 +41,7 @@ function isOriginAllowed(origin, environment = process.env) {
 
 function createCorsOptions(environment = process.env) {
   return {
-    methods: ["GET", "POST", "OPTIONS"],
+    methods: ["GET", "POST", "DELETE", "OPTIONS"],
     allowedHeaders: ["Authorization", "Content-Type"],
     maxAge: 600,
     origin(origin, callback) {
@@ -76,12 +78,14 @@ function createRateLimiter({
     DEFAULT_RATE_WINDOW_MS,
   ),
   now = Date.now,
+  keyForRequest = requestKey,
 } = {}) {
   const clients = new Map();
 
   return function rateLimit(request, response, next) {
     const currentTime = now();
-    const key = requestKey(request);
+    const key = keyForRequest(request);
+    if (typeof key !== "string" || !key) return next();
     const previous = clients.get(key);
     const entry =
       previous && currentTime - previous.startedAt < windowMs
@@ -117,6 +121,38 @@ function createRateLimiter({
     }
 
     return next();
+  };
+}
+
+function createAuthenticatedUserRateLimiter({
+  limit = parsePositiveInteger(
+    process.env.KINQUEST_SILA_CHAT_RATE_LIMIT,
+    DEFAULT_SILA_CHAT_RATE_LIMIT,
+  ),
+  windowMs = parsePositiveInteger(
+    process.env.KINQUEST_SILA_CHAT_RATE_WINDOW_MS,
+    DEFAULT_SILA_CHAT_RATE_WINDOW_MS,
+  ),
+  now = Date.now,
+} = {}) {
+  const limiter = createRateLimiter({
+    limit,
+    windowMs,
+    now,
+    keyForRequest(request) {
+      const userId = request.auth?.uid;
+      return typeof userId === "string" && userId ? `user:${userId}` : null;
+    },
+  });
+
+  return function authenticatedUserRateLimit(request, response, next) {
+    // Authentication and its user-facing 401 response stay owned by the route.
+    // This middleware only counts verified users, never a shared "anonymous"
+    // bucket that could let one unauthenticated caller block another family.
+    if (typeof request.auth?.uid !== "string" || !request.auth.uid) {
+      return next();
+    }
+    return limiter(request, response, next);
   };
 }
 
@@ -158,6 +194,7 @@ function createFirebaseAuthMiddleware({
 
 module.exports = {
   authenticationRequired,
+  createAuthenticatedUserRateLimiter,
   createCorsOptions,
   createFirebaseAuthMiddleware,
   createRateLimiter,

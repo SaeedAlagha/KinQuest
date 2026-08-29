@@ -320,7 +320,13 @@ class _DontSayItScreenState extends State<DontSayItScreen> {
     return GameExitGuard(
       gameInProgress: gameInProgress,
       child: Scaffold(
-        floatingActionButton: const SilaGameCoachButton(),
+        floatingActionButton: gameInProgress
+            ? SilaGameCoachButton(
+                tone: _phase == _DontSayItPhase.turnResult
+                    ? SilaGameCoachTone.celebrating
+                    : SilaGameCoachTone.play,
+              )
+            : null,
         appBar: AppBar(title: Text(strings.dontSayIt)),
         body: SafeArea(child: _buildBody()),
       ),
@@ -401,6 +407,8 @@ class _DontSayItScreenState extends State<DontSayItScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          SilaGameCoachBanner(message: strings.mascotGameSetupMessage),
+          const SizedBox(height: 20),
           Text(
             strings.whoIsPlaying,
             style: Theme.of(

@@ -568,7 +568,16 @@ class _RiskItScreenState extends State<RiskItScreen> {
     return GameExitGuard(
       gameInProgress: gameInProgress,
       child: Scaffold(
-        floatingActionButton: const SilaGameCoachButton(),
+        floatingActionButton: gameInProgress
+            ? SilaGameCoachButton(
+                tone: switch (_phase) {
+                  _RiskItPhase.loading => SilaGameCoachTone.thinking,
+                  _RiskItPhase.turnResult ||
+                  _RiskItPhase.roundResult => SilaGameCoachTone.celebrating,
+                  _ => SilaGameCoachTone.play,
+                },
+              )
+            : null,
         appBar: AppBar(title: Text(strings.riskItTitle)),
         body: SafeArea(
           child: switch (_phase) {

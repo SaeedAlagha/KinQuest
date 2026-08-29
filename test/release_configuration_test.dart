@@ -10,6 +10,7 @@ void main() {
 
     expect(manifest, contains('android.permission.INTERNET'));
     expect(manifest, contains('android.permission.POST_NOTIFICATIONS'));
+    expect(manifest, contains('android.intent.action.TTS_SERVICE'));
     expect(manifest, isNot(contains('android:usesCleartextTraffic="true"')));
   });
 

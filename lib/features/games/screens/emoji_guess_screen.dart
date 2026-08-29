@@ -605,7 +605,15 @@ class _EmojiGuessScreenState extends State<EmojiGuessScreen> {
     return GameExitGuard(
       gameInProgress: gameInProgress,
       child: Scaffold(
-        floatingActionButton: const SilaGameCoachButton(),
+        floatingActionButton: gameInProgress
+            ? SilaGameCoachButton(
+                tone:
+                    _phase == _EmojiGuessPhase.puzzleResult ||
+                        _phase == _EmojiGuessPhase.roundSummary
+                    ? SilaGameCoachTone.celebrating
+                    : SilaGameCoachTone.play,
+              )
+            : null,
         appBar: AppBar(title: Text(strings.emojiGuess)),
         body: SafeArea(
           child: _phase == _EmojiGuessPhase.setup

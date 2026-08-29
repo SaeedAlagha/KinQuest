@@ -18,6 +18,20 @@ test("server wires health, privacy headers, and JSON validation", async (t) => {
   assert.equal(health.headers.get("x-content-type-options"), "nosniff");
   assert.equal(health.headers.has("x-powered-by"), false);
 
+  const clearChatPreflight = await fetch(`${baseUrl}/api/sila/chat`, {
+    method: "OPTIONS",
+    headers: {
+      origin: "http://localhost:8080",
+      "access-control-request-method": "DELETE",
+      "access-control-request-headers": "authorization,content-type",
+    },
+  });
+  assert.equal(clearChatPreflight.status, 204);
+  assert.match(
+    clearChatPreflight.headers.get("access-control-allow-methods") || "",
+    /DELETE/,
+  );
+
   const catalog = await fetch(`${baseUrl}/api/digital-rewards`);
   assert.equal(catalog.status, 200);
   assert.equal((await catalog.json()).rewards.length, 30);
@@ -44,5 +58,15 @@ test("server wires health, privacy headers, and JSON validation", async (t) => {
   assert.equal(anonymousPurchase.status, 401);
   assert.deepEqual(await anonymousPurchase.json(), {
     error: "Sign in is required to manage Digital Rewards.",
+  });
+
+  const anonymousSilaChat = await fetch(`${baseUrl}/api/sila/chat`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ message: "Hello Sila" }),
+  });
+  assert.equal(anonymousSilaChat.status, 401);
+  assert.deepEqual(await anonymousSilaChat.json(), {
+    error: "Sign in is required to chat with Sila.",
   });
 });

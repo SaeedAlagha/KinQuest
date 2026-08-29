@@ -748,6 +748,84 @@ class AppLocalizationsEn extends AppLocalizations {
   String get silaStudioLoadError => 'Sila\'s closet could not be loaded. Please try again.';
 
   @override
+  String get silaChatTitle => 'Talk with Sila';
+
+  @override
+  String get silaChatDescription => 'Ask for a game idea, a family activity, or a little encouragement.';
+
+  @override
+  String get silaChatPrivacy => 'Private to your account. Sila receives family member names and this chat. KinQuest does not automatically attach photos, emails, or birth dates.';
+
+  @override
+  String get silaChatEmptyTitle => 'Sila is ready to listen';
+
+  @override
+  String get silaChatEmptyDescription => 'Start with one of these ideas, or write anything you would like to talk about.';
+
+  @override
+  String get silaChatStarterGame => 'Pick a game for my family';
+
+  @override
+  String get silaChatStarterBond => 'How can we connect today?';
+
+  @override
+  String get silaChatStarterCheer => 'Give my family a fun challenge';
+
+  @override
+  String get silaChatMessageHint => 'Message Sila…';
+
+  @override
+  String get silaChatSend => 'Send to Sila';
+
+  @override
+  String get silaChatClear => 'Clear chat';
+
+  @override
+  String get silaChatClearTitle => 'Clear your chat with Sila?';
+
+  @override
+  String get silaChatClearMessage => 'This removes this private conversation from your account and cannot be undone.';
+
+  @override
+  String get silaChatResponding => 'Sila is thinking…';
+
+  @override
+  String get silaChatError => 'Sila could not reply right now. Please try again.';
+
+  @override
+  String get silaChatSignInRequired => 'Sign in to chat with Sila.';
+
+  @override
+  String get silaChatFamilyRequired => 'Join or create a family before chatting with Sila.';
+
+  @override
+  String get silaChatRateLimited => 'Sila needs a quick pause. Try again in about a minute.';
+
+  @override
+  String get silaChatClearError => 'The conversation could not be cleared. Please try again.';
+
+  @override
+  String get silaChatVoice => 'Read Sila\'s replies aloud';
+
+  @override
+  String get silaChatVoiceDescription => 'Uses your device\'s voice. Your microphone is never turned on.';
+
+  @override
+  String get silaChatListen => 'Listen to this reply';
+
+  @override
+  String get silaChatStopVoice => 'Stop Sila\'s voice';
+
+  @override
+  String get silaChatVoiceUnavailable => 'A compatible English or Arabic voice is not available on this device. You can still read every reply.';
+
+  @override
+  String get silaChatDeveloperPreview => 'Preview conversation—messages are not saved.';
+
+  @override
+  String get silaChatPreviewReply => 'I’m here! Let’s pick a game, plan a kind family moment, or celebrate something you did together.';
+
+  @override
   String get silaBondTitle => 'Your Family Bond';
 
   @override
@@ -939,7 +1017,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get legalAiTitle => 'AI-assisted features';
 
   @override
-  String get legalAiBody => 'When you use an AI game or mission proof, Sila sends only the text or selected image needed for that request through its server to Google Gemini. Mission proof images are evaluated without being stored by Sila.';
+  String get legalAiBody => 'When you use an AI game, mission proof, or Sila Chat, the app sends only the text, selected image, or family member names needed for that request through its protected server to Google Gemini. Anything you type in a chat is included in that request. Private Sila Chat history is stored with your account so the conversation can continue and can be cleared in Sila Studio. Mission proof images are evaluated without being stored by Sila. Spoken replies use your device\'s text-to-speech service and never turn on the microphone.';
 
   @override
   String get legalControlsTitle => 'Your controls';

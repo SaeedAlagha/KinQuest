@@ -299,7 +299,15 @@ class _FamilyImpostorScreenState extends State<FamilyImpostorScreen> {
     return GameExitGuard(
       gameInProgress: gameInProgress,
       child: Scaffold(
-        floatingActionButton: const SilaGameCoachButton(),
+        floatingActionButton: gameInProgress
+            ? SilaGameCoachButton(
+                tone:
+                    _phase == _GamePhase.voteResults ||
+                        _phase == _GamePhase.roundResult
+                    ? SilaGameCoachTone.celebrating
+                    : SilaGameCoachTone.play,
+              )
+            : null,
         appBar: AppBar(title: Text(strings.familyImpostor)),
         body: SafeArea(child: _buildBody()),
       ),
@@ -415,6 +423,8 @@ class _FamilyImpostorScreenState extends State<FamilyImpostorScreen> {
           style: Theme.of(context).textTheme.bodyLarge,
         ),
         const SizedBox(height: 20),
+        SilaGameCoachBanner(message: strings.mascotGameSetupMessage),
+        const SizedBox(height: 18),
         _buildCategoryPicker(),
         const SizedBox(height: 18),
         GameRoundSelector(

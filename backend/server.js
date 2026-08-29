@@ -4,6 +4,7 @@ const dotenv = require("dotenv");
 const { GoogleGenAI } = require("@google/genai");
 const { getFirestore } = require("firebase-admin/firestore");
 const {
+  createAuthenticatedUserRateLimiter,
   createCorsOptions,
   createFirebaseAuthMiddleware,
   createRateLimiter,
@@ -17,6 +18,12 @@ const {
   purchaseDigitalReward,
   unequipDigitalReward,
 } = require("./digital_rewards");
+const {
+  SilaChatError,
+  chatWithSila,
+  clearSilaChat,
+  getSilaChatHistory,
+} = require("./sila_chat");
 
 dotenv.config({ quiet: true });
 
@@ -36,6 +43,7 @@ app.use(cors(createCorsOptions()));
 app.use("/api", createRateLimiter());
 app.use("/api", createFirebaseAuthMiddleware());
 app.use("/api", express.json({ limit: "2mb", type: "application/json" }));
+const silaChatRateLimiter = createAuthenticatedUserRateLimiter();
 const ai = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY,
 });
@@ -120,6 +128,70 @@ app.post("/api/digital-rewards/unequip", async (request, response) => {
     );
   } catch (error) {
     sendDigitalRewardError(error, response);
+  }
+});
+
+function requireSilaChatUser(request, response) {
+  const userId = request.auth?.uid;
+  if (typeof userId !== "string" || !userId) {
+    response.status(401).json({
+      error: "Sign in is required to chat with Sila.",
+    });
+    return null;
+  }
+  return userId;
+}
+
+function sendSilaChatError(error, response) {
+  if (error instanceof SilaChatError) {
+    return response.status(error.statusCode).json({ error: error.message });
+  }
+  console.error("Sila chat request failed without message logging");
+  return response.status(500).json({
+    error: "Sila could not reply right now. Please try again.",
+  });
+}
+
+app.get("/api/sila/chat", async (request, response) => {
+  const userId = requireSilaChatUser(request, response);
+  if (!userId) return;
+
+  try {
+    response.json({
+      messages: await getSilaChatHistory({ database: db, userId }),
+    });
+  } catch (error) {
+    sendSilaChatError(error, response);
+  }
+});
+
+app.post("/api/sila/chat", silaChatRateLimiter, async (request, response) => {
+  const userId = requireSilaChatUser(request, response);
+  if (!userId) return;
+
+  try {
+    response.json(
+      await chatWithSila({
+        database: db,
+        ai,
+        userId,
+        rawMessage: request.body?.message,
+        locale: request.body?.locale,
+      }),
+    );
+  } catch (error) {
+    sendSilaChatError(error, response);
+  }
+});
+
+app.delete("/api/sila/chat", async (request, response) => {
+  const userId = requireSilaChatUser(request, response);
+  if (!userId) return;
+
+  try {
+    response.json(await clearSilaChat({ database: db, userId }));
+  } catch (error) {
+    sendSilaChatError(error, response);
   }
 });
 

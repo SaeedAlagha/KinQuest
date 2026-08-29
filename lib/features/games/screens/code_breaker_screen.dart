@@ -630,7 +630,13 @@ class _CodeBreakerScreenState extends State<CodeBreakerScreen> {
     return GameExitGuard(
       gameInProgress: gameInProgress,
       child: Scaffold(
-        floatingActionButton: const SilaGameCoachButton(),
+        floatingActionButton: gameInProgress
+            ? SilaGameCoachButton(
+                tone: _phase == _CodeBreakerPhase.turnResult
+                    ? SilaGameCoachTone.celebrating
+                    : SilaGameCoachTone.play,
+              )
+            : null,
         appBar: AppBar(title: Text(strings.codeBreakerTitle)),
         body: SafeArea(
           child: switch (_phase) {

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -7,10 +9,17 @@ import '../../../l10n/app_localizations.dart';
 import '../../rewards/digital/digital_reward_visuals.dart';
 import '../../rewards/digital/equipped_digital_rewards.dart';
 
+enum SilaGameCoachTone { play, thinking, celebrating }
+
 class SilaGameCoachButton extends StatelessWidget {
-  const SilaGameCoachButton({super.key, this.message});
+  const SilaGameCoachButton({
+    super.key,
+    this.message,
+    this.tone = SilaGameCoachTone.play,
+  });
 
   final String? message;
+  final SilaGameCoachTone tone;
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +27,7 @@ class SilaGameCoachButton extends StatelessWidget {
     return DigitalRewardStyleBuilder(
       userId: userId,
       builder: (context, rewards) =>
-          _CoachButton(rewards: rewards, message: message),
+          _CoachButton(rewards: rewards, message: message, tone: tone),
     );
   }
 }
@@ -47,6 +56,9 @@ class SilaGameCoachBanner extends StatelessWidget {
         pose: pose,
         motion: SilaMascotMotion.gameReady,
         compact: true,
+        animate: !MediaQuery.disableAnimationsOf(context),
+        loop: true,
+        loopPause: const Duration(milliseconds: 2600),
         accessoryAssetKey: rewards.mascotAccessory,
         outfitAssetKey: rewards.mascotOutfit,
         auraAssetKey: rewards.mascotAura,
@@ -65,60 +77,132 @@ String? _currentUserId() {
 }
 
 class _CoachButton extends StatelessWidget {
-  const _CoachButton({required this.rewards, this.message});
+  const _CoachButton({required this.rewards, required this.tone, this.message});
 
   final EquippedDigitalRewards rewards;
   final String? message;
+  final SilaGameCoachTone tone;
 
   @override
   Widget build(BuildContext context) {
     final strings = AppLocalizations.of(context)!;
     final colors = Theme.of(context).colorScheme;
-    return Semantics(
+    final coachMessage =
+        message ??
+        switch (tone) {
+          SilaGameCoachTone.play => strings.silaGameCoachMessage,
+          SilaGameCoachTone.thinking => strings.mascotThinkingMessage,
+          SilaGameCoachTone.celebrating => strings.mascotCelebrationMessage,
+        };
+    final (pose, motion) = switch (tone) {
+      SilaGameCoachTone.play => (
+        SilaMascotPose.encouraging,
+        SilaMascotMotion.gameReady,
+      ),
+      SilaGameCoachTone.thinking => (
+        SilaMascotPose.thinking,
+        SilaMascotMotion.thinking,
+      ),
+      SilaGameCoachTone.celebrating => (
+        SilaMascotPose.celebrating,
+        SilaMascotMotion.celebrate,
+      ),
+    };
+    final mediaQuery = MediaQuery.of(context);
+    final supportsPill =
+        mediaQuery.size.width >= 360 && mediaQuery.textScaler.scale(1) <= 1.35;
+    final showExpanded = supportsPill && mediaQuery.size.width >= 720;
+    final shape = supportsPill
+        ? StadiumBorder(
+            side: BorderSide(color: colors.primary.withValues(alpha: 0.22)),
+          )
+        : CircleBorder(
+            side: BorderSide(color: colors.primary.withValues(alpha: 0.22)),
+          );
+
+    final coach = Semantics(
       button: true,
-      label: strings.mascotSemanticLabel,
+      label: '${strings.mascotSemanticLabel}. $coachMessage',
       child: Tooltip(
-        message: strings.silaGameCoachMessage,
+        message: coachMessage,
         child: Material(
           elevation: 10,
           color: colors.surface,
-          shape: const CircleBorder(),
+          shadowColor: colors.primary.withValues(alpha: 0.28),
+          shape: shape,
           clipBehavior: Clip.antiAlias,
           child: InkWell(
             key: const ValueKey('sila-game-coach-button'),
-            onTap: () => _showCoach(context),
-            child: SizedBox.square(
-              dimension: 78,
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  SilaMascot(
-                    pose: SilaMascotPose.encouraging,
-                    motion: SilaMascotMotion.gameReady,
-                    height: 72,
-                    accessoryAssetKey: rewards.mascotAccessory,
-                    outfitAssetKey: rewards.mascotOutfit,
-                    auraAssetKey: rewards.mascotAura,
+            onTap: () => _showCoach(
+              context,
+              coachMessage: coachMessage,
+              pose: pose,
+              motion: motion,
+            ),
+            customBorder: shape,
+            child: showExpanded
+                ? _ExpandedCoachButton(
+                    rewards: rewards,
+                    message: coachMessage,
+                    pose: pose,
+                    motion: motion,
+                  )
+                : supportsPill
+                ? _PhoneCoachButton(
+                    rewards: rewards,
+                    message: coachMessage,
+                    pose: pose,
+                    motion: motion,
+                  )
+                : _CompactCoachButton(
+                    rewards: rewards,
+                    pose: pose,
+                    motion: motion,
                   ),
-                  PositionedDirectional(
-                    end: 4,
-                    top: 4,
-                    child: Container(
-                      width: 20,
-                      height: 20,
-                      decoration: BoxDecoration(
-                        color: colors.primary,
-                        shape: BoxShape.circle,
-                        border: Border.all(color: colors.surface, width: 2),
-                      ),
-                      child: Icon(
-                        Icons.chat_bubble_rounded,
-                        size: 11,
-                        color: colors.onPrimary,
-                      ),
-                    ),
-                  ),
-                ],
+          ),
+        ),
+      ),
+    );
+
+    // Phone games commonly keep their main action at the bottom of the screen.
+    // Lift the wider helper above that action so Sila stays visible and tappable
+    // without covering the player's primary control.
+    return Padding(
+      padding: EdgeInsetsDirectional.only(
+        bottom: supportsPill && !showExpanded ? 84 : 0,
+      ),
+      child: coach,
+    );
+  }
+
+  Future<void> _showCoach(
+    BuildContext context, {
+    required String coachMessage,
+    required SilaMascotPose pose,
+    required SilaMascotMotion motion,
+  }) {
+    final strings = AppLocalizations.of(context)!;
+    return showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      isScrollControlled: true,
+      builder: (context) => SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 620),
+              child: SilaMascotGuide(
+                title: strings.mascotName,
+                message: coachMessage,
+                semanticLabel: strings.mascotSemanticLabel,
+                pose: pose,
+                motion: motion,
+                animate: !MediaQuery.disableAnimationsOf(context),
+                loop: true,
+                accessoryAssetKey: rewards.mascotAccessory,
+                outfitAssetKey: rewards.mascotOutfit,
+                auraAssetKey: rewards.mascotAura,
               ),
             ),
           ),
@@ -126,28 +210,273 @@ class _CoachButton extends StatelessWidget {
       ),
     );
   }
+}
 
-  Future<void> _showCoach(BuildContext context) {
-    final strings = AppLocalizations.of(context)!;
-    return showModalBottomSheet<void>(
-      context: context,
-      showDragHandle: true,
-      isScrollControlled: true,
-      builder: (context) => SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
-          child: SilaMascotGuide(
-            title: strings.mascotName,
-            message: message ?? strings.silaGameCoachMessage,
-            semanticLabel: strings.mascotSemanticLabel,
-            pose: SilaMascotPose.encouraging,
-            motion: SilaMascotMotion.gameReady,
-            accessoryAssetKey: rewards.mascotAccessory,
-            outfitAssetKey: rewards.mascotOutfit,
-            auraAssetKey: rewards.mascotAura,
+class _CompactCoachButton extends StatelessWidget {
+  const _CompactCoachButton({
+    required this.rewards,
+    required this.pose,
+    required this.motion,
+  });
+
+  final EquippedDigitalRewards rewards;
+  final SilaMascotPose pose;
+  final SilaMascotMotion motion;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    return SizedBox.square(
+      key: const ValueKey('sila-game-coach-compact'),
+      dimension: 72,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          _RecurringCoachMascot(
+            rewards: rewards,
+            height: 68,
+            pose: pose,
+            motion: motion,
           ),
-        ),
+          PositionedDirectional(
+            end: 3,
+            top: 3,
+            child: _CoachChatBadge(colors: colors),
+          ),
+        ],
       ),
+    );
+  }
+}
+
+class _ExpandedCoachButton extends StatelessWidget {
+  const _ExpandedCoachButton({
+    required this.rewards,
+    required this.message,
+    required this.pose,
+    required this.motion,
+  });
+
+  final EquippedDigitalRewards rewards;
+  final String message;
+  final SilaMascotPose pose;
+  final SilaMascotMotion motion;
+
+  @override
+  Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context)!;
+    final colors = Theme.of(context).colorScheme;
+    return SizedBox(
+      key: const ValueKey('sila-game-coach-expanded'),
+      width: 286,
+      height: 82,
+      child: Row(
+        children: [
+          const SizedBox(width: 4),
+          SizedBox(
+            width: 74,
+            child: _RecurringCoachMascot(
+              rewards: rewards,
+              height: 76,
+              pose: pose,
+              motion: motion,
+            ),
+          ),
+          const SizedBox(width: 6),
+          Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  strings.mascotName,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                    color: colors.primary,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  message,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: colors.onSurfaceVariant,
+                    height: 1.15,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsetsDirectional.only(start: 8, end: 12),
+            child: _CoachChatBadge(colors: colors),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PhoneCoachButton extends StatelessWidget {
+  const _PhoneCoachButton({
+    required this.rewards,
+    required this.message,
+    required this.pose,
+    required this.motion,
+  });
+
+  final EquippedDigitalRewards rewards;
+  final String message;
+  final SilaMascotPose pose;
+  final SilaMascotMotion motion;
+
+  @override
+  Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context)!;
+    final colors = Theme.of(context).colorScheme;
+    return SizedBox(
+      key: const ValueKey('sila-game-coach-phone'),
+      width: 212,
+      height: 72,
+      child: Row(
+        children: [
+          const SizedBox(width: 4),
+          SizedBox(
+            width: 62,
+            child: _RecurringCoachMascot(
+              rewards: rewards,
+              height: 68,
+              pose: pose,
+              motion: motion,
+            ),
+          ),
+          const SizedBox(width: 5),
+          Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  strings.mascotName,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                    color: colors.primary,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  message,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: colors.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsetsDirectional.only(start: 6, end: 9),
+            child: _CoachChatBadge(colors: colors),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CoachChatBadge extends StatelessWidget {
+  const _CoachChatBadge({required this.colors});
+
+  final ColorScheme colors;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 24,
+      height: 24,
+      decoration: BoxDecoration(
+        color: colors.primary,
+        shape: BoxShape.circle,
+        border: Border.all(color: colors.surface, width: 2),
+      ),
+      child: Icon(Icons.chat_bubble_rounded, size: 12, color: colors.onPrimary),
+    );
+  }
+}
+
+/// Gives the in-game helper a calm recurring motion instead of a distracting
+/// nonstop animation. The pause between cycles also lets widget trees settle.
+class _RecurringCoachMascot extends StatefulWidget {
+  const _RecurringCoachMascot({
+    required this.rewards,
+    required this.height,
+    required this.pose,
+    required this.motion,
+  });
+
+  final EquippedDigitalRewards rewards;
+  final double height;
+  final SilaMascotPose pose;
+  final SilaMascotMotion motion;
+
+  @override
+  State<_RecurringCoachMascot> createState() => _RecurringCoachMascotState();
+}
+
+class _RecurringCoachMascotState extends State<_RecurringCoachMascot> {
+  static const _cycleInterval = Duration(milliseconds: 4400);
+
+  Timer? _cycleTimer;
+  var _cycle = 0;
+  var _reduceMotion = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final reduceMotion = MediaQuery.disableAnimationsOf(context);
+    if (_reduceMotion == reduceMotion && _cycleTimer != null) return;
+
+    _reduceMotion = reduceMotion;
+    _cycleTimer?.cancel();
+    _cycleTimer = null;
+    if (!_reduceMotion) {
+      _scheduleNextCycle();
+    }
+  }
+
+  void _scheduleNextCycle() {
+    _cycleTimer = Timer(_cycleInterval, () {
+      if (!mounted || _reduceMotion) return;
+      setState(() {
+        _cycle += 1;
+      });
+      _scheduleNextCycle();
+    });
+  }
+
+  @override
+  void dispose() {
+    _cycleTimer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SilaMascot(
+      key: ValueKey('sila-game-coach-motion-$_cycle'),
+      pose: widget.pose,
+      motion: widget.motion,
+      height: widget.height,
+      animate: !_reduceMotion,
+      accessoryAssetKey: widget.rewards.mascotAccessory,
+      outfitAssetKey: widget.rewards.mascotOutfit,
+      auraAssetKey: widget.rewards.mascotAura,
     );
   }
 }

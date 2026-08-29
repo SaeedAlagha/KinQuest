@@ -21,6 +21,10 @@ void main() {
     );
     await tester.pump();
 
+    expect(
+      find.byKey(const ValueKey('sila-game-coach-banner')),
+      findsOneWidget,
+    );
     expect(find.text('Prompt variety'), findsOneWidget);
     expect(find.text('Surprise Me'), findsOneWidget);
     expect(find.text('Storytelling'), findsOneWidget);

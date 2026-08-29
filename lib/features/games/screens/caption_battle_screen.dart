@@ -509,7 +509,15 @@ class _CaptionBattleScreenState extends State<CaptionBattleScreen> {
     return GameExitGuard(
       gameInProgress: gameInProgress,
       child: Scaffold(
-        floatingActionButton: const SilaGameCoachButton(),
+        floatingActionButton: gameInProgress
+            ? SilaGameCoachButton(
+                tone: _isLoading
+                    ? SilaGameCoachTone.thinking
+                    : _phase == _CaptionBattlePhase.roundResults
+                    ? SilaGameCoachTone.celebrating
+                    : SilaGameCoachTone.play,
+              )
+            : null,
         appBar: AppBar(title: Text(strings.captionBattle)),
         body: SafeArea(
           top: false,
@@ -614,6 +622,8 @@ class _CaptionBattleScreenState extends State<CaptionBattleScreen> {
                 description: strings.captionBattleSetupDescription,
               ),
               const SizedBox(height: 22),
+              SilaGameCoachBanner(message: strings.mascotGameSetupMessage),
+              const SizedBox(height: 18),
               _sectionCard(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,

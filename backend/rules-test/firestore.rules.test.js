@@ -91,6 +91,10 @@ test.beforeEach(async () => {
         celebrationEffect: "default",
         nameplate: "default",
       }),
+      setDoc(doc(database, "users/alice/silaChatMessages/message-1"), {
+        role: "assistant",
+        content: "A private Sila reply",
+      }),
     ]);
   });
 });
@@ -138,6 +142,25 @@ test("digital rewards are family-visible but backend-write-only", async () => {
   await assertFails(
     updateDoc(doc(aliceDatabase, settingsPath), {
       profileFrame: "forged",
+    }),
+  );
+});
+
+test("Sila chat history is inaccessible to every client SDK", async () => {
+  const aliceDatabase = testEnvironment
+    .authenticatedContext("alice")
+    .firestore();
+  const bobDatabase = testEnvironment
+    .authenticatedContext("bob")
+    .firestore();
+  const chatPath = "users/alice/silaChatMessages/message-1";
+
+  await assertFails(getDoc(doc(aliceDatabase, chatPath)));
+  await assertFails(getDoc(doc(bobDatabase, chatPath)));
+  await assertFails(
+    setDoc(doc(aliceDatabase, "users/alice/silaChatMessages/forged"), {
+      role: "assistant",
+      content: "Forged client reply",
     }),
   );
 });

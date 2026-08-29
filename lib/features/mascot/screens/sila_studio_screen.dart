@@ -14,14 +14,22 @@ import '../../rewards/digital/digital_reward_error_localization.dart';
 import '../../rewards/digital/digital_reward_localization.dart';
 import '../../rewards/digital/digital_reward_service.dart';
 import '../../rewards/digital/equipped_digital_rewards.dart';
+import '../widgets/sila_chat_panel.dart';
 import '../widgets/sila_companion_progress_card.dart';
 
 enum _StudioCategory { headwear, outfits, auras }
 
 class SilaStudioScreen extends StatefulWidget {
-  const SilaStudioScreen({super.key, this.developerPreview = false});
+  const SilaStudioScreen({
+    super.key,
+    this.developerPreview = false,
+    this.showBackButton = true,
+    this.active = true,
+  });
 
   final bool developerPreview;
+  final bool showBackButton;
+  final bool active;
 
   @override
   State<SilaStudioScreen> createState() => _SilaStudioScreenState();
@@ -77,6 +85,21 @@ class _SilaStudioScreenState extends State<SilaStudioScreen> {
       SilaMascotMotion.celebrate,
     ];
     _playReaction(motions[(motions.indexOf(_motion) + 1) % motions.length]);
+  }
+
+  void _showChatPose(SilaMascotPose pose) {
+    setState(() {
+      _pose = pose;
+      _motion = switch (pose) {
+        SilaMascotPose.idle => SilaMascotMotion.hover,
+        SilaMascotPose.thinking => SilaMascotMotion.thinking,
+        SilaMascotPose.celebrating ||
+        SilaMascotPose.winner => SilaMascotMotion.celebrate,
+        SilaMascotPose.welcome => SilaMascotMotion.excited,
+        SilaMascotPose.encouraging => SilaMascotMotion.gameReady,
+        SilaMascotPose.oops => SilaMascotMotion.excited,
+      };
+    });
   }
 
   Future<void> _updateReward({
@@ -303,14 +326,19 @@ class _SilaStudioScreenState extends State<SilaStudioScreen> {
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        IconButton(
-                          tooltip: MaterialLocalizations.of(
-                            context,
-                          ).backButtonTooltip,
-                          onPressed: () => Navigator.of(context).maybePop(),
-                          icon: const Icon(Icons.arrow_back_rounded),
-                        ),
-                        const SizedBox(width: 4),
+                        if (widget.showBackButton) ...[
+                          IconButton(
+                            tooltip: MaterialLocalizations.of(
+                              context,
+                            ).backButtonTooltip,
+                            onPressed: () => Navigator.of(context).maybePop(),
+                            icon: const Icon(Icons.arrow_back_rounded),
+                          ),
+                          const SizedBox(width: 4),
+                        ] else ...[
+                          const Icon(Icons.pets_rounded),
+                          const SizedBox(width: 12),
+                        ],
                         Expanded(
                           child: Text(
                             strings.silaStudioTitle,
@@ -322,7 +350,9 @@ class _SilaStudioScreenState extends State<SilaStudioScreen> {
                     ),
                     const SizedBox(height: 5),
                     Padding(
-                      padding: const EdgeInsetsDirectional.only(start: 52),
+                      padding: EdgeInsetsDirectional.only(
+                        start: widget.showBackButton ? 52 : 36,
+                      ),
                       child: Text(
                         strings.silaStudioSubtitle,
                         style: Theme.of(context).textTheme.bodyLarge,
@@ -331,6 +361,13 @@ class _SilaStudioScreenState extends State<SilaStudioScreen> {
                     const SizedBox(height: 22),
                     stage,
                     const SizedBox(height: 24),
+                    if (widget.active) ...[
+                      SilaChatPanel(
+                        developerPreview: widget.developerPreview,
+                        onPoseChanged: _showChatPose,
+                      ),
+                      const SizedBox(height: 24),
+                    ],
                     SilaCompanionProgressCard(
                       developerPreview: widget.developerPreview,
                     ),
@@ -371,6 +408,7 @@ class _SilaStage extends StatefulWidget {
 class _SilaStageState extends State<_SilaStage>
     with SingleTickerProviderStateMixin {
   late final AnimationController _ambientController;
+  var _reduceMotion = false;
 
   @override
   void initState() {
@@ -379,6 +417,22 @@ class _SilaStageState extends State<_SilaStage>
       vsync: this,
       duration: const Duration(seconds: 10),
     )..repeat();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final reduceMotion = MediaQuery.disableAnimationsOf(context);
+    if (_reduceMotion == reduceMotion) return;
+
+    _reduceMotion = reduceMotion;
+    if (_reduceMotion) {
+      _ambientController
+        ..stop()
+        ..value = 0;
+    } else {
+      _ambientController.repeat();
+    }
   }
 
   @override
@@ -487,7 +541,9 @@ class _SilaStageState extends State<_SilaStage>
                                 ),
                               ),
                               child: AnimatedSwitcher(
-                                duration: const Duration(milliseconds: 240),
+                                duration: _reduceMotion
+                                    ? Duration.zero
+                                    : const Duration(milliseconds: 240),
                                 child: Text(
                                   speech,
                                   key: ValueKey(
@@ -543,9 +599,7 @@ class _SilaStageState extends State<_SilaStage>
                                 ),
                               ),
                               SilaMascot(
-                                key: ValueKey(
-                                  'studio-${widget.pose.name}-${widget.motion.name}',
-                                ),
+                                key: const ValueKey('studio-sila-mascot'),
                                 pose: widget.pose,
                                 motion: widget.motion,
                                 loop: true,
