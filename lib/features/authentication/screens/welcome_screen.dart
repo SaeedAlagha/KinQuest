@@ -5,7 +5,6 @@ import '../../../core/mascot/sila_mascot.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/family_year_banner.dart';
 import '../../../l10n/app_localizations.dart';
-import '../../demo/screens/competition_demo_screen.dart';
 import 'login_screen.dart';
 import 'signup_screen.dart';
 
@@ -23,13 +22,6 @@ class WelcomeScreen extends StatelessWidget {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (_) => const SignupScreen()),
-    );
-  }
-
-  void _openCompetitionDemo(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => const CompetitionDemoScreen()),
     );
   }
 
@@ -65,11 +57,7 @@ class WelcomeScreen extends StatelessWidget {
                                   children: [
                                     Expanded(
                                       flex: 6,
-                                      child: _WelcomeHero(
-                                        isWide: true,
-                                        onDemo: () =>
-                                            _openCompetitionDemo(context),
-                                      ),
+                                      child: _WelcomeHero(isWide: true),
                                     ),
                                     const SizedBox(width: 64),
                                     Expanded(
@@ -83,11 +71,7 @@ class WelcomeScreen extends StatelessWidget {
                                 )
                               : Column(
                                   children: [
-                                    _WelcomeHero(
-                                      isWide: false,
-                                      onDemo: () =>
-                                          _openCompetitionDemo(context),
-                                    ),
+                                    _WelcomeHero(isWide: false),
                                     const SizedBox(height: 36),
                                     _WelcomeActions(
                                       onLogin: () => _openLogin(context),
@@ -110,10 +94,9 @@ class WelcomeScreen extends StatelessWidget {
 }
 
 class _WelcomeHero extends StatelessWidget {
-  const _WelcomeHero({required this.isWide, required this.onDemo});
+  const _WelcomeHero({required this.isWide});
 
   final bool isWide;
-  final VoidCallback onDemo;
 
   @override
   Widget build(BuildContext context) {
@@ -215,82 +198,7 @@ class _WelcomeHero extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(height: 20),
-        ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 420),
-          child: SizedBox(
-            width: isWide ? null : double.infinity,
-            child: FilledButton.tonalIcon(
-              key: const ValueKey('competition-demo-cta'),
-              onPressed: onDemo,
-              icon: const Icon(Icons.play_circle_fill_rounded),
-              label: Text(CompetitionDemoCopy.launchLabel(context)),
-            ),
-          ),
-        ),
-        const SizedBox(height: 20),
-        Wrap(
-          alignment: isWide ? WrapAlignment.start : WrapAlignment.center,
-          spacing: 10,
-          runSpacing: 10,
-          children: const [
-            _WelcomePill(
-              icon: Icons.park_outlined,
-              label: 'Roots • الجذور',
-              accent: AppTheme.uaeBlack,
-            ),
-            _WelcomePill(
-              icon: Icons.join_inner_rounded,
-              label: 'Bonds • الروابط',
-              accent: AppTheme.uaeRed,
-            ),
-            _WelcomePill(
-              icon: Icons.eco_outlined,
-              label: 'Growth • النمو',
-              accent: AppTheme.uaeGreen,
-            ),
-          ],
-        ),
       ],
-    );
-  }
-}
-
-class _WelcomePill extends StatelessWidget {
-  const _WelcomePill({
-    required this.icon,
-    required this.label,
-    required this.accent,
-  });
-
-  final IconData icon;
-  final String label;
-  final Color accent;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-      decoration: BoxDecoration(
-        color: colorScheme.surface.withValues(alpha: 0.86),
-        borderRadius: BorderRadius.circular(99),
-        border: Border.all(color: accent.withValues(alpha: 0.18)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 18, color: accent),
-          const SizedBox(width: 8),
-          Text(
-            label,
-            style: Theme.of(
-              context,
-            ).textTheme.labelLarge?.copyWith(color: colorScheme.onSurface),
-          ),
-        ],
-      ),
     );
   }
 }
