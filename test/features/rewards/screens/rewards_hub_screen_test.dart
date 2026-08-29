@@ -26,7 +26,7 @@ void main() {
     expect(find.text('Family Guardian Crown'), findsOneWidget);
     expect(find.text('Sila Outfits'), findsOneWidget);
     expect(find.text('Sila Auras'), findsOneWidget);
-    expect(find.byType(DigitalRewardPreview), findsNWidgets(24));
+    expect(find.byType(DigitalRewardPreview), findsNWidgets(30));
     expect(find.text('Equipped'), findsOneWidget);
     expect(find.text('Equip'), findsOneWidget);
     expect(find.text('Family Rewards'), findsNothing);

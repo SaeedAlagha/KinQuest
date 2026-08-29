@@ -23,6 +23,12 @@ void main() {
     expect(find.text('Sila Studio'), findsOneWidget);
     expect(find.byKey(const ValueKey('sila-studio-mascot')), findsOneWidget);
     expect(
+      find.byKey(const ValueKey('sila-bond-progress-card')),
+      findsOneWidget,
+    );
+    expect(find.text('Your Family Bond'), findsOneWidget);
+    expect(find.text('Level 2: Family Friend'), findsOneWidget);
+    expect(
       find.byKey(const ValueKey('sila-mascot-accessory-guardian_crown')),
       findsWidgets,
     );
@@ -32,6 +38,16 @@ void main() {
     await tester.pump(const Duration(milliseconds: 300));
     final mascot = tester.widgetList<SilaMascot>(find.byType(SilaMascot)).first;
     expect(mascot.motion, SilaMascotMotion.celebrate);
+    expect(
+      find.text(
+        'Amazing teamwork! Every moment together makes your bond stronger.',
+      ),
+      findsOneWidget,
+    );
+
+    await tester.tap(find.byKey(const ValueKey('sila-motion-excited')));
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.byKey(const ValueKey('sila-speech-excited')), findsOneWidget);
 
     final outfitsCategory = find.byKey(const ValueKey('sila-category-outfits'));
     await tester.ensureVisible(outfitsCategory);

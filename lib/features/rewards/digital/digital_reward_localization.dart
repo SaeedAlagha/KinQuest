@@ -62,6 +62,12 @@ const _arabicRewardNames = <String, String>{
   'mascot_family_sparkles': 'هالة بريق العائلة',
   'mascot_cosmic_orbit': 'هالة المدار الكوني',
   'mascot_uae_ribbon': 'شريط وحدة الإمارات',
+  'mascot_family_leaf_wreath': 'إكليل الجذور المشتركة',
+  'mascot_scholar_cap': 'قبعة عالم المستقبل',
+  'mascot_space_scout': 'بدلة مستكشف الفضاء',
+  'mascot_desert_explorer': 'وشاح مستكشف الصحراء',
+  'mascot_memory_hearts': 'هالة قلوب الذكريات',
+  'mascot_victory_burst': 'هالة انفجار البطولة',
 };
 
 const _arabicRewardDescriptions = <String, String>{
@@ -90,4 +96,16 @@ const _arabicRewardDescriptions = <String, String>{
   'mascot_family_sparkles': 'ألوان الجذور والروابط والنمو تدور حول صلة.',
   'mascot_cosmic_orbit': 'مدار فضائي متحرك لمغامرات صلة.',
   'mascot_uae_ribbon': 'قوس بألوان الإمارات يحتفي بوحدة العائلة.',
+  'mascot_family_leaf_wreath':
+      'تاج نابض من الأوراق الخضراء والذهبية مستوحى من جذور عائلة صلة.',
+  'mascot_scholar_cap':
+      'قبعة احتفالية للعائلات الفضولية التي تواصل التعلّم معًا.',
+  'mascot_space_scout':
+      'ألواح كتف كونية وتفاصيل متوهجة لمغامرات تتجاوز النجوم.',
+  'mascot_desert_explorer':
+      'وشاح دافئ بألوان الشروق لمغامرة صلة العائلية القادمة في الإمارات.',
+  'mascot_memory_hearts':
+      'قلوب متحركة تحمل ألوان اللحظات التي تتشاركها عائلتكم.',
+  'mascot_victory_burst':
+      'انفجار ضوئي متحرك صُمم لأبطال العائلة وانتصاراتهم السعيدة.',
 };

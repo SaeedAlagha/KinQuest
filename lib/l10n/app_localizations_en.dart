@@ -672,6 +672,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get silaStudioSubtitle => 'Make your family companion feel uniquely yours.';
 
   @override
+  String get silaStudioProfileEntryDescription => 'Play with Sila, grow your bond, and choose his look.';
+
+  @override
   String get silaStudioTapHint => 'Tap Sila or choose a reaction to bring him to life.';
 
   @override
@@ -727,6 +730,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get silaStudioReactionThink => 'Think';
 
   @override
+  String get silaStudioReactionWave => 'Wave';
+
+  @override
   String get silaStudioReactionCelebrate => 'Celebrate';
 
   @override
@@ -740,6 +746,68 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get silaStudioLoadError => 'Sila\'s closet could not be loaded. Please try again.';
+
+  @override
+  String get silaBondTitle => 'Your Family Bond';
+
+  @override
+  String get silaBondDescription => 'Sila grows closer as your family plays, completes missions, and celebrates achievements together.';
+
+  @override
+  String silaBondPoints(int points) {
+    return '$points Bond Points';
+  }
+
+  @override
+  String silaBondLevel(int level, String name) {
+    return 'Level $level: $name';
+  }
+
+  @override
+  String silaBondPointsToNext(int points, String level) {
+    return '$points points until $level';
+  }
+
+  @override
+  String get silaBondMaxLevel => 'Your family has reached Sila\'s highest bond level!';
+
+  @override
+  String silaBondProgressSemantic(int percent) {
+    return 'Bond level progress: $percent percent';
+  }
+
+  @override
+  String get silaBondJourneyTitle => 'Sila\'s bond journey';
+
+  @override
+  String get silaBondJourneyDescription => 'These levels celebrate your relationship with Sila. His chosen look stays the same across every app theme.';
+
+  @override
+  String get silaBondNewCompanion => 'New Companion';
+
+  @override
+  String get silaBondFamilyFriend => 'Family Friend';
+
+  @override
+  String get silaBondMemoryKeeper => 'Memory Keeper';
+
+  @override
+  String get silaBondFamilyGuardian => 'Family Guardian';
+
+  @override
+  String get silaBondLegacyCompanion => 'Legacy Companion';
+
+  @override
+  String get silaBondCurrent => 'Current level';
+
+  @override
+  String get silaBondReached => 'Reached';
+
+  @override
+  String get silaBondLocked => 'Keep bonding';
+
+  @override
+  String get silaBondTrophies => 'Trophies';
 
   @override
   String get silaGameCoachMessage => 'I’m right here with you—play fair, cheer loudly, and have fun together!';

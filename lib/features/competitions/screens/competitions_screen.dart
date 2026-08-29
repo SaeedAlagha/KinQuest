@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import '../../../core/mascot/sila_mascot.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/family_year_banner.dart';
 import '../../../core/widgets/sila_page_backdrop.dart';
 import 'daily_challenge_screen.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../rewards/digital/digital_reward_visuals.dart';
+import '../../rewards/digital/equipped_digital_rewards.dart';
 import '../../games/screens/games_screen.dart';
 import 'weekly_championship_screen.dart';
 import 'monthly_cup_screen.dart';
@@ -67,7 +69,10 @@ class CompetitionsScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  _CompetitionArenaHero(strings: strings),
+                  _CompetitionArenaHero(
+                    strings: strings,
+                    developerPreview: developerPreview,
+                  ),
                   const SizedBox(height: 22),
                   ..._competitions.map(
                     (competition) => Padding(
@@ -110,12 +115,30 @@ class CompetitionsScreen extends StatelessWidget {
 }
 
 class _CompetitionArenaHero extends StatelessWidget {
-  const _CompetitionArenaHero({required this.strings});
+  const _CompetitionArenaHero({
+    required this.strings,
+    required this.developerPreview,
+  });
 
   final AppLocalizations strings;
+  final bool developerPreview;
 
   @override
   Widget build(BuildContext context) {
+    return DigitalRewardStyleBuilder(
+      userId: developerPreview ? null : FirebaseAuth.instance.currentUser?.uid,
+      preview: developerPreview
+          ? const EquippedDigitalRewards(
+              mascotAccessory: SilaMascotAccessories.guardianCrown,
+              mascotOutfit: SilaMascotOutfits.gameJersey,
+              mascotAura: SilaMascotAuras.victoryBurst,
+            )
+          : null,
+      builder: (context, rewards) => _buildHero(context, rewards),
+    );
+  }
+
+  Widget _buildHero(BuildContext context, EquippedDigitalRewards rewards) {
     return Container(
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
@@ -153,20 +176,18 @@ class _CompetitionArenaHero extends StatelessWidget {
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(
-                      width: 64,
-                      height: 64,
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.15),
-                        borderRadius: BorderRadius.circular(21),
-                      ),
-                      child: const Icon(
-                        Icons.emoji_events_rounded,
-                        color: Colors.white,
-                        size: 34,
-                      ),
+                    SilaMascot(
+                      key: const ValueKey('competition-sila-host'),
+                      pose: SilaMascotPose.winner,
+                      motion: SilaMascotMotion.celebrate,
+                      loop: !developerPreview,
+                      height: 126,
+                      semanticLabel: strings.mascotSemanticLabel,
+                      accessoryAssetKey: rewards.mascotAccessory,
+                      outfitAssetKey: rewards.mascotOutfit,
+                      auraAssetKey: rewards.mascotAura,
                     ),
-                    const SizedBox(width: 18),
+                    const SizedBox(width: 14),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,

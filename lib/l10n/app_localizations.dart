@@ -1343,6 +1343,12 @@ abstract class AppLocalizations {
   /// **'Make your family companion feel uniquely yours.'**
   String get silaStudioSubtitle;
 
+  /// No description provided for @silaStudioProfileEntryDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Play with Sila, grow your bond, and choose his look.'**
+  String get silaStudioProfileEntryDescription;
+
   /// No description provided for @silaStudioTapHint.
   ///
   /// In en, this message translates to:
@@ -1445,6 +1451,12 @@ abstract class AppLocalizations {
   /// **'Think'**
   String get silaStudioReactionThink;
 
+  /// No description provided for @silaStudioReactionWave.
+  ///
+  /// In en, this message translates to:
+  /// **'Wave'**
+  String get silaStudioReactionWave;
+
   /// No description provided for @silaStudioReactionCelebrate.
   ///
   /// In en, this message translates to:
@@ -1474,6 +1486,114 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Sila\'s closet could not be loaded. Please try again.'**
   String get silaStudioLoadError;
+
+  /// No description provided for @silaBondTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your Family Bond'**
+  String get silaBondTitle;
+
+  /// No description provided for @silaBondDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Sila grows closer as your family plays, completes missions, and celebrates achievements together.'**
+  String get silaBondDescription;
+
+  /// No description provided for @silaBondPoints.
+  ///
+  /// In en, this message translates to:
+  /// **'{points} Bond Points'**
+  String silaBondPoints(int points);
+
+  /// No description provided for @silaBondLevel.
+  ///
+  /// In en, this message translates to:
+  /// **'Level {level}: {name}'**
+  String silaBondLevel(int level, String name);
+
+  /// No description provided for @silaBondPointsToNext.
+  ///
+  /// In en, this message translates to:
+  /// **'{points} points until {level}'**
+  String silaBondPointsToNext(int points, String level);
+
+  /// No description provided for @silaBondMaxLevel.
+  ///
+  /// In en, this message translates to:
+  /// **'Your family has reached Sila\'s highest bond level!'**
+  String get silaBondMaxLevel;
+
+  /// No description provided for @silaBondProgressSemantic.
+  ///
+  /// In en, this message translates to:
+  /// **'Bond level progress: {percent} percent'**
+  String silaBondProgressSemantic(int percent);
+
+  /// No description provided for @silaBondJourneyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sila\'s bond journey'**
+  String get silaBondJourneyTitle;
+
+  /// No description provided for @silaBondJourneyDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'These levels celebrate your relationship with Sila. His chosen look stays the same across every app theme.'**
+  String get silaBondJourneyDescription;
+
+  /// No description provided for @silaBondNewCompanion.
+  ///
+  /// In en, this message translates to:
+  /// **'New Companion'**
+  String get silaBondNewCompanion;
+
+  /// No description provided for @silaBondFamilyFriend.
+  ///
+  /// In en, this message translates to:
+  /// **'Family Friend'**
+  String get silaBondFamilyFriend;
+
+  /// No description provided for @silaBondMemoryKeeper.
+  ///
+  /// In en, this message translates to:
+  /// **'Memory Keeper'**
+  String get silaBondMemoryKeeper;
+
+  /// No description provided for @silaBondFamilyGuardian.
+  ///
+  /// In en, this message translates to:
+  /// **'Family Guardian'**
+  String get silaBondFamilyGuardian;
+
+  /// No description provided for @silaBondLegacyCompanion.
+  ///
+  /// In en, this message translates to:
+  /// **'Legacy Companion'**
+  String get silaBondLegacyCompanion;
+
+  /// No description provided for @silaBondCurrent.
+  ///
+  /// In en, this message translates to:
+  /// **'Current level'**
+  String get silaBondCurrent;
+
+  /// No description provided for @silaBondReached.
+  ///
+  /// In en, this message translates to:
+  /// **'Reached'**
+  String get silaBondReached;
+
+  /// No description provided for @silaBondLocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep bonding'**
+  String get silaBondLocked;
+
+  /// No description provided for @silaBondTrophies.
+  ///
+  /// In en, this message translates to:
+  /// **'Trophies'**
+  String get silaBondTrophies;
 
   /// No description provided for @silaGameCoachMessage.
   ///

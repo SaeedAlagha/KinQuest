@@ -20,7 +20,7 @@ test("server wires health, privacy headers, and JSON validation", async (t) => {
 
   const catalog = await fetch(`${baseUrl}/api/digital-rewards`);
   assert.equal(catalog.status, 200);
-  assert.equal((await catalog.json()).rewards.length, 24);
+  assert.equal((await catalog.json()).rewards.length, 30);
 
   const invalidJson = await fetch(`${baseUrl}/api/trivia`, {
     method: "POST",

@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../../../core/mascot/sila_mascot.dart';
 import '../../mascot/screens/sila_studio_screen.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../authentication/screens/family_choice_screen.dart';
@@ -1090,20 +1091,41 @@ class _SettingsSection extends StatelessWidget {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: Column(
         children: [
-          ListTile(
-            leading: const Icon(Icons.checkroom_rounded),
-            title: Text(strings.navSila),
-            subtitle: const Text('Customize your Sila avatar'),
-            trailing: const Icon(Icons.chevron_right_rounded),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) =>
-                      SilaStudioScreen(developerPreview: developerPreview),
-                ),
-              );
-            },
+          DigitalRewardStyleBuilder(
+            userId: developerPreview
+                ? null
+                : FirebaseAuth.instance.currentUser?.uid,
+            preview: developerPreview
+                ? const EquippedDigitalRewards(
+                    mascotAccessory: SilaMascotAccessories.familyLeafWreath,
+                    mascotOutfit: SilaMascotOutfits.familyCape,
+                    mascotAura: SilaMascotAuras.familySparkles,
+                  )
+                : null,
+            builder: (context, rewards) => ListTile(
+              key: const ValueKey('profile-sila-studio-entry'),
+              leading: SilaMascot(
+                pose: SilaMascotPose.welcome,
+                motion: SilaMascotMotion.hover,
+                height: 58,
+                semanticLabel: strings.mascotSemanticLabel,
+                accessoryAssetKey: rewards.mascotAccessory,
+                outfitAssetKey: rewards.mascotOutfit,
+                auraAssetKey: rewards.mascotAura,
+              ),
+              title: Text(strings.navSila),
+              subtitle: Text(strings.silaStudioProfileEntryDescription),
+              trailing: const Icon(Icons.chevron_right_rounded),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) =>
+                        SilaStudioScreen(developerPreview: developerPreview),
+                  ),
+                );
+              },
+            ),
           ),
           const Divider(height: 1),
           ListTile(

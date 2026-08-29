@@ -27,6 +27,11 @@ void main() {
 
     expect(find.byType(SilaPageBackdrop), findsOneWidget);
     expect(find.byType(UaeColorRibbon), findsOneWidget);
+    expect(find.byKey(const ValueKey('competition-sila-host')), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('sila-mascot-aura-victory_burst')),
+      findsOneWidget,
+    );
     expect(find.text('Play Together'), findsOneWidget);
     expect(find.text('Quick Play'), findsOneWidget);
 
