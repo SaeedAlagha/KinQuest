@@ -21,6 +21,10 @@ void main() {
     );
     await tester.pump();
 
+    expect(
+      find.byKey(const ValueKey('sila-game-coach-banner')),
+      findsOneWidget,
+    );
     expect(find.text('Random mix'), findsOneWidget);
     expect(find.text('Music'), findsOneWidget);
     expect(find.text('Technology'), findsOneWidget);
@@ -75,6 +79,9 @@ void main() {
     expect(find.text('جهّزوا لغزكم'), findsOneWidget);
     expect(find.text('مزيج عشوائي'), findsOneWidget);
     expect(find.text('الإمارات والتراث'), findsOneWidget);
+
+    await tester.scrollUntilVisible(find.text('جولة واحدة'), 180);
+
     expect(find.text('جولة واحدة'), findsOneWidget);
     expect(
       tester
@@ -83,8 +90,7 @@ void main() {
       TextDirection.rtl,
     );
 
-    await tester.drag(find.byType(ListView), const Offset(0, -900));
-    await tester.pump();
+    await tester.scrollUntilVisible(find.text('تم اختيار 4 لاعبين'), 220);
 
     expect(find.text('تم اختيار 4 لاعبين'), findsOneWidget);
     expect(find.text('ابدأ اللعبة'), findsOneWidget);

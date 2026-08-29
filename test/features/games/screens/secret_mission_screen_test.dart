@@ -43,6 +43,10 @@ void main() {
     );
     await tester.pump();
 
+    expect(
+      find.byKey(const ValueKey('sila-game-coach-banner')),
+      findsOneWidget,
+    );
     expect(find.text('مهمة سرية'), findsOneWidget);
     expect(find.text('من سيلعب؟'), findsOneWidget);
     expect(find.textContaining('10 دقائق لكل جولة'), findsOneWidget);

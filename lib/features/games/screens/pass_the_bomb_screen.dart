@@ -477,7 +477,13 @@ class _PassTheBombScreenState extends State<PassTheBombScreen> {
     return GameExitGuard(
       gameInProgress: gameInProgress,
       child: Scaffold(
-        floatingActionButton: const SilaGameCoachButton(),
+        floatingActionButton: gameInProgress
+            ? SilaGameCoachButton(
+                tone: _phase == _BombPhase.roundResult
+                    ? SilaGameCoachTone.celebrating
+                    : SilaGameCoachTone.play,
+              )
+            : null,
         appBar: AppBar(title: Text(strings.passTheBomb)),
         body: SafeArea(child: _buildBody()),
       ),
@@ -586,10 +592,16 @@ class _PassTheBombScreenState extends State<PassTheBombScreen> {
           const SizedBox(height: 24),
           Expanded(
             child: ListView.separated(
-              itemCount: _familyMembers.length,
+              itemCount: _familyMembers.length + 1,
               separatorBuilder: (_, _) => const SizedBox(height: 10),
               itemBuilder: (context, index) {
-                final player = _familyMembers[index];
+                if (index == 0) {
+                  return SilaGameCoachBanner(
+                    message: strings.mascotGameSetupMessage,
+                  );
+                }
+
+                final player = _familyMembers[index - 1];
 
                 final selected = _selectedPlayerIds.contains(player.id);
 

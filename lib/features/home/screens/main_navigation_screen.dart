@@ -6,6 +6,7 @@ import '../../../core/widgets/sila_brand_mark.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../competitions/screens/competitions_screen.dart';
 import '../../games/screens/family_missions_screen.dart';
+import '../../mascot/screens/sila_studio_screen.dart';
 import '../../memories/screens/memories_screen.dart';
 import '../../profile/screens/profile_screen.dart';
 import 'home_screen.dart';
@@ -42,7 +43,12 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       selectedIcon: const Icon(Icons.groups_rounded),
       label: strings.navMissions,
     ),
-
+    NavigationDestination(
+      key: const ValueKey('nav-sila-destination'),
+      icon: const _SilaNavigationIcon(),
+      selectedIcon: const _SilaNavigationIcon(selected: true),
+      label: strings.navSila,
+    ),
     NavigationDestination(
       icon: const Icon(Icons.redeem_outlined),
       selectedIcon: const Icon(Icons.redeem_rounded),
@@ -78,7 +84,11 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       selectedIcon: const Icon(Icons.groups_rounded),
       label: Text(strings.navMissions),
     ),
-
+    NavigationRailDestination(
+      icon: const _SilaNavigationIcon(),
+      selectedIcon: const _SilaNavigationIcon(selected: true),
+      label: Text(strings.navSila),
+    ),
     NavigationRailDestination(
       icon: const Icon(Icons.redeem_outlined),
       selectedIcon: const Icon(Icons.redeem_rounded),
@@ -107,6 +117,11 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
             const MemoriesScreen(developerPreview: true),
             const CompetitionsScreen(developerPreview: true),
             const FamilyMissionsScreen(developerPreview: true),
+            SilaStudioScreen(
+              developerPreview: true,
+              showBackButton: false,
+              active: _selectedIndex == 4,
+            ),
             const RewardsHubScreen(developerPreview: true),
             const ProfileScreen(developerPreview: true),
           ]
@@ -115,13 +130,17 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
             const MemoriesScreen(),
             const CompetitionsScreen(),
             const FamilyMissionsScreen(),
+            SilaStudioScreen(
+              showBackButton: false,
+              active: _selectedIndex == 4,
+            ),
             const RewardsHubScreen(),
             const ProfileScreen(),
           ];
   }
 
   void _openFamilyOverview() {
-    _selectScreen(5);
+    _selectScreen(6);
   }
 
   void _selectScreen(int index) {
@@ -277,12 +296,55 @@ class _MobileNavigationShell extends StatelessWidget {
             NavigationBar(
               backgroundColor: Colors.transparent,
               elevation: 0,
+              labelBehavior:
+                  NavigationDestinationLabelBehavior.onlyShowSelected,
               selectedIndex: selectedIndex,
               onDestinationSelected: onDestinationSelected,
               destinations: destinations,
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _SilaNavigationIcon extends StatelessWidget {
+  const _SilaNavigationIcon({this.selected = false});
+
+  final bool selected;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    final size = selected ? 29.0 : 25.0;
+
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 180),
+      width: size,
+      height: size,
+      clipBehavior: Clip.antiAlias,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(
+          color: selected ? colors.primary : colors.outlineVariant,
+          width: selected ? 2 : 1,
+        ),
+        boxShadow: selected
+            ? [
+                BoxShadow(
+                  color: colors.primary.withValues(alpha: 0.28),
+                  blurRadius: 7,
+                ),
+              ]
+            : null,
+      ),
+      child: Image.asset(
+        'assets/mascot/sila_app_icon.png',
+        fit: BoxFit.cover,
+        cacheWidth: 96,
+        cacheHeight: 96,
+        excludeFromSemantics: true,
       ),
     );
   }

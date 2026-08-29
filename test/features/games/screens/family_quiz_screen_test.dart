@@ -12,6 +12,10 @@ void main() {
       final service = _FakeFamilyQuizAiService(_privateAnswerQuestions);
       await _pumpQuiz(tester, service);
 
+      expect(
+        find.byKey(const ValueKey('sila-game-coach-banner')),
+        findsOneWidget,
+      );
       final startButton = find.widgetWithText(
         FilledButton,
         'Start Family Quiz',
@@ -244,7 +248,10 @@ Future<void> _pumpQuiz(
       theme: ThemeData(useMaterial3: true),
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
-      home: FamilyQuizScreen(aiService: service, developerPreview: true),
+      home: TickerMode(
+        enabled: false,
+        child: FamilyQuizScreen(aiService: service, developerPreview: true),
+      ),
     ),
   );
   await tester.pumpAndSettle();

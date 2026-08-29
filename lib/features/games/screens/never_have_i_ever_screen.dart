@@ -191,7 +191,7 @@ class _NeverHaveIEverScreenState extends State<NeverHaveIEverScreen> {
     return GameExitGuard(
       gameInProgress: _isPlaying,
       child: Scaffold(
-        floatingActionButton: const SilaGameCoachButton(),
+        floatingActionButton: _isPlaying ? const SilaGameCoachButton() : null,
         appBar: AppBar(title: Text(strings.neverHaveIEver)),
         body: _showResults || _isPlaying
             ? Padding(

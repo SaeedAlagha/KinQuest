@@ -6,6 +6,7 @@ import 'package:kinquest/core/widgets/sila_brand_mark.dart';
 import 'package:kinquest/features/authentication/screens/login_screen.dart';
 import 'package:kinquest/features/demo/screens/competition_demo_screen.dart';
 import 'package:kinquest/features/home/screens/main_navigation_screen.dart';
+import 'package:kinquest/features/mascot/screens/sila_studio_screen.dart';
 import 'package:kinquest/l10n/app_localizations.dart';
 import 'package:kinquest/main.dart';
 
@@ -89,9 +90,7 @@ void main() {
 
     final navigationBar = find.byType(NavigationBar);
 
-    await tester.tap(
-      find.descendant(of: navigationBar, matching: find.text('Memories')),
-    );
+    await tester.tap(_navigationDestination(navigationBar, 'Memories'));
     await tester.pump(const Duration(milliseconds: 400));
 
     expect(find.text('Developer Family memories'), findsOneWidget);
@@ -101,9 +100,7 @@ void main() {
     );
     expect(tester.takeException(), isNull);
 
-    await tester.tap(
-      find.descendant(of: navigationBar, matching: find.text('Play')),
-    );
+    await tester.tap(_navigationDestination(navigationBar, 'Play'));
     await tester.pump(const Duration(milliseconds: 400));
 
     await tester.scrollUntilVisible(
@@ -114,9 +111,23 @@ void main() {
     expect(find.text('Developer Family Leaderboard'), findsOneWidget);
     expect(tester.takeException(), isNull);
 
-    await tester.tap(
-      find.descendant(of: navigationBar, matching: find.text('Profile')),
+    await tester.tap(find.byKey(const ValueKey('nav-sila-destination')));
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(find.byType(SilaStudioScreen), findsOneWidget);
+    expect(
+      tester
+          .widget<SilaStudioScreen>(find.byType(SilaStudioScreen))
+          .showBackButton,
+      isFalse,
     );
+    expect(
+      tester.widget<SilaStudioScreen>(find.byType(SilaStudioScreen)).active,
+      isTrue,
+    );
+    expect(tester.takeException(), isNull);
+
+    await tester.tap(_navigationDestination(navigationBar, 'Profile'));
     await tester.pump(const Duration(milliseconds: 400));
 
     expect(find.text('preview@sila.local'), findsOneWidget);
@@ -130,5 +141,14 @@ Widget _testApp(Widget home) {
     supportedLocales: AppLocalizations.supportedLocales,
     localizationsDelegates: AppLocalizations.localizationsDelegates,
     home: home,
+  );
+}
+
+Finder _navigationDestination(Finder navigationBar, String label) {
+  return find.descendant(
+    of: navigationBar,
+    matching: find.byWidgetPredicate(
+      (widget) => widget is NavigationDestination && widget.label == label,
+    ),
   );
 }

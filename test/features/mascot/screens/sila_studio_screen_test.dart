@@ -4,8 +4,11 @@ import 'package:kinquest/core/mascot/sila_mascot.dart';
 import 'package:kinquest/core/theme/app_theme.dart';
 import 'package:kinquest/features/mascot/screens/sila_studio_screen.dart';
 import 'package:kinquest/l10n/app_localizations.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
+  setUp(() => SharedPreferences.setMockInitialValues({}));
+
   testWidgets('Sila Studio previews layered cosmetics and reactions', (
     tester,
   ) async {
@@ -33,6 +36,9 @@ void main() {
       findsWidgets,
     );
     expect(find.text('Headwear'), findsOneWidget);
+    expect(find.byKey(const ValueKey('sila-chat-panel')), findsOneWidget);
+    expect(find.text('Talk with Sila'), findsOneWidget);
+    expect(find.textContaining('Private to your account'), findsOneWidget);
 
     await tester.tap(find.byKey(const ValueKey('sila-motion-celebrate')));
     await tester.pump(const Duration(milliseconds: 300));
@@ -55,6 +61,22 @@ void main() {
     await tester.pump(const Duration(milliseconds: 400));
     expect(find.text('Game Night Jersey'), findsOneWidget);
     expect(find.text('Memory Keeper Kit'), findsOneWidget);
+
+    await tester.ensureVisible(find.byKey(const ValueKey('sila-chat-input')));
+    await tester.enterText(
+      find.byKey(const ValueKey('sila-chat-input')),
+      'What should we play?',
+    );
+    final sendButton = tester.widget<IconButton>(
+      find.byKey(const ValueKey('sila-chat-send')),
+    );
+    expect(sendButton.onPressed, isNotNull);
+    sendButton.onPressed!();
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(find.byKey(const ValueKey('sila-chat-thinking')), findsOneWidget);
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(find.text('What should we play?'), findsOneWidget);
+    expect(find.byKey(const ValueKey('sila-chat-thinking')), findsNothing);
     expect(tester.takeException(), isNull);
   });
 }

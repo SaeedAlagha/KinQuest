@@ -309,7 +309,13 @@ class _DrawAndGuessScreenState extends State<DrawAndGuessScreen> {
     return GameExitGuard(
       gameInProgress: gameInProgress,
       child: Scaffold(
-        floatingActionButton: const SilaGameCoachButton(),
+        floatingActionButton: gameInProgress
+            ? SilaGameCoachButton(
+                tone: _phase == _DrawGamePhase.roundResult
+                    ? SilaGameCoachTone.celebrating
+                    : SilaGameCoachTone.play,
+              )
+            : null,
         appBar: AppBar(title: Text(strings.drawAndGuess)),
         body: SafeArea(child: _buildBody()),
       ),
@@ -426,10 +432,16 @@ class _DrawAndGuessScreenState extends State<DrawAndGuessScreen> {
 
           Expanded(
             child: ListView.separated(
-              itemCount: _familyMembers.length,
+              itemCount: _familyMembers.length + 1,
               separatorBuilder: (_, _) => const SizedBox(height: 10),
               itemBuilder: (context, index) {
-                final player = _familyMembers[index];
+                if (index == 0) {
+                  return SilaGameCoachBanner(
+                    message: strings.mascotGameSetupMessage,
+                  );
+                }
+
+                final player = _familyMembers[index - 1];
 
                 final selected = _selectedPlayerIds.contains(player.id);
 

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -93,6 +94,7 @@ class SilaMascot extends StatefulWidget {
     this.auraAssetKey = SilaMascotAuras.none,
     this.motion,
     this.loop = false,
+    this.loopPause = Duration.zero,
   });
 
   final SilaMascotPose pose;
@@ -104,6 +106,7 @@ class SilaMascot extends StatefulWidget {
   final String auraAssetKey;
   final SilaMascotMotion? motion;
   final bool loop;
+  final Duration loopPause;
 
   @override
   State<SilaMascot> createState() => _SilaMascotState();
@@ -113,6 +116,9 @@ class _SilaMascotState extends State<SilaMascot>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
   late final Animation<double> _progress;
+  Timer? _loopTimer;
+  var _animationGeneration = 0;
+  var _reduceMotion = false;
 
   @override
   void initState() {
@@ -126,21 +132,40 @@ class _SilaMascotState extends State<SilaMascot>
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final reduceMotion = MediaQuery.disableAnimationsOf(context);
+    if (_reduceMotion == reduceMotion) return;
+    _reduceMotion = reduceMotion;
+    _syncAnimation();
+  }
+
+  @override
   void didUpdateWidget(covariant SilaMascot oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.animate != widget.animate ||
         oldWidget.pose != widget.pose ||
         oldWidget.motion != widget.motion ||
-        oldWidget.loop != widget.loop) {
+        oldWidget.loop != widget.loop ||
+        oldWidget.loopPause != widget.loopPause) {
       _syncAnimation();
     }
   }
 
   void _syncAnimation() {
-    if (widget.animate) {
+    _animationGeneration += 1;
+    _loopTimer?.cancel();
+    _loopTimer = null;
+    _controller.stop();
+
+    if (widget.animate && !_reduceMotion) {
       _controller.duration = _motionDuration;
       if (widget.loop) {
-        _controller.repeat();
+        if (widget.loopPause > Duration.zero) {
+          _playLoopCycle(_animationGeneration);
+        } else {
+          _controller.repeat();
+        }
       } else {
         _controller.forward(from: 0);
       }
@@ -149,6 +174,25 @@ class _SilaMascotState extends State<SilaMascot>
         ..stop()
         ..value = 0;
     }
+  }
+
+  void _playLoopCycle(int generation) {
+    _controller.forward(from: 0).whenCompleteOrCancel(() {
+      if (!mounted ||
+          generation != _animationGeneration ||
+          _reduceMotion ||
+          !widget.animate ||
+          !widget.loop) {
+        return;
+      }
+
+      _loopTimer = Timer(widget.loopPause, () {
+        if (!mounted || generation != _animationGeneration || _reduceMotion) {
+          return;
+        }
+        _playLoopCycle(generation);
+      });
+    });
   }
 
   SilaMascotMotion get _effectiveMotion {
@@ -174,13 +218,21 @@ class _SilaMascotState extends State<SilaMascot>
 
   @override
   void dispose() {
+    _animationGeneration += 1;
+    _loopTimer?.cancel();
     _controller.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final transitionDuration = !widget.animate || _reduceMotion
+        ? Duration.zero
+        : const Duration(milliseconds: 260);
+    final accessoryGeometry = _accessoryGeometryFor(widget.pose);
+    final outfitGeometry = _outfitGeometryFor(widget.pose);
     final image = SizedBox(
+      key: const ValueKey('sila-character-rig'),
       width: widget.height * 0.75,
       height: widget.height,
       child: Stack(
@@ -188,21 +240,53 @@ class _SilaMascotState extends State<SilaMascot>
         fit: StackFit.expand,
         children: [
           _SilaAuraOverlay(assetKey: widget.auraAssetKey, animation: _progress),
-          Image.asset(
-            widget.pose.assetPath,
-            fit: BoxFit.contain,
-            filterQuality: FilterQuality.high,
-            gaplessPlayback: true,
-            excludeFromSemantics: widget.semanticLabel == null,
-            semanticLabel: widget.semanticLabel,
+          AnimatedSwitcher(
+            duration: transitionDuration,
+            switchInCurve: Curves.easeOut,
+            switchOutCurve: Curves.easeIn,
+            child: Image.asset(
+              widget.pose.assetPath,
+              key: ValueKey('sila-pose-${widget.pose.name}'),
+              fit: BoxFit.contain,
+              filterQuality: FilterQuality.high,
+              gaplessPlayback: true,
+              excludeFromSemantics: widget.semanticLabel == null,
+              semanticLabel: widget.semanticLabel,
+            ),
           ),
-          _SilaOutfitOverlay(assetKey: widget.outfitAssetKey),
-          _SilaAccessoryOverlay(assetKey: widget.accessoryAssetKey),
+          AnimatedSlide(
+            key: const ValueKey('sila-animated-outfit-layer'),
+            offset: outfitGeometry.offset,
+            duration: transitionDuration,
+            curve: Curves.easeOutBack,
+            child: AnimatedScale(
+              key: const ValueKey('sila-animated-outfit-scale'),
+              scale: outfitGeometry.scale,
+              alignment: const Alignment(0, 0.2),
+              duration: transitionDuration,
+              curve: Curves.easeOutBack,
+              child: _SilaOutfitOverlay(assetKey: widget.outfitAssetKey),
+            ),
+          ),
+          AnimatedSlide(
+            key: const ValueKey('sila-animated-accessory-layer'),
+            offset: accessoryGeometry.offset,
+            duration: transitionDuration,
+            curve: Curves.easeOutBack,
+            child: AnimatedScale(
+              key: const ValueKey('sila-animated-accessory-scale'),
+              scale: accessoryGeometry.scale,
+              alignment: const Alignment(0, -0.58),
+              duration: transitionDuration,
+              curve: Curves.easeOutBack,
+              child: _SilaAccessoryOverlay(assetKey: widget.accessoryAssetKey),
+            ),
+          ),
         ],
       ),
     );
 
-    if (!widget.animate || MediaQuery.disableAnimationsOf(context)) {
+    if (!widget.animate || _reduceMotion) {
       return image;
     }
 
@@ -239,6 +323,7 @@ class _SilaMascotState extends State<SilaMascot>
           ),
         };
         return Transform.translate(
+          key: const ValueKey('sila-character-motion-transform'),
           offset: offset,
           child: Transform.rotate(
             angle: angle,
@@ -249,6 +334,71 @@ class _SilaMascotState extends State<SilaMascot>
     );
   }
 }
+
+/// Each pose uses the same 384 x 512 canvas, while Sila's head and torso move
+/// within it. Cosmetics are painted in the idle coordinate space, then this
+/// small rig correction follows the photographed character in every pose.
+class _SilaLayerGeometry {
+  const _SilaLayerGeometry({this.offset = Offset.zero, this.scale = 1});
+
+  final Offset offset;
+  final double scale;
+}
+
+_SilaLayerGeometry _accessoryGeometryFor(SilaMascotPose pose) => switch (pose) {
+  SilaMascotPose.idle => const _SilaLayerGeometry(),
+  SilaMascotPose.welcome => const _SilaLayerGeometry(
+    offset: Offset(0.045, 0.018),
+  ),
+  SilaMascotPose.thinking => const _SilaLayerGeometry(
+    offset: Offset(0.032, 0.035),
+    scale: 1.02,
+  ),
+  SilaMascotPose.celebrating => const _SilaLayerGeometry(
+    offset: Offset(-0.045, 0.026),
+    scale: 0.92,
+  ),
+  SilaMascotPose.encouraging => const _SilaLayerGeometry(
+    offset: Offset(0.02, -0.055),
+    scale: 0.96,
+  ),
+  SilaMascotPose.oops => const _SilaLayerGeometry(
+    offset: Offset(0.005, -0.075),
+    scale: 0.97,
+  ),
+  SilaMascotPose.winner => const _SilaLayerGeometry(
+    offset: Offset(-0.045, -0.058),
+    scale: 0.94,
+  ),
+};
+
+_SilaLayerGeometry _outfitGeometryFor(SilaMascotPose pose) => switch (pose) {
+  SilaMascotPose.idle => const _SilaLayerGeometry(),
+  SilaMascotPose.welcome => const _SilaLayerGeometry(
+    offset: Offset(0.015, -0.002),
+    scale: 0.98,
+  ),
+  SilaMascotPose.thinking => const _SilaLayerGeometry(
+    offset: Offset(0.02, 0.01),
+    scale: 0.96,
+  ),
+  SilaMascotPose.celebrating => const _SilaLayerGeometry(
+    offset: Offset(-0.045, 0.025),
+    scale: 0.88,
+  ),
+  SilaMascotPose.encouraging => const _SilaLayerGeometry(
+    offset: Offset(0.015, -0.052),
+    scale: 0.91,
+  ),
+  SilaMascotPose.oops => const _SilaLayerGeometry(
+    offset: Offset(0.005, -0.07),
+    scale: 0.9,
+  ),
+  SilaMascotPose.winner => const _SilaLayerGeometry(
+    offset: Offset(-0.045, -0.052),
+    scale: 0.9,
+  ),
+};
 
 class _SilaAccessoryOverlay extends StatelessWidget {
   const _SilaAccessoryOverlay({required this.assetKey});
@@ -368,34 +518,93 @@ class _SilaOutfitPainter extends CustomPainter {
   }
 
   void _paintGameJersey(Canvas canvas, Size size) {
-    final paint = Paint()..color = const Color(0xFF0877C9);
-    final accent = Paint()..color = const Color(0xFF59E3E8);
-    for (final direction in [-1.0, 1.0]) {
-      final center = Offset(
-        size.width * (0.5 + direction * 0.25),
-        size.height * 0.64,
-      );
-      canvas.drawRRect(
-        RRect.fromRectAndRadius(
-          Rect.fromCenter(
-            center: center,
-            width: size.width * 0.15,
-            height: size.height * 0.13,
-          ),
-          Radius.circular(size.width * 0.06),
-        ),
-        paint,
-      );
-      canvas.drawArc(
-        Rect.fromCircle(center: center, radius: size.width * 0.075),
-        direction < 0 ? -0.7 : math.pi - 0.7,
-        1.4,
-        false,
-        accent
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = math.max(1.5, size.width * 0.018),
-      );
-    }
+    // A torso jersey stays attached during raised-arm poses. The previous
+    // detached sleeve patches were convincing only on the idle artwork.
+    final jersey = Path()
+      ..moveTo(size.width * 0.34, size.height * 0.52)
+      ..quadraticBezierTo(
+        size.width * 0.5,
+        size.height * 0.57,
+        size.width * 0.66,
+        size.height * 0.52,
+      )
+      ..quadraticBezierTo(
+        size.width * 0.72,
+        size.height * 0.68,
+        size.width * 0.65,
+        size.height * 0.79,
+      )
+      ..quadraticBezierTo(
+        size.width * 0.5,
+        size.height * 0.86,
+        size.width * 0.35,
+        size.height * 0.79,
+      )
+      ..quadraticBezierTo(
+        size.width * 0.28,
+        size.height * 0.68,
+        size.width * 0.34,
+        size.height * 0.52,
+      )
+      ..close();
+    canvas.drawShadow(jersey, const Color(0x66002D5E), 4, false);
+    canvas.drawPath(
+      jersey,
+      Paint()
+        ..shader = const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF0B91E8), Color(0xFF0754A7), Color(0xFF06356E)],
+        ).createShader(jersey.getBounds()),
+    );
+    canvas.drawPath(
+      jersey,
+      Paint()
+        ..color = const Color(0xFF59E3E8)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = math.max(1.5, size.width * 0.014),
+    );
+
+    final collar = Path()
+      ..moveTo(size.width * 0.4, size.height * 0.535)
+      ..lineTo(size.width * 0.5, size.height * 0.615)
+      ..lineTo(size.width * 0.6, size.height * 0.535);
+    canvas.drawPath(
+      collar,
+      Paint()
+        ..color = Colors.white.withValues(alpha: 0.9)
+        ..style = PaintingStyle.stroke
+        ..strokeCap = StrokeCap.round
+        ..strokeJoin = StrokeJoin.round
+        ..strokeWidth = math.max(2, size.width * 0.026),
+    );
+
+    final badgeCenter = Offset(size.width * 0.5, size.height * 0.7);
+    canvas.drawCircle(
+      badgeCenter,
+      size.width * 0.075,
+      Paint()..color = Colors.white.withValues(alpha: 0.92),
+    );
+    final linkPaint = Paint()
+      ..color = const Color(0xFF0877C9)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = math.max(1.5, size.width * 0.018);
+    canvas.drawOval(
+      Rect.fromCenter(
+        center: badgeCenter.translate(-size.width * 0.027, 0),
+        width: size.width * 0.07,
+        height: size.width * 0.045,
+      ),
+      linkPaint,
+    );
+    canvas.drawOval(
+      Rect.fromCenter(
+        center: badgeCenter.translate(size.width * 0.027, 0),
+        width: size.width * 0.07,
+        height: size.width * 0.045,
+      ),
+      linkPaint,
+    );
   }
 
   void _paintMemoryKeeper(Canvas canvas, Size size) {
@@ -437,60 +646,67 @@ class _SilaOutfitPainter extends CustomPainter {
   }
 
   void _paintSpaceScout(Canvas canvas, Size size) {
-    final panelPaint = Paint()
-      ..shader =
-          const LinearGradient(
-            colors: [Color(0xFF182A73), Color(0xFF7257C9), Color(0xFF24C7C9)],
-          ).createShader(
-            Rect.fromLTWH(
-              size.width * 0.2,
-              size.height * 0.5,
-              size.width * 0.6,
-              size.height * 0.34,
-            ),
-          );
+    // Keep the spacesuit on Sila's core instead of drawing independent
+    // shoulder pads that remain behind when his arms wave or celebrate.
+    final shell = RRect.fromRectAndRadius(
+      Rect.fromCenter(
+        center: Offset(size.width * 0.5, size.height * 0.67),
+        width: size.width * 0.52,
+        height: size.height * 0.3,
+      ),
+      Radius.circular(size.width * 0.13),
+    );
+    final shellPath = Path()..addRRect(shell);
+    canvas.drawShadow(shellPath, const Color(0x77091851), 5, false);
+    canvas.drawRRect(
+      shell,
+      Paint()
+        ..shader = const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF182A73), Color(0xFF7257C9), Color(0xFF24C7C9)],
+        ).createShader(shell.outerRect),
+    );
+    canvas.drawRRect(
+      shell,
+      Paint()
+        ..color = const Color(0xFF60F0DF)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = math.max(1.5, size.width * 0.016),
+    );
+
+    final controlPanel = RRect.fromRectAndRadius(
+      Rect.fromCenter(
+        center: Offset(size.width * 0.5, size.height * 0.68),
+        width: size.width * 0.3,
+        height: size.height * 0.14,
+      ),
+      Radius.circular(size.width * 0.045),
+    );
+    canvas.drawRRect(
+      controlPanel,
+      Paint()..color = const Color(0xFF101B58).withValues(alpha: 0.9),
+    );
+    canvas.drawCircle(
+      controlPanel.center,
+      size.width * 0.052,
+      Paint()..color = const Color(0xFFFFE28A),
+    );
+    canvas.drawCircle(
+      controlPanel.center,
+      size.width * 0.027,
+      Paint()..color = const Color(0xFF24C7C9),
+    );
     for (final direction in [-1.0, 1.0]) {
-      final panel = RRect.fromRectAndRadius(
-        Rect.fromCenter(
-          center: Offset(
-            size.width * (0.5 + direction * 0.27),
-            size.height * 0.66,
-          ),
-          width: size.width * 0.17,
-          height: size.height * 0.18,
-        ),
-        Radius.circular(size.width * 0.07),
-      );
-      canvas.drawShadow(
-        Path()..addRRect(panel),
-        const Color(0x66091851),
-        4,
-        false,
-      );
-      canvas.drawRRect(panel, panelPaint);
       canvas.drawCircle(
-        Offset(size.width * (0.5 + direction * 0.27), size.height * 0.61),
-        size.width * 0.025,
-        Paint()..color = const Color(0xFFFFE28A),
+        Offset(size.width * (0.5 + direction * 0.19), size.height * 0.61),
+        size.width * 0.022,
+        Paint()
+          ..color = direction < 0
+              ? SilaMascotPalette.coral
+              : const Color(0xFF60F0DF),
       );
     }
-
-    final connector = Paint()
-      ..color = const Color(0xFF60F0DF)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = math.max(1.5, size.width * 0.016)
-      ..strokeCap = StrokeCap.round;
-    canvas.drawArc(
-      Rect.fromCenter(
-        center: Offset(size.width * 0.5, size.height * 0.62),
-        width: size.width * 0.58,
-        height: size.height * 0.2,
-      ),
-      0.12,
-      math.pi - 0.24,
-      false,
-      connector,
-    );
   }
 
   void _paintDesertExplorer(Canvas canvas, Size size) {
@@ -954,6 +1170,8 @@ class SilaMascotGuide extends StatelessWidget {
     this.pose = SilaMascotPose.welcome,
     this.compact = false,
     this.animate = true,
+    this.loop = false,
+    this.loopPause = Duration.zero,
     this.action,
     this.accessoryAssetKey = SilaMascotAccessories.none,
     this.outfitAssetKey = SilaMascotOutfits.none,
@@ -967,6 +1185,8 @@ class SilaMascotGuide extends StatelessWidget {
   final SilaMascotPose pose;
   final bool compact;
   final bool animate;
+  final bool loop;
+  final Duration loopPause;
   final Widget? action;
   final String accessoryAssetKey;
   final String outfitAssetKey;
@@ -982,6 +1202,8 @@ class SilaMascotGuide extends StatelessWidget {
           pose: pose,
           height: compact ? 118 : 164,
           animate: animate,
+          loop: loop,
+          loopPause: loopPause,
           semanticLabel: semanticLabel,
           accessoryAssetKey: accessoryAssetKey,
           outfitAssetKey: outfitAssetKey,

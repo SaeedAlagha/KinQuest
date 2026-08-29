@@ -655,6 +655,8 @@ class PartyGamesScreen extends StatelessWidget {
                           color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                       ),
+                      const SizedBox(height: 18),
+                      const SilaGameCoachBanner(),
                       const SizedBox(height: 24),
                       GridView.builder(
                         shrinkWrap: true,
@@ -664,7 +666,7 @@ class PartyGamesScreen extends StatelessWidget {
                           crossAxisCount: columns,
                           crossAxisSpacing: 14,
                           mainAxisSpacing: 14,
-                          mainAxisExtent: 150,
+                          mainAxisExtent: columns == 1 ? 170 : 150,
                         ),
                         itemBuilder: (context, index) {
                           final game = _games[index];

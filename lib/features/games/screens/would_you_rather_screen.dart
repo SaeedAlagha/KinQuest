@@ -436,7 +436,9 @@ class _WouldYouRatherScreenState extends State<WouldYouRatherScreen> {
     return GameExitGuard(
       gameInProgress: gameInProgress,
       child: Scaffold(
-        floatingActionButton: const SilaGameCoachButton(),
+        floatingActionButton: gameInProgress
+            ? const SilaGameCoachButton()
+            : null,
         appBar: AppBar(title: Text(strings.wouldYouRather)),
         body: SafeArea(
           child: LayoutBuilder(

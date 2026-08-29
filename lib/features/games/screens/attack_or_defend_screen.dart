@@ -623,7 +623,15 @@ class _AttackOrDefendScreenState extends State<AttackOrDefendScreen> {
     return GameExitGuard(
       gameInProgress: gameInProgress,
       child: Scaffold(
-        floatingActionButton: const SilaGameCoachButton(),
+        floatingActionButton: gameInProgress
+            ? SilaGameCoachButton(
+                tone: switch (_phase) {
+                  _BattlePhase.loading => SilaGameCoachTone.thinking,
+                  _BattlePhase.battleResult => SilaGameCoachTone.celebrating,
+                  _ => SilaGameCoachTone.play,
+                },
+              )
+            : null,
         appBar: AppBar(title: Text(strings.attackOrDefendTitle)),
         body: SafeArea(
           child: switch (_phase) {

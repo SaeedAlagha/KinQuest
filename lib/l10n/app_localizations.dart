@@ -1487,6 +1487,162 @@ abstract class AppLocalizations {
   /// **'Sila\'s closet could not be loaded. Please try again.'**
   String get silaStudioLoadError;
 
+  /// No description provided for @silaChatTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Talk with Sila'**
+  String get silaChatTitle;
+
+  /// No description provided for @silaChatDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask for a game idea, a family activity, or a little encouragement.'**
+  String get silaChatDescription;
+
+  /// No description provided for @silaChatPrivacy.
+  ///
+  /// In en, this message translates to:
+  /// **'Private to your account. Sila receives family member names and this chat. KinQuest does not automatically attach photos, emails, or birth dates.'**
+  String get silaChatPrivacy;
+
+  /// No description provided for @silaChatEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sila is ready to listen'**
+  String get silaChatEmptyTitle;
+
+  /// No description provided for @silaChatEmptyDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Start with one of these ideas, or write anything you would like to talk about.'**
+  String get silaChatEmptyDescription;
+
+  /// No description provided for @silaChatStarterGame.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a game for my family'**
+  String get silaChatStarterGame;
+
+  /// No description provided for @silaChatStarterBond.
+  ///
+  /// In en, this message translates to:
+  /// **'How can we connect today?'**
+  String get silaChatStarterBond;
+
+  /// No description provided for @silaChatStarterCheer.
+  ///
+  /// In en, this message translates to:
+  /// **'Give my family a fun challenge'**
+  String get silaChatStarterCheer;
+
+  /// No description provided for @silaChatMessageHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Message Sila…'**
+  String get silaChatMessageHint;
+
+  /// No description provided for @silaChatSend.
+  ///
+  /// In en, this message translates to:
+  /// **'Send to Sila'**
+  String get silaChatSend;
+
+  /// No description provided for @silaChatClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear chat'**
+  String get silaChatClear;
+
+  /// No description provided for @silaChatClearTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear your chat with Sila?'**
+  String get silaChatClearTitle;
+
+  /// No description provided for @silaChatClearMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This removes this private conversation from your account and cannot be undone.'**
+  String get silaChatClearMessage;
+
+  /// No description provided for @silaChatResponding.
+  ///
+  /// In en, this message translates to:
+  /// **'Sila is thinking…'**
+  String get silaChatResponding;
+
+  /// No description provided for @silaChatError.
+  ///
+  /// In en, this message translates to:
+  /// **'Sila could not reply right now. Please try again.'**
+  String get silaChatError;
+
+  /// No description provided for @silaChatSignInRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to chat with Sila.'**
+  String get silaChatSignInRequired;
+
+  /// No description provided for @silaChatFamilyRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Join or create a family before chatting with Sila.'**
+  String get silaChatFamilyRequired;
+
+  /// No description provided for @silaChatRateLimited.
+  ///
+  /// In en, this message translates to:
+  /// **'Sila needs a quick pause. Try again in about a minute.'**
+  String get silaChatRateLimited;
+
+  /// No description provided for @silaChatClearError.
+  ///
+  /// In en, this message translates to:
+  /// **'The conversation could not be cleared. Please try again.'**
+  String get silaChatClearError;
+
+  /// No description provided for @silaChatVoice.
+  ///
+  /// In en, this message translates to:
+  /// **'Read Sila\'s replies aloud'**
+  String get silaChatVoice;
+
+  /// No description provided for @silaChatVoiceDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Uses your device\'s voice. Your microphone is never turned on.'**
+  String get silaChatVoiceDescription;
+
+  /// No description provided for @silaChatListen.
+  ///
+  /// In en, this message translates to:
+  /// **'Listen to this reply'**
+  String get silaChatListen;
+
+  /// No description provided for @silaChatStopVoice.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop Sila\'s voice'**
+  String get silaChatStopVoice;
+
+  /// No description provided for @silaChatVoiceUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'A compatible English or Arabic voice is not available on this device. You can still read every reply.'**
+  String get silaChatVoiceUnavailable;
+
+  /// No description provided for @silaChatDeveloperPreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview conversation—messages are not saved.'**
+  String get silaChatDeveloperPreview;
+
+  /// No description provided for @silaChatPreviewReply.
+  ///
+  /// In en, this message translates to:
+  /// **'I’m here! Let’s pick a game, plan a kind family moment, or celebrate something you did together.'**
+  String get silaChatPreviewReply;
+
   /// No description provided for @silaBondTitle.
   ///
   /// In en, this message translates to:
@@ -1856,7 +2012,7 @@ abstract class AppLocalizations {
   /// No description provided for @legalAiBody.
   ///
   /// In en, this message translates to:
-  /// **'When you use an AI game or mission proof, Sila sends only the text or selected image needed for that request through its server to Google Gemini. Mission proof images are evaluated without being stored by Sila.'**
+  /// **'When you use an AI game, mission proof, or Sila Chat, the app sends only the text, selected image, or family member names needed for that request through its protected server to Google Gemini. Anything you type in a chat is included in that request. Private Sila Chat history is stored with your account so the conversation can continue and can be cleared in Sila Studio. Mission proof images are evaluated without being stored by Sila. Spoken replies use your device\'s text-to-speech service and never turn on the microphone.'**
   String get legalAiBody;
 
   /// No description provided for @legalControlsTitle.

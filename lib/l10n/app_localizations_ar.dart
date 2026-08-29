@@ -755,6 +755,84 @@ class AppLocalizationsAr extends AppLocalizations {
   String get silaStudioLoadError => 'تعذر تحميل خزانة صلة. حاولوا مرة أخرى.';
 
   @override
+  String get silaChatTitle => 'تحدث مع صلة';
+
+  @override
+  String get silaChatDescription => 'اطلب فكرة للعبة أو نشاطًا عائليًا أو بعض التشجيع.';
+
+  @override
+  String get silaChatPrivacy => 'محادثة خاصة بحسابك. يتلقى صلة أسماء أفراد العائلة وهذه المحادثة. ولا يرفق كين كويست الصور أو البريد الإلكتروني أو تواريخ الميلاد تلقائيًا.';
+
+  @override
+  String get silaChatEmptyTitle => 'صلة جاهز للاستماع';
+
+  @override
+  String get silaChatEmptyDescription => 'ابدأ بإحدى هذه الأفكار أو اكتب أي شيء تود التحدث عنه.';
+
+  @override
+  String get silaChatStarterGame => 'اختر لعبة لعائلتي';
+
+  @override
+  String get silaChatStarterBond => 'كيف نتقارب اليوم؟';
+
+  @override
+  String get silaChatStarterCheer => 'أعطِ عائلتي تحديًا ممتعًا';
+
+  @override
+  String get silaChatMessageHint => 'اكتب رسالة إلى صلة…';
+
+  @override
+  String get silaChatSend => 'إرسال إلى صلة';
+
+  @override
+  String get silaChatClear => 'مسح المحادثة';
+
+  @override
+  String get silaChatClearTitle => 'هل تريد مسح محادثتك مع صلة؟';
+
+  @override
+  String get silaChatClearMessage => 'سيؤدي ذلك إلى حذف هذه المحادثة الخاصة من حسابك نهائيًا.';
+
+  @override
+  String get silaChatResponding => 'صلة يفكر…';
+
+  @override
+  String get silaChatError => 'تعذر على صلة الرد الآن. حاول مرة أخرى.';
+
+  @override
+  String get silaChatSignInRequired => 'سجّل الدخول للتحدث مع صلة.';
+
+  @override
+  String get silaChatFamilyRequired => 'انضم إلى عائلة أو أنشئ واحدة قبل التحدث مع صلة.';
+
+  @override
+  String get silaChatRateLimited => 'يحتاج صلة إلى استراحة قصيرة. حاول مرة أخرى بعد نحو دقيقة.';
+
+  @override
+  String get silaChatClearError => 'تعذر مسح المحادثة. حاول مرة أخرى.';
+
+  @override
+  String get silaChatVoice => 'قراءة ردود صلة بصوت عالٍ';
+
+  @override
+  String get silaChatVoiceDescription => 'يستخدم صوت جهازك، ولن يتم تشغيل الميكروفون أبدًا.';
+
+  @override
+  String get silaChatListen => 'استمع إلى هذا الرد';
+
+  @override
+  String get silaChatStopVoice => 'إيقاف صوت صلة';
+
+  @override
+  String get silaChatVoiceUnavailable => 'لا يتوفر صوت عربي أو إنجليزي متوافق على هذا الجهاز. لا يزال بإمكانك قراءة كل رد.';
+
+  @override
+  String get silaChatDeveloperPreview => 'محادثة تجريبية—لن يتم حفظ الرسائل.';
+
+  @override
+  String get silaChatPreviewReply => 'أنا هنا! لنختر لعبة أو نخطط للحظة عائلية جميلة أو نحتفل بإنجاز حققتموه معًا.';
+
+  @override
   String get silaBondTitle => 'رابطة عائلتكم';
 
   @override
@@ -946,7 +1024,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get legalAiTitle => 'الميزات المدعومة بالذكاء الاصطناعي';
 
   @override
-  String get legalAiBody => 'عند استخدام لعبة ذكية أو إثبات مهمة، ترسل صلة فقط النص أو الصورة المختارة اللازمة للطلب عبر خادمها إلى Google Gemini. يتم تقييم صور إثبات المهمات من دون أن تخزنها صلة.';
+  String get legalAiBody => 'عند استخدام لعبة ذكية أو إثبات مهمة أو محادثة صلة، يرسل التطبيق فقط النص أو الصورة المختارة أو أسماء أفراد العائلة اللازمة للطلب عبر خادمه المحمي إلى Google Gemini. ويُضمّن في الطلب أي محتوى تكتبه في المحادثة. تُحفظ محادثة صلة الخاصة مع حسابك لمتابعة الحوار، ويمكنك مسحها من استوديو صلة. يتم تقييم صور إثبات المهمات من دون تخزينها. وتستخدم الردود المنطوقة خدمة تحويل النص إلى كلام في جهازك من دون تشغيل الميكروفون.';
 
   @override
   String get legalControlsTitle => 'خيارات التحكم';

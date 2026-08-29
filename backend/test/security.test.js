@@ -3,6 +3,8 @@ const test = require("node:test");
 
 const {
   authenticationRequired,
+  createAuthenticatedUserRateLimiter,
+  createCorsOptions,
   createFirebaseAuthMiddleware,
   createRateLimiter,
   isOriginAllowed,
@@ -64,6 +66,12 @@ test("CORS allows configured origins and local development only", () => {
     false,
   );
   assert.equal(isOriginAllowed(undefined, { NODE_ENV: "production" }), true);
+  assert.deepEqual(createCorsOptions().methods, [
+    "GET",
+    "POST",
+    "DELETE",
+    "OPTIONS",
+  ]);
 });
 
 test("security middleware applies privacy-preserving headers", () => {
@@ -110,6 +118,53 @@ test("rate limiter blocks requests beyond the configured window quota", () => {
     calledAfterReset = true;
   });
   assert.equal(calledAfterReset, true);
+});
+
+test("Sila chat limiter is strict per verified user, not shared IP", () => {
+  let currentTime = 5_000;
+  const middleware = createAuthenticatedUserRateLimiter({
+    limit: 2,
+    windowMs: 30_000,
+    now: () => currentTime,
+  });
+  const requestFor = (uid) => ({
+    auth: uid ? { uid } : undefined,
+    ip: "203.0.113.10",
+  });
+
+  for (let index = 0; index < 2; index += 1) {
+    let called = false;
+    middleware(requestFor("alice"), createResponse(), () => {
+      called = true;
+    });
+    assert.equal(called, true);
+  }
+
+  const blocked = createResponse();
+  middleware(requestFor("alice"), blocked, () => {
+    assert.fail("the third request from one user should be blocked");
+  });
+  assert.equal(blocked.statusCode, 429);
+  assert.equal(blocked.headers.get("RateLimit-Remaining"), "0");
+
+  let otherUserContinued = false;
+  middleware(requestFor("bob"), createResponse(), () => {
+    otherUserContinued = true;
+  });
+  assert.equal(otherUserContinued, true);
+
+  let anonymousContinued = false;
+  middleware(requestFor(null), createResponse(), () => {
+    anonymousContinued = true;
+  });
+  assert.equal(anonymousContinued, true);
+
+  currentTime += 30_001;
+  let resetContinued = false;
+  middleware(requestFor("alice"), createResponse(), () => {
+    resetContinued = true;
+  });
+  assert.equal(resetContinued, true);
 });
 
 test("auth middleware rejects missing tokens and accepts verified users", async () => {

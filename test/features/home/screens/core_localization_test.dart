@@ -4,6 +4,7 @@ import 'package:kinquest/core/theme/app_theme.dart';
 import 'package:kinquest/features/competitions/screens/daily_challenge_screen.dart';
 import 'package:kinquest/features/home/screens/home_screen.dart';
 import 'package:kinquest/features/home/screens/main_navigation_screen.dart';
+import 'package:kinquest/features/mascot/screens/sila_studio_screen.dart';
 import 'package:kinquest/l10n/app_localizations.dart';
 
 void main() {
@@ -29,9 +30,7 @@ void main() {
       findsOneWidget,
     );
 
-    await tester.tap(
-      find.descendant(of: navigationBar, matching: find.text('اللعب')),
-    );
+    await tester.tap(_navigationDestination(navigationBar, 'اللعب'));
     await tester.pumpAndSettle();
 
     expect(find.text('العبوا معًا'), findsOneWidget);
@@ -71,6 +70,47 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('Arabic seven-destination navigation fits at 320px', (
+    tester,
+  ) async {
+    await _setViewport(tester, const Size(320, 568));
+    await _pumpLocalized(
+      tester,
+      const MainNavigationScreen(developerPreview: true),
+    );
+
+    var navigation = tester.widget<NavigationBar>(find.byType(NavigationBar));
+    final labels = navigation.destinations
+        .map((destination) => (destination as NavigationDestination).label)
+        .toList();
+    expect(labels, [
+      'الرئيسية',
+      'الذكريات',
+      'اللعب',
+      'المهام',
+      'الخزانة',
+      'المكافآت',
+      'الملف الشخصي',
+    ]);
+    expect(
+      navigation.labelBehavior,
+      NavigationDestinationLabelBehavior.onlyShowSelected,
+    );
+    expect(tester.takeException(), isNull);
+
+    await tester.tap(find.byKey(const ValueKey('nav-sila-destination')));
+    await tester.pump(const Duration(milliseconds: 300));
+
+    navigation = tester.widget<NavigationBar>(find.byType(NavigationBar));
+    expect(navigation.selectedIndex, 4);
+    expect(find.byType(SilaStudioScreen), findsOneWidget);
+    expect(
+      Directionality.of(tester.element(find.byType(SilaStudioScreen))),
+      TextDirection.rtl,
+    );
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('Daily Challenge presents its core experience in Arabic', (
     tester,
   ) async {
@@ -106,4 +146,13 @@ Future<void> _pumpLocalized(WidgetTester tester, Widget home) async {
     ),
   );
   await tester.pumpAndSettle();
+}
+
+Finder _navigationDestination(Finder navigationBar, String label) {
+  return find.descendant(
+    of: navigationBar,
+    matching: find.byWidgetPredicate(
+      (widget) => widget is NavigationDestination && widget.label == label,
+    ),
+  );
 }

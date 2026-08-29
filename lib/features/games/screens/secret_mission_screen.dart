@@ -565,7 +565,16 @@ class _SecretMissionScreenState extends State<SecretMissionScreen> {
     return GameExitGuard(
       gameInProgress: gameInProgress,
       child: Scaffold(
-        floatingActionButton: const SilaGameCoachButton(),
+        floatingActionButton: gameInProgress
+            ? SilaGameCoachButton(
+                tone: switch (_phase) {
+                  _SecretMissionPhase.judging => SilaGameCoachTone.thinking,
+                  _SecretMissionPhase.roundResults =>
+                    SilaGameCoachTone.celebrating,
+                  _ => SilaGameCoachTone.play,
+                },
+              )
+            : null,
         appBar: AppBar(title: Text(strings.secretMission)),
         body: SafeArea(child: _buildBody()),
       ),
@@ -656,54 +665,55 @@ class _SecretMissionScreenState extends State<SecretMissionScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(
-            strings.whoIsPlaying,
-            style: Theme.of(
-              context,
-            ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 8),
-          Text(strings.chooseMissionPlayers),
-          const SizedBox(height: 10),
-          Text(strings.secretMissionSetupSummary(_selectedRounds)),
-          const SizedBox(height: 10),
-          Text(strings.secretMissionSetupInstructions),
-          const SizedBox(height: 18),
-          GameRoundSelector(
-            value: _selectedRounds,
-            onChanged: (rounds) {
-              setState(() {
-                _selectedRounds = rounds;
-              });
-            },
-            keyPrefix: 'mission-round-option',
-          ),
-          const SizedBox(height: 24),
           Expanded(
-            child: ListView.separated(
-              itemCount: _familyMembers.length,
-              separatorBuilder: (_, _) => const SizedBox(height: 10),
-              itemBuilder: (context, index) {
-                final player = _familyMembers[index];
-                final selected = _selectedPlayerIds.contains(player.id);
-
-                return Card(
-                  child: CheckboxListTile(
-                    value: selected,
-                    onChanged: widget.participantIds == null
-                        ? (_) => _togglePlayer(player)
-                        : null,
-                    title: Text(player.name),
-                    secondary: CircleAvatar(
-                      child: Text(
-                        player.name.isEmpty
-                            ? '?'
-                            : player.name[0].toUpperCase(),
+            child: ListView(
+              padding: EdgeInsets.zero,
+              children: [
+                Text(
+                  strings.whoIsPlaying,
+                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(strings.chooseMissionPlayers),
+                const SizedBox(height: 18),
+                SilaGameCoachBanner(message: strings.mascotGameSetupMessage),
+                const SizedBox(height: 18),
+                Text(strings.secretMissionSetupSummary(_selectedRounds)),
+                const SizedBox(height: 10),
+                Text(strings.secretMissionSetupInstructions),
+                const SizedBox(height: 18),
+                GameRoundSelector(
+                  value: _selectedRounds,
+                  onChanged: (rounds) {
+                    setState(() {
+                      _selectedRounds = rounds;
+                    });
+                  },
+                  keyPrefix: 'mission-round-option',
+                ),
+                const SizedBox(height: 24),
+                for (final player in _familyMembers) ...[
+                  Card(
+                    child: CheckboxListTile(
+                      value: _selectedPlayerIds.contains(player.id),
+                      onChanged: widget.participantIds == null
+                          ? (_) => _togglePlayer(player)
+                          : null,
+                      title: Text(player.name),
+                      secondary: CircleAvatar(
+                        child: Text(
+                          player.name.isEmpty
+                              ? '?'
+                              : player.name[0].toUpperCase(),
+                        ),
                       ),
                     ),
                   ),
-                );
-              },
+                  const SizedBox(height: 10),
+                ],
+              ],
             ),
           ),
           const SizedBox(height: 16),
