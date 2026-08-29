@@ -4,7 +4,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
+import '../../../core/mascot/sila_mascot.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../rewards/digital/digital_reward_visuals.dart';
 import 'add_memory_screen.dart';
 import 'memory_details_screen.dart';
 
@@ -89,31 +91,28 @@ class MemoriesScreen extends StatelessWidget {
                   return Padding(
                     padding: const EdgeInsets.all(24),
                     child: Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.photo_library_outlined,
-                            size: 82,
-                            color: Theme.of(context).colorScheme.primary,
+                      child: SingleChildScrollView(
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 620),
+                          child: DigitalRewardStyleBuilder(
+                            userId: user.uid,
+                            builder: (context, rewards) => SilaMascotGuide(
+                              title: strings.noMemoriesYet,
+                              message: strings.memoriesEmptyDescription,
+                              semanticLabel: strings.mascotSemanticLabel,
+                              pose: SilaMascotPose.welcome,
+                              motion: SilaMascotMotion.gameReady,
+                              accessoryAssetKey: rewards.mascotAccessory,
+                              outfitAssetKey: rewards.mascotOutfit,
+                              auraAssetKey: rewards.mascotAura,
+                              action: FilledButton.icon(
+                                onPressed: () => _openAddMemory(context),
+                                icon: const Icon(Icons.add),
+                                label: Text(strings.addFirstMemory),
+                              ),
+                            ),
                           ),
-                          const SizedBox(height: 22),
-                          Text(
-                            strings.noMemoriesYet,
-                            style: Theme.of(context).textTheme.headlineMedium,
-                          ),
-                          const SizedBox(height: 10),
-                          Text(
-                            strings.memoriesEmptyDescription,
-                            textAlign: TextAlign.center,
-                          ),
-                          const SizedBox(height: 28),
-                          FilledButton.icon(
-                            onPressed: () => _openAddMemory(context),
-                            icon: const Icon(Icons.add),
-                            label: Text(strings.addFirstMemory),
-                          ),
-                        ],
+                        ),
                       ),
                     ),
                   );

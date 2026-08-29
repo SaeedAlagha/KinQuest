@@ -14,6 +14,7 @@ import '../../rewards/digital/digital_reward_error_localization.dart';
 import '../../rewards/digital/digital_reward_localization.dart';
 import '../../rewards/digital/digital_reward_service.dart';
 import '../../rewards/digital/equipped_digital_rewards.dart';
+import '../widgets/sila_companion_progress_card.dart';
 
 enum _StudioCategory { headwear, outfits, auras }
 
@@ -72,6 +73,7 @@ class _SilaStudioScreenState extends State<SilaStudioScreen> {
       SilaMascotMotion.hover,
       SilaMascotMotion.gameReady,
       SilaMascotMotion.thinking,
+      SilaMascotMotion.excited,
       SilaMascotMotion.celebrate,
     ];
     _playReaction(motions[(motions.indexOf(_motion) + 1) % motions.length]);
@@ -329,6 +331,10 @@ class _SilaStudioScreenState extends State<SilaStudioScreen> {
                     const SizedBox(height: 22),
                     stage,
                     const SizedBox(height: 24),
+                    SilaCompanionProgressCard(
+                      developerPreview: widget.developerPreview,
+                    ),
+                    const SizedBox(height: 24),
                     closet,
                   ],
                 ),
@@ -402,11 +408,23 @@ class _SilaStageState extends State<_SilaStage>
         Icons.psychology_rounded,
       ),
       (
+        SilaMascotMotion.excited,
+        strings.silaStudioReactionWave,
+        Icons.waving_hand_rounded,
+      ),
+      (
         SilaMascotMotion.celebrate,
         strings.silaStudioReactionCelebrate,
         Icons.celebration_rounded,
       ),
     ];
+    final speech = switch (widget.motion) {
+      SilaMascotMotion.hover => strings.silaStudioWelcomeMessage,
+      SilaMascotMotion.gameReady => strings.mascotGameSetupMessage,
+      SilaMascotMotion.thinking => strings.mascotThinkingMessage,
+      SilaMascotMotion.excited => strings.mascotWelcomeMessage,
+      SilaMascotMotion.celebrate => strings.mascotCelebrationMessage,
+    };
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -468,15 +486,21 @@ class _SilaStageState extends State<_SilaStage>
                                   color: Colors.white.withValues(alpha: 0.16),
                                 ),
                               ),
-                              child: Text(
-                                strings.silaStudioWelcomeMessage,
-                                maxLines: compact ? 2 : 3,
-                                overflow: TextOverflow.ellipsis,
-                                style: Theme.of(context).textTheme.bodyMedium
-                                    ?.copyWith(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.w800,
-                                    ),
+                              child: AnimatedSwitcher(
+                                duration: const Duration(milliseconds: 240),
+                                child: Text(
+                                  speech,
+                                  key: ValueKey(
+                                    'sila-speech-${widget.motion.name}',
+                                  ),
+                                  maxLines: compact ? 2 : 3,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: Theme.of(context).textTheme.bodyMedium
+                                      ?.copyWith(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.w800,
+                                      ),
+                                ),
                               ),
                             ),
                           ),

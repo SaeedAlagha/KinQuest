@@ -43,7 +43,14 @@ void main() {
     expect(find.text('بطل الكأس الشهري'), findsOneWidget);
     expect(find.textContaining('لاعب تجريبي'), findsOneWidget);
     expect(find.textContaining('2026-08'), findsOneWidget);
-    expect(find.byIcon(Icons.checkroom_rounded), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('profile-sila-studio-entry')),
+      findsOneWidget,
+    );
+    expect(
+      find.text('العبوا مع صلة وطوّروا رابطتكم واختاروا مظهره.'),
+      findsOneWidget,
+    );
 
     final appSettings = find.text('إعدادات التطبيق');
 

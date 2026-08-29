@@ -8,7 +8,7 @@ const {
 } = require("../digital_rewards");
 
 test("built-in Digital Reward catalog ships complete working categories", () => {
-  assert.equal(digitalRewardCatalog.length, 24);
+  assert.equal(digitalRewardCatalog.length, 30);
   assert.equal(
     new Set(digitalRewardCatalog.map((reward) => reward.id)).size,
     digitalRewardCatalog.length,
@@ -42,6 +42,7 @@ test("server catalog is canonical and rejects unknown rewards", () => {
   assert.equal(rewardById("frame_gold").cost, 250);
   assert.equal(rewardById("mascot_guardian_crown").cost, 300);
   assert.equal(rewardById("mascot_cosmic_orbit").cost, 420);
+  assert.equal(rewardById("mascot_victory_burst").cost, 460);
   assert.throws(
     () => rewardById("client-invented-reward"),
     (error) =>

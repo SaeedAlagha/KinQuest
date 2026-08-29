@@ -679,6 +679,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get silaStudioSubtitle => 'اجعلوا رفيق العائلة مميزًا بطريقتكم.';
 
   @override
+  String get silaStudioProfileEntryDescription => 'العبوا مع صلة وطوّروا رابطتكم واختاروا مظهره.';
+
+  @override
   String get silaStudioTapHint => 'اضغطوا على صلة أو اختاروا حركة لتشاهدوه ينبض بالحياة.';
 
   @override
@@ -734,6 +737,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get silaStudioReactionThink => 'تفكير';
 
   @override
+  String get silaStudioReactionWave => 'تلويح';
+
+  @override
   String get silaStudioReactionCelebrate => 'احتفال';
 
   @override
@@ -747,6 +753,68 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get silaStudioLoadError => 'تعذر تحميل خزانة صلة. حاولوا مرة أخرى.';
+
+  @override
+  String get silaBondTitle => 'رابطة عائلتكم';
+
+  @override
+  String get silaBondDescription => 'تزداد صلة قربًا منكم كلما لعبت العائلة وأنجزت المهمات واحتفلت بإنجازاتها معًا.';
+
+  @override
+  String silaBondPoints(int points) {
+    return '$points نقطة ترابط';
+  }
+
+  @override
+  String silaBondLevel(int level, String name) {
+    return 'المستوى $level: $name';
+  }
+
+  @override
+  String silaBondPointsToNext(int points, String level) {
+    return 'تبقّت $points نقطة للوصول إلى $level';
+  }
+
+  @override
+  String get silaBondMaxLevel => 'وصلت عائلتكم إلى أعلى مستوى ترابط مع صلة!';
+
+  @override
+  String silaBondProgressSemantic(int percent) {
+    return 'تقدم مستوى الترابط: $percent بالمئة';
+  }
+
+  @override
+  String get silaBondJourneyTitle => 'رحلة الترابط مع صلة';
+
+  @override
+  String get silaBondJourneyDescription => 'تحتفي هذه المستويات بعلاقتكم مع صلة، ويبقى مظهره الذي اخترتموه ثابتًا في جميع سمات التطبيق.';
+
+  @override
+  String get silaBondNewCompanion => 'رفيق جديد';
+
+  @override
+  String get silaBondFamilyFriend => 'صديق العائلة';
+
+  @override
+  String get silaBondMemoryKeeper => 'حافظ الذكريات';
+
+  @override
+  String get silaBondFamilyGuardian => 'حارس العائلة';
+
+  @override
+  String get silaBondLegacyCompanion => 'رفيق الإرث';
+
+  @override
+  String get silaBondCurrent => 'المستوى الحالي';
+
+  @override
+  String get silaBondReached => 'تم الوصول';
+
+  @override
+  String get silaBondLocked => 'واصلوا الترابط';
+
+  @override
+  String get silaBondTrophies => 'الكؤوس';
 
   @override
   String get silaGameCoachMessage => 'أنا معكم—العبوا بإنصاف وشجّعوا بحماس واستمتعوا معًا!';
