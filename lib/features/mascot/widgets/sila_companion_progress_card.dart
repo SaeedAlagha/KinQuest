@@ -303,9 +303,12 @@ class _PointsPill extends StatelessWidget {
         children: [
           Icon(Icons.bolt_rounded, color: colors.tertiary, size: 21),
           const SizedBox(width: 5),
-          Text(
-            strings.silaBondPoints(points),
-            style: const TextStyle(fontWeight: FontWeight.w900),
+          Flexible(
+            child: Text(
+              strings.silaBondPoints(points),
+              softWrap: true,
+              style: const TextStyle(fontWeight: FontWeight.w900),
+            ),
           ),
         ],
       ),

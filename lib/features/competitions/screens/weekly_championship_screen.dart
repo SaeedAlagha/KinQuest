@@ -1056,6 +1056,9 @@ class _WeeklyChampionshipScreenState extends State<WeeklyChampionshipScreen> {
             ? strings.weeklyCompleteWithoutChampion
             : strings.weeklyCompleteWithChampion(champion),
         effect: digitalRewards.celebrationEffect,
+        mascotAccessory: digitalRewards.mascotAccessory,
+        mascotOutfit: digitalRewards.mascotOutfit,
+        mascotAura: digitalRewards.mascotAura,
         rewards: [
           SilaCelebrationReward(
             icon: Icons.stars_rounded,

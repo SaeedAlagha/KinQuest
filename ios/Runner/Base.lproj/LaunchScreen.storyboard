@@ -18,12 +18,28 @@
                         <subviews>
                             <imageView opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleAspectFit" image="LaunchImage" translatesAutoresizingMaskIntoConstraints="NO" id="YRO-k0-Ey4">
                             </imageView>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" text="SILA • صِلَة" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="J5g-Ff-Rt9">
+                                <fontDescription key="fontDescription" type="system" weight="heavy" pointSize="24"/>
+                                <color key="textColor" red="0.02745098039" green="0.08235294118" blue="0.1803921569" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" text="Closer, one moment at a time." textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="YES" minimumScaleFactor="0.8" translatesAutoresizingMaskIntoConstraints="NO" id="K6h-Gg-Su0">
+                                <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="13"/>
+                                <color key="textColor" red="0" green="0.4196078431" blue="0.2862745098" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <nil key="highlightedColor"/>
+                            </label>
                         </subviews>
                         <color key="backgroundColor" red="1" green="0.9725490196" blue="0.9098039216" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
                             <constraint firstItem="YRO-k0-Ey4" firstAttribute="width" constant="128" id="0Bm-EQ-Fmq"/>
                             <constraint firstItem="YRO-k0-Ey4" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="1a2-6s-vTC"/>
-                            <constraint firstItem="YRO-k0-Ey4" firstAttribute="centerY" secondItem="Ze5-6b-2t3" secondAttribute="centerY" id="4X2-HB-R7a"/>
+                            <constraint firstItem="YRO-k0-Ey4" firstAttribute="centerY" secondItem="Ze5-6b-2t3" secondAttribute="centerY" constant="-38" id="4X2-HB-R7a"/>
+                            <constraint firstItem="J5g-Ff-Rt9" firstAttribute="top" secondItem="YRO-k0-Ey4" secondAttribute="bottom" constant="16" id="D2n-KY-Et1"/>
+                            <constraint firstItem="J5g-Ff-Rt9" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="D7p-LZ-Fu2"/>
+                            <constraint firstItem="J5g-Ff-Rt9" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="Ze5-6b-2t3" secondAttribute="leading" constant="24" id="E3q-Ma-Gv3"/>
+                            <constraint firstItem="K6h-Gg-Su0" firstAttribute="top" secondItem="J5g-Ff-Rt9" secondAttribute="bottom" constant="7" id="F4r-Nb-Hw4"/>
+                            <constraint firstItem="K6h-Gg-Su0" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="G5s-Oc-Ix5"/>
+                            <constraint firstItem="K6h-Gg-Su0" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="Ze5-6b-2t3" secondAttribute="leading" constant="24" id="H6t-Pd-Jy6"/>
                             <constraint firstItem="YRO-k0-Ey4" firstAttribute="height" constant="171" id="QxC-J6-UbB"/>
                         </constraints>
                     </view>

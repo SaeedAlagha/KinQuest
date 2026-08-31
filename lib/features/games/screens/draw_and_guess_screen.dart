@@ -58,6 +58,7 @@ class _DrawAndGuessScreenState extends State<DrawAndGuessScreen> {
   final Map<String, int> _scores = {};
 
   String _roundResultMessage = '';
+  bool _roundWasSuccessful = false;
 
   bool _isPreparingGame = false;
 
@@ -305,15 +306,21 @@ class _DrawAndGuessScreenState extends State<DrawAndGuessScreen> {
     final gameInProgress =
         _phase != _DrawGamePhase.setup &&
         _phase != _DrawGamePhase.finalLeaderboard;
+    final showSila = _phase != _DrawGamePhase.setup;
 
     return GameExitGuard(
       gameInProgress: gameInProgress,
       child: Scaffold(
-        floatingActionButton: gameInProgress
+        floatingActionButton: showSila
             ? SilaGameCoachButton(
-                tone: _phase == _DrawGamePhase.roundResult
-                    ? SilaGameCoachTone.celebrating
-                    : SilaGameCoachTone.play,
+                tone: switch (_phase) {
+                  _DrawGamePhase.roundResult =>
+                    _roundWasSuccessful
+                        ? SilaGameCoachTone.celebrating
+                        : SilaGameCoachTone.oops,
+                  _DrawGamePhase.finalLeaderboard => SilaGameCoachTone.winner,
+                  _ => SilaGameCoachTone.play,
+                },
               )
             : null,
         appBar: AppBar(title: Text(strings.drawAndGuess)),
@@ -602,6 +609,7 @@ class _DrawAndGuessScreenState extends State<DrawAndGuessScreen> {
         setState(() {
           _secondsRemaining = 0;
           _roundResultMessage = strings.drawingTimeUp;
+          _roundWasSuccessful = false;
           _phase = _DrawGamePhase.roundResult;
         });
 
@@ -897,6 +905,7 @@ class _DrawAndGuessScreenState extends State<DrawAndGuessScreen> {
         guesser.name,
         artist.name,
       );
+      _roundWasSuccessful = true;
 
       _phase = _DrawGamePhase.roundResult;
     });

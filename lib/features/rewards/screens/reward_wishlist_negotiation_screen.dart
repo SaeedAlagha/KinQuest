@@ -2,7 +2,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
+import '../../../core/mascot/sila_mascot.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../mascot/widgets/sila_companion_callout.dart';
 import '../models/reward_wishlist_proposal.dart';
 import '../services/rewards_service.dart';
 import 'rewards_hub_screen.dart';
@@ -1166,33 +1168,24 @@ class _WishlistLoadError extends StatelessWidget {
     final strings = AppLocalizations.of(context)!;
 
     return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.cloud_off_rounded,
-              size: 56,
-              color: Theme.of(context).colorScheme.error,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              strings.couldNotLoadWishlist,
-              textAlign: TextAlign.center,
-              style: Theme.of(
-                context,
-              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-            ),
-            if (onRetry != null) ...[
-              const SizedBox(height: 16),
-              FilledButton.icon(
-                onPressed: onRetry,
-                icon: const Icon(Icons.refresh_rounded),
-                label: Text(strings.tryAgain),
-              ),
-            ],
-          ],
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(24),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 620),
+          child: SilaCompanionCallout(
+            key: const ValueKey('wishlist-sila-error'),
+            userId: FirebaseAuth.instance.currentUser?.uid,
+            title: strings.couldNotLoadWishlist,
+            message: strings.tryAgain,
+            pose: SilaMascotPose.oops,
+            action: onRetry == null
+                ? null
+                : FilledButton.icon(
+                    onPressed: onRetry,
+                    icon: const Icon(Icons.refresh_rounded),
+                    label: Text(strings.tryAgain),
+                  ),
+          ),
         ),
       ),
     );
@@ -1213,22 +1206,17 @@ class _EmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, size: 56),
-            const SizedBox(height: 16),
-            Text(
-              title,
-              style: Theme.of(
-                context,
-              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            Text(message, textAlign: TextAlign.center),
-          ],
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(24),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 620),
+          child: SilaCompanionCallout(
+            key: ValueKey('wishlist-sila-empty-${icon.codePoint}'),
+            userId: FirebaseAuth.instance.currentUser?.uid,
+            title: title,
+            message: message,
+            pose: SilaMascotPose.encouraging,
+          ),
         ),
       ),
     );

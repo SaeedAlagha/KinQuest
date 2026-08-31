@@ -10,15 +10,17 @@ import '../../../core/widgets/sila_page_backdrop.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../competitions/screens/daily_challenge_screen.dart';
 import '../../games/screens/games_screen.dart';
+import '../../mascot/screens/sila_studio_screen.dart';
 import '../../memories/screens/add_memory_screen.dart';
 import '../../profile/screens/profile_screen.dart';
 import '../../rewards/digital/digital_reward_visuals.dart';
 import '../../rewards/screens/rewards_hub_screen.dart';
 
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key, this.onFamilyOverview});
+  const HomeScreen({super.key, this.onFamilyOverview, this.onSilaStudio});
 
   final VoidCallback? onFamilyOverview;
+  final VoidCallback? onSilaStudio;
 
   @override
   Widget build(BuildContext context) {
@@ -55,6 +57,7 @@ class HomeScreen extends StatelessWidget {
                 mascotOutfit: equippedRewards.mascotOutfit,
                 mascotAura: equippedRewards.mascotAura,
                 onFamilyOverview: onFamilyOverview,
+                onSilaStudio: onSilaStudio,
               );
             }
 
@@ -80,6 +83,7 @@ class HomeScreen extends StatelessWidget {
                   mascotOutfit: equippedRewards.mascotOutfit,
                   mascotAura: equippedRewards.mascotAura,
                   onFamilyOverview: onFamilyOverview,
+                  onSilaStudio: onSilaStudio,
                 );
               },
             );
@@ -99,6 +103,7 @@ class HomeDashboard extends StatelessWidget {
     required this.tokens,
     this.developerPreview = false,
     this.onFamilyOverview,
+    this.onSilaStudio,
     this.mascotAccessory = SilaMascotAccessories.none,
     this.mascotOutfit = SilaMascotOutfits.none,
     this.mascotAura = SilaMascotAuras.none,
@@ -110,6 +115,7 @@ class HomeDashboard extends StatelessWidget {
   final String tokens;
   final bool developerPreview;
   final VoidCallback? onFamilyOverview;
+  final VoidCallback? onSilaStudio;
   final String mascotAccessory;
   final String mascotOutfit;
   final String mascotAura;
@@ -137,9 +143,28 @@ class HomeDashboard extends StatelessWidget {
     );
   }
 
+  void _openSilaStudio(BuildContext context) {
+    final studioCallback = onSilaStudio;
+
+    if (studioCallback != null) {
+      studioCallback();
+      return;
+    }
+
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => SilaStudioScreen(
+          developerPreview: developerPreview,
+          chatFocusRequest: 1,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final strings = AppLocalizations.of(context)!;
+    final reduceMotion = MediaQuery.disableAnimationsOf(context);
 
     return Scaffold(
       body: SilaPageBackdrop(
@@ -166,11 +191,22 @@ class HomeDashboard extends StatelessWidget {
                           title: strings.mascotName,
                           message: strings.mascotHomeMessage(name),
                           semanticLabel: strings.mascotSemanticLabel,
-                          pose: SilaMascotPose.idle,
+                          pose: SilaMascotPose.welcome,
+                          motion: SilaMascotMotion.gameReady,
+                          animate: !reduceMotion,
                           compact: constraints.maxWidth < 480,
                           accessoryAssetKey: mascotAccessory,
                           outfitAssetKey: mascotOutfit,
                           auraAssetKey: mascotAura,
+                          action: SizedBox(
+                            width: double.infinity,
+                            child: FilledButton.tonalIcon(
+                              key: const ValueKey('home-sila-action'),
+                              onPressed: () => _openSilaStudio(context),
+                              icon: const Icon(Icons.forum_rounded),
+                              label: Text(strings.silaHomeAction),
+                            ),
+                          ),
                         ),
                         const SizedBox(height: 22),
                         if (isWide)

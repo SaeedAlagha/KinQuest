@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../../core/branding/app_brand.dart';
 import '../../../core/widgets/family_year_banner.dart';
-import '../../../core/widgets/sila_brand_mark.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../competitions/screens/competitions_screen.dart';
 import '../../games/screens/family_missions_screen.dart';
@@ -102,6 +101,8 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   ];
 
   int _selectedIndex = 0;
+  int _silaChatFocusRequest = 0;
+  int _silaStageFocusRequest = 0;
 
   List<Widget> _screens(AppLocalizations strings) {
     return widget.developerPreview
@@ -113,6 +114,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
               tokens: '480',
               developerPreview: true,
               onFamilyOverview: _openFamilyOverview,
+              onSilaStudio: _openSilaChat,
             ),
             const MemoriesScreen(developerPreview: true),
             const CompetitionsScreen(developerPreview: true),
@@ -121,18 +123,25 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
               developerPreview: true,
               showBackButton: false,
               active: _selectedIndex == 4,
+              chatFocusRequest: _silaChatFocusRequest,
+              stageFocusRequest: _silaStageFocusRequest,
             ),
             const RewardsHubScreen(developerPreview: true),
             const ProfileScreen(developerPreview: true),
           ]
         : [
-            HomeScreen(onFamilyOverview: _openFamilyOverview),
+            HomeScreen(
+              onFamilyOverview: _openFamilyOverview,
+              onSilaStudio: _openSilaChat,
+            ),
             const MemoriesScreen(),
             const CompetitionsScreen(),
             const FamilyMissionsScreen(),
             SilaStudioScreen(
               showBackButton: false,
               active: _selectedIndex == 4,
+              chatFocusRequest: _silaChatFocusRequest,
+              stageFocusRequest: _silaStageFocusRequest,
             ),
             const RewardsHubScreen(),
             const ProfileScreen(),
@@ -143,8 +152,27 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     _selectScreen(6);
   }
 
+  void _openSilaStudio() {
+    setState(() {
+      _silaChatFocusRequest = 0;
+      _silaStageFocusRequest += 1;
+      _selectedIndex = 4;
+    });
+  }
+
+  void _openSilaChat() {
+    setState(() {
+      _silaChatFocusRequest += 1;
+      _selectedIndex = 4;
+    });
+  }
+
   void _selectScreen(int index) {
     setState(() {
+      // A tap on the regular navigation always opens Sila's character stage.
+      // Chat-first is a one-shot intent reserved for the Home "Ask Sila" CTA.
+      _silaChatFocusRequest = 0;
+      if (index == 4) _silaStageFocusRequest += 1;
       _selectedIndex = index;
     });
   }
@@ -228,9 +256,12 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                       groupAlignment: -0.45,
                       selectedIndex: _selectedIndex,
                       onDestinationSelected: _selectScreen,
-                      leading: const Padding(
-                        padding: EdgeInsets.fromLTRB(20, 18, 20, 34),
-                        child: _NavigationBrand(),
+                      leading: Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 14, 16, 30),
+                        child: _NavigationBrand(
+                          onTap: _openSilaStudio,
+                          tooltip: strings.silaNavigationHint,
+                        ),
                       ),
                       destinations: _desktopDestinations(strings),
                     ),
@@ -317,10 +348,13 @@ class _SilaNavigationIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
-    final size = selected ? 29.0 : 25.0;
+    final reduceMotion = MediaQuery.disableAnimationsOf(context);
+    final size = selected ? 34.0 : 27.0;
 
     return AnimatedContainer(
-      duration: const Duration(milliseconds: 180),
+      duration: reduceMotion
+          ? Duration.zero
+          : const Duration(milliseconds: 180),
       width: size,
       height: size,
       clipBehavior: Clip.antiAlias,
@@ -328,7 +362,7 @@ class _SilaNavigationIcon extends StatelessWidget {
         shape: BoxShape.circle,
         border: Border.all(
           color: selected ? colors.primary : colors.outlineVariant,
-          width: selected ? 2 : 1,
+          width: selected ? 2.5 : 1,
         ),
         boxShadow: selected
             ? [
@@ -388,39 +422,100 @@ class _DeveloperPreviewBanner extends StatelessWidget {
 }
 
 class _NavigationBrand extends StatelessWidget {
-  const _NavigationBrand();
+  const _NavigationBrand({required this.onTap, required this.tooltip});
+
+  final VoidCallback onTap;
+  final String tooltip;
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    return Row(
-      children: [
-        const SilaBrandMark(size: 42, showShadow: false),
-        const SizedBox(width: 12),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              AppBrand.name,
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                color: colorScheme.onSurface,
-                fontWeight: FontWeight.w800,
+    return Tooltip(
+      message: tooltip,
+      excludeFromSemantics: true,
+      child: Semantics(
+        button: true,
+        label: tooltip,
+        excludeSemantics: true,
+        onTap: onTap,
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            key: const ValueKey('desktop-sila-brand-action'),
+            excludeFromSemantics: true,
+            onTap: onTap,
+            borderRadius: BorderRadius.circular(20),
+            child: Padding(
+              padding: const EdgeInsets.all(4),
+              child: Row(
+                children: [
+                  Container(
+                    width: 50,
+                    height: 50,
+                    clipBehavior: Clip.antiAlias,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: colorScheme.primary.withValues(alpha: 0.28),
+                        width: 2,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: colorScheme.primary.withValues(alpha: 0.18),
+                          blurRadius: 12,
+                        ),
+                      ],
+                    ),
+                    child: Image.asset(
+                      'assets/mascot/sila_app_icon.png',
+                      fit: BoxFit.cover,
+                      cacheWidth: 120,
+                      cacheHeight: 120,
+                      excludeFromSemantics: true,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          AppBrand.name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context).textTheme.titleLarge
+                              ?.copyWith(
+                                color: colorScheme.onSurface,
+                                fontWeight: FontWeight.w800,
+                              ),
+                        ),
+                        Text(
+                          AppBrand.arabicName,
+                          textDirection: TextDirection.rtl,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context).textTheme.labelSmall
+                              ?.copyWith(
+                                color: colorScheme.primary,
+                                fontWeight: FontWeight.w700,
+                              ),
+                        ),
+                        const SizedBox(height: 4),
+                        const SizedBox(
+                          width: 56,
+                          child: UaeColorRibbon(height: 3),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ),
-            Text(
-              AppBrand.arabicName,
-              textDirection: TextDirection.rtl,
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                color: colorScheme.primary,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            const SizedBox(height: 4),
-            const SizedBox(width: 56, child: UaeColorRibbon(height: 3)),
-          ],
+          ),
         ),
-      ],
+      ),
     );
   }
 }

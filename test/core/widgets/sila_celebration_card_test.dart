@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:kinquest/core/mascot/sila_mascot.dart';
 import 'package:kinquest/core/theme/app_theme.dart';
 import 'package:kinquest/core/widgets/sila_celebration_card.dart';
 
@@ -18,6 +19,9 @@ void main() {
             padding: EdgeInsets.all(16),
             child: SilaCelebrationCard(
               effect: 'fireworks',
+              mascotAccessory: SilaMascotAccessories.guardianCrown,
+              mascotOutfit: SilaMascotOutfits.gameJersey,
+              mascotAura: SilaMascotAuras.victoryBurst,
               eyebrow: 'Daily Challenge complete',
               title: 'Sara takes the family crown',
               subtitle: 'A shared win becomes a family memory.',
@@ -45,9 +49,45 @@ void main() {
       find.byKey(const ValueKey('celebration-effect-fireworks')),
       findsOneWidget,
     );
+    expect(
+      find.byKey(const ValueKey('sila-mascot-accessory-guardian_crown')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const ValueKey('sila-mascot-outfit-game_jersey')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const ValueKey('sila-mascot-aura-victory_burst')),
+      findsOneWidget,
+    );
 
     await tester.pumpAndSettle();
 
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('celebration honors the reduced-motion preference', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: MediaQuery(
+            data: MediaQueryData(disableAnimations: true),
+            child: SilaCelebrationCard(
+              eyebrow: 'Complete',
+              title: 'Family win',
+              subtitle: 'Together',
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final mascot = tester.widget<SilaMascot>(find.byType(SilaMascot));
+    expect(mascot.animate, isFalse);
+    await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
   });
 }

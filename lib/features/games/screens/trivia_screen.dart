@@ -89,6 +89,7 @@ class _TriviaScreenState extends State<TriviaScreen> {
   int? _selectedAnswer;
 
   String _questionResultMessage = '';
+  bool _lastResultWasSuccessful = false;
 
   _TriviaPhase _phase = _TriviaPhase.setup;
 
@@ -372,6 +373,7 @@ class _TriviaScreenState extends State<TriviaScreen> {
           _questionResultMessage = _strings.noStealCorrectAnswer(
             question.options[question.correctIndex],
           );
+          _lastResultWasSuccessful = false;
 
           _phase = _TriviaPhase.questionResult;
         });
@@ -430,6 +432,7 @@ class _TriviaScreenState extends State<TriviaScreen> {
           _startingTeamName,
           2,
         );
+        _lastResultWasSuccessful = true;
 
         _phase = _TriviaPhase.questionResult;
       });
@@ -485,6 +488,7 @@ class _TriviaScreenState extends State<TriviaScreen> {
           _stealingTeamName,
           1,
         );
+        _lastResultWasSuccessful = true;
 
         _phase = _TriviaPhase.questionResult;
       });
@@ -495,6 +499,7 @@ class _TriviaScreenState extends State<TriviaScreen> {
         _questionResultMessage = _strings.stealMissedCorrectAnswer(
           question.options[question.correctIndex],
         );
+        _lastResultWasSuccessful = false;
 
         _phase = _TriviaPhase.questionResult;
       });
@@ -589,17 +594,22 @@ class _TriviaScreenState extends State<TriviaScreen> {
 
     final gameInProgress =
         _phase != _TriviaPhase.setup && _phase != _TriviaPhase.finalResults;
+    final showSila = _phase != _TriviaPhase.setup;
 
     return GameExitGuard(
       gameInProgress: gameInProgress,
       child: Scaffold(
-        floatingActionButton: gameInProgress
+        floatingActionButton: showSila
             ? SilaGameCoachButton(
-                tone:
-                    _phase == _TriviaPhase.questionResult ||
-                        _phase == _TriviaPhase.roundSummary
-                    ? SilaGameCoachTone.celebrating
-                    : SilaGameCoachTone.play,
+                tone: switch (_phase) {
+                  _TriviaPhase.questionResult =>
+                    _lastResultWasSuccessful
+                        ? SilaGameCoachTone.celebrating
+                        : SilaGameCoachTone.oops,
+                  _TriviaPhase.roundSummary => SilaGameCoachTone.celebrating,
+                  _TriviaPhase.finalResults => SilaGameCoachTone.winner,
+                  _ => SilaGameCoachTone.play,
+                },
               )
             : null,
         appBar: AppBar(title: Text(strings.trivia)),

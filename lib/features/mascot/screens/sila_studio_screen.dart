@@ -25,11 +25,15 @@ class SilaStudioScreen extends StatefulWidget {
     this.developerPreview = false,
     this.showBackButton = true,
     this.active = true,
+    this.chatFocusRequest = 0,
+    this.stageFocusRequest = 0,
   });
 
   final bool developerPreview;
   final bool showBackButton;
   final bool active;
+  final int chatFocusRequest;
+  final int stageFocusRequest;
 
   @override
   State<SilaStudioScreen> createState() => _SilaStudioScreenState();
@@ -39,12 +43,18 @@ class _SilaStudioScreenState extends State<SilaStudioScreen> {
   final DigitalRewardService _rewardService = DigitalRewardService();
   final Future<List<DigitalRewardDefinition>> _catalog =
       DigitalRewardCatalog.load();
+  final ScrollController _studioScrollController = ScrollController();
 
   _StudioCategory _category = _StudioCategory.headwear;
   SilaMascotPose _pose = SilaMascotPose.idle;
   SilaMascotMotion _motion = SilaMascotMotion.hover;
   EquippedDigitalRewards? _tryOn;
   String? _processingRewardId;
+  String? _rewardStreamUserId;
+  Stream<DocumentSnapshot<Map<String, dynamic>>>? _userRewardStream;
+  Stream<QuerySnapshot<Map<String, dynamic>>>? _ownedRewardsStream;
+  Stream<DocumentSnapshot<Map<String, dynamic>>>? _equippedRewardsStream;
+  late bool _chatHasOpened;
 
   int _previewTokens = 1350;
   final Set<String> _previewOwned = {
@@ -62,6 +72,45 @@ class _SilaStudioScreenState extends State<SilaStudioScreen> {
     mascotOutfit: SilaMascotOutfits.familyCape,
     mascotAura: SilaMascotAuras.familySparkles,
   );
+
+  @override
+  void initState() {
+    super.initState();
+    _chatHasOpened = widget.active;
+  }
+
+  @override
+  void didUpdateWidget(covariant SilaStudioScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.active) _chatHasOpened = true;
+    final navigationIntentChanged =
+        oldWidget.chatFocusRequest != widget.chatFocusRequest ||
+        oldWidget.stageFocusRequest != widget.stageFocusRequest;
+    if (widget.active && navigationIntentChanged) _resetStudioScroll();
+  }
+
+  void _resetStudioScroll() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || !_studioScrollController.hasClients) return;
+      _studioScrollController.jumpTo(
+        _studioScrollController.position.minScrollExtent,
+      );
+    });
+  }
+
+  void _prepareRewardStreams(String userId) {
+    if (_rewardStreamUserId == userId) return;
+    _rewardStreamUserId = userId;
+    final userReference = FirebaseFirestore.instance
+        .collection('users')
+        .doc(userId);
+    _userRewardStream = userReference.snapshots();
+    _ownedRewardsStream = userReference.collection('ownedRewards').snapshots();
+    _equippedRewardsStream = userReference
+        .collection('settings')
+        .doc('digitalRewards')
+        .snapshots();
+  }
 
   void _playReaction(SilaMascotMotion motion) {
     setState(() {
@@ -171,17 +220,21 @@ class _SilaStudioScreenState extends State<SilaStudioScreen> {
   }
 
   @override
+  void dispose() {
+    _studioScrollController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
         child: FutureBuilder<List<DigitalRewardDefinition>>(
           future: _catalog,
           builder: (context, catalogSnapshot) {
-            if (!catalogSnapshot.hasData && !catalogSnapshot.hasError) {
-              return const Center(child: CircularProgressIndicator());
-            }
-            if (catalogSnapshot.hasError) return const _StudioLoadError();
-
+            final catalogLoading =
+                !catalogSnapshot.hasData && !catalogSnapshot.hasError;
+            final catalogError = catalogSnapshot.hasError;
             final wardrobe = (catalogSnapshot.data ?? const [])
                 .where((reward) => _isMascotCategory(reward.category))
                 .toList();
@@ -193,47 +246,41 @@ class _SilaStudioScreenState extends State<SilaStudioScreen> {
                 owned: _previewOwned,
                 equippedIds: _previewEquipped,
                 equippedRewards: _previewRewards,
+                catalogLoading: catalogLoading,
+                catalogError: catalogError,
               );
             }
 
             final user = FirebaseAuth.instance.currentUser;
             if (user == null) return const _StudioSignedOut();
+            _prepareRewardStreams(user.uid);
 
             return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-              stream: FirebaseFirestore.instance
-                  .collection('users')
-                  .doc(user.uid)
-                  .snapshots(),
+              stream: _userRewardStream,
               builder: (context, userSnapshot) {
                 return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-                  stream: FirebaseFirestore.instance
-                      .collection('users')
-                      .doc(user.uid)
-                      .collection('ownedRewards')
-                      .snapshots(),
+                  stream: _ownedRewardsStream,
                   builder: (context, ownedSnapshot) {
                     return StreamBuilder<
                       DocumentSnapshot<Map<String, dynamic>>
                     >(
-                      stream: FirebaseFirestore.instance
-                          .collection('users')
-                          .doc(user.uid)
-                          .collection('settings')
-                          .doc('digitalRewards')
-                          .snapshots(),
+                      stream: _equippedRewardsStream,
                       builder: (context, settingsSnapshot) {
-                        if ((!userSnapshot.hasData || !ownedSnapshot.hasData) &&
-                            !userSnapshot.hasError &&
-                            !ownedSnapshot.hasError) {
-                          return const Center(
-                            child: CircularProgressIndicator(),
-                          );
-                        }
-                        if (userSnapshot.hasError || ownedSnapshot.hasError) {
-                          return const _StudioLoadError();
-                        }
-
                         final documents = ownedSnapshot.data?.docs ?? const [];
+                        final rewardStateLoading =
+                            (!userSnapshot.hasData && !userSnapshot.hasError) ||
+                            (!ownedSnapshot.hasData &&
+                                !ownedSnapshot.hasError) ||
+                            (!settingsSnapshot.hasData &&
+                                !settingsSnapshot.hasError);
+                        final rewardStateError =
+                            userSnapshot.hasError ||
+                            ownedSnapshot.hasError ||
+                            settingsSnapshot.hasError;
+
+                        // Wardrobe data is secondary to Sila's character and
+                        // conversation. Keep the stage and chat usable while
+                        // reward streams connect—or if one temporarily fails.
                         return _buildStudio(
                           wardrobe: wardrobe,
                           tokens:
@@ -248,6 +295,8 @@ class _SilaStudioScreenState extends State<SilaStudioScreen> {
                           equippedRewards: EquippedDigitalRewards.fromMap(
                             settingsSnapshot.data?.data(),
                           ),
+                          catalogLoading: catalogLoading || rewardStateLoading,
+                          catalogError: catalogError || rewardStateError,
                         );
                       },
                     );
@@ -267,6 +316,8 @@ class _SilaStudioScreenState extends State<SilaStudioScreen> {
     required Set<String> owned,
     required Set<String> equippedIds,
     required EquippedDigitalRewards equippedRewards,
+    required bool catalogLoading,
+    required bool catalogError,
   }) {
     final strings = AppLocalizations.of(context)!;
     final visibleRewards = wardrobe
@@ -278,6 +329,7 @@ class _SilaStudioScreenState extends State<SilaStudioScreen> {
       child: LayoutBuilder(
         builder: (context, constraints) {
           final stage = _SilaStage(
+            key: const ValueKey('sila-studio-stage-content'),
             pose: _pose,
             motion: _motion,
             rewards: preview,
@@ -285,32 +337,50 @@ class _SilaStudioScreenState extends State<SilaStudioScreen> {
             onTapSila: _playNextReaction,
             onReaction: _playReaction,
           );
-          final closet = _StudioCloset(
-            category: _category,
-            rewards: visibleRewards,
-            tokens: tokens,
-            owned: owned,
-            equipped: equippedIds,
-            processingRewardId: _processingRewardId,
-            onCategoryChanged: (value) => setState(() {
-              _category = value;
-              _tryOn = null;
-            }),
-            onTryOn: (reward) => setState(() {
-              _tryOn = equippedRewards.withAsset(
-                reward.category,
-                reward.assetKey,
-              );
-              _playReaction(SilaMascotMotion.gameReady);
-            }),
-            onUpdate: (reward) => _updateReward(
-              reward: reward,
-              owned: owned.contains(reward.id),
-              equipped: equippedIds.contains(reward.id),
-            ),
+          final closet = catalogLoading || catalogError
+              ? _StudioClosetStatus(hasError: catalogError)
+              : _StudioCloset(
+                  category: _category,
+                  rewards: visibleRewards,
+                  tokens: tokens,
+                  owned: owned,
+                  equipped: equippedIds,
+                  processingRewardId: _processingRewardId,
+                  onCategoryChanged: (value) => setState(() {
+                    _category = value;
+                    _tryOn = null;
+                  }),
+                  onTryOn: (reward) {
+                    setState(() {
+                      _tryOn = equippedRewards.withAsset(
+                        reward.category,
+                        reward.assetKey,
+                      );
+                      _motion = SilaMascotMotion.gameReady;
+                      _pose = SilaMascotPose.encouraging;
+                    });
+                  },
+                  onUpdate: (reward) => _updateReward(
+                    reward: reward,
+                    owned: owned.contains(reward.id),
+                    equipped: equippedIds.contains(reward.id),
+                  ),
+                );
+          final focusChat = widget.active && widget.chatFocusRequest > 0;
+          final chat = SilaChatPanel(
+            key: const ValueKey('sila-studio-chat-content'),
+            developerPreview: widget.developerPreview,
+            active: widget.active,
+            onPoseChanged: _showChatPose,
           );
 
           return SingleChildScrollView(
+            // Navigation requests reset this stable viewport after the chat and
+            // stage reorder. Keeping the viewport itself stable preserves chat
+            // drafts and in-flight replies while still revealing the requested
+            // Studio hero at the top.
+            key: const ValueKey('sila-studio-scroll'),
+            controller: _studioScrollController,
             padding: EdgeInsets.fromLTRB(
               constraints.maxWidth < 520 ? 18 : 28,
               24,
@@ -359,13 +429,14 @@ class _SilaStudioScreenState extends State<SilaStudioScreen> {
                       ),
                     ),
                     const SizedBox(height: 22),
+                    if (_chatHasOpened && focusChat) ...[
+                      chat,
+                      const SizedBox(height: 24),
+                    ],
                     stage,
                     const SizedBox(height: 24),
-                    if (widget.active) ...[
-                      SilaChatPanel(
-                        developerPreview: widget.developerPreview,
-                        onPoseChanged: _showChatPose,
-                      ),
+                    if (_chatHasOpened && !focusChat) ...[
+                      chat,
                       const SizedBox(height: 24),
                     ],
                     SilaCompanionProgressCard(
@@ -386,6 +457,7 @@ class _SilaStudioScreenState extends State<SilaStudioScreen> {
 
 class _SilaStage extends StatefulWidget {
   const _SilaStage({
+    super.key,
     required this.pose,
     required this.motion,
     required this.rewards,
@@ -483,7 +555,21 @@ class _SilaStageState extends State<_SilaStage>
     return LayoutBuilder(
       builder: (context, constraints) {
         final compact = constraints.maxWidth < 700;
-        final frameHeight = compact ? 520.0 : 590.0;
+        final largeText = MediaQuery.textScalerOf(context).scale(1) > 1.35;
+        if (largeText) {
+          return _buildLargeTextStage(
+            context: context,
+            strings: strings,
+            colors: colors,
+            reactions: reactions,
+            speech: speech,
+            compact: compact,
+          );
+        }
+
+        // Phone layouts need enough vertical room for Arabic and other longer
+        // localized speech without squeezing Sila or truncating the guidance.
+        final frameHeight = compact ? 552.0 : 590.0;
         final mascotHeight = compact ? 305.0 : 435.0;
 
         return Container(
@@ -509,84 +595,259 @@ class _SilaStageState extends State<_SilaStage>
               decoration: BoxDecoration(
                 gradient: AppTheme.heroGradientFor(context),
               ),
-              child: AnimatedBuilder(
-                animation: _ambientController,
-                builder: (context, _) => Stack(
-                  children: [
-                    Positioned.fill(
+              child: Stack(
+                children: [
+                  Positioned.fill(
+                    child: RepaintBoundary(
                       child: CustomPaint(
                         painter: _StudioAtmospherePainter(
-                          progress: _ambientController.value,
+                          animation: _ambientController,
                         ),
                       ),
                     ),
-                    PositionedDirectional(
-                      top: compact ? 14 : 20,
-                      start: compact ? 14 : 22,
-                      end: compact ? 14 : 22,
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(
-                            child: Container(
-                              padding: EdgeInsets.symmetric(
-                                horizontal: compact ? 12 : 16,
-                                vertical: compact ? 10 : 13,
+                  ),
+                  PositionedDirectional(
+                    top: compact ? 14 : 20,
+                    start: compact ? 14 : 22,
+                    end: compact ? 14 : 22,
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Container(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: compact ? 12 : 16,
+                              vertical: compact ? 10 : 13,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.14),
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(
+                                color: Colors.white.withValues(alpha: 0.16),
                               ),
-                              decoration: BoxDecoration(
-                                color: Colors.white.withValues(alpha: 0.14),
-                                borderRadius: BorderRadius.circular(20),
-                                border: Border.all(
-                                  color: Colors.white.withValues(alpha: 0.16),
+                            ),
+                            child: AnimatedSwitcher(
+                              duration: _reduceMotion
+                                  ? Duration.zero
+                                  : const Duration(milliseconds: 240),
+                              child: Text(
+                                speech,
+                                key: ValueKey(
+                                  'sila-speech-${widget.motion.name}',
                                 ),
-                              ),
-                              child: AnimatedSwitcher(
-                                duration: _reduceMotion
-                                    ? Duration.zero
-                                    : const Duration(milliseconds: 240),
-                                child: Text(
-                                  speech,
-                                  key: ValueKey(
-                                    'sila-speech-${widget.motion.name}',
-                                  ),
-                                  maxLines: compact ? 2 : 3,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: Theme.of(context).textTheme.bodyMedium
-                                      ?.copyWith(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.w800,
-                                      ),
-                                ),
+                                maxLines: 3,
+                                overflow: TextOverflow.ellipsis,
+                                style: Theme.of(context).textTheme.bodyMedium
+                                    ?.copyWith(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w800,
+                                    ),
                               ),
                             ),
                           ),
-                          const SizedBox(width: 10),
-                          Chip(
+                        ),
+                        const SizedBox(width: 10),
+                        Chip(
+                          avatar: const Icon(Icons.stars_rounded, size: 18),
+                          label: Text('${widget.tokens}'),
+                          backgroundColor: Colors.white,
+                          side: BorderSide.none,
+                        ),
+                      ],
+                    ),
+                  ),
+                  Positioned.fill(
+                    top: compact ? 88 : 64,
+                    bottom: compact ? 118 : 98,
+                    child: Stack(
+                      key: const ValueKey('sila-studio-mascot'),
+                      alignment: Alignment.bottomCenter,
+                      children: [
+                        Positioned(
+                          bottom: compact ? 12 : 18,
+                          child: Container(
+                            width: compact ? 245 : 360,
+                            height: compact ? 55 : 76,
+                            decoration: BoxDecoration(
+                              gradient: RadialGradient(
+                                colors: [
+                                  Colors.white.withValues(alpha: 0.58),
+                                  Colors.white.withValues(alpha: 0.04),
+                                ],
+                              ),
+                              borderRadius: BorderRadius.circular(999),
+                            ),
+                          ),
+                        ),
+                        SilaMascot(
+                          key: const ValueKey('studio-sila-mascot'),
+                          pose: widget.pose,
+                          motion: widget.motion,
+                          loop: true,
+                          height: mascotHeight,
+                          semanticLabel: strings.mascotSemanticLabel,
+                          semanticHint: strings.silaStudioTapHint,
+                          onTap: widget.onTapSila,
+                          accessoryAssetKey: widget.rewards.mascotAccessory,
+                          outfitAssetKey: widget.rewards.mascotOutfit,
+                          auraAssetKey: widget.rewards.mascotAura,
+                        ),
+                      ],
+                    ),
+                  ),
+                  PositionedDirectional(
+                    start: 14,
+                    end: 14,
+                    bottom: 15,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          strings.silaStudioTapHint,
+                          textAlign: TextAlign.center,
+                          maxLines: compact ? 2 : 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context).textTheme.labelLarge
+                              ?.copyWith(
+                                color: Colors.white.withValues(alpha: 0.86),
+                                fontWeight: FontWeight.w700,
+                              ),
+                        ),
+                        const SizedBox(height: 9),
+                        Wrap(
+                          alignment: WrapAlignment.center,
+                          spacing: 8,
+                          runSpacing: 7,
+                          children: [
+                            for (final reaction in reactions)
+                              ChoiceChip(
+                                key: ValueKey(
+                                  'sila-motion-${reaction.$1.name}',
+                                ),
+                                selected: widget.motion == reaction.$1,
+                                onSelected: (_) =>
+                                    widget.onReaction(reaction.$1),
+                                avatar: Icon(reaction.$3, size: 18),
+                                label: Text(reaction.$2),
+                                side: BorderSide.none,
+                              ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildLargeTextStage({
+    required BuildContext context,
+    required AppLocalizations strings,
+    required ColorScheme colors,
+    required List<(SilaMascotMotion, String, IconData)> reactions,
+    required String speech,
+    required bool compact,
+  }) {
+    final mascotHeight = compact ? 245.0 : 360.0;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Container(
+          padding: const EdgeInsets.all(3),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [Color(0xFFFFD879), Color(0xFF64E7C2), Color(0xFFFF8D73)],
+            ),
+            borderRadius: BorderRadius.circular(38),
+            boxShadow: [
+              BoxShadow(
+                color: colors.primary.withValues(alpha: 0.24),
+                blurRadius: 42,
+                spreadRadius: 2,
+                offset: const Offset(0, 18),
+              ),
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(35),
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: AppTheme.heroGradientFor(context),
+              ),
+              child: Stack(
+                children: [
+                  Positioned.fill(
+                    child: RepaintBoundary(
+                      child: CustomPaint(
+                        painter: _StudioAtmospherePainter(
+                          animation: _ambientController,
+                        ),
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.all(compact ? 14 : 22),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: compact ? 12 : 16,
+                            vertical: compact ? 10 : 13,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.14),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color: Colors.white.withValues(alpha: 0.16),
+                            ),
+                          ),
+                          child: AnimatedSwitcher(
+                            duration: _reduceMotion
+                                ? Duration.zero
+                                : const Duration(milliseconds: 240),
+                            child: Text(
+                              speech,
+                              key: ValueKey(
+                                'sila-speech-${widget.motion.name}',
+                              ),
+                              style: Theme.of(context).textTheme.bodyMedium
+                                  ?.copyWith(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        Align(
+                          alignment: AlignmentDirectional.centerEnd,
+                          child: Chip(
                             avatar: const Icon(Icons.stars_rounded, size: 18),
                             label: Text('${widget.tokens}'),
                             backgroundColor: Colors.white,
                             side: BorderSide.none,
                           ),
-                        ],
-                      ),
-                    ),
-                    Positioned.fill(
-                      top: compact ? 70 : 64,
-                      bottom: compact ? 104 : 98,
-                      child: GestureDetector(
-                        key: const ValueKey('sila-studio-mascot'),
-                        onTap: widget.onTapSila,
-                        child: Semantics(
-                          button: true,
-                          label: strings.silaStudioTapHint,
+                        ),
+                        const SizedBox(height: 8),
+                        SizedBox(
+                          height: compact ? 300 : 430,
                           child: Stack(
+                            key: const ValueKey('sila-studio-mascot'),
+                            clipBehavior: Clip.none,
                             alignment: Alignment.bottomCenter,
                             children: [
                               Positioned(
-                                bottom: compact ? 12 : 18,
+                                bottom: compact ? 8 : 14,
                                 child: Container(
-                                  width: compact ? 245 : 360,
-                                  height: compact ? 55 : 76,
+                                  width: compact ? 220 : 330,
+                                  height: compact ? 50 : 70,
                                   decoration: BoxDecoration(
                                     gradient: RadialGradient(
                                       colors: [
@@ -605,6 +866,8 @@ class _SilaStageState extends State<_SilaStage>
                                 loop: true,
                                 height: mascotHeight,
                                 semanticLabel: strings.mascotSemanticLabel,
+                                semanticHint: strings.silaStudioTapHint,
+                                onTap: widget.onTapSila,
                                 accessoryAssetKey:
                                     widget.rewards.mascotAccessory,
                                 outfitAssetKey: widget.rewards.mascotOutfit,
@@ -613,64 +876,66 @@ class _SilaStageState extends State<_SilaStage>
                             ],
                           ),
                         ),
-                      ),
+                      ],
                     ),
-                    PositionedDirectional(
-                      start: 14,
-                      end: 14,
-                      bottom: 15,
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            strings.silaStudioTapHint,
-                            textAlign: TextAlign.center,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: Theme.of(context).textTheme.labelLarge
-                                ?.copyWith(
-                                  color: Colors.white.withValues(alpha: 0.86),
-                                  fontWeight: FontWeight.w700,
-                                ),
-                          ),
-                          const SizedBox(height: 9),
-                          Wrap(
-                            alignment: WrapAlignment.center,
-                            spacing: 8,
-                            runSpacing: 7,
-                            children: [
-                              for (final reaction in reactions)
-                                ChoiceChip(
-                                  key: ValueKey(
-                                    'sila-motion-${reaction.$1.name}',
-                                  ),
-                                  selected: widget.motion == reaction.$1,
-                                  onSelected: (_) =>
-                                      widget.onReaction(reaction.$1),
-                                  avatar: Icon(reaction.$3, size: 18),
-                                  label: Text(reaction.$2),
-                                  side: BorderSide.none,
-                                ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ),
-        );
-      },
+        ),
+        const SizedBox(height: 14),
+        Container(
+          key: const ValueKey('sila-stage-large-text-controls'),
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: colors.surface,
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: colors.outlineVariant),
+          ),
+          child: Column(
+            children: [
+              Text(
+                strings.silaStudioTapHint,
+                key: const ValueKey('sila-stage-tap-hint'),
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                  color: colors.onSurfaceVariant,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Wrap(
+                alignment: WrapAlignment.center,
+                spacing: 8,
+                runSpacing: 9,
+                children: [
+                  for (final reaction in reactions)
+                    ChoiceChip(
+                      key: ValueKey('sila-motion-${reaction.$1.name}'),
+                      selected: widget.motion == reaction.$1,
+                      onSelected: (_) => widget.onReaction(reaction.$1),
+                      avatar: Icon(reaction.$3, size: 18),
+                      label: Text(reaction.$2),
+                      side: BorderSide.none,
+                    ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
 
 class _StudioAtmospherePainter extends CustomPainter {
-  const _StudioAtmospherePainter({required this.progress});
+  _StudioAtmospherePainter({required this.animation})
+    : super(repaint: animation);
 
-  final double progress;
+  final Animation<double> animation;
+
+  double get progress => animation.value;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -748,7 +1013,57 @@ class _StudioAtmospherePainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _StudioAtmospherePainter oldDelegate) =>
-      oldDelegate.progress != progress;
+      oldDelegate.animation != animation;
+}
+
+class _StudioClosetStatus extends StatelessWidget {
+  const _StudioClosetStatus({required this.hasError});
+
+  final bool hasError;
+
+  @override
+  Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context)!;
+    final colors = Theme.of(context).colorScheme;
+
+    return Container(
+      key: ValueKey(
+        hasError ? 'sila-closet-load-error' : 'sila-closet-loading',
+      ),
+      width: double.infinity,
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: colors.surface,
+        borderRadius: BorderRadius.circular(30),
+        border: Border.all(color: colors.outlineVariant),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            strings.silaStudioCloset,
+            style: Theme.of(
+              context,
+            ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w900),
+          ),
+          const SizedBox(height: 12),
+          if (hasError)
+            Row(
+              children: [
+                Icon(Icons.cloud_off_rounded, color: colors.error),
+                const SizedBox(width: 10),
+                Expanded(child: Text(strings.silaStudioLoadError)),
+              ],
+            )
+          else ...[
+            const LinearProgressIndicator(),
+            const SizedBox(height: 12),
+            Text(strings.silaStudioClosetDescription),
+          ],
+        ],
+      ),
+    );
+  }
 }
 
 class _StudioCloset extends StatelessWidget {
@@ -995,21 +1310,6 @@ class _StudioRewardCard extends StatelessWidget {
       ),
     );
   }
-}
-
-class _StudioLoadError extends StatelessWidget {
-  const _StudioLoadError();
-
-  @override
-  Widget build(BuildContext context) => Center(
-    child: Padding(
-      padding: const EdgeInsets.all(28),
-      child: Text(
-        AppLocalizations.of(context)!.silaStudioLoadError,
-        textAlign: TextAlign.center,
-      ),
-    ),
-  );
 }
 
 class _StudioSignedOut extends StatelessWidget {

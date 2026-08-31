@@ -18,6 +18,11 @@ void main() {
     await tester.pump(const Duration(milliseconds: 100));
 
     expect(find.text('1350'), findsOneWidget);
+    expect(find.byKey(const ValueKey('rewards-sila-guide')), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('sila-companion-callout-mascot')),
+      findsOneWidget,
+    );
     expect(find.text('Digital Rewards'), findsOneWidget);
     expect(find.text('Golden Profile Frame'), findsOneWidget);
     expect(find.text('Profile Frames'), findsOneWidget);

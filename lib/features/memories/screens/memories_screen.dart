@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/mascot/sila_mascot.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../mascot/widgets/sila_companion_callout.dart';
 import '../../rewards/digital/digital_reward_visuals.dart';
 import 'add_memory_screen.dart';
 import 'memory_details_screen.dart';
@@ -51,21 +52,23 @@ class MemoriesScreen extends StatelessWidget {
             }
 
             if (userSnapshot.hasError) {
-              return Center(child: Text(strings.memoriesLoadError));
+              return _MemoriesCompanionState(
+                userId: user.uid,
+                title: strings.memoriesTitle,
+                message: strings.memoriesLoadError,
+                pose: SilaMascotPose.oops,
+              );
             }
 
             final userData = userSnapshot.data?.data();
             final familyId = userData?['familyId'] as String?;
 
             if (familyId == null || familyId.isEmpty) {
-              return Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(24),
-                  child: Text(
-                    strings.memoriesFamilyRequired,
-                    textAlign: TextAlign.center,
-                  ),
-                ),
+              return _MemoriesCompanionState(
+                userId: user.uid,
+                title: strings.memoriesTitle,
+                message: strings.memoriesFamilyRequired,
+                pose: SilaMascotPose.encouraging,
               );
             }
 
@@ -82,7 +85,12 @@ class MemoriesScreen extends StatelessWidget {
                 }
 
                 if (memorySnapshot.hasError) {
-                  return Center(child: Text(strings.memoriesLoadError));
+                  return _MemoriesCompanionState(
+                    userId: user.uid,
+                    title: strings.memoriesTitle,
+                    message: strings.memoriesLoadError,
+                    pose: SilaMascotPose.oops,
+                  );
                 }
 
                 final memories = memorySnapshot.data?.docs ?? [];
@@ -228,6 +236,39 @@ class MemoriesScreen extends StatelessWidget {
       floatingActionButton: FloatingActionButton(
         onPressed: () => _openAddMemory(context),
         child: const Icon(Icons.add),
+      ),
+    );
+  }
+}
+
+class _MemoriesCompanionState extends StatelessWidget {
+  const _MemoriesCompanionState({
+    required this.userId,
+    required this.title,
+    required this.message,
+    required this.pose,
+  });
+
+  final String userId;
+  final String title;
+  final String message;
+  final SilaMascotPose pose;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(24),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 620),
+          child: SilaCompanionCallout(
+            key: const ValueKey('memories-sila-state'),
+            title: title,
+            message: message,
+            pose: pose,
+            userId: userId,
+          ),
+        ),
       ),
     );
   }

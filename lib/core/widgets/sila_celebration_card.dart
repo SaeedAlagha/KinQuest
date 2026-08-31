@@ -29,6 +29,9 @@ class SilaCelebrationCard extends StatefulWidget {
     this.rewards = const [],
     this.footer,
     this.effect = 'default',
+    this.mascotAccessory = SilaMascotAccessories.none,
+    this.mascotOutfit = SilaMascotOutfits.none,
+    this.mascotAura = SilaMascotAuras.none,
   });
 
   final String eyebrow;
@@ -38,6 +41,9 @@ class SilaCelebrationCard extends StatefulWidget {
   final List<SilaCelebrationReward> rewards;
   final Widget? footer;
   final String effect;
+  final String mascotAccessory;
+  final String mascotOutfit;
+  final String mascotAura;
 
   @override
   State<SilaCelebrationCard> createState() => _SilaCelebrationCardState();
@@ -47,6 +53,7 @@ class _SilaCelebrationCardState extends State<SilaCelebrationCard>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
   late final Animation<double> _entrance;
+  bool? _reduceMotion;
 
   @override
   void initState() {
@@ -56,7 +63,19 @@ class _SilaCelebrationCardState extends State<SilaCelebrationCard>
       duration: const Duration(milliseconds: 1050),
     );
     _entrance = CurvedAnimation(parent: _controller, curve: Curves.easeOutBack);
-    _controller.forward();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final reduceMotion = MediaQuery.disableAnimationsOf(context);
+    if (_reduceMotion == reduceMotion) return;
+    _reduceMotion = reduceMotion;
+    if (reduceMotion) {
+      _controller.value = 1;
+    } else {
+      _controller.forward(from: 0);
+    }
   }
 
   @override
@@ -127,10 +146,13 @@ class _SilaCelebrationCardState extends State<SilaCelebrationCard>
                             SilaMascot(
                               pose: SilaMascotPose.winner,
                               height: 150,
-                              animate: false,
+                              animate: !(_reduceMotion ?? false),
                               semanticLabel: AppLocalizations.of(
                                 context,
                               )?.mascotSemanticLabel,
+                              accessoryAssetKey: widget.mascotAccessory,
+                              outfitAssetKey: widget.mascotOutfit,
+                              auraAssetKey: widget.mascotAura,
                             ),
                             PositionedDirectional(
                               end: 3,

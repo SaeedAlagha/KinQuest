@@ -473,15 +473,18 @@ class _PassTheBombScreenState extends State<PassTheBombScreen> {
     final strings = AppLocalizations.of(context)!;
     final gameInProgress =
         _phase != _BombPhase.setup && _phase != _BombPhase.finalLeaderboard;
+    final showSila = _phase != _BombPhase.setup;
 
     return GameExitGuard(
       gameInProgress: gameInProgress,
       child: Scaffold(
-        floatingActionButton: gameInProgress
+        floatingActionButton: showSila
             ? SilaGameCoachButton(
-                tone: _phase == _BombPhase.roundResult
-                    ? SilaGameCoachTone.celebrating
-                    : SilaGameCoachTone.play,
+                tone: switch (_phase) {
+                  _BombPhase.roundResult => SilaGameCoachTone.celebrating,
+                  _BombPhase.finalLeaderboard => SilaGameCoachTone.winner,
+                  _ => SilaGameCoachTone.play,
+                },
               )
             : null,
         appBar: AppBar(title: Text(strings.passTheBomb)),

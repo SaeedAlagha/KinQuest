@@ -1,10 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import '../../../core/mascot/sila_mascot.dart';
 import '../../../core/theme/appearance_controller.dart';
 import '../../../core/theme/app_theme_catalog.dart';
 import '../../../core/theme/theme_unlock_service.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../mascot/widgets/sila_companion_callout.dart';
 import '../digital/digital_reward_catalog.dart';
 import '../digital/digital_reward_definition.dart';
 import '../digital/digital_reward_error_localization.dart';
@@ -276,6 +278,7 @@ class _RewardsHubScreenState extends State<RewardsHubScreen> {
               icon: Icons.family_restroom_rounded,
               title: strings.joinFamilyFirst,
               message: strings.joinFamilyRewardsDescription,
+              userId: user.uid,
             ),
           );
         }
@@ -319,6 +322,7 @@ class _RewardsHubScreenState extends State<RewardsHubScreen> {
               icon: Icons.cloud_off_rounded,
               title: strings.couldNotLoadGoals,
               message: strings.tryAgain,
+              userId: userId,
             ),
           );
         }
@@ -358,7 +362,7 @@ class _RewardsHubScreenState extends State<RewardsHubScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const _RewardsIntro(),
+              _RewardsIntro(userId: userId),
               const SizedBox(height: 20),
               Wrap(
                 spacing: 12,
@@ -422,6 +426,7 @@ class _RewardsHubScreenState extends State<RewardsHubScreen> {
                   icon: Icons.flag_outlined,
                   title: strings.noActiveGoals,
                   message: strings.noActiveGoalsDescription,
+                  showMascot: false,
                 )
               else
                 ...goals.map(
@@ -495,7 +500,7 @@ class _RewardsHubScreenState extends State<RewardsHubScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const _RewardsIntro(),
+          const _RewardsIntro(developerPreview: true),
           const SizedBox(height: 20),
           FilledButton.tonalIcon(
             onPressed: () => Navigator.push(
@@ -636,27 +641,21 @@ class _TokenBalanceCard extends StatelessWidget {
 }
 
 class _RewardsIntro extends StatelessWidget {
-  const _RewardsIntro();
+  const _RewardsIntro({this.userId, this.developerPreview = false});
+
+  final String? userId;
+  final bool developerPreview;
 
   @override
   Widget build(BuildContext context) {
     final strings = AppLocalizations.of(context)!;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          strings.rewardsIntroTitle,
-          style: Theme.of(
-            context,
-          ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          strings.rewardsIntroDescription,
-          style: Theme.of(context).textTheme.bodyLarge,
-        ),
-      ],
+    return SilaCompanionCallout(
+      key: const ValueKey('rewards-sila-guide'),
+      title: strings.rewardsIntroTitle,
+      message: strings.rewardsIntroDescription,
+      userId: userId,
+      animate: !developerPreview,
     );
   }
 }
@@ -966,6 +965,7 @@ class _DigitalRewardsStore extends StatelessWidget {
             icon: Icons.error_outline_rounded,
             title: strings.digitalRewardsLoadFailed,
             message: strings.restartAndTryAgain,
+            showMascot: false,
           );
         }
 
@@ -1006,6 +1006,7 @@ class _DigitalRewardsStore extends StatelessWidget {
                 icon: Icons.cloud_off_rounded,
                 title: strings.collectionLoadFailed,
                 message: strings.checkConnectionTryAgain,
+                showMascot: false,
               );
             }
 
@@ -1479,14 +1480,29 @@ class _RewardsMessage extends StatelessWidget {
     required this.icon,
     required this.title,
     required this.message,
+    this.showMascot = true,
+    this.userId,
   });
 
   final IconData icon;
   final String title;
   final String message;
+  final bool showMascot;
+  final String? userId;
 
   @override
   Widget build(BuildContext context) {
+    if (showMascot) {
+      return SilaCompanionCallout(
+        title: title,
+        message: message,
+        userId: userId,
+        pose: Icons.cloud_off_rounded == icon
+            ? SilaMascotPose.oops
+            : SilaMascotPose.encouraging,
+      );
+    }
+
     final colorScheme = Theme.of(context).colorScheme;
 
     return Container(

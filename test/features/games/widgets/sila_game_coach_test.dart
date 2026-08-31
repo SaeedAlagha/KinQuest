@@ -1,3 +1,5 @@
+import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kinquest/core/mascot/sila_mascot.dart';
@@ -11,6 +13,16 @@ void main() {
     await _setViewport(tester, const Size(390, 844));
     await tester.pumpWidget(_app(const SilaGameCoachButton()));
     await tester.pump();
+
+    final semantics = tester.ensureSemantics();
+    final coachNode = tester.getSemantics(
+      find.bySemanticsLabel(RegExp(r'^Sila, your family companion')),
+    );
+    expect(
+      coachNode.getSemanticsData().actions & ui.SemanticsAction.tap.index,
+      isNot(0),
+    );
+    semantics.dispose();
 
     expect(find.byKey(const ValueKey('sila-game-coach-phone')), findsOneWidget);
     expect(find.text('Sila'), findsOneWidget);
@@ -54,6 +66,37 @@ void main() {
       findsOneWidget,
     );
     expect(find.byKey(const ValueKey('sila-game-coach-phone')), findsNothing);
+    expect(
+      tester
+          .getBottomLeft(find.byKey(const ValueKey('sila-game-coach-compact')))
+          .dy,
+      lessThan(560),
+    );
+    expect(tester.takeException(), isNull);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
+  testWidgets('winner reaction stays compact over phone result screens', (
+    tester,
+  ) async {
+    await _setViewport(tester, const Size(390, 844));
+    await tester.pumpWidget(
+      _app(const SilaGameCoachButton(tone: SilaGameCoachTone.winner)),
+    );
+    await tester.pump();
+
+    expect(
+      find.byKey(const ValueKey('sila-game-coach-compact')),
+      findsOneWidget,
+    );
+    expect(find.byKey(const ValueKey('sila-game-coach-phone')), findsNothing);
+    expect(
+      tester
+          .getBottomLeft(find.byKey(const ValueKey('sila-game-coach-compact')))
+          .dy,
+      lessThan(730),
+    );
     expect(tester.takeException(), isNull);
 
     await tester.pumpWidget(const SizedBox.shrink());
@@ -72,9 +115,21 @@ void main() {
       SilaMascotMotion.celebrate,
       'Amazing teamwork',
     ),
+    (
+      SilaGameCoachTone.oops,
+      SilaMascotPose.oops,
+      SilaMascotMotion.excited,
+      'did not work',
+    ),
+    (
+      SilaGameCoachTone.winner,
+      SilaMascotPose.winner,
+      SilaMascotMotion.celebrate,
+      'What a finish',
+    ),
   ]) {
     testWidgets('$tone gives Sila a contextual reaction', (tester) async {
-      await _setViewport(tester, const Size(390, 844));
+      await _setViewport(tester, const Size(800, 844));
       await tester.pumpWidget(_app(SilaGameCoachButton(tone: tone)));
       await tester.pump();
 

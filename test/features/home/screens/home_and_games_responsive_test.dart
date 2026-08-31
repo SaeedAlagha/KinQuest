@@ -19,6 +19,10 @@ void main() {
       find.byKey(const ValueKey('sila-mascot-accessory-guardian_crown')),
       findsOneWidget,
     );
+    final homeMascot = tester.widget<SilaMascot>(find.byType(SilaMascot));
+    expect(homeMascot.pose, SilaMascotPose.welcome);
+    expect(homeMascot.motion, SilaMascotMotion.gameReady);
+    expect(find.byKey(const ValueKey('home-sila-action')), findsOneWidget);
     expect(tester.takeException(), isNull);
 
     await _pumpScreen(tester, const GamesScreen());
@@ -39,6 +43,45 @@ void main() {
     await _pumpScreen(tester, const GamesScreen());
 
     expect(find.text('Find your next family favorite'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Home Sila respects reduced motion and remains actionable', (
+    tester,
+  ) async {
+    await _setViewport(tester, const Size(320, 568));
+    var openedStudio = false;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.lightTheme,
+        supportedLocales: AppLocalizations.supportedLocales,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        home: MediaQuery(
+          data: const MediaQueryData(
+            disableAnimations: true,
+            textScaler: TextScaler.linear(2),
+          ),
+          child: HomeDashboard(
+            name: 'Demo User',
+            familyName: 'Demo Family',
+            memberCount: 4,
+            tokens: '120',
+            developerPreview: true,
+            onSilaStudio: () => openedStudio = true,
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(tester.widget<SilaMascot>(find.byType(SilaMascot)).animate, isFalse);
+    final action = find.byKey(const ValueKey('home-sila-action'));
+    await tester.ensureVisible(action);
+    await tester.tap(action);
+    await tester.pump();
+
+    expect(openedStudio, isTrue);
     expect(tester.takeException(), isNull);
   });
 }

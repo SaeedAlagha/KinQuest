@@ -561,16 +561,18 @@ class _SecretMissionScreenState extends State<SecretMissionScreen> {
     final gameInProgress =
         _phase != _SecretMissionPhase.setup &&
         _phase != _SecretMissionPhase.leaderboard;
+    final showSila = _phase != _SecretMissionPhase.setup;
 
     return GameExitGuard(
       gameInProgress: gameInProgress,
       child: Scaffold(
-        floatingActionButton: gameInProgress
+        floatingActionButton: showSila
             ? SilaGameCoachButton(
                 tone: switch (_phase) {
                   _SecretMissionPhase.judging => SilaGameCoachTone.thinking,
                   _SecretMissionPhase.roundResults =>
                     SilaGameCoachTone.celebrating,
+                  _SecretMissionPhase.leaderboard => SilaGameCoachTone.winner,
                   _ => SilaGameCoachTone.play,
                 },
               )

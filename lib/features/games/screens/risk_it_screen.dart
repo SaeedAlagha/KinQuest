@@ -559,21 +559,22 @@ class _RiskItScreenState extends State<RiskItScreen> {
   }
 
   @override
-  @override
   Widget build(BuildContext context) {
     final strings = AppLocalizations.of(context)!;
     final gameInProgress =
         _phase != _RiskItPhase.setup && _phase != _RiskItPhase.finalResults;
+    final showSila = _phase != _RiskItPhase.setup;
 
     return GameExitGuard(
       gameInProgress: gameInProgress,
       child: Scaffold(
-        floatingActionButton: gameInProgress
+        floatingActionButton: showSila
             ? SilaGameCoachButton(
                 tone: switch (_phase) {
                   _RiskItPhase.loading => SilaGameCoachTone.thinking,
                   _RiskItPhase.turnResult ||
                   _RiskItPhase.roundResult => SilaGameCoachTone.celebrating,
+                  _RiskItPhase.finalResults => SilaGameCoachTone.winner,
                   _ => SilaGameCoachTone.play,
                 },
               )

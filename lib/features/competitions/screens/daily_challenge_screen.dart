@@ -615,6 +615,9 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> {
             ? strings.dailyCompleteWithoutWinner
             : strings.dailyCompleteWithWinner(winner),
         effect: digitalRewards.celebrationEffect,
+        mascotAccessory: digitalRewards.mascotAccessory,
+        mascotOutfit: digitalRewards.mascotOutfit,
+        mascotAura: digitalRewards.mascotAura,
         rewards: [
           SilaCelebrationReward(
             icon: Icons.stars_rounded,

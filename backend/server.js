@@ -213,7 +213,7 @@ Generate exactly ${questionCount} unique Would You Rather questions.
 
 Category: ${category}
 
-This is for KinQuest, a family game.
+This is for Sila, a family connection app.
 
 Rules:
 - Family friendly
@@ -305,7 +305,7 @@ Generate exactly ${promptCount} unique Charades prompts.
 
 Category: ${category}
 
-This is for KinQuest, a family game.
+This is for Sila, a family connection app.
 
 Rules:
 - Family friendly
@@ -366,7 +366,7 @@ Generate exactly ${promptCount} unique Never Have I Ever statements.
 
 Category: ${category}
 
-This is for KinQuest, a family game.
+This is for Sila, a family connection app.
 
 Rules:
 - Family friendly
@@ -448,7 +448,7 @@ Generate exactly ${questionCount} unique multiple-choice trivia questions.
 
 Category: ${category}
 
-This is for KinQuest, a family game.
+This is for Sila, a family connection app.
 
 Rules:
 - Family friendly
@@ -553,7 +553,7 @@ Generate exactly ${promptCount} unique Truth or Dare prompts.
 
 Category: ${category}
 
-This is for KinQuest, a family game.
+This is for Sila, a family connection app.
 
 Rules:
 - Family friendly
@@ -645,7 +645,7 @@ Generate exactly ${puzzleCount} unique Emoji Guess puzzles.
 
 Category: ${category}
 
-This is for KinQuest, a family game.
+This is for Sila, a family connection app.
 
 Rules:
 - Family friendly
@@ -769,7 +769,7 @@ app.post("/api/family-quiz", async (req, res) => {
     }
 
     const sharedRules = `
-This is for KinQuest, a family bonding game.
+This is for Sila, a family connection app.
 
 Rules:
 - Family friendly and appropriate for children and adults
@@ -1091,7 +1091,7 @@ app.post("/api/family-impostor", async (req, res) => {
     const prompt = `
 Generate exactly ${roundCount} Family Impostor rounds.
 
-This is for KinQuest, a family bonding game played by children and adults together.
+This is for Sila, a family connection app used by children and adults together.
 
 For each round, generate:
 - one simple category
@@ -1450,7 +1450,7 @@ app.post("/api/pass-the-bomb", async (req, res) => {
     const prompt = `
 Generate exactly ${categoryCount} categories for a family game called Pass the Bomb.
 
-KinQuest is a family bonding app played together on one shared phone.
+Sila is a family connection app played together on one shared phone.
 
 During each round, players take turns naming something that matches the category.
 They cannot repeat an answer.
@@ -2412,7 +2412,7 @@ const PORT = process.env.PORT || 3000;
 
 if (require.main === module) {
   app.listen(PORT, () => {
-    console.log(`KinQuest Gemini server running on port ${PORT}`);
+    console.log(`Sila Gemini server running on port ${PORT}`);
   });
 }
 

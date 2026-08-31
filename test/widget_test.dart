@@ -15,6 +15,11 @@ void main() {
 
     expect(find.text('Sila'), findsWidgets);
     expect(find.text('صِلَة'), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('welcome-sila-spotlight')),
+      findsOneWidget,
+    );
+    expect(find.text('MEET SILA • YOUR FAMILY COMPANION'), findsOneWidget);
     expect(find.text('Closer, one moment at a time.'), findsOneWidget);
     expect(find.text('Log In'), findsOneWidget);
     expect(find.text('Create Account'), findsOneWidget);
