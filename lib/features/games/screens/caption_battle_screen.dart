@@ -505,17 +505,21 @@ class _CaptionBattleScreenState extends State<CaptionBattleScreen> {
     final gameInProgress =
         _phase != _CaptionBattlePhase.setup &&
         _phase != _CaptionBattlePhase.finalResults;
+    final showSila = _phase != _CaptionBattlePhase.setup;
 
     return GameExitGuard(
       gameInProgress: gameInProgress,
       child: Scaffold(
-        floatingActionButton: gameInProgress
+        floatingActionButton: showSila
             ? SilaGameCoachButton(
-                tone: _isLoading
-                    ? SilaGameCoachTone.thinking
-                    : _phase == _CaptionBattlePhase.roundResults
-                    ? SilaGameCoachTone.celebrating
-                    : SilaGameCoachTone.play,
+                tone: switch ((_isLoading, _phase)) {
+                  (true, _) => SilaGameCoachTone.thinking,
+                  (_, _CaptionBattlePhase.roundResults) =>
+                    SilaGameCoachTone.celebrating,
+                  (_, _CaptionBattlePhase.finalResults) =>
+                    SilaGameCoachTone.winner,
+                  _ => SilaGameCoachTone.play,
+                },
               )
             : null,
         appBar: AppBar(title: Text(strings.captionBattle)),

@@ -464,7 +464,7 @@ abstract class AppLocalizations {
   /// No description provided for @navSila.
   ///
   /// In en, this message translates to:
-  /// **'Wardrobe'**
+  /// **'Sila'**
   String get navSila;
 
   /// No description provided for @navMemories.
@@ -1292,14 +1292,32 @@ abstract class AppLocalizations {
   /// No description provided for @mascotWelcomeMessage.
   ///
   /// In en, this message translates to:
-  /// **'Hi! I’m Sila. I’ll help your family play, create, and grow closer.'**
+  /// **'Hi! I’m Sila—your playful family companion. I’ll guide games, spark shared moments, and celebrate every bond you grow.'**
   String get mascotWelcomeMessage;
 
   /// No description provided for @mascotHomeMessage.
   ///
   /// In en, this message translates to:
-  /// **'Ready for a small family moment together, {name}?'**
+  /// **'Hi {name}! Tell me how your family feels today and I’ll help you choose a moment to share.'**
   String mascotHomeMessage(String name);
+
+  /// No description provided for @silaMeetCompanion.
+  ///
+  /// In en, this message translates to:
+  /// **'MEET SILA • YOUR FAMILY COMPANION'**
+  String get silaMeetCompanion;
+
+  /// No description provided for @silaHomeAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask Sila for today’s idea'**
+  String get silaHomeAction;
+
+  /// No description provided for @silaNavigationHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Sila Studio and chat'**
+  String get silaNavigationHint;
 
   /// No description provided for @mascotGameSetupMessage.
   ///
@@ -1324,6 +1342,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Amazing teamwork! Every moment together makes your bond stronger.'**
   String get mascotCelebrationMessage;
+
+  /// No description provided for @silaGameWinnerMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'What a finish! Celebrate the winner—and everyone who made this family moment fun.'**
+  String get silaGameWinnerMessage;
 
   /// No description provided for @silaMissionsMessage.
   ///
@@ -1502,7 +1526,7 @@ abstract class AppLocalizations {
   /// No description provided for @silaChatPrivacy.
   ///
   /// In en, this message translates to:
-  /// **'Private to your account. Sila receives family member names and this chat. KinQuest does not automatically attach photos, emails, or birth dates.'**
+  /// **'Private to your account. Sila receives family member names and this chat. The Sila app does not automatically attach photos, emails, or birth dates.'**
   String get silaChatPrivacy;
 
   /// No description provided for @silaChatEmptyTitle.

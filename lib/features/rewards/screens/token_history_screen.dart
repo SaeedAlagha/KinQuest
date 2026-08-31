@@ -2,7 +2,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
+import '../../../core/mascot/sila_mascot.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../mascot/widgets/sila_companion_callout.dart';
 import '../models/token_transaction.dart';
 
 class TokenHistoryScreen extends StatelessWidget {
@@ -36,14 +38,11 @@ class TokenHistoryScreen extends StatelessWidget {
             }
 
             if (snapshot.hasError) {
-              return Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(24),
-                  child: Text(
-                    strings.tokenHistoryLoadFailed,
-                    textAlign: TextAlign.center,
-                  ),
-                ),
+              return _TokenHistoryState(
+                userId: user.uid,
+                title: strings.tokenHistory,
+                message: strings.tokenHistoryLoadFailed,
+                pose: SilaMascotPose.oops,
               );
             }
 
@@ -54,29 +53,11 @@ class TokenHistoryScreen extends StatelessWidget {
                 [];
 
             if (transactions.isEmpty) {
-              return Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(32),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(Icons.receipt_long_outlined, size: 52),
-                      const SizedBox(height: 14),
-                      Text(
-                        strings.noTokenActivity,
-                        style: const TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        strings.tokenActivityDescription,
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  ),
-                ),
+              return _TokenHistoryState(
+                userId: user.uid,
+                title: strings.noTokenActivity,
+                message: strings.tokenActivityDescription,
+                pose: SilaMascotPose.encouraging,
               );
             }
 
@@ -91,6 +72,39 @@ class TokenHistoryScreen extends StatelessWidget {
               },
             );
           },
+        ),
+      ),
+    );
+  }
+}
+
+class _TokenHistoryState extends StatelessWidget {
+  const _TokenHistoryState({
+    required this.userId,
+    required this.title,
+    required this.message,
+    required this.pose,
+  });
+
+  final String userId;
+  final String title;
+  final String message;
+  final SilaMascotPose pose;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(24),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 620),
+          child: SilaCompanionCallout(
+            key: const ValueKey('token-history-sila-state'),
+            userId: userId,
+            title: title,
+            message: message,
+            pose: pose,
+          ),
         ),
       ),
     );

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kinquest/core/branding/app_brand.dart';
+import 'package:kinquest/core/mascot/sila_mascot.dart';
 import 'package:kinquest/core/theme/app_theme.dart';
 import 'package:kinquest/core/validation/form_validators.dart';
 import 'package:kinquest/features/authentication/screens/family_choice_screen.dart';
@@ -27,6 +28,7 @@ void main() {
     );
     expect(description, findsOneWidget);
     expect(Directionality.of(tester.element(description)), TextDirection.rtl);
+    expect(find.text('تعرّف إلى صلة • رفيق عائلتك'), findsOneWidget);
     expect(
       tester.widget<Text>(find.text(AppBrand.tagline)).textDirection,
       TextDirection.ltr,
@@ -42,6 +44,34 @@ void main() {
     expect(find.text('كلمة المرور'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets(
+    'Sila welcome stays usable with large Arabic text and no motion',
+    (tester) async {
+      await _setViewport(tester, const Size(320, 568));
+      await _pumpArabic(
+        tester,
+        const MediaQuery(
+          data: MediaQueryData(
+            disableAnimations: true,
+            textScaler: TextScaler.linear(2),
+          ),
+          child: WelcomeScreen(),
+        ),
+      );
+
+      expect(find.text('تعرّف إلى صلة • رفيق عائلتك'), findsOneWidget);
+      expect(
+        tester.widget<SilaMascot>(find.byType(SilaMascot)).animate,
+        isFalse,
+      );
+
+      final login = find.widgetWithText(FilledButton, 'تسجيل الدخول');
+      await tester.ensureVisible(login);
+      expect(login, findsOneWidget);
+      expect(tester.takeException(), isNull);
+    },
+  );
 
   testWidgets('Arabic login and sign-up validation stays local', (
     tester,

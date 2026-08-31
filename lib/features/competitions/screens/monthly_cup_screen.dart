@@ -1263,6 +1263,9 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
             subtitle: strings.monthlyCompleteDescription,
             icon: Icons.workspace_premium_rounded,
             effect: digitalRewards.celebrationEffect,
+            mascotAccessory: digitalRewards.mascotAccessory,
+            mascotOutfit: digitalRewards.mascotOutfit,
+            mascotAura: digitalRewards.mascotAura,
             rewards: [
               SilaCelebrationReward(
                 icon: Icons.stars_rounded,

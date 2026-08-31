@@ -79,6 +79,73 @@ void main() {
     expect(find.byKey(const ValueKey('sila-chat-thinking')), findsNothing);
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('chat focus request places the conversation before the stage', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      _app(
+        const SilaStudioScreen(developerPreview: true, chatFocusRequest: 1),
+        reduceMotion: true,
+      ),
+    );
+    await tester.pump();
+
+    await _pumpUntilFound(
+      tester,
+      find.byKey(const ValueKey('sila-chat-panel')),
+    );
+
+    expect(find.byKey(const ValueKey('sila-chat-panel')), findsOneWidget);
+    final chatRect = tester.getRect(
+      find.byKey(const ValueKey('sila-chat-panel')),
+    );
+    expect(chatRect.top, lessThan(760));
+    expect(chatRect.bottom, greaterThan(0));
+    expect(
+      chatRect.top,
+      lessThan(
+        tester.getRect(find.byKey(const ValueKey('sila-studio-mascot'))).top,
+      ),
+    );
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('large text keeps reactions below the mascot stage', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(320, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      _app(
+        const SilaStudioScreen(developerPreview: true),
+        reduceMotion: true,
+        textScale: 2,
+      ),
+    );
+    await _pumpUntilFound(
+      tester,
+      find.byKey(const ValueKey('sila-stage-large-text-controls')),
+    );
+
+    final mascotRect = tester.getRect(
+      find.byKey(const ValueKey('sila-studio-mascot')),
+    );
+    final controlsRect = tester.getRect(
+      find.byKey(const ValueKey('sila-stage-large-text-controls')),
+    );
+    expect(controlsRect.top, greaterThanOrEqualTo(mascotRect.bottom));
+    expect(find.byKey(const ValueKey('sila-stage-tap-hint')), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
 }
 
 Future<void> _finishCatalogLoad(WidgetTester tester) async {
@@ -87,11 +154,25 @@ Future<void> _finishCatalogLoad(WidgetTester tester) async {
   }
 }
 
-Widget _app(Widget home) {
+Future<void> _pumpUntilFound(WidgetTester tester, Finder finder) async {
+  for (var frame = 0; frame < 30; frame += 1) {
+    if (finder.evaluate().isNotEmpty) return;
+    await tester.pump(const Duration(milliseconds: 100));
+  }
+}
+
+Widget _app(Widget home, {bool reduceMotion = false, double textScale = 1}) {
   return MaterialApp(
     theme: AppTheme.lightTheme,
     supportedLocales: AppLocalizations.supportedLocales,
     localizationsDelegates: AppLocalizations.localizationsDelegates,
+    builder: (context, child) => MediaQuery(
+      data: MediaQuery.of(context).copyWith(
+        disableAnimations: reduceMotion,
+        textScaler: TextScaler.linear(textScale),
+      ),
+      child: child!,
+    ),
     home: TickerMode(enabled: false, child: home),
   );
 }

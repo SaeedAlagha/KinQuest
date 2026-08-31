@@ -17,6 +17,7 @@ resize_icon() {
 
 # Web and installable PWA icons.
 resize_icon 32 web/favicon.png
+resize_icon 180 web/icons/Icon-180.png
 resize_icon 192 web/icons/Icon-192.png
 resize_icon 512 web/icons/Icon-512.png
 resize_icon 192 web/icons/Icon-maskable-192.png

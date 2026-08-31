@@ -3,10 +3,12 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../../core/mascot/sila_mascot.dart';
 import '../../../core/validation/form_validators.dart';
 import '../../../core/widgets/sila_page_backdrop.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../authentication/screens/family_choice_screen.dart';
+import '../../mascot/widgets/sila_companion_callout.dart';
 
 class FamilyManagementScreen extends StatefulWidget {
   const FamilyManagementScreen({super.key, this.developerPreview = false});
@@ -957,16 +959,20 @@ class _FamilyLoadError extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context)!;
+
     return Center(
-      child: Padding(
+      child: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.family_restroom_outlined, size: 56),
-            const SizedBox(height: 14),
-            Text(message, textAlign: TextAlign.center),
-          ],
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 620),
+          child: SilaCompanionCallout(
+            key: const ValueKey('family-management-sila-error'),
+            userId: FirebaseAuth.instance.currentUser?.uid,
+            title: strings.familyManagement,
+            message: message,
+            pose: SilaMascotPose.oops,
+          ),
         ),
       ),
     );
@@ -983,25 +989,22 @@ class _NoFamilyState extends StatelessWidget {
     final strings = AppLocalizations.of(context)!;
 
     return Center(
-      child: Padding(
+      child: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.group_add_outlined, size: 62),
-            const SizedBox(height: 16),
-            Text(
-              strings.youHaveNotJoinedFamily,
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-            const SizedBox(height: 18),
-            FilledButton.icon(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 620),
+          child: SilaCompanionCallout(
+            key: const ValueKey('family-management-sila-empty'),
+            userId: FirebaseAuth.instance.currentUser?.uid,
+            title: strings.youHaveNotJoinedFamily,
+            message: strings.familyManagementDescription,
+            pose: SilaMascotPose.welcome,
+            action: FilledButton.icon(
               onPressed: onSetupFamily,
               icon: const Icon(Icons.family_restroom_rounded),
               label: Text(strings.createOrJoinFamilyAction),
             ),
-          ],
+          ),
         ),
       ),
     );

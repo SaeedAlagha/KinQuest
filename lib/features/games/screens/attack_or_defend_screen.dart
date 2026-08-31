@@ -613,21 +613,22 @@ class _AttackOrDefendScreenState extends State<AttackOrDefendScreen> {
   }
 
   @override
-  @override
   Widget build(BuildContext context) {
     final strings = AppLocalizations.of(context)!;
 
     final gameInProgress =
         _phase != _BattlePhase.setup && _phase != _BattlePhase.finalResults;
+    final showSila = _phase != _BattlePhase.setup;
 
     return GameExitGuard(
       gameInProgress: gameInProgress,
       child: Scaffold(
-        floatingActionButton: gameInProgress
+        floatingActionButton: showSila
             ? SilaGameCoachButton(
                 tone: switch (_phase) {
                   _BattlePhase.loading => SilaGameCoachTone.thinking,
                   _BattlePhase.battleResult => SilaGameCoachTone.celebrating,
+                  _BattlePhase.finalResults => SilaGameCoachTone.winner,
                   _ => SilaGameCoachTone.play,
                 },
               )

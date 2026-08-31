@@ -9,25 +9,35 @@ import '../../../l10n/app_localizations.dart';
 import '../../rewards/digital/digital_reward_visuals.dart';
 import '../../rewards/digital/equipped_digital_rewards.dart';
 
-enum SilaGameCoachTone { play, thinking, celebrating }
+/// The reactions Sila can use while hosting a game.
+///
+/// Keep these semantic rather than game-specific so every game can give Sila
+/// the same recognizable personality without duplicating mascot logic.
+enum SilaGameCoachTone { play, thinking, celebrating, oops, winner }
 
 class SilaGameCoachButton extends StatelessWidget {
   const SilaGameCoachButton({
     super.key,
     this.message,
     this.tone = SilaGameCoachTone.play,
+    this.resultScreen = false,
   });
 
   final String? message;
   final SilaGameCoachTone tone;
+  final bool resultScreen;
 
   @override
   Widget build(BuildContext context) {
     final userId = _currentUserId();
     return DigitalRewardStyleBuilder(
       userId: userId,
-      builder: (context, rewards) =>
-          _CoachButton(rewards: rewards, message: message, tone: tone),
+      builder: (context, rewards) => _CoachButton(
+        rewards: rewards,
+        message: message,
+        tone: tone,
+        resultScreen: resultScreen,
+      ),
     );
   }
 }
@@ -77,11 +87,17 @@ String? _currentUserId() {
 }
 
 class _CoachButton extends StatelessWidget {
-  const _CoachButton({required this.rewards, required this.tone, this.message});
+  const _CoachButton({
+    required this.rewards,
+    required this.tone,
+    required this.resultScreen,
+    this.message,
+  });
 
   final EquippedDigitalRewards rewards;
   final String? message;
   final SilaGameCoachTone tone;
+  final bool resultScreen;
 
   @override
   Widget build(BuildContext context) {
@@ -93,6 +109,8 @@ class _CoachButton extends StatelessWidget {
           SilaGameCoachTone.play => strings.silaGameCoachMessage,
           SilaGameCoachTone.thinking => strings.mascotThinkingMessage,
           SilaGameCoachTone.celebrating => strings.mascotCelebrationMessage,
+          SilaGameCoachTone.oops => strings.mascotOopsMessage,
+          SilaGameCoachTone.winner => strings.silaGameWinnerMessage,
         };
     final (pose, motion) = switch (tone) {
       SilaGameCoachTone.play => (
@@ -107,10 +125,22 @@ class _CoachButton extends StatelessWidget {
         SilaMascotPose.celebrating,
         SilaMascotMotion.celebrate,
       ),
+      SilaGameCoachTone.oops => (SilaMascotPose.oops, SilaMascotMotion.excited),
+      SilaGameCoachTone.winner => (
+        SilaMascotPose.winner,
+        SilaMascotMotion.celebrate,
+      ),
     };
     final mediaQuery = MediaQuery.of(context);
+    // A wide pill can cover score cards and replay buttons on phone result
+    // screens. Keep the trophy reaction compact there, while retaining the
+    // fully branded host card on tablets and desktops.
+    final compactWinner =
+        tone == SilaGameCoachTone.winner && mediaQuery.size.width < 720;
     final supportsPill =
-        mediaQuery.size.width >= 360 && mediaQuery.textScaler.scale(1) <= 1.35;
+        !compactWinner &&
+        mediaQuery.size.width >= 360 &&
+        mediaQuery.textScaler.scale(1) <= 1.35;
     final showExpanded = supportsPill && mediaQuery.size.width >= 720;
     final shape = supportsPill
         ? StadiumBorder(
@@ -119,12 +149,25 @@ class _CoachButton extends StatelessWidget {
         : CircleBorder(
             side: BorderSide(color: colors.primary.withValues(alpha: 0.22)),
           );
+    void handleCoachTap() {
+      unawaited(
+        _showCoach(
+          context,
+          coachMessage: coachMessage,
+          pose: pose,
+          motion: motion,
+        ),
+      );
+    }
 
     final coach = Semantics(
       button: true,
       label: '${strings.mascotSemanticLabel}. $coachMessage',
+      excludeSemantics: true,
+      onTap: handleCoachTap,
       child: Tooltip(
         message: coachMessage,
+        excludeFromSemantics: true,
         child: Material(
           elevation: 10,
           color: colors.surface,
@@ -133,12 +176,8 @@ class _CoachButton extends StatelessWidget {
           clipBehavior: Clip.antiAlias,
           child: InkWell(
             key: const ValueKey('sila-game-coach-button'),
-            onTap: () => _showCoach(
-              context,
-              coachMessage: coachMessage,
-              pose: pose,
-              motion: motion,
-            ),
+            excludeFromSemantics: true,
+            onTap: handleCoachTap,
             customBorder: shape,
             child: showExpanded
                 ? _ExpandedCoachButton(
@@ -164,12 +203,11 @@ class _CoachButton extends StatelessWidget {
       ),
     );
 
-    // Phone games commonly keep their main action at the bottom of the screen.
-    // Lift the wider helper above that action so Sila stays visible and tappable
-    // without covering the player's primary control.
+    // Games commonly keep their main/replay actions at the bottom. Reserve
+    // that action zone for every coach size, with extra room for result screens.
     return Padding(
       padding: EdgeInsetsDirectional.only(
-        bottom: supportsPill && !showExpanded ? 84 : 0,
+        bottom: resultScreen || tone == SilaGameCoachTone.winner ? 128 : 84,
       ),
       child: coach,
     );

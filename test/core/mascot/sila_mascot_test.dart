@@ -57,12 +57,18 @@ void main() {
       );
 
       final image = tester.widget<Image>(find.byType(Image));
-      final provider = image.image as AssetImage;
+      final provider = image.image as ResizeImage;
+      final asset = provider.imageProvider as AssetImage;
       expect(
-        provider.assetName,
+        asset.assetName,
         SilaMascotPose.welcome.assetPath,
         reason: appearance.name,
       );
+      // Every Sila instance reuses the same compact native-size cache entry,
+      // including after responsive layout and device-pixel-ratio changes.
+      expect(provider.width, 384);
+      expect(provider.height, 512);
+      expect(image.gaplessPlayback, isTrue);
     }
   });
 
@@ -172,33 +178,59 @@ void main() {
         reason: pose.name,
       );
 
-      final accessorySlide = tester.widget<AnimatedSlide>(
+      final accessoryTranslation = tester.widget<FractionalTranslation>(
         find.byKey(const ValueKey('sila-animated-accessory-layer')),
       );
-      final accessoryScale = tester.widget<AnimatedScale>(
+      final accessoryScale = tester.widget<Transform>(
         find.byKey(const ValueKey('sila-animated-accessory-scale')),
       );
-      final outfitSlide = tester.widget<AnimatedSlide>(
+      final outfitTranslation = tester.widget<FractionalTranslation>(
         find.byKey(const ValueKey('sila-animated-outfit-layer')),
       );
-      final outfitScale = tester.widget<AnimatedScale>(
+      final outfitScale = tester.widget<Transform>(
         find.byKey(const ValueKey('sila-animated-outfit-scale')),
       );
 
-      expect(accessorySlide.offset.dx.isFinite, isTrue, reason: pose.name);
-      expect(accessorySlide.offset.dy.isFinite, isTrue, reason: pose.name);
-      expect(accessoryScale.scale, greaterThan(0), reason: pose.name);
-      expect(outfitSlide.offset.dx.isFinite, isTrue, reason: pose.name);
-      expect(outfitSlide.offset.dy.isFinite, isTrue, reason: pose.name);
-      expect(outfitScale.scale, greaterThan(0), reason: pose.name);
+      expect(
+        accessoryTranslation.translation.dx.isFinite,
+        isTrue,
+        reason: pose.name,
+      );
+      expect(
+        accessoryTranslation.translation.dy.isFinite,
+        isTrue,
+        reason: pose.name,
+      );
+      expect(
+        accessoryScale.transform.entry(0, 0),
+        greaterThan(0),
+        reason: pose.name,
+      );
+      expect(
+        outfitTranslation.translation.dx.isFinite,
+        isTrue,
+        reason: pose.name,
+      );
+      expect(
+        outfitTranslation.translation.dy.isFinite,
+        isTrue,
+        reason: pose.name,
+      );
+      expect(
+        outfitScale.transform.entry(0, 0),
+        greaterThan(0),
+        reason: pose.name,
+      );
 
       accessoryGeometries.add(
-        '${accessorySlide.offset.dx}:${accessorySlide.offset.dy}:'
-        '${accessoryScale.scale}',
+        '${accessoryTranslation.translation.dx}:'
+        '${accessoryTranslation.translation.dy}:'
+        '${accessoryScale.transform.entry(0, 0)}',
       );
       outfitGeometries.add(
-        '${outfitSlide.offset.dx}:${outfitSlide.offset.dy}:'
-        '${outfitScale.scale}',
+        '${outfitTranslation.translation.dx}:'
+        '${outfitTranslation.translation.dy}:'
+        '${outfitScale.transform.entry(0, 0)}',
       );
       expect(tester.takeException(), isNull, reason: pose.name);
     }
@@ -279,6 +311,181 @@ void main() {
         matching: find.byKey(const ValueKey('sila-character-motion-transform')),
       ),
       findsOneWidget,
+    );
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('pose dissolve never paints two Silas or trailing cosmetics', (
+    tester,
+  ) async {
+    var pose = SilaMascotPose.idle;
+    late StateSetter updateHost;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: StatefulBuilder(
+            builder: (context, setState) {
+              updateHost = setState;
+              return SilaMascot(
+                pose: pose,
+                accessoryAssetKey: SilaMascotAccessories.guardianCrown,
+                outfitAssetKey: SilaMascotOutfits.gameJersey,
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    final idleAccessory = tester
+        .widget<FractionalTranslation>(
+          find.byKey(const ValueKey('sila-animated-accessory-layer')),
+        )
+        .translation;
+    expect(find.byType(Image), findsOneWidget);
+    expect(find.byKey(const ValueKey('sila-pose-idle')), findsOneWidget);
+
+    updateHost(() => pose = SilaMascotPose.thinking);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    // Before the invisible midpoint, the complete old rig is still shown.
+    expect(find.byType(Image), findsOneWidget);
+    expect(find.byKey(const ValueKey('sila-pose-idle')), findsOneWidget);
+    expect(
+      tester
+          .widget<FractionalTranslation>(
+            find.byKey(const ValueKey('sila-animated-accessory-layer')),
+          )
+          .translation,
+      idleAccessory,
+    );
+
+    await tester.pump(const Duration(milliseconds: 30));
+
+    // After the midpoint, artwork and both cosmetic layers switch together.
+    expect(find.byType(Image), findsOneWidget);
+    expect(find.byKey(const ValueKey('sila-pose-thinking')), findsOneWidget);
+    expect(
+      tester
+          .widget<FractionalTranslation>(
+            find.byKey(const ValueKey('sila-animated-accessory-layer')),
+          )
+          .translation,
+      isNot(idleAccessory),
+    );
+    expect(
+      tester
+          .widget<Opacity>(
+            find.byKey(const ValueKey('sila-pose-transition-opacity')),
+          )
+          .opacity,
+      inInclusiveRange(0.0, 1.0),
+    );
+    expect(tester.takeException(), isNull);
+
+    await tester.pumpAndSettle();
+  });
+
+  testWidgets(
+    'interactive Sila has one button node and replays motion on tap',
+    (tester) async {
+      var tapCount = 0;
+      final semantics = tester.ensureSemantics();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: SilaMascot(
+              semanticLabel: 'Sila, your family companion',
+              semanticHint: 'Plays a friendly reaction',
+              motion: SilaMascotMotion.excited,
+              onTap: () => tapCount += 1,
+            ),
+          ),
+        ),
+      );
+
+      expect(
+        find.bySemanticsLabel('Sila, your family companion'),
+        findsOneWidget,
+      );
+      final node = tester.getSemantics(
+        find.bySemanticsLabel('Sila, your family companion'),
+      );
+      final data = node.getSemanticsData();
+      expect(data.flagsCollection.isButton, isTrue);
+      expect(data.actions & ui.SemanticsAction.tap.index, isNot(0));
+      expect(data.hint, 'Plays a friendly reaction');
+      semantics.dispose();
+
+      await tester.pump(const Duration(milliseconds: 1050));
+      final settledTransform = List<double>.of(
+        tester
+            .widget<Transform>(
+              find.byKey(const ValueKey('sila-character-motion-transform')),
+            )
+            .transform
+            .storage,
+      );
+
+      await tester.tap(find.byType(SilaMascot));
+      await tester.pump(const Duration(milliseconds: 180));
+      final replayedTransform = List<double>.of(
+        tester
+            .widget<Transform>(
+              find.byKey(const ValueKey('sila-character-motion-transform')),
+            )
+            .transform
+            .storage,
+      );
+
+      expect(tapCount, 1);
+      expect(replayedTransform, isNot(equals(settledTransform)));
+      expect(tester.takeException(), isNull);
+
+      await tester.pumpAndSettle();
+    },
+  );
+
+  testWidgets('reduced motion swaps pose and cosmetics immediately', (
+    tester,
+  ) async {
+    var pose = SilaMascotPose.idle;
+    late StateSetter updateHost;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: StatefulBuilder(
+          builder: (context, setState) {
+            updateHost = setState;
+            return MediaQuery(
+              data: MediaQuery.of(context).copyWith(disableAnimations: true),
+              child: Scaffold(
+                body: SilaMascot(
+                  pose: pose,
+                  accessoryAssetKey: SilaMascotAccessories.scholarCap,
+                  outfitAssetKey: SilaMascotOutfits.spaceScout,
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    updateHost(() => pose = SilaMascotPose.winner);
+    await tester.pump();
+
+    expect(find.byKey(const ValueKey('sila-pose-winner')), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('sila-pose-transition-opacity')),
+      findsNothing,
+    );
+    expect(
+      find.byKey(const ValueKey('sila-character-motion-transform')),
+      findsNothing,
     );
     expect(tester.takeException(), isNull);
   });
@@ -379,6 +586,7 @@ void main() {
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
 
+    late String localizedMessage;
     await tester.pumpWidget(
       MaterialApp(
         theme: AppTheme.lightTheme,
@@ -388,6 +596,7 @@ void main() {
         home: Builder(
           builder: (context) {
             final strings = AppLocalizations.of(context)!;
+            localizedMessage = strings.mascotWelcomeMessage;
             return Scaffold(
               body: SafeArea(
                 child: SilaMascotGuide(
@@ -404,9 +613,7 @@ void main() {
     );
     await tester.pump();
 
-    final message = find.text(
-      'مرحبًا! أنا صلة. سأساعد عائلتكم على اللعب وصنع الذكريات والتقارب.',
-    );
+    final message = find.text(localizedMessage);
     expect(message, findsOneWidget);
     expect(Directionality.of(tester.element(message)), TextDirection.rtl);
     expect(find.byType(SilaMascot), findsOneWidget);

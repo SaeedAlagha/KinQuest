@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en" dir="auto">
 <head>
   <!--
     If you are serving your web app in a path other than the root, change the
@@ -18,21 +18,168 @@
 
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <meta name="theme-color" content="#006B49">
+  <meta name="color-scheme" content="light dark">
   <meta name="description" content="Sila brings families closer through games, stories, and shared memories.">
 
   <!-- iOS meta tags & icons -->
   <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="Sila">
-  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="icons/Icon-180.png">
 
   <!-- Favicon -->
-  <link rel="icon" type="image/png" href="favicon.png"/>
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon.png">
+  <link rel="preload" as="image" href="icons/Icon-192.png">
 
   <title>Sila | صِلَة</title>
   <link rel="manifest" href="manifest.json">
+  <style>
+    :root {
+      --sila-green: #006b49;
+      --sila-navy: #07152e;
+      --sila-cream: #fff8e8;
+    }
+
+    html,
+    body {
+      height: 100%;
+      margin: 0;
+      background: var(--sila-cream);
+    }
+
+    #sila-launch {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      color: var(--sila-navy);
+      background:
+        radial-gradient(circle at 50% 38%, rgb(0 107 73 / 14%), transparent 34%),
+        linear-gradient(145deg, #fff8e8 0%, #f6f7f3 68%, #eaf3ed 100%);
+      font-family: Inter, ui-rounded, "SF Pro Rounded", system-ui, -apple-system,
+        BlinkMacSystemFont, "Segoe UI", sans-serif;
+      transition: opacity 240ms ease, visibility 240ms ease;
+    }
+
+    #sila-launch[aria-hidden="true"] {
+      visibility: hidden;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .sila-launch__content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: min(82vw, 360px);
+      text-align: center;
+    }
+
+    .sila-launch__portrait {
+      width: clamp(124px, 32vw, 184px);
+      aspect-ratio: 1;
+      border: 3px solid rgb(255 255 255 / 78%);
+      border-radius: 34%;
+      box-shadow:
+        0 24px 54px rgb(7 21 46 / 20%),
+        0 0 0 8px rgb(0 107 73 / 7%);
+      object-fit: cover;
+      animation: sila-arrive 720ms cubic-bezier(.2, .8, .2, 1) both;
+    }
+
+    .sila-launch__name {
+      margin-top: 22px;
+      font-size: clamp(30px, 8vw, 42px);
+      font-weight: 850;
+      letter-spacing: -.04em;
+      line-height: 1;
+    }
+
+    .sila-launch__arabic {
+      color: var(--sila-green);
+      font-family: "Noto Sans Arabic", Tahoma, sans-serif;
+      font-weight: 800;
+    }
+
+    .sila-launch__tagline {
+      margin: 12px 0 0;
+      color: #52645c;
+      font-size: 14px;
+      font-weight: 650;
+      line-height: 1.5;
+    }
+
+    .sila-launch__pulse {
+      display: flex;
+      gap: 7px;
+      margin-top: 22px;
+    }
+
+    .sila-launch__pulse span {
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: var(--sila-green);
+      animation: sila-pulse 1s ease-in-out infinite;
+    }
+
+    .sila-launch__pulse span:nth-child(2) {
+      animation-delay: 120ms;
+    }
+
+    .sila-launch__pulse span:nth-child(3) {
+      animation-delay: 240ms;
+    }
+
+    @keyframes sila-arrive {
+      from {
+        opacity: 0;
+        transform: translateY(10px) scale(.94);
+      }
+    }
+
+    @keyframes sila-pulse {
+      0%,
+      100% {
+        opacity: .32;
+        transform: scale(.78);
+      }
+      50% {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      #sila-launch,
+      .sila-launch__portrait,
+      .sila-launch__pulse span {
+        animation: none;
+        transition: none;
+      }
+    }
+  </style>
 </head>
 <body>
+  <div id="sila-launch" role="status" aria-label="Sila is getting your family space ready">
+    <div class="sila-launch__content">
+      <img
+        class="sila-launch__portrait"
+        src="icons/Icon-192.png"
+        alt=""
+        width="192"
+        height="192"
+      >
+      <div class="sila-launch__name">Sila <span aria-hidden="true">•</span> <span class="sila-launch__arabic" lang="ar" dir="rtl">صِلَة</span></div>
+      <p class="sila-launch__tagline">Closer, one moment at a time.</p>
+      <div class="sila-launch__pulse" aria-hidden="true">
+        <span></span><span></span><span></span>
+      </div>
+    </div>
+  </div>
   <!--
     You can customize the "flutter_bootstrap.js" script.
     This is useful to provide a custom configuration to the Flutter loader
@@ -41,6 +188,14 @@
     For more details:
     * https://docs.flutter.dev/platform-integration/web/initialization
   -->
+  <script>
+    window.addEventListener('flutter-first-frame', function () {
+      const launch = document.getElementById('sila-launch');
+      if (!launch) return;
+      launch.setAttribute('aria-hidden', 'true');
+      window.setTimeout(function () { launch.remove(); }, 260);
+    });
+  </script>
   <script src="flutter_bootstrap.js" async></script>
 </body>
 </html>

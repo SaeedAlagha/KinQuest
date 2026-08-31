@@ -295,17 +295,19 @@ class _FamilyImpostorScreenState extends State<FamilyImpostorScreen> {
     final strings = AppLocalizations.of(context)!;
     final gameInProgress =
         _phase != _GamePhase.setup && _phase != _GamePhase.finalLeaderboard;
+    final showSila = _phase != _GamePhase.setup;
 
     return GameExitGuard(
       gameInProgress: gameInProgress,
       child: Scaffold(
-        floatingActionButton: gameInProgress
+        floatingActionButton: showSila
             ? SilaGameCoachButton(
-                tone:
-                    _phase == _GamePhase.voteResults ||
-                        _phase == _GamePhase.roundResult
-                    ? SilaGameCoachTone.celebrating
-                    : SilaGameCoachTone.play,
+                tone: switch (_phase) {
+                  _GamePhase.voteResults ||
+                  _GamePhase.roundResult => SilaGameCoachTone.celebrating,
+                  _GamePhase.finalLeaderboard => SilaGameCoachTone.winner,
+                  _ => SilaGameCoachTone.play,
+                },
               )
             : null,
         appBar: AppBar(title: Text(strings.familyImpostor)),

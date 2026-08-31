@@ -54,12 +54,14 @@ class _CharadesScreenState extends State<CharadesScreen> {
   int _selectedRounds = 3;
   bool _isLoading = false;
   bool _isPlaying = false;
+  bool _showResults = false;
   int _currentIndex = 0;
   List<String> _prompts = [];
 
   Future<void> _startGame() async {
     setState(() {
       _isLoading = true;
+      _showResults = false;
     });
 
     try {
@@ -111,13 +113,8 @@ class _CharadesScreenState extends State<CharadesScreen> {
     } else {
       setState(() {
         _isPlaying = false;
+        _showResults = true;
       });
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(AppLocalizations.of(context)!.charadesRoundComplete),
-        ),
-      );
     }
   }
 
@@ -128,9 +125,18 @@ class _CharadesScreenState extends State<CharadesScreen> {
     return GameExitGuard(
       gameInProgress: _isPlaying,
       child: Scaffold(
-        floatingActionButton: _isPlaying ? const SilaGameCoachButton() : null,
+        floatingActionButton: _showResults
+            ? const SilaGameCoachButton(
+                tone: SilaGameCoachTone.celebrating,
+                resultScreen: true,
+              )
+            : _isPlaying
+            ? const SilaGameCoachButton()
+            : null,
         appBar: AppBar(title: Text(strings.charades)),
-        body: _isPlaying
+        body: _showResults
+            ? Padding(padding: const EdgeInsets.all(24), child: _buildResults())
+            : _isPlaying
             ? Padding(padding: const EdgeInsets.all(24), child: _buildGame())
             : _buildSetup(),
       ),
@@ -235,6 +241,39 @@ class _CharadesScreenState extends State<CharadesScreen> {
         ),
         const SizedBox(height: 24),
         ElevatedButton(onPressed: _nextPrompt, child: Text(strings.nextPrompt)),
+      ],
+    );
+  }
+
+  Widget _buildResults() {
+    final strings = AppLocalizations.of(context)!;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const Spacer(),
+        const Icon(Icons.celebration_rounded, size: 72),
+        const SizedBox(height: 24),
+        Text(
+          strings.charadesRoundComplete,
+          textAlign: TextAlign.center,
+          style: Theme.of(
+            context,
+          ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w900),
+        ),
+        const SizedBox(height: 12),
+        Text(
+          strings.roundCompleteCelebration,
+          textAlign: TextAlign.center,
+          style: Theme.of(context).textTheme.bodyLarge,
+        ),
+        const Spacer(),
+        ElevatedButton(onPressed: _startGame, child: Text(strings.playAgain)),
+        const SizedBox(height: 12),
+        OutlinedButton(
+          onPressed: () => setState(() => _showResults = false),
+          child: Text(strings.changeCategory),
+        ),
       ],
     );
   }

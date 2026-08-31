@@ -16,12 +16,14 @@ class SilaChatPanel extends StatefulWidget {
   const SilaChatPanel({
     super.key,
     this.developerPreview = false,
+    this.active = true,
     this.chatService,
     this.voiceService,
     this.onPoseChanged,
   });
 
   final bool developerPreview;
+  final bool active;
   final SilaChatService? chatService;
   final SilaVoiceService? voiceService;
   final ValueChanged<SilaMascotPose>? onPoseChanged;
@@ -99,6 +101,15 @@ class _SilaChatPanelState extends State<SilaChatPanel> {
         pose: SilaChatPose.welcome,
       ),
     );
+  }
+
+  @override
+  void didUpdateWidget(covariant SilaChatPanel oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.active && !widget.active) {
+      FocusScope.of(context).unfocus();
+      if (_speakingMessageId != null) unawaited(_stopVoice());
+    }
   }
 
   Future<void> _loadVoicePreference() async {
@@ -217,7 +228,7 @@ class _SilaChatPanelState extends State<SilaChatPanel> {
       });
       widget.onPoseChanged?.call(_mascotPoseFor(reply.pose));
       _scrollToBottom();
-      if (_autoVoice) unawaited(_speak(reply));
+      if (_autoVoice && widget.active) unawaited(_speak(reply));
     } on Object catch (error) {
       if (!mounted || generation != _operationGeneration) return;
       setState(() {
@@ -241,7 +252,7 @@ class _SilaChatPanelState extends State<SilaChatPanel> {
   }
 
   Future<void> _speak(SilaChatMessage message) async {
-    if (!message.isFromSila || !_voiceSupported) return;
+    if (!widget.active || !message.isFromSila || !_voiceSupported) return;
     if (_speakingMessageId == message.id) {
       await _stopVoice();
       return;
@@ -664,13 +675,6 @@ class _ChatEmptyState extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 20),
       child: Column(
         children: [
-          const SilaMascot(
-            pose: SilaMascotPose.encouraging,
-            motion: SilaMascotMotion.gameReady,
-            height: 116,
-            loop: true,
-          ),
-          const SizedBox(height: 10),
           Text(
             strings.silaChatEmptyTitle,
             textAlign: TextAlign.center,

@@ -206,7 +206,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get navHome => 'الرئيسية';
 
   @override
-  String get navSila => 'الخزانة';
+  String get navSila => 'صلة';
 
   @override
   String get navMemories => 'الذكريات';
@@ -650,12 +650,21 @@ class AppLocalizationsAr extends AppLocalizations {
   String get profileFrameEquippedSemanticLabel => 'تم تجهيز إطار الملف الشخصي';
 
   @override
-  String get mascotWelcomeMessage => 'مرحبًا! أنا صلة. سأساعد عائلتكم على اللعب وصنع الذكريات والتقارب.';
+  String get mascotWelcomeMessage => 'مرحبًا! أنا صلة، رفيق عائلتكم المرح. سأرشد ألعابكم وألهم لحظاتكم وأحتفل بكل رابطة تنمونها معًا.';
 
   @override
   String mascotHomeMessage(String name) {
-    return 'هل أنت مستعد للحظة عائلية جميلة يا $name؟';
+    return 'مرحبًا يا $name! أخبرني كيف تشعر عائلتك اليوم وسأساعدك في اختيار لحظة تجمعكم.';
   }
+
+  @override
+  String get silaMeetCompanion => 'تعرّف إلى صلة • رفيق عائلتك';
+
+  @override
+  String get silaHomeAction => 'اسأل صلة عن فكرة اليوم';
+
+  @override
+  String get silaNavigationHint => 'افتح استوديو صلة والمحادثة';
 
   @override
   String get mascotGameSetupMessage => 'سأرشدكم خطوة بخطوة. اختاروا الإعدادات ولنبدأ اللعب!';
@@ -668,6 +677,9 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get mascotCelebrationMessage => 'عمل جماعي رائع! كل لحظة تجمعكم تجعل رابطتكم أقوى.';
+
+  @override
+  String get silaGameWinnerMessage => 'يا لها من نهاية رائعة! احتفلوا بالفائز وبكل من جعل هذه اللحظة العائلية ممتعة.';
 
   @override
   String get silaMissionsMessage => 'اختاروا مهمة، وساعدوا بعضكم، وحوّلوا خطوة بسيطة إلى إنجاز عائلي!';
@@ -761,7 +773,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get silaChatDescription => 'اطلب فكرة للعبة أو نشاطًا عائليًا أو بعض التشجيع.';
 
   @override
-  String get silaChatPrivacy => 'محادثة خاصة بحسابك. يتلقى صلة أسماء أفراد العائلة وهذه المحادثة. ولا يرفق كين كويست الصور أو البريد الإلكتروني أو تواريخ الميلاد تلقائيًا.';
+  String get silaChatPrivacy => 'محادثة خاصة بحسابك. يتلقى صلة أسماء أفراد العائلة وهذه المحادثة. ولا يرفق تطبيق صلة الصور أو البريد الإلكتروني أو تواريخ الميلاد تلقائيًا.';
 
   @override
   String get silaChatEmptyTitle => 'صلة جاهز للاستماع';

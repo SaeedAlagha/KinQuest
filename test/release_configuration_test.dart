@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -39,6 +40,8 @@ void main() {
     expect(android12Launch, contains('windowSplashScreenBackground'));
     expect(iosLaunch, contains('image="LaunchImage"'));
     expect(iosLaunch, contains('red="1" green="0.9725490196"'));
+    expect(iosLaunch, contains('text="SILA • صِلَة"'));
+    expect(iosLaunch, contains('text="Closer, one moment at a time."'));
 
     final launchImages = [
       File('android/app/src/main/res/drawable/sila_splash.png'),
@@ -54,6 +57,64 @@ void main() {
     for (final image in launchImages) {
       expect(image.existsSync(), isTrue, reason: image.path);
       expect(image.lengthSync(), greaterThan(10000), reason: image.path);
+    }
+  });
+
+  test('install surfaces consistently present the Sila identity', () {
+    final webIndex = File('web/index.html').readAsStringSync();
+    final webManifest =
+        jsonDecode(File('web/manifest.json').readAsStringSync())
+            as Map<String, dynamic>;
+    final androidManifest = File(
+      'android/app/src/main/AndroidManifest.xml',
+    ).readAsStringSync();
+    final androidName = File(
+      'android/app/src/main/res/values/strings.xml',
+    ).readAsStringSync();
+    final androidArabicName = File(
+      'android/app/src/main/res/values-ar/strings.xml',
+    ).readAsStringSync();
+    final iosInfo = File('ios/Runner/Info.plist').readAsStringSync();
+
+    expect(webIndex, contains('<title>Sila | صِلَة</title>'));
+    expect(webIndex, contains('id="sila-launch"'));
+    expect(webIndex, contains("'flutter-first-frame'"));
+    expect(webIndex, contains('icons/Icon-180.png'));
+    expect(webManifest['name'], 'Sila | صِلَة');
+    expect(webManifest['short_name'], 'Sila');
+    expect(webManifest['theme_color'], '#006B49');
+    expect(webManifest['background_color'], '#FFF8E8');
+    expect(androidManifest, contains('android:label="@string/app_name"'));
+    expect(androidName, contains('>Sila</string>'));
+    expect(androidArabicName, contains('>صِلَة</string>'));
+    expect(iosInfo, contains('<string>Sila</string>'));
+
+    for (final image in [
+      File('web/favicon.png'),
+      File('web/icons/Icon-180.png'),
+      File('web/icons/Icon-192.png'),
+      File('web/icons/Icon-512.png'),
+      File(
+        'ios/Runner/Assets.xcassets/AppIcon.appiconset/'
+        'Icon-App-1024x1024@1x.png',
+      ),
+    ]) {
+      expect(image.existsSync(), isTrue, reason: image.path);
+      expect(image.lengthSync(), greaterThan(1000), reason: image.path);
+    }
+  });
+
+  test('user-facing copy and AI context no longer expose the legacy name', () {
+    for (final path in [
+      'lib/l10n/app_en.arb',
+      'lib/l10n/app_ar.arb',
+      'backend/sila_chat.js',
+      'backend/server.js',
+    ]) {
+      final copy = File(path).readAsStringSync().toLowerCase();
+      expect(copy, isNot(contains('kinquest')), reason: path);
+      expect(copy, isNot(contains('kin quest')), reason: path);
+      expect(copy, isNot(contains('كين كويست')), reason: path);
     }
   });
 }

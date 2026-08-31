@@ -316,15 +316,18 @@ class _DontSayItScreenState extends State<DontSayItScreen> {
     final gameInProgress =
         _phase != _DontSayItPhase.setup &&
         _phase != _DontSayItPhase.finalLeaderboard;
+    final showSila = _phase != _DontSayItPhase.setup;
 
     return GameExitGuard(
       gameInProgress: gameInProgress,
       child: Scaffold(
-        floatingActionButton: gameInProgress
+        floatingActionButton: showSila
             ? SilaGameCoachButton(
-                tone: _phase == _DontSayItPhase.turnResult
-                    ? SilaGameCoachTone.celebrating
-                    : SilaGameCoachTone.play,
+                tone: switch (_phase) {
+                  _DontSayItPhase.turnResult => SilaGameCoachTone.celebrating,
+                  _DontSayItPhase.finalLeaderboard => SilaGameCoachTone.winner,
+                  _ => SilaGameCoachTone.play,
+                },
               )
             : null,
         appBar: AppBar(title: Text(strings.dontSayIt)),

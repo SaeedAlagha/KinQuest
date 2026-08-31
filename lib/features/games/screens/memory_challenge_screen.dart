@@ -202,7 +202,14 @@ class _MemoryChallengeScreenState extends State<MemoryChallengeScreen> {
   Widget build(BuildContext context) {
     final strings = AppLocalizations.of(context)!;
     return Scaffold(
-      floatingActionButton: _isPlaying ? const SilaGameCoachButton() : null,
+      floatingActionButton: _showResults
+          ? const SilaGameCoachButton(
+              tone: SilaGameCoachTone.celebrating,
+              resultScreen: true,
+            )
+          : _isPlaying
+          ? const SilaGameCoachButton()
+          : null,
       appBar: AppBar(title: Text(strings.memoryChallenge)),
       body: SafeArea(
         child: _showResults

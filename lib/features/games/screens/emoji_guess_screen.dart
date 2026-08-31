@@ -85,6 +85,7 @@ class _EmojiGuessScreenState extends State<EmojiGuessScreen> {
   int _secondsRemaining = 0;
 
   String _resultMessage = '';
+  bool _lastResultWasSuccessful = false;
 
   bool _isTieBreaker = false;
 
@@ -378,6 +379,7 @@ class _EmojiGuessScreenState extends State<EmojiGuessScreen> {
 
         setState(() {
           _resultMessage = _strings.noStealAnswer(puzzle.answer);
+          _lastResultWasSuccessful = false;
 
           _phase = _EmojiGuessPhase.puzzleResult;
         });
@@ -439,6 +441,7 @@ class _EmojiGuessScreenState extends State<EmojiGuessScreen> {
       }
 
       _resultMessage = _strings.teamGuessedCorrectly(_startingTeamName, 2);
+      _lastResultWasSuccessful = true;
 
       _phase = _EmojiGuessPhase.puzzleResult;
     });
@@ -470,6 +473,7 @@ class _EmojiGuessScreenState extends State<EmojiGuessScreen> {
       }
 
       _resultMessage = _strings.teamStolePuzzle(_stealingTeamName, 1);
+      _lastResultWasSuccessful = true;
 
       _phase = _EmojiGuessPhase.puzzleResult;
     });
@@ -497,6 +501,7 @@ class _EmojiGuessScreenState extends State<EmojiGuessScreen> {
 
     setState(() {
       _resultMessage = _strings.stealMissedAnswer(puzzle.answer);
+      _lastResultWasSuccessful = false;
 
       _phase = _EmojiGuessPhase.puzzleResult;
     });
@@ -601,17 +606,23 @@ class _EmojiGuessScreenState extends State<EmojiGuessScreen> {
     final gameInProgress =
         _phase != _EmojiGuessPhase.setup &&
         _phase != _EmojiGuessPhase.finalResults;
+    final showSila = _phase != _EmojiGuessPhase.setup;
 
     return GameExitGuard(
       gameInProgress: gameInProgress,
       child: Scaffold(
-        floatingActionButton: gameInProgress
+        floatingActionButton: showSila
             ? SilaGameCoachButton(
-                tone:
-                    _phase == _EmojiGuessPhase.puzzleResult ||
-                        _phase == _EmojiGuessPhase.roundSummary
-                    ? SilaGameCoachTone.celebrating
-                    : SilaGameCoachTone.play,
+                tone: switch (_phase) {
+                  _EmojiGuessPhase.puzzleResult =>
+                    _lastResultWasSuccessful
+                        ? SilaGameCoachTone.celebrating
+                        : SilaGameCoachTone.oops,
+                  _EmojiGuessPhase.roundSummary =>
+                    SilaGameCoachTone.celebrating,
+                  _EmojiGuessPhase.finalResults => SilaGameCoachTone.winner,
+                  _ => SilaGameCoachTone.play,
+                },
               )
             : null,
         appBar: AppBar(title: Text(strings.emojiGuess)),

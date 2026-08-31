@@ -103,6 +103,7 @@ class _WelcomeHero extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
     final strings = AppLocalizations.of(context)!;
+    final reduceMotion = MediaQuery.disableAnimationsOf(context);
 
     return Column(
       crossAxisAlignment: isWide
@@ -120,14 +121,10 @@ class _WelcomeHero extends StatelessWidget {
         ),
         SizedBox(height: isWide ? 26 : 22),
         ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 620),
-          child: SilaMascotGuide(
-            key: const ValueKey('welcome-mascot-guide'),
-            title: strings.mascotName,
-            message: strings.mascotWelcomeMessage,
-            semanticLabel: strings.mascotSemanticLabel,
-            pose: SilaMascotPose.welcome,
-            compact: !isWide,
+          constraints: const BoxConstraints(maxWidth: 660),
+          child: _WelcomeSilaSpotlight(
+            isWide: isWide,
+            animateMascot: !reduceMotion,
           ),
         ),
         SizedBox(height: isWide ? 26 : 22),
@@ -199,6 +196,96 @@ class _WelcomeHero extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _WelcomeSilaSpotlight extends StatelessWidget {
+  const _WelcomeSilaSpotlight({
+    required this.isWide,
+    required this.animateMascot,
+  });
+
+  final bool isWide;
+  final bool animateMascot;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final strings = AppLocalizations.of(context)!;
+
+    return Semantics(
+      container: true,
+      child: Container(
+        key: const ValueKey('welcome-sila-spotlight'),
+        padding: EdgeInsets.all(isWide ? 20 : 14),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: AlignmentDirectional.topStart,
+            end: AlignmentDirectional.bottomEnd,
+            colors: [
+              colorScheme.primaryContainer.withValues(alpha: 0.76),
+              colorScheme.surface.withValues(alpha: 0.92),
+            ],
+          ),
+          borderRadius: BorderRadius.circular(isWide ? 34 : 28),
+          border: Border.all(color: colorScheme.primary.withValues(alpha: 0.2)),
+          boxShadow: [
+            BoxShadow(
+              color: colorScheme.primary.withValues(alpha: 0.1),
+              blurRadius: 30,
+              offset: const Offset(0, 14),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+              decoration: BoxDecoration(
+                color: colorScheme.primary.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(99),
+                border: Border.all(
+                  color: colorScheme.primary.withValues(alpha: 0.14),
+                ),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.auto_awesome_rounded,
+                    size: 16,
+                    color: colorScheme.primary,
+                  ),
+                  const SizedBox(width: 7),
+                  Flexible(
+                    child: Text(
+                      strings.silaMeetCompanion,
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: colorScheme.primary,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 0.55,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 10),
+            SilaMascotGuide(
+              key: const ValueKey('welcome-mascot-guide'),
+              title: strings.mascotName,
+              message: strings.mascotWelcomeMessage,
+              semanticLabel: strings.mascotSemanticLabel,
+              pose: SilaMascotPose.welcome,
+              motion: SilaMascotMotion.gameReady,
+              animate: animateMascot,
+              compact: !isWide,
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

@@ -95,7 +95,10 @@ class SilaMascot extends StatefulWidget {
     this.motion,
     this.loop = false,
     this.loopPause = Duration.zero,
-  });
+    this.onTap,
+    this.semanticHint,
+  }) : assert(height > 0 && height < double.infinity),
+       assert(onTap == null || (semanticLabel != null && semanticLabel != ''));
 
   final SilaMascotPose pose;
   final double height;
@@ -108,76 +111,151 @@ class SilaMascot extends StatefulWidget {
   final bool loop;
   final Duration loopPause;
 
+  /// Makes Sila an optional interactive character instead of forcing every
+  /// decorative use to behave like a button. Interactive instances replay
+  /// their current motion when selected.
+  final VoidCallback? onTap;
+
+  /// Describes the result of selecting an interactive Sila to assistive tech.
+  final String? semanticHint;
+
   @override
   State<SilaMascot> createState() => _SilaMascotState();
 }
 
-class _SilaMascotState extends State<SilaMascot>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _controller;
-  late final Animation<double> _progress;
+class _SilaMascotState extends State<SilaMascot> with TickerProviderStateMixin {
+  static const _poseTransitionDuration = Duration(milliseconds: 240);
+
+  late final AnimationController _motionController;
+  late final Animation<double> _motionProgress;
+  late final AnimationController _poseController;
+  late SilaMascotPose _displayedPose;
+  late SilaMascotPose _targetPose;
   Timer? _loopTimer;
   var _animationGeneration = 0;
+  var _poseHasSwitched = true;
   var _reduceMotion = false;
+  (int, int)? _precachedPoseDimensions;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
+    _displayedPose = widget.pose;
+    _targetPose = widget.pose;
+    _motionController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 900),
     );
-    _progress = CurvedAnimation(parent: _controller, curve: Curves.linear);
-    _syncAnimation();
+    _motionProgress = CurvedAnimation(
+      parent: _motionController,
+      curve: Curves.linear,
+    );
+    _poseController = AnimationController(
+      vsync: this,
+      duration: _poseTransitionDuration,
+      value: 1,
+    )..addListener(_handlePoseTransitionTick);
+    _syncMotionAnimation();
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    _precachePoseFrames();
     final reduceMotion = MediaQuery.disableAnimationsOf(context);
     if (_reduceMotion == reduceMotion) return;
     _reduceMotion = reduceMotion;
-    _syncAnimation();
+    if (_reduceMotion) {
+      _showPoseImmediately(widget.pose);
+    }
+    _syncMotionAnimation();
   }
 
   @override
   void didUpdateWidget(covariant SilaMascot oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (oldWidget.height != widget.height) {
+      _precachePoseFrames();
+    }
+    if (oldWidget.pose != widget.pose) {
+      _transitionToPose(widget.pose);
+    } else if (oldWidget.animate != widget.animate && !widget.animate) {
+      _showPoseImmediately(widget.pose);
+    }
+
     if (oldWidget.animate != widget.animate ||
-        oldWidget.pose != widget.pose ||
         oldWidget.motion != widget.motion ||
         oldWidget.loop != widget.loop ||
         oldWidget.loopPause != widget.loopPause) {
-      _syncAnimation();
+      _syncMotionAnimation();
     }
   }
 
-  void _syncAnimation() {
+  (int, int) _poseCacheDimensions() {
+    // Every pose asset is already a compact 384 x 512 sprite. Reusing one
+    // native-size provider across cards, games, Studio, rotation, and layout
+    // breakpoints gives Flutter a single shared cache entry per expression.
+    // Height-specific providers caused a second decode when a responsive
+    // layout rebuilt Sila at a new size, briefly leaving only his cosmetics.
+    return (384, 512);
+  }
+
+  ImageProvider<Object> _poseImageProvider(
+    SilaMascotPose pose,
+    (int, int) dimensions,
+  ) {
+    return ResizeImage.resizeIfNeeded(
+      dimensions.$1,
+      dimensions.$2,
+      AssetImage(pose.assetPath),
+    );
+  }
+
+  void _precachePoseFrames() {
+    final dimensions = _poseCacheDimensions();
+    if (_precachedPoseDimensions == dimensions) return;
+    _precachedPoseDimensions = dimensions;
+
+    // Sila reacts frequently in games and chat. Decode every expression once
+    // at its compact native resolution so the first reaction—and every later
+    // responsive size—can reuse the same shared image-cache entries.
+    for (final pose in SilaMascotPose.values) {
+      unawaited(
+        precacheImage(
+          _poseImageProvider(pose, dimensions),
+          context,
+          onError: (_, _) {},
+        ),
+      );
+    }
+  }
+
+  void _syncMotionAnimation() {
     _animationGeneration += 1;
     _loopTimer?.cancel();
     _loopTimer = null;
-    _controller.stop();
+    _motionController.stop();
 
     if (widget.animate && !_reduceMotion) {
-      _controller.duration = _motionDuration;
+      _motionController.duration = _motionDuration;
       if (widget.loop) {
         if (widget.loopPause > Duration.zero) {
           _playLoopCycle(_animationGeneration);
         } else {
-          _controller.repeat();
+          _motionController.repeat();
         }
       } else {
-        _controller.forward(from: 0);
+        _motionController.forward(from: 0);
       }
     } else {
-      _controller
+      _motionController
         ..stop()
         ..value = 0;
     }
   }
 
   void _playLoopCycle(int generation) {
-    _controller.forward(from: 0).whenCompleteOrCancel(() {
+    _motionController.forward(from: 0).whenCompleteOrCancel(() {
       if (!mounted ||
           generation != _animationGeneration ||
           _reduceMotion ||
@@ -186,7 +264,10 @@ class _SilaMascotState extends State<SilaMascot>
         return;
       }
 
-      _loopTimer = Timer(widget.loopPause, () {
+      final pause = widget.loopPause.isNegative
+          ? Duration.zero
+          : widget.loopPause;
+      _loopTimer = Timer(pause, () {
         if (!mounted || generation != _animationGeneration || _reduceMotion) {
           return;
         }
@@ -195,9 +276,65 @@ class _SilaMascotState extends State<SilaMascot>
     });
   }
 
+  void _transitionToPose(SilaMascotPose pose) {
+    _targetPose = pose;
+    if (!widget.animate || _reduceMotion) {
+      _showPoseImmediately(pose);
+      return;
+    }
+
+    // Fade the old rig fully out, swap the pose and all attachment geometry at
+    // the invisible midpoint, then fade the new rig in. AnimatedSwitcher would
+    // paint two full characters and one in-between cosmetic rig at once, which
+    // made hats and outfits look doubled or detached during quick reactions.
+    _poseHasSwitched = false;
+    _poseController.forward(from: 0);
+  }
+
+  void _showPoseImmediately(SilaMascotPose pose) {
+    _targetPose = pose;
+    _displayedPose = pose;
+    _poseHasSwitched = true;
+    _poseController
+      ..stop()
+      ..value = 1;
+  }
+
+  void _handlePoseTransitionTick() {
+    if (_poseHasSwitched || _poseController.value < 0.5) return;
+    _poseHasSwitched = true;
+    if (!mounted || _displayedPose == _targetPose) return;
+    final defaultMotionChanges =
+        widget.motion == null &&
+        _motionForPose(_displayedPose) != _motionForPose(_targetPose);
+    setState(() => _displayedPose = _targetPose);
+    if (defaultMotionChanges) {
+      _syncMotionAnimation();
+    }
+  }
+
+  double get _poseOpacity {
+    final progress = _poseController.value;
+    if (progress < 0.5) {
+      return 1 - Curves.easeInCubic.transform(progress * 2);
+    }
+    return Curves.easeOutCubic.transform((progress - 0.5) * 2);
+  }
+
+  void _handleTap() {
+    widget.onTap?.call();
+    if (mounted && widget.animate && !_reduceMotion) {
+      _syncMotionAnimation();
+    }
+  }
+
   SilaMascotMotion get _effectiveMotion {
     if (widget.motion case final motion?) return motion;
-    return switch (widget.pose) {
+    return _motionForPose(_displayedPose);
+  }
+
+  SilaMascotMotion _motionForPose(SilaMascotPose pose) {
+    return switch (pose) {
       SilaMascotPose.thinking => SilaMascotMotion.thinking,
       SilaMascotPose.celebrating ||
       SilaMascotPose.winner => SilaMascotMotion.celebrate,
@@ -220,18 +357,19 @@ class _SilaMascotState extends State<SilaMascot>
   void dispose() {
     _animationGeneration += 1;
     _loopTimer?.cancel();
-    _controller.dispose();
+    _poseController
+      ..removeListener(_handlePoseTransitionTick)
+      ..dispose();
+    _motionController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final transitionDuration = !widget.animate || _reduceMotion
-        ? Duration.zero
-        : const Duration(milliseconds: 260);
-    final accessoryGeometry = _accessoryGeometryFor(widget.pose);
-    final outfitGeometry = _outfitGeometryFor(widget.pose);
-    final image = SizedBox(
+    final accessoryGeometry = _accessoryGeometryFor(_displayedPose);
+    final outfitGeometry = _outfitGeometryFor(_displayedPose);
+    final cacheDimensions = _poseCacheDimensions();
+    final rig = SizedBox(
       key: const ValueKey('sila-character-rig'),
       width: widget.height * 0.75,
       height: widget.height,
@@ -239,163 +377,227 @@ class _SilaMascotState extends State<SilaMascot>
         clipBehavior: Clip.none,
         fit: StackFit.expand,
         children: [
-          _SilaAuraOverlay(assetKey: widget.auraAssetKey, animation: _progress),
-          AnimatedSwitcher(
-            duration: transitionDuration,
-            switchInCurve: Curves.easeOut,
-            switchOutCurve: Curves.easeIn,
-            child: Image.asset(
-              widget.pose.assetPath,
-              key: ValueKey('sila-pose-${widget.pose.name}'),
+          RepaintBoundary(
+            child: _SilaAuraOverlay(
+              assetKey: widget.auraAssetKey,
+              animation: _motionProgress,
+            ),
+          ),
+          RepaintBoundary(
+            child: Image(
+              image: _poseImageProvider(_displayedPose, cacheDimensions),
+              key: ValueKey('sila-pose-${_displayedPose.name}'),
               fit: BoxFit.contain,
               filterQuality: FilterQuality.high,
+              // Keep the already decoded pose visible while a new raster size
+              // is prepared after rotation or a responsive layout change.
+              // Pose changes still use different keys and the coordinated rig
+              // dissolve below, so this cannot paint two Silas at once.
               gaplessPlayback: true,
-              excludeFromSemantics: widget.semanticLabel == null,
-              semanticLabel: widget.semanticLabel,
+              excludeFromSemantics: true,
             ),
           ),
-          AnimatedSlide(
+          FractionalTranslation(
             key: const ValueKey('sila-animated-outfit-layer'),
-            offset: outfitGeometry.offset,
-            duration: transitionDuration,
-            curve: Curves.easeOutBack,
-            child: AnimatedScale(
-              key: const ValueKey('sila-animated-outfit-scale'),
-              scale: outfitGeometry.scale,
+            translation: outfitGeometry.offset,
+            transformHitTests: false,
+            child: Transform.rotate(
+              angle: outfitGeometry.rotation,
               alignment: const Alignment(0, 0.2),
-              duration: transitionDuration,
-              curve: Curves.easeOutBack,
-              child: _SilaOutfitOverlay(assetKey: widget.outfitAssetKey),
+              transformHitTests: false,
+              child: Transform.scale(
+                key: const ValueKey('sila-animated-outfit-scale'),
+                scale: outfitGeometry.scale,
+                alignment: const Alignment(0, 0.2),
+                transformHitTests: false,
+                child: RepaintBoundary(
+                  child: _SilaOutfitOverlay(assetKey: widget.outfitAssetKey),
+                ),
+              ),
             ),
           ),
-          AnimatedSlide(
+          FractionalTranslation(
             key: const ValueKey('sila-animated-accessory-layer'),
-            offset: accessoryGeometry.offset,
-            duration: transitionDuration,
-            curve: Curves.easeOutBack,
-            child: AnimatedScale(
-              key: const ValueKey('sila-animated-accessory-scale'),
-              scale: accessoryGeometry.scale,
+            translation: accessoryGeometry.offset,
+            transformHitTests: false,
+            child: Transform.rotate(
+              angle: accessoryGeometry.rotation,
               alignment: const Alignment(0, -0.58),
-              duration: transitionDuration,
-              curve: Curves.easeOutBack,
-              child: _SilaAccessoryOverlay(assetKey: widget.accessoryAssetKey),
+              transformHitTests: false,
+              child: Transform.scale(
+                key: const ValueKey('sila-animated-accessory-scale'),
+                scale: accessoryGeometry.scale,
+                alignment: const Alignment(0, -0.58),
+                transformHitTests: false,
+                child: RepaintBoundary(
+                  child: _SilaAccessoryOverlay(
+                    assetKey: widget.accessoryAssetKey,
+                  ),
+                ),
+              ),
             ),
           ),
         ],
       ),
     );
 
-    if (!widget.animate || _reduceMotion) {
-      return image;
+    Widget result = rig;
+    if (widget.animate && !_reduceMotion) {
+      result = AnimatedBuilder(
+        animation: _poseController,
+        child: rig,
+        builder: (context, child) => Opacity(
+          key: const ValueKey('sila-pose-transition-opacity'),
+          opacity: _poseOpacity,
+          child: child,
+        ),
+      );
+
+      result = AnimatedBuilder(
+        animation: _motionProgress,
+        child: result,
+        builder: (context, child) {
+          final phase = _motionProgress.value * math.pi * 2;
+          final (offset, angle, scale) = switch (_effectiveMotion) {
+            SilaMascotMotion.hover => (
+              Offset(0, -3.8 * math.sin(phase)),
+              0.006 * math.sin(phase),
+              1.0,
+            ),
+            SilaMascotMotion.gameReady => (
+              Offset(0, -4.5 * math.sin(phase).abs()),
+              0.012 * math.sin(phase),
+              1 + 0.018 * math.sin(phase).abs(),
+            ),
+            SilaMascotMotion.thinking => (
+              Offset(2.5 * math.sin(phase), -2 * math.cos(phase)),
+              0.02 * math.sin(phase),
+              1.0,
+            ),
+            SilaMascotMotion.excited => (
+              Offset(0, -6 * math.sin(phase).abs()),
+              0.026 * math.sin(phase * 2),
+              1 + 0.025 * math.sin(phase).abs(),
+            ),
+            SilaMascotMotion.celebrate => (
+              Offset(0, -8 * math.sin(phase).abs()),
+              0.018 * math.sin(phase),
+              1 + 0.04 * math.sin(phase).abs(),
+            ),
+          };
+          return Transform.translate(
+            key: const ValueKey('sila-character-motion-transform'),
+            offset: offset,
+            transformHitTests: false,
+            child: Transform.rotate(
+              angle: angle,
+              transformHitTests: false,
+              child: Transform.scale(
+                scale: scale,
+                transformHitTests: false,
+                child: child,
+              ),
+            ),
+          );
+        },
+      );
     }
 
-    return AnimatedBuilder(
-      animation: _progress,
-      child: image,
-      builder: (context, child) {
-        final phase = _progress.value * math.pi * 2;
-        final (offset, angle, scale) = switch (_effectiveMotion) {
-          SilaMascotMotion.hover => (
-            Offset(0, -3.8 * math.sin(phase)),
-            0.006 * math.sin(phase),
-            1.0,
-          ),
-          SilaMascotMotion.gameReady => (
-            Offset(0, -4.5 * math.sin(phase).abs()),
-            0.012 * math.sin(phase),
-            1 + 0.018 * math.sin(phase).abs(),
-          ),
-          SilaMascotMotion.thinking => (
-            Offset(2.5 * math.sin(phase), -2 * math.cos(phase)),
-            0.02 * math.sin(phase),
-            1.0,
-          ),
-          SilaMascotMotion.excited => (
-            Offset(0, -6 * math.sin(phase).abs()),
-            0.026 * math.sin(phase * 2),
-            1 + 0.025 * math.sin(phase).abs(),
-          ),
-          SilaMascotMotion.celebrate => (
-            Offset(0, -8 * math.sin(phase).abs()),
-            0.018 * math.sin(phase),
-            1 + 0.04 * math.sin(phase).abs(),
-          ),
-        };
-        return Transform.translate(
-          key: const ValueKey('sila-character-motion-transform'),
-          offset: offset,
-          child: Transform.rotate(
-            angle: angle,
-            child: Transform.scale(scale: scale, child: child),
-          ),
-        );
-      },
-    );
+    result = RepaintBoundary(child: result);
+    if (widget.semanticLabel case final label?) {
+      result = Semantics(
+        container: true,
+        image: widget.onTap == null,
+        button: widget.onTap != null,
+        label: label,
+        hint: widget.semanticHint,
+        onTap: widget.onTap == null ? null : _handleTap,
+        child: ExcludeSemantics(child: result),
+      );
+    }
+
+    if (widget.onTap case final _?) {
+      result = Material(
+        type: MaterialType.transparency,
+        child: InkResponse(
+          containedInkWell: false,
+          highlightShape: BoxShape.circle,
+          radius: widget.height * 0.45,
+          splashColor: SilaMascotPalette.deepGreen.withValues(alpha: 0.12),
+          hoverColor: SilaMascotPalette.deepGreen.withValues(alpha: 0.06),
+          focusColor: SilaMascotPalette.sandGold.withValues(alpha: 0.14),
+          mouseCursor: SystemMouseCursors.click,
+          excludeFromSemantics: true,
+          onTap: _handleTap,
+          child: result,
+        ),
+      );
+    }
+
+    return result;
   }
 }
 
 /// Each pose uses the same 384 x 512 canvas, while Sila's head and torso move
 /// within it. Cosmetics are painted in the idle coordinate space, then this
-/// small rig correction follows the photographed character in every pose.
+/// small rig correction follows the character in every pose. Geometry swaps at
+/// the invisible midpoint of a pose transition, so it never trails the artwork.
 class _SilaLayerGeometry {
-  const _SilaLayerGeometry({this.offset = Offset.zero, this.scale = 1});
+  const _SilaLayerGeometry({
+    this.offset = Offset.zero,
+    this.scale = 1,
+    this.rotation = 0,
+  });
 
   final Offset offset;
   final double scale;
+  final double rotation;
 }
 
 _SilaLayerGeometry _accessoryGeometryFor(SilaMascotPose pose) => switch (pose) {
   SilaMascotPose.idle => const _SilaLayerGeometry(),
-  SilaMascotPose.welcome => const _SilaLayerGeometry(
-    offset: Offset(0.045, 0.018),
-  ),
+  SilaMascotPose.welcome => const _SilaLayerGeometry(scale: 0.99),
   SilaMascotPose.thinking => const _SilaLayerGeometry(
-    offset: Offset(0.032, 0.035),
-    scale: 1.02,
+    offset: Offset(0.034, 0.02),
+    scale: 0.99,
+    rotation: 0.018,
   ),
   SilaMascotPose.celebrating => const _SilaLayerGeometry(
-    offset: Offset(-0.045, 0.026),
-    scale: 0.92,
+    offset: Offset(-0.018, 0.01),
+    scale: 0.98,
   ),
-  SilaMascotPose.encouraging => const _SilaLayerGeometry(
-    offset: Offset(0.02, -0.055),
-    scale: 0.96,
-  ),
-  SilaMascotPose.oops => const _SilaLayerGeometry(
-    offset: Offset(0.005, -0.075),
-    scale: 0.97,
-  ),
+  SilaMascotPose.encouraging => const _SilaLayerGeometry(scale: 1.01),
+  SilaMascotPose.oops => const _SilaLayerGeometry(offset: Offset(0, -0.02)),
   SilaMascotPose.winner => const _SilaLayerGeometry(
-    offset: Offset(-0.045, -0.058),
-    scale: 0.94,
+    offset: Offset(-0.004, 0.004),
   ),
 };
 
 _SilaLayerGeometry _outfitGeometryFor(SilaMascotPose pose) => switch (pose) {
   SilaMascotPose.idle => const _SilaLayerGeometry(),
   SilaMascotPose.welcome => const _SilaLayerGeometry(
-    offset: Offset(0.015, -0.002),
+    offset: Offset(0.015, 0),
     scale: 0.98,
   ),
   SilaMascotPose.thinking => const _SilaLayerGeometry(
-    offset: Offset(0.02, 0.01),
-    scale: 0.96,
+    offset: Offset(0.035, 0.016),
+    scale: 0.94,
+    rotation: 0.008,
   ),
   SilaMascotPose.celebrating => const _SilaLayerGeometry(
-    offset: Offset(-0.045, 0.025),
+    offset: Offset(0.008, 0.008),
     scale: 0.88,
   ),
   SilaMascotPose.encouraging => const _SilaLayerGeometry(
-    offset: Offset(0.015, -0.052),
-    scale: 0.91,
+    offset: Offset(0.018, -0.014),
+    scale: 0.93,
   ),
   SilaMascotPose.oops => const _SilaLayerGeometry(
-    offset: Offset(0.005, -0.07),
+    offset: Offset(0.003, -0.018),
     scale: 0.9,
   ),
   SilaMascotPose.winner => const _SilaLayerGeometry(
-    offset: Offset(-0.045, -0.052),
+    offset: Offset(-0.005, -0.012),
     scale: 0.9,
   ),
 };
@@ -415,6 +617,7 @@ class _SilaAccessoryOverlay extends StatelessWidget {
       child: CustomPaint(
         key: ValueKey('sila-mascot-accessory-$assetKey'),
         painter: _SilaAccessoryPainter(assetKey),
+        isComplex: true,
       ),
     );
   }
@@ -435,6 +638,7 @@ class _SilaOutfitOverlay extends StatelessWidget {
       child: CustomPaint(
         key: ValueKey('sila-mascot-outfit-$assetKey'),
         painter: _SilaOutfitPainter(assetKey),
+        isComplex: true,
       ),
     );
   }
@@ -453,12 +657,11 @@ class _SilaAuraOverlay extends StatelessWidget {
     }
 
     return IgnorePointer(
-      child: AnimatedBuilder(
-        animation: animation,
-        builder: (context, _) => CustomPaint(
-          key: ValueKey('sila-mascot-aura-$assetKey'),
-          painter: _SilaAuraPainter(assetKey, animation.value),
-        ),
+      child: CustomPaint(
+        key: ValueKey('sila-mascot-aura-$assetKey'),
+        painter: _SilaAuraPainter(assetKey, animation),
+        isComplex: true,
+        willChange: true,
       ),
     );
   }
@@ -757,10 +960,12 @@ class _SilaOutfitPainter extends CustomPainter {
 }
 
 class _SilaAuraPainter extends CustomPainter {
-  const _SilaAuraPainter(this.assetKey, this.progress);
+  _SilaAuraPainter(this.assetKey, this.animation) : super(repaint: animation);
 
   final String assetKey;
-  final double progress;
+  final Animation<double> animation;
+
+  double get progress => animation.value;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -928,7 +1133,7 @@ class _SilaAuraPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _SilaAuraPainter oldDelegate) =>
-      oldDelegate.assetKey != assetKey || oldDelegate.progress != progress;
+      oldDelegate.assetKey != assetKey || oldDelegate.animation != animation;
 }
 
 class _SilaAccessoryPainter extends CustomPainter {
@@ -1177,6 +1382,8 @@ class SilaMascotGuide extends StatelessWidget {
     this.outfitAssetKey = SilaMascotOutfits.none,
     this.auraAssetKey = SilaMascotAuras.none,
     this.motion,
+    this.onMascotTap,
+    this.mascotSemanticHint,
   });
 
   final String message;
@@ -1192,6 +1399,8 @@ class SilaMascotGuide extends StatelessWidget {
   final String outfitAssetKey;
   final String auraAssetKey;
   final SilaMascotMotion? motion;
+  final VoidCallback? onMascotTap;
+  final String? mascotSemanticHint;
 
   @override
   Widget build(BuildContext context) {
@@ -1209,6 +1418,8 @@ class SilaMascotGuide extends StatelessWidget {
           outfitAssetKey: outfitAssetKey,
           auraAssetKey: auraAssetKey,
           motion: motion,
+          onTap: onMascotTap,
+          semanticHint: mascotSemanticHint,
         );
         final bubble = _MascotSpeechBubble(
           title: title,

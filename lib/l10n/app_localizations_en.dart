@@ -206,7 +206,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get navHome => 'Home';
 
   @override
-  String get navSila => 'Wardrobe';
+  String get navSila => 'Sila';
 
   @override
   String get navMemories => 'Memories';
@@ -643,12 +643,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileFrameEquippedSemanticLabel => 'Profile frame equipped';
 
   @override
-  String get mascotWelcomeMessage => 'Hi! I’m Sila. I’ll help your family play, create, and grow closer.';
+  String get mascotWelcomeMessage => 'Hi! I’m Sila—your playful family companion. I’ll guide games, spark shared moments, and celebrate every bond you grow.';
 
   @override
   String mascotHomeMessage(String name) {
-    return 'Ready for a small family moment together, $name?';
+    return 'Hi $name! Tell me how your family feels today and I’ll help you choose a moment to share.';
   }
+
+  @override
+  String get silaMeetCompanion => 'MEET SILA • YOUR FAMILY COMPANION';
+
+  @override
+  String get silaHomeAction => 'Ask Sila for today’s idea';
+
+  @override
+  String get silaNavigationHint => 'Open Sila Studio and chat';
 
   @override
   String get mascotGameSetupMessage => 'I’ll guide everyone. Choose your setup and let’s play!';
@@ -661,6 +670,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get mascotCelebrationMessage => 'Amazing teamwork! Every moment together makes your bond stronger.';
+
+  @override
+  String get silaGameWinnerMessage => 'What a finish! Celebrate the winner—and everyone who made this family moment fun.';
 
   @override
   String get silaMissionsMessage => 'Pick a mission, help each other, and turn a small action into a family win!';
@@ -754,7 +766,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get silaChatDescription => 'Ask for a game idea, a family activity, or a little encouragement.';
 
   @override
-  String get silaChatPrivacy => 'Private to your account. Sila receives family member names and this chat. KinQuest does not automatically attach photos, emails, or birth dates.';
+  String get silaChatPrivacy => 'Private to your account. Sila receives family member names and this chat. The Sila app does not automatically attach photos, emails, or birth dates.';
 
   @override
   String get silaChatEmptyTitle => 'Sila is ready to listen';
