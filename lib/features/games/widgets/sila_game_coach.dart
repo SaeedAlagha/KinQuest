@@ -169,11 +169,15 @@ class _CoachButton extends StatelessWidget {
         message: coachMessage,
         excludeFromSemantics: true,
         child: Material(
+          key: const ValueKey('sila-game-coach-surface'),
           elevation: 10,
           color: colors.surface,
           shadowColor: colors.primary.withValues(alpha: 0.28),
           shape: shape,
-          clipBehavior: Clip.antiAlias,
+          // Sila's celebration bounce and equipped halo intentionally extend
+          // beyond the button surface. The custom InkWell border still keeps
+          // the interaction circular/pill-shaped without cropping the mascot.
+          clipBehavior: Clip.none,
           child: InkWell(
             key: const ValueKey('sila-game-coach-button'),
             excludeFromSemantics: true,
