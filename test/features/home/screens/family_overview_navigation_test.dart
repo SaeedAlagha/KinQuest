@@ -31,7 +31,7 @@ void main() {
       navigation.destinations
           .map((destination) => (destination as NavigationDestination).label)
           .toList(),
-      ['Home', 'Memories', 'Play', 'Missions', 'Sila', 'Rewards', 'Profile'],
+      ['Home', 'Memories', 'Play', 'Missions', 'Rewards', 'Profile'],
     );
 
     final overviewButton = find.widgetWithText(FilledButton, 'Family Overview');
@@ -49,74 +49,6 @@ void main() {
       tester.widget<NavigationBar>(find.byType(NavigationBar)).selectedIndex,
       6,
     );
-    expect(tester.takeException(), isNull);
-  });
-
-  testWidgets('Sila is a direct destination between Missions and Rewards', (
-    tester,
-  ) async {
-    tester.view.physicalSize = const Size(390, 844);
-    tester.view.devicePixelRatio = 1;
-    addTearDown(tester.view.resetPhysicalSize);
-    addTearDown(tester.view.resetDevicePixelRatio);
-
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: AppTheme.lightTheme,
-        supportedLocales: AppLocalizations.supportedLocales,
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        home: const MainNavigationScreen(developerPreview: true),
-      ),
-    );
-    await tester.pump(const Duration(seconds: 1));
-
-    var navigation = tester.widget<NavigationBar>(find.byType(NavigationBar));
-    final labels = navigation.destinations
-        .map((destination) => (destination as NavigationDestination).label)
-        .toList();
-    expect(navigation.destinations, hasLength(7));
-    expect(labels.indexOf('Sila'), labels.indexOf('Missions') + 1);
-    expect(labels.indexOf('Rewards'), labels.indexOf('Sila') + 1);
-    expect(
-      navigation.labelBehavior,
-      NavigationDestinationLabelBehavior.onlyShowSelected,
-    );
-
-    await tester.tap(find.byKey(const ValueKey('nav-sila-destination')));
-    await tester.pump(const Duration(milliseconds: 300));
-
-    navigation = tester.widget<NavigationBar>(find.byType(NavigationBar));
-    expect(navigation.selectedIndex, 4);
-    final studio = tester.widget<SilaStudioScreen>(
-      find.byType(SilaStudioScreen),
-    );
-    expect(studio.showBackButton, isFalse);
-    expect(studio.active, isTrue);
-    expect(studio.stageFocusRequest, 1);
-
-    await tester.drag(
-      find.byKey(const ValueKey('sila-studio-scroll')),
-      const Offset(0, -1100),
-    );
-    await tester.pump(const Duration(milliseconds: 200));
-    tester
-        .widget<NavigationBar>(find.byType(NavigationBar))
-        .onDestinationSelected!(0);
-    await tester.pump(const Duration(milliseconds: 200));
-    tester
-        .widget<NavigationBar>(find.byType(NavigationBar))
-        .onDestinationSelected!(4);
-    await tester.pump(const Duration(milliseconds: 300));
-
-    final revisitedStudio = tester.widget<SilaStudioScreen>(
-      find.byType(SilaStudioScreen),
-    );
-    expect(revisitedStudio.stageFocusRequest, 2);
-    final revisitedStage = tester.getRect(
-      find.byKey(const ValueKey('sila-studio-mascot')),
-    );
-    expect(revisitedStage.top, lessThan(700));
-    expect(revisitedStage.bottom, greaterThan(0));
     expect(tester.takeException(), isNull);
   });
 

@@ -25,12 +25,8 @@ void main() {
 
     expect(find.text('Sila Studio'), findsOneWidget);
     expect(find.byKey(const ValueKey('sila-studio-mascot')), findsOneWidget);
-    expect(
-      find.byKey(const ValueKey('sila-bond-progress-card')),
-      findsOneWidget,
-    );
-    expect(find.text('Your Family Bond'), findsOneWidget);
-    expect(find.text('Level 2: Family Friend'), findsOneWidget);
+    expect(find.text('Your Family Bond'), findsNothing);
+    expect(find.text('Level 2: Family Friend'), findsNothing);
     expect(
       find.byKey(const ValueKey('sila-mascot-accessory-guardian_crown')),
       findsWidgets,
