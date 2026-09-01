@@ -269,22 +269,89 @@ async function chatWithSila({ database, ai, userId, rawMessage, locale }) {
     context,
   });
 
-  const response = await ai.models.generateContent({
-    model: "gemini-3.5-flash",
-    contents: buildSilaPrompt({
-      locale: normalizedLocale,
-      currentMemberName: context.currentMemberName,
-      familyMemberNames: context.familyMemberNames,
-      history,
-      message,
-    }),
-    config: {
-      responseMimeType: "application/json",
-      maxOutputTokens: 500,
-    },
-  });
-  const silaReply = normalizeSilaReply(response.text);
+  const openRouterApiKey = process.env.OPENROUTER_API_KEY;
 
+if (!openRouterApiKey) {
+  throw new SilaChatError(
+    "Sila AI is not configured on the server.",
+    503,
+  );
+}
+
+const prompt = buildSilaPrompt({
+  locale: normalizedLocale,
+  currentMemberName: context.currentMemberName,
+  familyMemberNames: context.familyMemberNames,
+  history,
+  message,
+});
+
+const response = await fetch(
+  "https://openrouter.ai/api/v1/chat/completions",
+  {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${openRouterApiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model: "openrouter/free",
+      messages: [
+        {
+          role: "user",
+          content: prompt,
+        },
+      ],
+      max_tokens: 500,
+      temperature: 0.7,
+    }),
+  },
+);
+
+const responseBody = await response.text();
+
+if (!response.ok) {
+  console.error(
+    "OpenRouter request failed:",
+    response.status,
+    responseBody,
+  );
+
+  if (response.status === 429) {
+    throw new SilaChatError(
+      "Sila is busy right now. Please try again in a little while.",
+      429,
+    );
+  }
+
+  throw new SilaChatError(
+    "Sila could not reach the AI service.",
+    502,
+  );
+}
+
+let openRouterData;
+
+try {
+  openRouterData = JSON.parse(responseBody);
+} catch (_) {
+  throw new SilaChatError(
+    "Sila received an invalid AI response.",
+    502,
+  );
+}
+
+const responseText =
+  openRouterData?.choices?.[0]?.message?.content;
+
+if (typeof responseText !== "string" || !responseText.trim()) {
+  throw new SilaChatError(
+    "Sila could not prepare a reply.",
+    502,
+  );
+}
+
+const silaReply = normalizeSilaReply(responseText);
   const messages = chatCollection(context.userRef);
   const userMessageRef = messages.doc();
   const silaMessageRef = messages.doc();

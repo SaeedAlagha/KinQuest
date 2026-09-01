@@ -144,9 +144,25 @@ function requireSilaChatUser(request, response) {
 
 function sendSilaChatError(error, response) {
   if (error instanceof SilaChatError) {
-    return response.status(error.statusCode).json({ error: error.message });
+    console.error(
+      "Sila chat request failed:",
+      error.name,
+      error.message,
+      "status:",
+      error.statusCode,
+    );
+
+    return response.status(error.statusCode).json({
+      error: error.message,
+    });
   }
-  console.error("Sila chat request failed without message logging");
+
+  console.error(
+    "Sila chat request failed:",
+    error?.name ?? "Error",
+    error?.message ?? String(error),
+  );
+
   return response.status(500).json({
     error: "Sila could not reply right now. Please try again.",
   });
