@@ -2412,7 +2412,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get weeklyCrown => 'Weekly crown';
 
   @override
-  String get monthlyCompetitionDescription => 'Four family members. Two semifinals. One final. One champion.';
+  String get monthlyCompetitionDescription => 'Choose your competitors and battle through a knockout tournament to crown one Monthly Cup champion.';
 
   @override
   String get monthlyRewards => 'Monthly rewards';
@@ -2428,7 +2428,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get chooseFourCompetitors => 'Choose exactly 4 competitors';
+  String get chooseFourCompetitors => 'Choose at least 2 competitors';
 
   @override
   String get startingMonthlyCup => 'Starting Monthly Cup...';

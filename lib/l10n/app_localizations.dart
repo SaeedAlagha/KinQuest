@@ -4592,7 +4592,7 @@ abstract class AppLocalizations {
   /// No description provided for @monthlyCompetitionDescription.
   ///
   /// In en, this message translates to:
-  /// **'Four family members. Two semifinals. One final. One champion.'**
+  /// **'Choose your competitors and battle through a knockout tournament to crown one Monthly Cup champion.'**
   String get monthlyCompetitionDescription;
 
   /// No description provided for @monthlyRewards.
@@ -4616,7 +4616,7 @@ abstract class AppLocalizations {
   /// No description provided for @chooseFourCompetitors.
   ///
   /// In en, this message translates to:
-  /// **'Choose exactly 4 competitors'**
+  /// **'Choose at least 2 competitors'**
   String get chooseFourCompetitors;
 
   /// No description provided for @startingMonthlyCup.

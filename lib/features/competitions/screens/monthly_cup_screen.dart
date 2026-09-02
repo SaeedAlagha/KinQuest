@@ -960,7 +960,7 @@ class _MonthlyCupScreenState extends State<MonthlyCupScreen> {
         const SizedBox(height: 8),
         const SizedBox(height: 20),
         Text(
-          strings.selectExactlyFourMembers,
+          strings.selectAtLeastTwoFamilyMembers,
           style: Theme.of(
             context,
           ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),

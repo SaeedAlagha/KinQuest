@@ -2435,7 +2435,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get weeklyCrown => 'لقب الأسبوع';
 
   @override
-  String get monthlyCompetitionDescription => 'أربعة أفراد، ونصفا نهائي، ونهائي واحد، وبطل واحد.';
+  String get monthlyCompetitionDescription => 'اختاروا المتنافسين وتقدموا عبر بطولة إقصائية حتى يتوّج بطل واحد للكأس الشهري.';
 
   @override
   String get monthlyRewards => 'مكافآت الشهر';
@@ -2451,7 +2451,7 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String get chooseFourCompetitors => 'اختر 4 متنافسين بالضبط';
+  String get chooseFourCompetitors => 'اختر متنافسين اثنين على الأقل';
 
   @override
   String get startingMonthlyCup => 'جارٍ بدء الكأس الشهري...';
