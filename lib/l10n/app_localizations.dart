@@ -8249,6 +8249,24 @@ abstract class AppLocalizations {
   /// **'{name} must answer correctly to block the attack.'**
   String playerMustBlock(String name);
 
+  /// No description provided for @attackLanded.
+  ///
+  /// In en, this message translates to:
+  /// **'Attack landed!'**
+  String get attackLanded;
+
+  /// No description provided for @playerCouldNotDefend.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} couldn\'t defend. {damage, plural, =1{1 heart was removed.} other{{damage} hearts were removed.}}'**
+  String playerCouldNotDefend(String name, int damage);
+
+  /// No description provided for @heartsRemaining.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No hearts remaining} =1{1 heart remaining} other{{count} hearts remaining}}'**
+  String heartsRemaining(int count);
+
   /// No description provided for @otherPlayerLookAwayShort.
   ///
   /// In en, this message translates to:

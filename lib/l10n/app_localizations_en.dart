@@ -4636,6 +4636,32 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get attackLanded => 'Attack landed!';
+
+  @override
+  String playerCouldNotDefend(String name, int damage) {
+    String _temp0 = intl.Intl.pluralLogic(
+      damage,
+      locale: localeName,
+      other: '$damage hearts were removed.',
+      one: '1 heart was removed.',
+    );
+    return '$name couldn\'t defend. $_temp0';
+  }
+
+  @override
+  String heartsRemaining(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count hearts remaining',
+      one: '1 heart remaining',
+      zero: 'No hearts remaining',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get otherPlayerLookAwayShort => 'The other player should look away.';
 
   @override
