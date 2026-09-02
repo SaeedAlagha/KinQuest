@@ -1560,9 +1560,7 @@ class _FamilyMissionsScreenState extends State<FamilyMissionsScreen> {
       ),
       child: Column(
         children: [
-          SilaGameCoachBanner(
-            message: strings.silaMissionsMessage,
-          ),
+          SilaGameCoachBanner(message: strings.silaMissionsMessage),
           const SizedBox(height: 18),
           Text(
             strings.doMoreTogether,

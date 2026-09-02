@@ -51,10 +51,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get spaceThemeDescription => 'Starlit adventures, glowing orbits, and deep-space wonder';
 
   @override
-  String get khalifaUniversityTheme => 'KU Future Lab';
+  String get khalifaUniversityTheme => 'Future Lab';
 
   @override
-  String get khalifaUniversityThemeDescription => 'A precise blue innovation system inspired by Khalifa University';
+  String get khalifaUniversityThemeDescription => 'A clean blue theme inspired by technology and innovation.';
 
   @override
   String get desertNightsTheme => 'Desert Nights';
@@ -2412,7 +2412,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get weeklyCrown => 'Weekly crown';
 
   @override
-  String get monthlyCompetitionDescription => 'Four family members. Two semifinals. One final. One champion.';
+  String get monthlyCompetitionDescription => 'Choose your competitors and battle through a knockout tournament to crown one Monthly Cup champion.';
 
   @override
   String get monthlyRewards => 'Monthly rewards';
@@ -2428,7 +2428,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get chooseFourCompetitors => 'Choose exactly 4 competitors';
+  String get chooseFourCompetitors => 'Choose at least 2 competitors';
 
   @override
   String get startingMonthlyCup => 'Starting Monthly Cup...';
@@ -4633,6 +4633,32 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String playerMustBlock(String name) {
     return '$name must answer correctly to block the attack.';
+  }
+
+  @override
+  String get attackLanded => 'Attack landed!';
+
+  @override
+  String playerCouldNotDefend(String name, int damage) {
+    String _temp0 = intl.Intl.pluralLogic(
+      damage,
+      locale: localeName,
+      other: '$damage hearts were removed.',
+      one: '1 heart was removed.',
+    );
+    return '$name couldn\'t defend. $_temp0';
+  }
+
+  @override
+  String heartsRemaining(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count hearts remaining',
+      one: '1 heart remaining',
+      zero: 'No hearts remaining',
+    );
+    return '$_temp0';
   }
 
   @override

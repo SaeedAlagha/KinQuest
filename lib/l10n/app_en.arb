@@ -14,8 +14,8 @@
   "uaeFamilyYearThemeDescription": "Heritage arches, majlis warmth, and colors of unity",
   "spaceTheme": "Cosmic Family",
   "spaceThemeDescription": "Starlit adventures, glowing orbits, and deep-space wonder",
-  "khalifaUniversityTheme": "KU Future Lab",
-  "khalifaUniversityThemeDescription": "A precise blue innovation system inspired by Khalifa University",
+  "khalifaUniversityTheme": "Future Lab",
+  "khalifaUniversityThemeDescription": "A clean blue theme inspired by technology and innovation.",
   "desertNightsTheme": "Desert Nights",
   "desertNightsThemeDescription": "Moonlit dunes, copper sunsets, and luxurious night skies",
   "pearlLagoonTheme": "Pearl Lagoon",
@@ -899,13 +899,13 @@
 "weeklyCompleteWithChampion": "{name} is this week's Family Champion after four games together.",
 "@weeklyCompleteWithChampion": {"placeholders": {"name": {"type": "String"}}},
 "weeklyCrown": "Weekly crown",
-"monthlyCompetitionDescription": "Four family members. Two semifinals. One final. One champion.",
+"monthlyCompetitionDescription": "Choose your competitors and battle through a knockout tournament to crown one Monthly Cup champion.",
 "monthlyRewards": "Monthly rewards",
 "monthlyChampionRewardSummary": "Champion: +{tokens} Tokens + {points} RP + Trophy",
 "@monthlyChampionRewardSummary": {"placeholders": {"tokens": {"type": "int"}, "points": {"type": "int"}}},
 "semifinalistRewardSummary": "Semifinalists: +{points} RP",
 "@semifinalistRewardSummary": {"placeholders": {"points": {"type": "int"}}},
-"chooseFourCompetitors": "Choose exactly 4 competitors",
+"chooseFourCompetitors": "Choose at least 2 competitors",
 "startingMonthlyCup": "Starting Monthly Cup...",
 "startMonthlyCup": "Start Monthly Cup",
 "monthlyParticipantIncomplete": "Monthly Cup participant data is incomplete.",
@@ -1666,6 +1666,26 @@
 "@playerIsAttacking": {"placeholders": {"name": {"type": "String"}}},
 "playerMustBlock": "{name} must answer correctly to block the attack.",
 "@playerMustBlock": {"placeholders": {"name": {"type": "String"}}},
+"attackLanded": "Attack landed!",
+"playerCouldNotDefend": "{name} couldn't defend. {damage, plural, =1{1 heart was removed.} other{{damage} hearts were removed.}}",
+"@playerCouldNotDefend": {
+  "placeholders": {
+    "name": {
+      "type": "String"
+    },
+    "damage": {
+      "type": "int"
+    }
+  }
+},
+"heartsRemaining": "{count, plural, =0{No hearts remaining} =1{1 heart remaining} other{{count} hearts remaining}}",
+"@heartsRemaining": {
+  "placeholders": {
+    "count": {
+      "type": "int"
+    }
+  }
+},
 "otherPlayerLookAwayShort": "The other player should look away.",
 "defendAction": "🛡️ DEFEND!",
 "earnEnergyAction": "⚡ EARN ENERGY",
@@ -1700,4 +1720,5 @@
 "logicDuel": "LOGIC DUEL",
 "battleDuel": "BATTLE DUEL",
 "highStakesDuel": "HIGH-STAKES DUEL"
+
 }

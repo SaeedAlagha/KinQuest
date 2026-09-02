@@ -14,8 +14,8 @@
   "uaeFamilyYearThemeDescription": "أقواس تراثية ودفء المجلس وألوان تجسّد وحدتنا",
   "spaceTheme": "العائلة الكونية",
   "spaceThemeDescription": "مغامرات بين النجوم ومدارات مضيئة وسحر الفضاء",
-  "khalifaUniversityTheme": "مختبر جامعة خليفة للمستقبل",
-  "khalifaUniversityThemeDescription": "هوية ابتكار زرقاء ودقيقة مستوحاة من جامعة خليفة",
+"khalifaUniversityTheme": "مختبر المستقبل",
+"khalifaUniversityThemeDescription": "مظهر أزرق عصري مستوحى من التقنية والابتكار.",
   "desertNightsTheme": "ليالي الصحراء",
   "desertNightsThemeDescription": "كثبان تحت ضوء القمر وغروب نحاسي وسماء ليلية فاخرة",
   "pearlLagoonTheme": "بحيرة اللؤلؤ",
@@ -899,13 +899,13 @@
   "weeklyCompleteWithChampion": "يتوج {name} بطلاً للعائلة هذا الأسبوع بعد أربع ألعاب معًا.",
   "@weeklyCompleteWithChampion": {"placeholders": {"name": {"type": "String"}}},
   "weeklyCrown": "لقب الأسبوع",
-  "monthlyCompetitionDescription": "أربعة أفراد، ونصفا نهائي، ونهائي واحد، وبطل واحد.",
+"monthlyCompetitionDescription": "اختاروا المتنافسين وتقدموا عبر بطولة إقصائية حتى يتوّج بطل واحد للكأس الشهري.",
   "monthlyRewards": "مكافآت الشهر",
   "monthlyChampionRewardSummary": "البطل: +{tokens} رمزًا + {points} نقطة ترتيب + كأس",
   "@monthlyChampionRewardSummary": {"placeholders": {"tokens": {"type": "int"}, "points": {"type": "int"}}},
   "semifinalistRewardSummary": "المتأهلون لنصف النهائي: +{points} نقطة ترتيب",
   "@semifinalistRewardSummary": {"placeholders": {"points": {"type": "int"}}},
-  "chooseFourCompetitors": "اختر 4 متنافسين بالضبط",
+  "chooseFourCompetitors": "اختر متنافسين اثنين على الأقل",
   "startingMonthlyCup": "جارٍ بدء الكأس الشهري...",
   "startMonthlyCup": "ابدأ الكأس الشهري",
   "monthlyParticipantIncomplete": "بيانات المشاركين في الكأس الشهري غير مكتملة.",
@@ -1666,6 +1666,26 @@
   "@playerIsAttacking": {"placeholders": {"name": {"type": "String"}}},
   "playerMustBlock": "على {name} الإجابة بشكل صحيح لصد الهجوم.",
   "@playerMustBlock": {"placeholders": {"name": {"type": "String"}}},
+  "attackLanded": "نجح الهجوم!",
+"playerCouldNotDefend": "لم يتمكن {name} من الدفاع. {damage, plural, =1{تمت إزالة قلب واحد.} other{تمت إزالة {damage} قلوب.}}",
+"@playerCouldNotDefend": {
+  "placeholders": {
+    "name": {
+      "type": "String"
+    },
+    "damage": {
+      "type": "int"
+    }
+  }
+},
+"heartsRemaining": "{count, plural, =0{لم تتبقَ أي قلوب} =1{تبقى قلب واحد} other{تبقى {count} قلوب}}",
+"@heartsRemaining": {
+  "placeholders": {
+    "count": {
+      "type": "int"
+    }
+  }
+},
   "otherPlayerLookAwayShort": "على اللاعب الآخر ألا ينظر.",
   "defendAction": "🛡️ دافع!",
   "earnEnergyAction": "⚡ اجمع الطاقة",
@@ -1701,3 +1721,4 @@
   "battleDuel": "مواجهة قتالية",
   "highStakesDuel": "مواجهة عالية المخاطر"
 }
+  

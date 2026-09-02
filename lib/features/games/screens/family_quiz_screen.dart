@@ -879,6 +879,7 @@ class _FamilyQuizScreenState extends State<FamilyQuizScreen> {
 
   Widget _buildSetup() {
     final strings = AppLocalizations.of(context)!;
+
     if (_isLoadingFamily) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -893,6 +894,7 @@ class _FamilyQuizScreenState extends State<FamilyQuizScreen> {
           strings.officialMatchInvalidPlayers(strings.familyQuiz),
         _FamilyQuizLoadError.loadFailed => strings.couldNotLoadFamilyMembers,
       };
+
       return Center(
         child: Padding(
           padding: const EdgeInsets.all(24),
@@ -901,149 +903,157 @@ class _FamilyQuizScreenState extends State<FamilyQuizScreen> {
       );
     }
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          SilaGameCoachBanner(message: strings.mascotGameSetupMessage),
+    return GameSetupView(
+      icon: Icons.quiz_rounded,
+      title: strings.familyQuiz,
+      description: strings.triviaSetupDescription,
+      children: [
+        GameSetupSectionCard(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                strings.whoIsPlaying,
+                style: Theme.of(
+                  context,
+                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                strings.chooseAtLeastTwoPlayers,
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+              const SizedBox(height: 14),
+              ..._familyMembers.map((player) {
+                final selected = _selectedPlayerIds.contains(player.id);
 
-          const SizedBox(height: 20),
-
-          Text(
-            strings.whoIsPlaying,
-            style: Theme.of(
-              context,
-            ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
-          ),
-
-          const SizedBox(height: 8),
-
-          Text(strings.chooseAtLeastTwoPlayers),
-
-          const SizedBox(height: 18),
-
-          ..._familyMembers.map((player) {
-            final selected = _selectedPlayerIds.contains(player.id);
-
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 10),
-              child: Card(
-                margin: EdgeInsets.zero,
-                child: CheckboxListTile(
+                return CheckboxListTile(
+                  contentPadding: EdgeInsets.zero,
+                  dense: true,
                   value: selected,
                   onChanged: _hasLockedParticipants
                       ? null
                       : (_) => _togglePlayer(player),
-                  secondary: CircleAvatar(
-                    child: Text(
-                      player.name.isEmpty ? '?' : player.name[0].toUpperCase(),
-                    ),
+                  secondary: Icon(
+                    Icons.person_rounded,
+                    size: 18,
+                    color: Theme.of(context).colorScheme.primary,
                   ),
                   title: Text(
                     player.name,
                     style: const TextStyle(fontWeight: FontWeight.w600),
                   ),
-                ),
+                  controlAffinity: ListTileControlAffinity.trailing,
+                );
+              }),
+            ],
+          ),
+        ),
+
+        const SizedBox(height: 18),
+
+        GameSetupSectionCard(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                strings.category,
+                style: Theme.of(
+                  context,
+                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
               ),
-            );
-          }),
-
-          const SizedBox(height: 28),
-
-          Text(
-            strings.category,
-            style: Theme.of(
-              context,
-            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+              const SizedBox(height: 14),
+              Wrap(
+                spacing: 10,
+                runSpacing: 10,
+                children: _categories.map((category) {
+                  return ChoiceChip(
+                    label: Text(localizedGameCategory(strings, category)),
+                    selected: _selectedCategory == category,
+                    onSelected: (_) {
+                      setState(() {
+                        _selectedCategory = category;
+                      });
+                    },
+                  );
+                }).toList(),
+              ),
+            ],
           ),
+        ),
 
-          const SizedBox(height: 12),
+        const SizedBox(height: 18),
 
-          Wrap(
-            spacing: 10,
-            runSpacing: 10,
-            children: _categories.map((category) {
-              return ChoiceChip(
-                label: Text(localizedGameCategory(strings, category)),
-                selected: _selectedCategory == category,
-                onSelected: (_) {
-                  setState(() {
-                    _selectedCategory = category;
-                  });
-                },
-              );
-            }).toList(),
+        GameRoundSelector(
+          value: _selectedRounds,
+          onChanged: (rounds) {
+            setState(() {
+              _selectedRounds = rounds;
+            });
+          },
+        ),
+
+        const SizedBox(height: 18),
+
+        GameSetupSectionCard(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                strings.questionsPerRound,
+                style: Theme.of(
+                  context,
+                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 14),
+              Wrap(
+                spacing: 10,
+                runSpacing: 10,
+                children: [3, 5, 10].map((questionCount) {
+                  return ChoiceChip(
+                    label: Text('$questionCount'),
+                    selected: _questionsPerRound == questionCount,
+                    onSelected: (_) {
+                      setState(() {
+                        _questionsPerRound = questionCount;
+                      });
+                    },
+                  );
+                }).toList(),
+              ),
+            ],
           ),
+        ),
 
-          const SizedBox(height: 28),
+        const SizedBox(height: 22),
 
-          GameRoundSelector(
-            value: _selectedRounds,
-            onChanged: (rounds) {
-              setState(() {
-                _selectedRounds = rounds;
-              });
-            },
+        FilledButton(
+          onPressed: _selectedPlayerIds.length >= 2 && !_isPreparingGame
+              ? _startGame
+              : null,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 14),
+            child: _isPreparingGame
+                ? Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
+                      const SizedBox(width: 12),
+                      Text(strings.preparingGame),
+                    ],
+                  )
+                : Text(
+                    _isVotingMode
+                        ? strings.startVoting
+                        : strings.startNamedGame(strings.familyQuiz),
+                  ),
           ),
-
-          const SizedBox(height: 28),
-
-          Text(
-            strings.questionsPerRound,
-            style: Theme.of(
-              context,
-            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-          ),
-
-          const SizedBox(height: 12),
-
-          Wrap(
-            spacing: 10,
-            runSpacing: 10,
-            children: [3, 5, 10].map((questionCount) {
-              return ChoiceChip(
-                label: Text('$questionCount'),
-                selected: _questionsPerRound == questionCount,
-                onSelected: (_) {
-                  setState(() {
-                    _questionsPerRound = questionCount;
-                  });
-                },
-              );
-            }).toList(),
-          ),
-
-          const SizedBox(height: 32),
-
-          FilledButton(
-            onPressed: _selectedPlayerIds.length >= 2 && !_isPreparingGame
-                ? _startGame
-                : null,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 14),
-              child: _isPreparingGame
-                  ? Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        ),
-                        const SizedBox(width: 12),
-                        Text(strings.preparingGame),
-                      ],
-                    )
-                  : Text(
-                      _isVotingMode
-                          ? strings.startVoting
-                          : strings.startNamedGame(strings.familyQuiz),
-                    ),
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 

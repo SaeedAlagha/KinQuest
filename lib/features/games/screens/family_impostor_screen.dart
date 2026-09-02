@@ -112,9 +112,11 @@ class _FamilyImpostorScreenState extends State<FamilyImpostorScreen> {
     _familyMembers
       ..clear()
       ..addAll(availableMembers);
-    _selectedPlayerIds
-      ..clear()
-      ..addAll(availableMembers.map((member) => member.id));
+    _selectedPlayerIds.clear();
+
+    if (widget.participantIds != null) {
+      _selectedPlayerIds.addAll(widget.participantIds!);
+    }
     _isLoading = false;
   }
 
@@ -185,12 +187,11 @@ class _FamilyImpostorScreenState extends State<FamilyImpostorScreen> {
           ..clear()
           ..addAll(availableMembers);
 
-        _selectedPlayerIds
-          ..clear()
-          ..addAll(
-            widget.participantIds ??
-                availableMembers.map((member) => member.id),
-          );
+        _selectedPlayerIds.clear();
+
+        if (widget.participantIds != null) {
+          _selectedPlayerIds.addAll(widget.participantIds!);
+        }
 
         _isLoading = false;
       });
@@ -410,25 +411,64 @@ class _FamilyImpostorScreenState extends State<FamilyImpostorScreen> {
       );
     }
 
-    return ListView(
-      padding: const EdgeInsets.all(24),
+    return GameSetupView(
+      icon: Icons.visibility_off_rounded,
+      title: strings.familyImpostor,
+      description: strings.impostorSetupDescription,
       children: [
-        Text(
-          strings.impostorSetupTitle,
-          style: Theme.of(
-            context,
-          ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
+        GameSetupSectionCard(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                strings.whoIsPlaying,
+                style: Theme.of(
+                  context,
+                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                strings.chooseAtLeastThreePlayers,
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+              const SizedBox(height: 14),
+              ..._familyMembers.map((player) {
+                final selected = _selectedPlayerIds.contains(player.id);
+
+                return CheckboxListTile(
+                  contentPadding: EdgeInsets.zero,
+                  dense: true,
+                  value: selected,
+                  onChanged: widget.participantIds == null
+                      ? (_) => _togglePlayer(player)
+                      : null,
+                  secondary: Icon(
+                    Icons.person_rounded,
+                    size: 18,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                  title: Text(
+                    player.name,
+                    style: const TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                  controlAffinity: ListTileControlAffinity.trailing,
+                );
+              }),
+              const SizedBox(height: 6),
+              Text(
+                strings.selectedPlayersCount(_selectedPlayerIds.length),
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            ],
+          ),
         ),
-        const SizedBox(height: 8),
-        Text(
-          strings.impostorSetupDescription,
-          style: Theme.of(context).textTheme.bodyLarge,
-        ),
-        const SizedBox(height: 20),
-        SilaGameCoachBanner(message: strings.mascotGameSetupMessage),
+
         const SizedBox(height: 18),
+
         _buildCategoryPicker(),
+
         const SizedBox(height: 18),
+
         GameRoundSelector(
           value: _selectedRounds,
           onChanged: (rounds) {
@@ -438,50 +478,9 @@ class _FamilyImpostorScreenState extends State<FamilyImpostorScreen> {
           },
           keyPrefix: 'impostor-round-option',
         ),
-        const SizedBox(height: 28),
-        Text(
-          strings.whoIsPlaying,
-          style: Theme.of(
-            context,
-          ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          strings.chooseAtLeastThreePlayers,
-          style: Theme.of(context).textTheme.bodyLarge,
-        ),
-        const SizedBox(height: 16),
-        ..._familyMembers.map((player) {
-          final selected = _selectedPlayerIds.contains(player.id);
 
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 10),
-            child: Card(
-              margin: EdgeInsets.zero,
-              child: CheckboxListTile(
-                value: selected,
-                onChanged: widget.participantIds == null
-                    ? (_) => _togglePlayer(player)
-                    : null,
-                secondary: CircleAvatar(
-                  child: Text(
-                    player.name.isEmpty ? '?' : player.name[0].toUpperCase(),
-                  ),
-                ),
-                title: Text(
-                  player.name,
-                  style: const TextStyle(fontWeight: FontWeight.w600),
-                ),
-              ),
-            ),
-          );
-        }),
-        const SizedBox(height: 6),
-        Text(
-          strings.selectedPlayersCount(_selectedPlayerIds.length),
-          textAlign: TextAlign.center,
-        ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 22),
+
         FilledButton.icon(
           onPressed: _selectedPlayerIds.length >= 3 && !_isStartingGame
               ? _startGame

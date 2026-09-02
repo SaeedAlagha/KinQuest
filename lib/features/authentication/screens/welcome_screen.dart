@@ -102,7 +102,6 @@ class _WelcomeHero extends StatelessWidget {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
-    final strings = AppLocalizations.of(context)!;
     final reduceMotion = MediaQuery.disableAnimationsOf(context);
 
     return Column(
@@ -181,18 +180,6 @@ class _WelcomeHero extends StatelessWidget {
           style: textTheme.titleMedium?.copyWith(
             color: colorScheme.primary,
             fontWeight: FontWeight.w700,
-          ),
-        ),
-        const SizedBox(height: 16),
-        ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 620),
-          child: Text(
-            strings.welcomePrivateFamilySpace,
-            textAlign: isWide ? TextAlign.start : TextAlign.center,
-            style: textTheme.bodyLarge?.copyWith(
-              color: colorScheme.onSurfaceVariant,
-              fontSize: 18,
-            ),
           ),
         ),
       ],
