@@ -51,10 +51,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get spaceThemeDescription => 'Starlit adventures, glowing orbits, and deep-space wonder';
 
   @override
-  String get khalifaUniversityTheme => 'KU Future Lab';
+  String get khalifaUniversityTheme => 'Future Lab';
 
   @override
-  String get khalifaUniversityThemeDescription => 'A precise blue innovation system inspired by Khalifa University';
+  String get khalifaUniversityThemeDescription => 'A clean blue theme inspired by technology and innovation.';
 
   @override
   String get desertNightsTheme => 'Desert Nights';

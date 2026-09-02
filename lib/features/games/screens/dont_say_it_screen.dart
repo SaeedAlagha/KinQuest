@@ -102,7 +102,11 @@ class _DontSayItScreenState extends State<DontSayItScreen> {
               .where((member) => widget.participantIds!.contains(member.id))
               .toList();
     _familyMembers.addAll(availableMembers);
-    _selectedPlayerIds.addAll(availableMembers.map((member) => member.id));
+    _selectedPlayerIds.clear();
+
+    if (widget.participantIds != null) {
+      _selectedPlayerIds.addAll(widget.participantIds!);
+    }
     _isLoading = false;
   }
 
@@ -405,102 +409,114 @@ class _DontSayItScreenState extends State<DontSayItScreen> {
       );
     }
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          SilaGameCoachBanner(message: strings.mascotGameSetupMessage),
-          const SizedBox(height: 20),
-          Text(
-            strings.whoIsPlaying,
-            style: Theme.of(
-              context,
-            ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            strings.chooseAtLeastTwoPlayers,
-            style: Theme.of(context).textTheme.bodyLarge,
-          ),
-          const SizedBox(height: 20),
+    return GameSetupView(
+      icon: Icons.record_voice_over_rounded,
+      title: strings.dontSayIt,
+      description: strings.rememberWordCard,
+      children: [
+        GameSetupSectionCard(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                strings.whoIsPlaying,
+                style: Theme.of(
+                  context,
+                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                strings.chooseAtLeastTwoPlayers,
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+              const SizedBox(height: 14),
 
-          ..._familyMembers.map((player) {
-            final selected = _selectedPlayerIds.contains(player.id);
-
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 10),
-              child: Card(
-                margin: EdgeInsets.zero,
-                child: CheckboxListTile(
-                  value: selected,
+              for (final player in _familyMembers)
+                CheckboxListTile(
+                  contentPadding: EdgeInsets.zero,
+                  dense: true,
+                  value: _selectedPlayerIds.contains(player.id),
                   onChanged: _hasLockedParticipants
                       ? null
                       : (_) => _togglePlayer(player),
-                  secondary: CircleAvatar(
-                    child: Text(
-                      player.name.isEmpty ? '?' : player.name[0].toUpperCase(),
-                    ),
+                  secondary: Icon(
+                    Icons.person_rounded,
+                    size: 18,
+                    color: Theme.of(context).colorScheme.primary,
                   ),
                   title: Text(
                     player.name,
                     style: const TextStyle(fontWeight: FontWeight.w600),
                   ),
+                  controlAffinity: ListTileControlAffinity.trailing,
                 ),
+            ],
+          ),
+        ),
+
+        const SizedBox(height: 18),
+
+        GameRoundSelector(
+          value: _selectedRounds,
+          onChanged: (rounds) {
+            setState(() {
+              _selectedRounds = rounds;
+            });
+          },
+        ),
+
+        const SizedBox(height: 18),
+
+        GameSetupSectionCard(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                strings.timePerTurn,
+                style: Theme.of(
+                  context,
+                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
               ),
-            );
-          }),
-
-          const SizedBox(height: 24),
-
-          GameRoundSelector(
-            value: _selectedRounds,
-            onChanged: (rounds) {
-              setState(() {
-                _selectedRounds = rounds;
-              });
-            },
+              const SizedBox(height: 14),
+              Wrap(
+                spacing: 10,
+                runSpacing: 10,
+                children: [30, 45, 60].map((seconds) {
+                  return ChoiceChip(
+                    label: Text(strings.secondsShort(seconds)),
+                    selected: _secondsPerTurn == seconds,
+                    onSelected: (_) {
+                      setState(() {
+                        _secondsPerTurn = seconds;
+                      });
+                    },
+                  );
+                }).toList(),
+              ),
+            ],
           ),
+        ),
 
-          const SizedBox(height: 28),
+        const SizedBox(height: 22),
 
-          Text(
-            strings.timePerTurn,
-            style: Theme.of(
-              context,
-            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+        FilledButton.icon(
+          onPressed: _selectedPlayerIds.length >= 2 && !_isPreparingGame
+              ? _continueToGame
+              : null,
+          icon: _isPreparingGame
+              ? const SizedBox(
+                  width: 18,
+                  height: 18,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : const Icon(Icons.play_arrow_rounded),
+          label: Text(
+            _isPreparingGame
+                ? strings.preparingGame
+                : strings.startNamedGame(strings.dontSayIt),
           ),
-          const SizedBox(height: 12),
-
-          Wrap(
-            spacing: 10,
-            runSpacing: 10,
-            children: [30, 45, 60].map((seconds) {
-              return ChoiceChip(
-                label: Text(strings.secondsShort(seconds)),
-                selected: _secondsPerTurn == seconds,
-                onSelected: (_) {
-                  setState(() {
-                    _secondsPerTurn = seconds;
-                  });
-                },
-              );
-            }).toList(),
-          ),
-
-          const SizedBox(height: 30),
-
-          FilledButton.icon(
-            onPressed: _selectedPlayerIds.length >= 2 && !_isPreparingGame
-                ? _continueToGame
-                : null,
-            icon: const Icon(Icons.play_arrow),
-            label: Text(
-              _isPreparingGame ? strings.preparingGame : strings.continueLabel,
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 

@@ -120,9 +120,11 @@ class _CaptionBattleScreenState extends State<CaptionBattleScreen> {
         imageBytes: previewImage,
       ),
     );
-    _selectedPlayerIds
-      ..clear()
-      ..addAll(availableMembers.map((member) => member.id));
+    _selectedPlayerIds.clear();
+
+    if (widget.participantIds != null) {
+      _selectedPlayerIds.addAll(widget.participantIds!);
+    }
     _isLoading = false;
   }
 
@@ -244,9 +246,11 @@ class _CaptionBattleScreenState extends State<CaptionBattleScreen> {
           );
         }
 
-        _selectedPlayerIds
-          ..clear()
-          ..addAll(widget.participantIds ?? members.map((member) => member.id));
+        _selectedPlayerIds.clear();
+
+        if (widget.participantIds != null) {
+          _selectedPlayerIds.addAll(widget.participantIds!);
+        }
 
         _isLoading = false;
       });
@@ -611,235 +615,157 @@ class _CaptionBattleScreenState extends State<CaptionBattleScreen> {
 
   Widget _buildSetup() {
     final strings = AppLocalizations.of(context)!;
-    return SingleChildScrollView(
-      key: const ValueKey('setup'),
-      padding: const EdgeInsets.fromLTRB(20, 20, 20, 36),
-      child: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 680),
+
+    return GameSetupView(
+      icon: Icons.add_comment_rounded,
+      title: strings.captionBattle,
+      description: strings.captionBattleSetupDescription,
+      children: [
+        GameSetupSectionCard(
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _heroCard(
-                icon: Icons.add_comment_rounded,
-                title: strings.captionBattle,
-                description: strings.captionBattleSetupDescription,
-              ),
-              const SizedBox(height: 22),
-              SilaGameCoachBanner(message: strings.mascotGameSetupMessage),
-              const SizedBox(height: 18),
-              _sectionCard(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      strings.howItWorks,
-                      style: Theme.of(context).textTheme.titleLarge,
-                    ),
-                    const SizedBox(height: 14),
-                    _RuleRow(
-                      icon: Icons.photo_rounded,
-                      text: strings.captionRulePhoto,
-                    ),
-                    _RuleRow(
-                      icon: Icons.edit_rounded,
-                      text: strings.captionRuleWrite,
-                    ),
-                    _RuleRow(
-                      icon: Icons.shuffle_rounded,
-                      text: strings.captionRuleShuffle,
-                    ),
-                    _RuleRow(
-                      icon: Icons.how_to_vote_rounded,
-                      text: strings.captionRuleVote,
-                    ),
-                    _RuleRow(
-                      icon: Icons.star_rounded,
-                      text: strings.captionRulePoint,
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 18),
-              _sectionCard(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      strings.promptVariety,
-                      style: Theme.of(context).textTheme.titleLarge,
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      strings.promptVarietyDescription,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                    const SizedBox(height: 14),
-                    Wrap(
-                      spacing: 9,
-                      runSpacing: 9,
-                      children: CaptionBattleAiService.promptStyles.map((
-                        style,
-                      ) {
-                        return ChoiceChip(
-                          key: ValueKey('caption-style-$style'),
-                          label: Text(_localizedPromptStyle(strings, style)),
-                          selected: _selectedPromptStyle == style,
-                          onSelected: (_) {
-                            setState(() {
-                              _selectedPromptStyle = style;
-                            });
-                          },
-                        );
-                      }).toList(),
-                    ),
-                    const SizedBox(height: 14),
-                    Text(
-                      CaptionBattleAiService.descriptionForStyle(
-                        _selectedPromptStyle,
-                        languageCode: Localizations.localeOf(
-                          context,
-                        ).languageCode,
-                      ),
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      CaptionBattleAiService.examplesForStyle(
-                        _selectedPromptStyle,
-                        languageCode: Localizations.localeOf(
-                          context,
-                        ).languageCode,
-                      ),
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppTheme.primaryColor,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 18),
-              _sectionCard(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      strings.familyPhotos,
-                      style: Theme.of(context).textTheme.titleLarge,
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      _memories.isEmpty
-                          ? strings.noPhotoMemories
-                          : strings.photoMemoriesAvailable(_memories.length),
-                      style: Theme.of(context).textTheme.bodyLarge,
-                    ),
-                    if (_memories.isEmpty) ...[
-                      const SizedBox(height: 10),
-                      Text(
-                        strings.addPhotoMemoryFirst,
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ] else ...[
-                      const SizedBox(height: 10),
-                      Text(
-                        strings.captionBattleRoundCount(_selectedRounds),
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-              const SizedBox(height: 18),
-              if (_memories.isNotEmpty) ...[
-                GameRoundSelector(
-                  value: _selectedRounds,
-                  maximum: _memories.length,
-                  onChanged: (rounds) {
-                    setState(() {
-                      _selectedRounds = rounds;
-                    });
-                  },
-                  keyPrefix: 'caption-round-option',
-                  description: strings.captionRoundPhotoDescription,
-                ),
-                const SizedBox(height: 18),
-              ],
-              _sectionCard(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      strings.choosePlayers,
-                      style: Theme.of(context).textTheme.titleLarge,
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      strings.selectAtLeastTwoFamilyMembers,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                    const SizedBox(height: 14),
-                    for (final member in _familyMembers)
-                      Material(
-                        color: Colors.transparent,
-                        child: CheckboxListTile(
-                          contentPadding: EdgeInsets.zero,
-                          value: _selectedPlayerIds.contains(member.id),
-                          title: Text(member.name),
-                          secondary: const Icon(Icons.person_rounded),
-                          onChanged: widget.participantIds == null
-                              ? (value) {
-                                  setState(() {
-                                    if (value == true) {
-                                      _selectedPlayerIds.add(member.id);
-                                    } else {
-                                      _selectedPlayerIds.remove(member.id);
-                                    }
-                                  });
-                                }
-                              : null,
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 22),
-              FilledButton.icon(
-                onPressed: _isStarting || _memories.isEmpty ? null : _startGame,
-                icon: _isStarting
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Icon(Icons.play_arrow_rounded),
-                label: Text(
-                  _isStarting
-                      ? strings.preparingNamedGame(strings.captionBattle)
-                      : strings.startNamedGame(strings.captionBattle),
-                ),
-              ),
-              const SizedBox(height: 8),
               Text(
-                strings.quickPlayNoRanking,
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                strings.choosePlayers,
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              const SizedBox(height: 6),
+              Text(
+                strings.selectAtLeastTwoFamilyMembers,
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+              const SizedBox(height: 14),
+              for (final member in _familyMembers)
+                CheckboxListTile(
+                  contentPadding: EdgeInsets.zero,
+                  dense: true,
+                  value: _selectedPlayerIds.contains(member.id),
+                  title: Text(
+                    member.name,
+                    style: const TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                  secondary: Icon(
+                    Icons.person_rounded,
+                    size: 18,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                  controlAffinity: ListTileControlAffinity.trailing,
+                  onChanged: widget.participantIds == null
+                      ? (value) {
+                          setState(() {
+                            if (value == true) {
+                              _selectedPlayerIds.add(member.id);
+                            } else {
+                              _selectedPlayerIds.remove(member.id);
+                            }
+                          });
+                        }
+                      : null,
                 ),
+            ],
+          ),
+        ),
+
+        const SizedBox(height: 18),
+
+        GameSetupSectionCard(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                strings.promptVariety,
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              const SizedBox(height: 6),
+              Text(
+                strings.promptVarietyDescription,
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+              const SizedBox(height: 14),
+              Wrap(
+                spacing: 9,
+                runSpacing: 9,
+                children: CaptionBattleAiService.promptStyles.map((style) {
+                  return ChoiceChip(
+                    key: ValueKey('caption-style-$style'),
+                    label: Text(_localizedPromptStyle(strings, style)),
+                    selected: _selectedPromptStyle == style,
+                    onSelected: (_) {
+                      setState(() {
+                        _selectedPromptStyle = style;
+                      });
+                    },
+                  );
+                }).toList(),
               ),
             ],
           ),
         ),
-      ),
+
+        const SizedBox(height: 18),
+
+        GameSetupSectionCard(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                strings.familyPhotos,
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                _memories.isEmpty
+                    ? strings.noPhotoMemories
+                    : strings.photoMemoriesAvailable(_memories.length),
+                style: Theme.of(context).textTheme.bodyLarge,
+              ),
+              if (_memories.isEmpty) ...[
+                const SizedBox(height: 8),
+                Text(
+                  strings.addPhotoMemoryFirst,
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+              ],
+            ],
+          ),
+        ),
+
+        if (_memories.isNotEmpty) ...[
+          const SizedBox(height: 18),
+          GameRoundSelector(
+            value: _selectedRounds,
+            maximum: _memories.length,
+            onChanged: (rounds) {
+              setState(() {
+                _selectedRounds = rounds;
+              });
+            },
+            keyPrefix: 'caption-round-option',
+            description: strings.captionRoundPhotoDescription,
+          ),
+        ],
+
+        const SizedBox(height: 22),
+
+        FilledButton.icon(
+          onPressed:
+              _isStarting || _memories.isEmpty || _selectedPlayerIds.length < 2
+              ? null
+              : _startGame,
+          icon: _isStarting
+              ? const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : const Icon(Icons.play_arrow_rounded),
+          label: Text(
+            _isStarting
+                ? strings.preparingNamedGame(strings.captionBattle)
+                : strings.startNamedGame(strings.captionBattle),
+          ),
+        ),
+      ],
     );
   }
 
@@ -1478,28 +1404,6 @@ class _CaptionBattleScreenState extends State<CaptionBattleScreen> {
         border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
       ),
       child: child,
-    );
-  }
-}
-
-class _RuleRow extends StatelessWidget {
-  const _RuleRow({required this.icon, required this.text});
-
-  final IconData icon;
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(icon, size: 21, color: AppTheme.primaryColor),
-          const SizedBox(width: 12),
-          Expanded(child: Text(text)),
-        ],
-      ),
     );
   }
 }

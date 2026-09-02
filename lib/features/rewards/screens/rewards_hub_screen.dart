@@ -2,9 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../../../core/mascot/sila_mascot.dart';
-import '../../../core/theme/appearance_controller.dart';
-import '../../../core/theme/app_theme_catalog.dart';
-import '../../../core/theme/theme_unlock_service.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../mascot/widgets/sila_companion_callout.dart';
 import '../digital/digital_reward_catalog.dart';
@@ -35,103 +32,6 @@ class RewardsHubScreen extends StatefulWidget {
 
 class _RewardsHubScreenState extends State<RewardsHubScreen> {
   RewardsService? _rewardsService;
-  AppAppearance? _processingAppearance;
-  Future<void> _purchaseAppTheme({required AppThemeOffer offer}) async {
-    if (_processingAppearance != null || offer.isIncluded) {
-      return;
-    }
-
-    final user = FirebaseAuth.instance.currentUser;
-    final strings = AppLocalizations.of(context)!;
-
-    if (user == null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(strings.signInToUnlockThemes)));
-      return;
-    }
-
-    if (AppearanceController.instance.isUnlocked(offer.appearance)) {
-      return;
-    }
-
-    final themeName = _appearanceName(strings, offer.appearance);
-    final cost = offer.tokenCost!;
-
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) {
-        return AlertDialog(
-          icon: const Icon(Icons.palette_rounded),
-          title: Text(strings.unlockThemeTitle(themeName)),
-          content: Text(strings.unlockThemeMessage(cost)),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(dialogContext, false),
-              child: Text(strings.cancel),
-            ),
-            FilledButton.icon(
-              onPressed: () => Navigator.pop(dialogContext, true),
-              icon: const Icon(Icons.stars_rounded),
-              label: Text(strings.unlockForTokens(cost)),
-            ),
-          ],
-        );
-      },
-    );
-
-    if (confirmed != true || !mounted) {
-      return;
-    }
-
-    setState(() {
-      _processingAppearance = offer.appearance;
-    });
-
-    try {
-      await ThemeUnlockService().unlockWithTokens(
-        userId: user.uid,
-        offer: offer,
-      );
-
-      await AppearanceController.instance.registerUnlocked([offer.appearance]);
-
-      if (!mounted) {
-        return;
-      }
-
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(strings.themeUnlocked(themeName))));
-    } on ThemeUnlockException catch (error) {
-      if (!mounted) {
-        return;
-      }
-
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(error.message)));
-    } finally {
-      if (mounted) {
-        setState(() {
-          _processingAppearance = null;
-        });
-      }
-    }
-  }
-
-  String _appearanceName(AppLocalizations strings, AppAppearance appearance) {
-    return switch (appearance) {
-      AppAppearance.light => strings.silaLightTheme,
-      AppAppearance.dark => strings.darkTheme,
-      AppAppearance.familyYear2026 => strings.uaeFamilyYearTheme,
-      AppAppearance.space => strings.spaceTheme,
-      AppAppearance.khalifaUniversity => strings.khalifaUniversityTheme,
-      AppAppearance.desertNights => strings.desertNightsTheme,
-      AppAppearance.pearlLagoon => strings.pearlLagoonTheme,
-    };
-  }
-
   RewardsService get _service => _rewardsService ??= RewardsService();
   final DigitalRewardService _digitalRewardService = DigitalRewardService();
   final Future<List<DigitalRewardDefinition>> _catalog =
@@ -480,11 +380,6 @@ class _RewardsHubScreenState extends State<RewardsHubScreen> {
                 processingRewardId: _processingRewardId,
                 onPurchase: (reward) => _purchaseDigitalReward(reward: reward),
                 onEquip: _equipDigitalReward,
-                appThemes: AppThemeCatalog.offers
-                    .where((offer) => !offer.isIncluded)
-                    .toList(),
-                processingAppearance: _processingAppearance,
-                onPurchaseAppTheme: (offer) => _purchaseAppTheme(offer: offer),
               ),
             ],
           ),
@@ -525,15 +420,6 @@ class _RewardsHubScreenState extends State<RewardsHubScreen> {
               );
             },
             onEquip: (_) async {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(strings.developerPreviewReadOnly)),
-              );
-            },
-            appThemes: AppThemeCatalog.offers
-                .where((offer) => !offer.isIncluded)
-                .toList(),
-            processingAppearance: null,
-            onPurchaseAppTheme: (_) async {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text(strings.developerPreviewReadOnly)),
               );
@@ -925,9 +811,6 @@ class _DigitalRewardsStore extends StatelessWidget {
     required this.processingRewardId,
     required this.onPurchase,
     required this.onEquip,
-    required this.appThemes,
-    required this.processingAppearance,
-    required this.onPurchaseAppTheme,
     this.userId,
     this.developerPreview = false,
   });
@@ -938,10 +821,6 @@ class _DigitalRewardsStore extends StatelessWidget {
   final String? processingRewardId;
   final _DigitalRewardAction onPurchase;
   final _DigitalRewardAction onEquip;
-
-  final List<AppThemeOffer> appThemes;
-  final AppAppearance? processingAppearance;
-  final Future<void> Function(AppThemeOffer offer) onPurchaseAppTheme;
 
   final bool developerPreview;
 
@@ -972,9 +851,6 @@ class _DigitalRewardsStore extends StatelessWidget {
         final rewards = catalogSnapshot.data ?? const [];
         if (developerPreview) {
           return _DigitalRewardsCatalogView(
-            appThemes: appThemes,
-            processingAppearance: processingAppearance,
-            onPurchaseAppTheme: onPurchaseAppTheme,
             rewards: rewards,
             tokens: tokens,
             ownedRewardIds: const {'frame_gold', 'badge_champion'},
@@ -1018,9 +894,6 @@ class _DigitalRewardsStore extends StatelessWidget {
                 .toSet();
 
             return _DigitalRewardsCatalogView(
-              appThemes: appThemes,
-              processingAppearance: processingAppearance,
-              onPurchaseAppTheme: onPurchaseAppTheme,
               rewards: rewards,
               tokens: tokens,
               ownedRewardIds: owned,
@@ -1045,14 +918,7 @@ class _DigitalRewardsCatalogView extends StatelessWidget {
     required this.processingRewardId,
     required this.onPurchase,
     required this.onEquip,
-    required this.appThemes,
-    required this.processingAppearance,
-    required this.onPurchaseAppTheme,
   });
-
-  final List<AppThemeOffer> appThemes;
-  final AppAppearance? processingAppearance;
-  final Future<void> Function(AppThemeOffer offer) onPurchaseAppTheme;
 
   final List<DigitalRewardDefinition> rewards;
   final int tokens;
@@ -1079,15 +945,6 @@ class _DigitalRewardsCatalogView extends StatelessWidget {
           style: Theme.of(context).textTheme.bodyLarge,
         ),
         const SizedBox(height: 22),
-
-        _AppThemeRewardsSection(
-          offers: appThemes,
-          tokens: tokens,
-          processingAppearance: processingAppearance,
-          onPurchase: onPurchaseAppTheme,
-        ),
-
-        const SizedBox(height: 30),
 
         for (final category in DigitalRewardCategory.values) ...[
           _DigitalRewardCategoryHeader(category: category),
@@ -1130,187 +987,6 @@ class _DigitalRewardsCatalogView extends StatelessWidget {
           const SizedBox(height: 30),
         ],
       ],
-    );
-  }
-}
-
-class _AppThemeRewardsSection extends StatelessWidget {
-  const _AppThemeRewardsSection({
-    required this.offers,
-    required this.tokens,
-    required this.processingAppearance,
-    required this.onPurchase,
-  });
-
-  final List<AppThemeOffer> offers;
-  final int tokens;
-  final AppAppearance? processingAppearance;
-  final Future<void> Function(AppThemeOffer offer) onPurchase;
-
-  @override
-  Widget build(BuildContext context) {
-    return ListenableBuilder(
-      listenable: AppearanceController.instance,
-      builder: (context, child) {
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(
-                  Icons.format_paint_rounded,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-                const SizedBox(width: 9),
-                Expanded(
-                  child: Text(
-                    'App Themes',
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 6),
-            Text(
-              'Unlock full Sila appearances with Family Tokens.',
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-            const SizedBox(height: 12),
-            LayoutBuilder(
-              builder: (context, constraints) {
-                final cardWidth = constraints.maxWidth < 300
-                    ? constraints.maxWidth
-                    : constraints.maxWidth < 700
-                    ? (constraints.maxWidth - 12) / 2
-                    : (constraints.maxWidth - 32) / 3;
-
-                return Wrap(
-                  spacing: 12,
-                  runSpacing: 12,
-                  children: [
-                    for (final offer in offers)
-                      SizedBox(
-                        width: cardWidth,
-                        child: _AppThemeRewardCard(
-                          offer: offer,
-                          tokens: tokens,
-                          owned: AppearanceController.instance.isUnlocked(
-                            offer.appearance,
-                          ),
-                          processing: processingAppearance == offer.appearance,
-                          anotherThemeProcessing:
-                              processingAppearance != null &&
-                              processingAppearance != offer.appearance,
-                          onPurchase: () => onPurchase(offer),
-                        ),
-                      ),
-                  ],
-                );
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-}
-
-class _AppThemeRewardCard extends StatelessWidget {
-  const _AppThemeRewardCard({
-    required this.offer,
-    required this.tokens,
-    required this.owned,
-    required this.processing,
-    required this.anotherThemeProcessing,
-    required this.onPurchase,
-  });
-
-  final AppThemeOffer offer;
-  final int tokens;
-  final bool owned;
-  final bool processing;
-  final bool anotherThemeProcessing;
-  final VoidCallback onPurchase;
-
-  String _name(AppLocalizations strings) {
-    return switch (offer.appearance) {
-      AppAppearance.light => strings.silaLightTheme,
-      AppAppearance.dark => strings.darkTheme,
-      AppAppearance.familyYear2026 => strings.uaeFamilyYearTheme,
-      AppAppearance.space => strings.spaceTheme,
-      AppAppearance.khalifaUniversity => strings.khalifaUniversityTheme,
-      AppAppearance.desertNights => strings.desertNightsTheme,
-      AppAppearance.pearlLagoon => strings.pearlLagoonTheme,
-    };
-  }
-
-  IconData get _icon {
-    return switch (offer.appearance) {
-      AppAppearance.light => Icons.light_mode_rounded,
-      AppAppearance.dark => Icons.dark_mode_rounded,
-      AppAppearance.familyYear2026 => Icons.family_restroom_rounded,
-      AppAppearance.space => Icons.rocket_launch_rounded,
-      AppAppearance.khalifaUniversity => Icons.science_rounded,
-      AppAppearance.desertNights => Icons.nightlight_round,
-      AppAppearance.pearlLagoon => Icons.water_rounded,
-    };
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final strings = AppLocalizations.of(context)!;
-    final cost = offer.tokenCost ?? 0;
-    final canAfford = tokens >= cost;
-    final disabled = processing || anotherThemeProcessing || owned;
-
-    return Card(
-      clipBehavior: Clip.antiAlias,
-      child: Padding(
-        padding: const EdgeInsets.all(15),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            CircleAvatar(radius: 28, child: Icon(_icon, size: 28)),
-            const SizedBox(height: 10),
-            Text(
-              _name(strings),
-              style: Theme.of(
-                context,
-              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900),
-            ),
-            const SizedBox(height: 10),
-            Chip(
-              avatar: const Icon(Icons.stars_rounded, size: 18),
-              label: Text(strings.tokensAmount(cost)),
-            ),
-            const SizedBox(height: 10),
-            FilledButton.icon(
-              onPressed: disabled || !canAfford ? null : onPurchase,
-              icon: processing
-                  ? const SizedBox.square(
-                      dimension: 18,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : Icon(
-                      owned
-                          ? Icons.check_circle_rounded
-                          : Icons.lock_open_rounded,
-                    ),
-              label: Text(
-                processing
-                    ? strings.updating
-                    : owned
-                    ? 'Owned'
-                    : !canAfford
-                    ? strings.needMoreTokens(cost - tokens)
-                    : strings.buyForTokens(cost),
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

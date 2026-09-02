@@ -182,13 +182,13 @@ abstract class AppLocalizations {
   /// No description provided for @khalifaUniversityTheme.
   ///
   /// In en, this message translates to:
-  /// **'KU Future Lab'**
+  /// **'Future Lab'**
   String get khalifaUniversityTheme;
 
   /// No description provided for @khalifaUniversityThemeDescription.
   ///
   /// In en, this message translates to:
-  /// **'A precise blue innovation system inspired by Khalifa University'**
+  /// **'A clean blue theme inspired by technology and innovation.'**
   String get khalifaUniversityThemeDescription;
 
   /// No description provided for @desertNightsTheme.

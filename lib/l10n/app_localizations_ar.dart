@@ -51,10 +51,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get spaceThemeDescription => 'مغامرات بين النجوم ومدارات مضيئة وسحر الفضاء';
 
   @override
-  String get khalifaUniversityTheme => 'مختبر جامعة خليفة للمستقبل';
+  String get khalifaUniversityTheme => 'مختبر المستقبل';
 
   @override
-  String get khalifaUniversityThemeDescription => 'هوية ابتكار زرقاء ودقيقة مستوحاة من جامعة خليفة';
+  String get khalifaUniversityThemeDescription => 'مظهر أزرق عصري مستوحى من التقنية والابتكار.';
 
   @override
   String get desertNightsTheme => 'ليالي الصحراء';

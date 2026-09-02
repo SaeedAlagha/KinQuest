@@ -100,7 +100,11 @@ class _DrawAndGuessScreenState extends State<DrawAndGuessScreen> {
               .where((member) => widget.participantIds!.contains(member.id))
               .toList();
     _familyMembers.addAll(availableMembers);
-    _selectedPlayerIds.addAll(availableMembers.map((member) => member.id));
+    _selectedPlayerIds.clear();
+
+    if (widget.participantIds != null) {
+      _selectedPlayerIds.addAll(widget.participantIds!);
+    }
     _isLoading = false;
   }
 
@@ -185,9 +189,11 @@ class _DrawAndGuessScreenState extends State<DrawAndGuessScreen> {
           ..clear()
           ..addAll(members);
 
-        _selectedPlayerIds
-          ..clear()
-          ..addAll(widget.participantIds ?? members.map((member) => member.id));
+        _selectedPlayerIds.clear();
+
+        if (widget.participantIds != null) {
+          _selectedPlayerIds.addAll(widget.participantIds!);
+        }
 
         _isLoading = false;
       });
@@ -408,94 +414,91 @@ class _DrawAndGuessScreenState extends State<DrawAndGuessScreen> {
       );
     }
 
-    return Padding(
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(
-            strings.whoIsPlaying,
-            style: Theme.of(
-              context,
-            ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            strings.chooseAtLeastTwoPlayers,
-            style: Theme.of(context).textTheme.bodyLarge,
-          ),
-          const SizedBox(height: 18),
-          GameRoundSelector(
-            value: _selectedRounds,
-            onChanged: (rounds) {
-              setState(() {
-                _selectedRounds = rounds;
-              });
-            },
-            keyPrefix: 'drawing-round-option',
-            description: strings.drawingTurnEachRound,
-          ),
-          const SizedBox(height: 24),
+    return GameSetupView(
+      icon: Icons.draw_rounded,
+      title: strings.drawAndGuess,
+      description: strings.drawingTurnEachRound,
+      children: [
+        GameSetupSectionCard(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                strings.whoIsPlaying,
+                style: Theme.of(
+                  context,
+                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                strings.chooseAtLeastTwoPlayers,
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+              const SizedBox(height: 14),
 
-          Expanded(
-            child: ListView.separated(
-              itemCount: _familyMembers.length + 1,
-              separatorBuilder: (_, _) => const SizedBox(height: 10),
-              itemBuilder: (context, index) {
-                if (index == 0) {
-                  return SilaGameCoachBanner(
-                    message: strings.mascotGameSetupMessage,
-                  );
-                }
-
-                final player = _familyMembers[index - 1];
-
-                final selected = _selectedPlayerIds.contains(player.id);
-
-                return Card(
-                  margin: EdgeInsets.zero,
-                  child: CheckboxListTile(
-                    value: selected,
-                    onChanged: widget.participantIds == null
-                        ? (_) => _togglePlayer(player)
-                        : null,
-                    secondary: CircleAvatar(
-                      child: Text(
-                        player.name.isEmpty
-                            ? '?'
-                            : player.name[0].toUpperCase(),
-                      ),
-                    ),
-                    title: Text(
-                      player.name,
-                      style: const TextStyle(fontWeight: FontWeight.w600),
-                    ),
+              for (final player in _familyMembers)
+                CheckboxListTile(
+                  contentPadding: EdgeInsets.zero,
+                  dense: true,
+                  value: _selectedPlayerIds.contains(player.id),
+                  onChanged: widget.participantIds == null
+                      ? (_) => _togglePlayer(player)
+                      : null,
+                  secondary: Icon(
+                    Icons.person_rounded,
+                    size: 18,
+                    color: Theme.of(context).colorScheme.primary,
                   ),
-                );
-              },
-            ),
+                  title: Text(
+                    player.name,
+                    style: const TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                  controlAffinity: ListTileControlAffinity.trailing,
+                ),
+
+              const SizedBox(height: 6),
+
+              Text(
+                strings.selectedPlayersCount(_selectedPlayerIds.length),
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            ],
           ),
+        ),
 
-          const SizedBox(height: 16),
+        const SizedBox(height: 18),
 
-          Text(
-            strings.selectedPlayersCount(_selectedPlayerIds.length),
-            textAlign: TextAlign.center,
+        GameRoundSelector(
+          value: _selectedRounds,
+          onChanged: (rounds) {
+            setState(() {
+              _selectedRounds = rounds;
+            });
+          },
+          keyPrefix: 'drawing-round-option',
+          description: strings.drawingTurnEachRound,
+        ),
+
+        const SizedBox(height: 22),
+
+        FilledButton.icon(
+          onPressed: _selectedPlayerIds.length >= 2 && !_isPreparingGame
+              ? _continueToGame
+              : null,
+          icon: _isPreparingGame
+              ? const SizedBox(
+                  width: 18,
+                  height: 18,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : const Icon(Icons.draw_rounded),
+          label: Text(
+            _isPreparingGame
+                ? strings.preparingGame
+                : strings.startNamedGame(strings.drawAndGuess),
           ),
-
-          const SizedBox(height: 12),
-
-          FilledButton.icon(
-            onPressed: _selectedPlayerIds.length >= 2 && !_isPreparingGame
-                ? _continueToGame
-                : null,
-            icon: const Icon(Icons.arrow_forward),
-            label: Text(
-              _isPreparingGame ? strings.preparingGame : strings.continueLabel,
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
