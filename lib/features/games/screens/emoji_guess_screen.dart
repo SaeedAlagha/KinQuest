@@ -222,6 +222,10 @@ class _EmojiGuessScreenState extends State<EmojiGuessScreen> {
   }
 
   void _togglePlayer(_EmojiPlayer player) {
+    if (widget.participantIds != null) {
+      return;
+    }
+
     setState(() {
       if (_selectedPlayerIds.contains(player.id)) {
         _selectedPlayerIds.remove(player.id);
@@ -685,7 +689,9 @@ class _EmojiGuessScreenState extends State<EmojiGuessScreen> {
                   child: CheckboxListTile(
                     contentPadding: EdgeInsets.zero,
                     value: _selectedPlayerIds.contains(player.id),
-                    onChanged: (_) => _togglePlayer(player),
+                    onChanged: widget.participantIds == null
+                        ? (_) => _togglePlayer(player)
+                        : null,
                     secondary: const Icon(Icons.person_rounded),
                     title: Text(player.name),
                   ),
