@@ -8434,6 +8434,96 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'HIGH-STAKES DUEL'**
   String get highStakesDuel;
+
+  /// No description provided for @gameCharadesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Charades'**
+  String get gameCharadesTitle;
+
+  /// No description provided for @gameCharadesDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Act out creative prompts for the whole family.'**
+  String get gameCharadesDescription;
+
+  /// No description provided for @gameCharadesBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'ACT IT OUT'**
+  String get gameCharadesBadge;
+
+  /// No description provided for @gameWouldYouRatherTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Would You Rather'**
+  String get gameWouldYouRatherTitle;
+
+  /// No description provided for @gameWouldYouRatherDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose between two playful options.'**
+  String get gameWouldYouRatherDescription;
+
+  /// No description provided for @gameWouldYouRatherBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'CHOICE GAME'**
+  String get gameWouldYouRatherBadge;
+
+  /// No description provided for @gameTruthOrDareTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Truth or Dare'**
+  String get gameTruthOrDareTitle;
+
+  /// No description provided for @gameTruthOrDareDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a friendly truth or a fun challenge.'**
+  String get gameTruthOrDareDescription;
+
+  /// No description provided for @gameTruthOrDareBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'PARTY CHALLENGE'**
+  String get gameTruthOrDareBadge;
+
+  /// No description provided for @gameNeverHaveIEverTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Never Have I Ever'**
+  String get gameNeverHaveIEverTitle;
+
+  /// No description provided for @gameNeverHaveIEverDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Share family-friendly moments and surprises.'**
+  String get gameNeverHaveIEverDescription;
+
+  /// No description provided for @gameNeverHaveIEverBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'PARTY TALK'**
+  String get gameNeverHaveIEverBadge;
+
+  /// No description provided for @leaveGameTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave game?'**
+  String get leaveGameTitle;
+
+  /// No description provided for @leaveGameMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Your current match will be lost if you leave now.'**
+  String get leaveGameMessage;
+
+  /// No description provided for @leaveGame.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave Game'**
+  String get leaveGame;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

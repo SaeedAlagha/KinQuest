@@ -1719,6 +1719,24 @@
   "partyGamesSectionSubtitle": "ألعاب خفيفة للضحك والمرح الجماعي.",
   "logicDuel": "مواجهة منطقية",
   "battleDuel": "مواجهة قتالية",
-  "highStakesDuel": "مواجهة عالية المخاطر"
+  "highStakesDuel": "مواجهة عالية المخاطر",
+  "gameCharadesTitle": "التمثيل الصامت",
+"gameCharadesDescription": "مثّل أفكارًا إبداعية ليستمتع بها جميع أفراد العائلة.",
+"gameCharadesBadge": "مثّلها",
+
+"gameWouldYouRatherTitle": "ماذا تفضّل؟",
+"gameWouldYouRatherDescription": "اختر بين خيارين مرحين.",
+"gameWouldYouRatherBadge": "لعبة الاختيار",
+
+"gameTruthOrDareTitle": "صراحة أم تحدٍ",
+"gameTruthOrDareDescription": "اختر سؤال صراحة لطيفًا أو تحديًا ممتعًا.",
+"gameTruthOrDareBadge": "تحدٍ جماعي",
+
+"gameNeverHaveIEverTitle": "لم يسبق لي",
+"gameNeverHaveIEverDescription": "شاركوا مواقف ومفاجآت عائلية ممتعة.",
+"gameNeverHaveIEverBadge": "حديث جماعي",
+"leaveGameTitle": "مغادرة اللعبة؟",
+"leaveGameMessage": "ستفقد المباراة الحالية إذا غادرت الآن.",
+"leaveGame": "مغادرة اللعبة"
 }
   

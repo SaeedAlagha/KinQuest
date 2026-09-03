@@ -4797,4 +4797,49 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get highStakesDuel => 'مواجهة عالية المخاطر';
+
+  @override
+  String get gameCharadesTitle => 'التمثيل الصامت';
+
+  @override
+  String get gameCharadesDescription => 'مثّل أفكارًا إبداعية ليستمتع بها جميع أفراد العائلة.';
+
+  @override
+  String get gameCharadesBadge => 'مثّلها';
+
+  @override
+  String get gameWouldYouRatherTitle => 'ماذا تفضّل؟';
+
+  @override
+  String get gameWouldYouRatherDescription => 'اختر بين خيارين مرحين.';
+
+  @override
+  String get gameWouldYouRatherBadge => 'لعبة الاختيار';
+
+  @override
+  String get gameTruthOrDareTitle => 'صراحة أم تحدٍ';
+
+  @override
+  String get gameTruthOrDareDescription => 'اختر سؤال صراحة لطيفًا أو تحديًا ممتعًا.';
+
+  @override
+  String get gameTruthOrDareBadge => 'تحدٍ جماعي';
+
+  @override
+  String get gameNeverHaveIEverTitle => 'لم يسبق لي';
+
+  @override
+  String get gameNeverHaveIEverDescription => 'شاركوا مواقف ومفاجآت عائلية ممتعة.';
+
+  @override
+  String get gameNeverHaveIEverBadge => 'حديث جماعي';
+
+  @override
+  String get leaveGameTitle => 'مغادرة اللعبة؟';
+
+  @override
+  String get leaveGameMessage => 'ستفقد المباراة الحالية إذا غادرت الآن.';
+
+  @override
+  String get leaveGame => 'مغادرة اللعبة';
 }

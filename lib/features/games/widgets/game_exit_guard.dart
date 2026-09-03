@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import '../../../l10n/app_localizations.dart';
 class GameExitGuard extends StatefulWidget {
   const GameExitGuard({
     super.key,
@@ -18,7 +18,9 @@ class _GameExitGuardState extends State<GameExitGuard> {
   bool _allowPop = false;
   bool _dialogOpen = false;
 
-  Future<void> _handleBackAttempt() async {
+Future<void> _handleBackAttempt() async {
+    final strings = AppLocalizations.of(context)!;
+
     if (_dialogOpen) return;
 
     _dialogOpen = true;
@@ -29,19 +31,14 @@ class _GameExitGuardState extends State<GameExitGuard> {
       builder: (dialogContext) {
         return AlertDialog(
           icon: const Icon(Icons.sports_esports_rounded),
-          title: const Text('Leave game?'),
-          content: const Text(
-            'Your current match will be lost if you leave now.',
-          ),
+title: Text(strings.leaveGameTitle),          content: Text(strings.leaveGameMessage),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(dialogContext).pop(false),
-              child: const Text('Keep Playing'),
-            ),
+child: Text(strings.keepPlaying),            ),
             FilledButton(
               onPressed: () => Navigator.of(dialogContext).pop(true),
-              child: const Text('Leave Game'),
-            ),
+child: Text(strings.leaveGame),            ),
           ],
         );
       },

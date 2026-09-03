@@ -4756,4 +4756,49 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get highStakesDuel => 'HIGH-STAKES DUEL';
+
+  @override
+  String get gameCharadesTitle => 'Charades';
+
+  @override
+  String get gameCharadesDescription => 'Act out creative prompts for the whole family.';
+
+  @override
+  String get gameCharadesBadge => 'ACT IT OUT';
+
+  @override
+  String get gameWouldYouRatherTitle => 'Would You Rather';
+
+  @override
+  String get gameWouldYouRatherDescription => 'Choose between two playful options.';
+
+  @override
+  String get gameWouldYouRatherBadge => 'CHOICE GAME';
+
+  @override
+  String get gameTruthOrDareTitle => 'Truth or Dare';
+
+  @override
+  String get gameTruthOrDareDescription => 'Pick a friendly truth or a fun challenge.';
+
+  @override
+  String get gameTruthOrDareBadge => 'PARTY CHALLENGE';
+
+  @override
+  String get gameNeverHaveIEverTitle => 'Never Have I Ever';
+
+  @override
+  String get gameNeverHaveIEverDescription => 'Share family-friendly moments and surprises.';
+
+  @override
+  String get gameNeverHaveIEverBadge => 'PARTY TALK';
+
+  @override
+  String get leaveGameTitle => 'Leave game?';
+
+  @override
+  String get leaveGameMessage => 'Your current match will be lost if you leave now.';
+
+  @override
+  String get leaveGame => 'Leave Game';
 }

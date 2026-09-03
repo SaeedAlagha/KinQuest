@@ -1719,6 +1719,23 @@
 "partyGamesSectionSubtitle": "Casual games made for laughs and group fun.",
 "logicDuel": "LOGIC DUEL",
 "battleDuel": "BATTLE DUEL",
-"highStakesDuel": "HIGH-STAKES DUEL"
+"highStakesDuel": "HIGH-STAKES DUEL",
+"gameCharadesTitle": "Charades",
+"gameCharadesDescription": "Act out creative prompts for the whole family.",
+"gameCharadesBadge": "ACT IT OUT",
 
+"gameWouldYouRatherTitle": "Would You Rather",
+"gameWouldYouRatherDescription": "Choose between two playful options.",
+"gameWouldYouRatherBadge": "CHOICE GAME",
+
+"gameTruthOrDareTitle": "Truth or Dare",
+"gameTruthOrDareDescription": "Pick a friendly truth or a fun challenge.",
+"gameTruthOrDareBadge": "PARTY CHALLENGE",
+
+"gameNeverHaveIEverTitle": "Never Have I Ever",
+"gameNeverHaveIEverDescription": "Share family-friendly moments and surprises.",
+"gameNeverHaveIEverBadge": "PARTY TALK",
+"leaveGameTitle": "Leave game?",
+"leaveGameMessage": "Your current match will be lost if you leave now.",
+"leaveGame": "Leave Game"
 }
