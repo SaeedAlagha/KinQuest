@@ -313,7 +313,7 @@ const response = await fetch(
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      model: "z-ai/glm-5.2:free",
+      model: "openrouter/free",
       messages: [
         {
           role: "user",
