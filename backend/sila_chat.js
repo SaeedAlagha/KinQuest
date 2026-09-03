@@ -48,21 +48,39 @@ function safeName(value, fallback = "Family member") {
 }
 
 function normalizeSilaReply(responseText) {
-  let decoded;
-  try {
-    decoded = JSON.parse(responseText);
-  } catch (_) {
+  if (typeof responseText !== "string" || !responseText.trim()) {
     throw new SilaChatError("Sila could not prepare a reply.", 502);
   }
 
-  const reply = typeof decoded?.reply === "string" ? decoded.reply.trim() : "";
-  if (!reply) {
-    throw new SilaChatError("Sila could not prepare a reply.", 502);
+  const cleaned = responseText
+    .trim()
+    .replace(/^```json\s*/i, "")
+    .replace(/^```\s*/i, "")
+    .replace(/\s*```$/i, "")
+    .trim();
+
+  try {
+    const decoded = JSON.parse(cleaned);
+
+    const reply =
+      typeof decoded?.reply === "string" ? decoded.reply.trim() : "";
+
+    if (reply) {
+      return {
+        reply: reply.slice(0, 1200),
+        pose: ALLOWED_POSES.has(decoded?.pose)
+          ? decoded.pose
+          : "encouraging",
+      };
+    }
+  } catch (_) {
+    // Some OpenRouter free models return normal text instead of JSON.
+    // Use the text itself as Sila's reply rather than failing the chat.
   }
 
   return {
-    reply: reply.slice(0, 1200),
-    pose: ALLOWED_POSES.has(decoded?.pose) ? decoded.pose : "encouraging",
+    reply: cleaned.slice(0, 1200),
+    pose: "encouraging",
   };
 }
 
@@ -295,7 +313,7 @@ const response = await fetch(
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      model: "openrouter/free",
+      model: "z-ai/glm-5.2:free",
       messages: [
         {
           role: "user",
