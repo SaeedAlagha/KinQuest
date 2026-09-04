@@ -61,7 +61,8 @@ Appearance preferences include Sila Light, Dark, and UAE Family Year 2026.
 - **Client:** Flutter 3.44.8 / Dart 3.12, responsive Material UI.
 - **Identity and data:** Firebase Authentication, Firestore, Storage, and Cloud
   Messaging.
-- **AI gateway:** Express and Google GenAI. API keys stay server-side.
+- **AI gateway:** Express routes every game and mission-proof request to Google
+  Gemini, while Sila Chat alone uses OpenRouter. Both API keys stay server-side.
 - **Authorization:** family-scoped Firestore and Storage rules tested in the
   official Firebase emulators.
 - **Production boundary:** every `/api` route requires a verified Firebase ID
@@ -89,7 +90,9 @@ npm --prefix backend ci
 cp backend/.env.example backend/.env
 ```
 
-Set `GEMINI_API_KEY` in `backend/.env`, then start the AI gateway:
+Set `GEMINI_API_KEY` and `OPENROUTER_API_KEY` in `backend/.env`, then start the
+AI gateway. Games use Gemini 3.8 Flash with a stable Gemini 2.5 Flash fallback;
+Sila Chat uses the configurable OpenRouter model:
 
 ```sh
 npm --prefix backend start
@@ -140,6 +143,21 @@ flutter build web --release \
   --dart-define=KINQUEST_API_BASE_URL=https://api.example.com
 ```
 
+For iOS, first replace the placeholder `com.example.kinquest` identifier with
+the team's registered Apple bundle ID, regenerate the matching Firebase iOS
+configuration, select an Apple Developer team in Xcode, and deploy the HTTPS
+gateway. The guarded helper then creates the signed archive and IPA:
+
+```sh
+KINQUEST_API_BASE_URL=https://api.example.com \
+  ./tool/build_ios_release.sh
+```
+
+The helper deliberately stops before building when the URL is insecure, full
+Xcode or an Apple Distribution identity is missing, or the placeholder bundle
+ID remains. Upload the resulting IPA through Xcode or Transporter for TestFlight
+and App Store distribution.
+
 Missing, malformed, or insecure release URLs stop the app instead of silently
 calling localhost. GitHub Actions repeats analysis, tests, backend validation,
 Firebase emulator tests, and the release build, then uploads `sila-web-release`
@@ -150,6 +168,7 @@ Before any live deployment, follow the [release checklist](docs/RELEASE_CHECKLIS
 ## Competition and pilot handoff
 
 - [Competition demo script](docs/COMPETITION_DEMO.md)
+- [Judge QR/web access](docs/JUDGE_WEB_ACCESS.md)
 - [Architecture and privacy](docs/ARCHITECTURE_AND_PRIVACY.md)
 - [Release checklist](docs/RELEASE_CHECKLIST.md)
 - [Family pilot playbook](docs/PILOT_PLAYBOOK.md)

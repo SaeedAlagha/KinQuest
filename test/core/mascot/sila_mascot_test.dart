@@ -136,9 +136,133 @@ void main() {
     }
   });
 
+  testWidgets('cosmetics use separate depth planes around Sila', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: SilaMascot(
+            animate: false,
+            accessoryAssetKey: SilaMascotAccessories.scholarCap,
+            outfitAssetKey: SilaMascotOutfits.familyCape,
+            auraAssetKey: SilaMascotAuras.cosmicOrbit,
+          ),
+        ),
+      ),
+    );
+
+    for (final key in [
+      'sila-mascot-aura-cosmic_orbit',
+      'sila-mascot-outfit-back-family_cape',
+      'sila-mascot-accessory-back-scholar_cap',
+      'sila-mascot-outfit-family_cape',
+      'sila-mascot-accessory-scholar_cap',
+      'sila-mascot-aura-front-cosmic_orbit',
+    ]) {
+      expect(find.byKey(ValueKey(key)), findsOneWidget, reason: key);
+    }
+
+    final rigStack = tester.widget<Stack>(
+      find.descendant(
+        of: find.byKey(const ValueKey('sila-character-rig')),
+        matching: find.byType(Stack),
+      ),
+    );
+    expect(rigStack.children.map((child) => child.key), const [
+      ValueKey('sila-aura-back-layer'),
+      ValueKey('sila-outfit-back-layer'),
+      ValueKey('sila-accessory-back-layer'),
+      ValueKey('sila-pose-artwork-layer'),
+      ValueKey('sila-animated-outfit-layer'),
+      ValueKey('sila-animated-accessory-layer'),
+      ValueKey('sila-aura-front-layer'),
+    ]);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('combined cosmetics remain paint-safe at app display sizes', (
+    tester,
+  ) async {
+    const sizes = [58.0, 100.0, 126.0, 205.0];
+    const looks = [
+      (
+        SilaMascotAccessories.guardianCrown,
+        SilaMascotOutfits.familyCape,
+        SilaMascotAuras.victoryBurst,
+      ),
+      (
+        SilaMascotAccessories.explorerCap,
+        SilaMascotOutfits.memoryKeeper,
+        SilaMascotAuras.familySparkles,
+      ),
+      (
+        SilaMascotAccessories.scholarCap,
+        SilaMascotOutfits.spaceScout,
+        SilaMascotAuras.cosmicOrbit,
+      ),
+      (
+        SilaMascotAccessories.starHalo,
+        SilaMascotOutfits.gameJersey,
+        SilaMascotAuras.uaeRibbon,
+      ),
+      (
+        SilaMascotAccessories.familyLeafWreath,
+        SilaMascotOutfits.desertExplorer,
+        SilaMascotAuras.memoryHearts,
+      ),
+    ];
+
+    for (final size in sizes) {
+      for (final pose in SilaMascotPose.values) {
+        for (final look in looks) {
+          await tester.pumpWidget(
+            MaterialApp(
+              home: Scaffold(
+                body: Center(
+                  child: SilaMascot(
+                    pose: pose,
+                    height: size,
+                    animate: false,
+                    accessoryAssetKey: look.$1,
+                    outfitAssetKey: look.$2,
+                    auraAssetKey: look.$3,
+                  ),
+                ),
+              ),
+            ),
+          );
+          expect(
+            tester.takeException(),
+            isNull,
+            reason: '${pose.name} at $size with ${look.$1}',
+          );
+        }
+      }
+    }
+  });
+
   testWidgets('every pose has attached wardrobe geometry', (tester) async {
     final accessoryGeometries = <String>{};
     final outfitGeometries = <String>{};
+    const expectedAccessoryGeometry = {
+      SilaMascotPose.idle: (Offset(0.033, 0), 1.0),
+      SilaMascotPose.welcome: (Offset(0.043, -0.006), 1.0),
+      SilaMascotPose.thinking: (Offset(0.013, 0.01), 0.94),
+      SilaMascotPose.celebrating: (Offset(-0.052, 0.021), 0.96),
+      SilaMascotPose.oops: (Offset(0.02, -0.088), 0.96),
+      SilaMascotPose.encouraging: (Offset(0.028, -0.068), 0.94),
+      SilaMascotPose.winner: (Offset(-0.019, -0.066), 0.95),
+    };
+    const expectedOutfitGeometry = {
+      SilaMascotPose.idle: (Offset(0.039, 0.012), 1.0),
+      SilaMascotPose.welcome: (Offset(-0.018, 0.013), 1.0),
+      SilaMascotPose.thinking: (Offset(-0.046, 0.025), 0.95),
+      SilaMascotPose.celebrating: (Offset(-0.069, 0.037), 0.97),
+      SilaMascotPose.oops: (Offset(0.009, -0.083), 0.96),
+      SilaMascotPose.encouraging: (Offset(0.003, -0.069), 0.95),
+      SilaMascotPose.winner: (Offset(-0.018, -0.067), 0.95),
+    };
 
     for (final pose in SilaMascotPose.values) {
       await tester.pumpWidget(
@@ -220,6 +344,26 @@ void main() {
         outfitScale.transform.entry(0, 0),
         greaterThan(0),
         reason: pose.name,
+      );
+      expect(
+        accessoryTranslation.translation,
+        expectedAccessoryGeometry[pose]!.$1,
+        reason: 'measured head anchor for ${pose.name}',
+      );
+      expect(
+        accessoryScale.transform.entry(0, 0),
+        closeTo(expectedAccessoryGeometry[pose]!.$2, 0.0001),
+        reason: 'measured head scale for ${pose.name}',
+      );
+      expect(
+        outfitTranslation.translation,
+        expectedOutfitGeometry[pose]!.$1,
+        reason: 'measured chest anchor for ${pose.name}',
+      );
+      expect(
+        outfitScale.transform.entry(0, 0),
+        closeTo(expectedOutfitGeometry[pose]!.$2, 0.0001),
+        reason: 'measured chest scale for ${pose.name}',
       );
 
       accessoryGeometries.add(

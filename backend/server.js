@@ -1,7 +1,6 @@
 const express = require("express");
 const cors = require("cors");
 const dotenv = require("dotenv");
-const { GoogleGenAI } = require("@google/genai");
 const { getFirestore } = require("firebase-admin/firestore");
 const {
   createAuthenticatedUserRateLimiter,
@@ -11,6 +10,7 @@ const {
   securityHeaders,
 } = require("./security");
 const { ensureFirebaseAdmin } = require("./firebase_admin");
+const { createGameAi } = require("./game_ai");
 const {
   DigitalRewardError,
   digitalRewardCatalog,
@@ -19,6 +19,7 @@ const {
   unequipDigitalReward,
 } = require("./digital_rewards");
 const {
+  DEFAULT_OPENROUTER_MODEL,
   SilaChatError,
   chatWithSila,
   clearSilaChat,
@@ -44,14 +45,27 @@ app.use("/api", createRateLimiter());
 app.use("/api", createFirebaseAuthMiddleware());
 app.use("/api", express.json({ limit: "2mb", type: "application/json" }));
 const silaChatRateLimiter = createAuthenticatedUserRateLimiter();
-const ai = new GoogleGenAI({
-  apiKey: process.env.GEMINI_API_KEY,
-});
+const OPENROUTER_MODEL =
+  process.env.OPENROUTER_MODEL?.trim() || DEFAULT_OPENROUTER_MODEL;
+const gameAi = createGameAi();
 
 app.get("/", (req, res) => {
   res.json({
     message: "Sila AI service is running",
     authentication: "Firebase ID token required in production",
+    providers: {
+      games: {
+        provider: gameAi.provider,
+        model: gameAi.primaryModel,
+        fallbackModel: gameAi.fallbackModel,
+        configured: gameAi.configured,
+      },
+      silaChat: {
+        provider: "OpenRouter",
+        model: OPENROUTER_MODEL,
+        configured: Boolean(process.env.OPENROUTER_API_KEY?.trim()),
+      },
+    },
   });
 });
 
@@ -189,7 +203,6 @@ app.post("/api/sila/chat", silaChatRateLimiter, async (request, response) => {
     response.json(
       await chatWithSila({
         database: db,
-        ai,
         userId,
         rawMessage: request.body?.message,
         locale: request.body?.locale,
@@ -255,44 +268,12 @@ Return ONLY valid JSON in this exact format:
 }
 `;
 
-let response;
-let lastError;
-
-for (let attempt = 1; attempt <= 3; attempt += 1) {
-  try {
-    response = await ai.models.generateContent({
-      model: "gemini-3.5-flash",
+    const response = await gameAi.generateContent({
       contents: prompt,
       config: {
         responseMimeType: "application/json",
       },
     });
-
-    break;
-  } catch (error) {
-    lastError = error;
-
-    const temporary =
-      error?.status === 429 ||
-      error?.status === 503;
-
-    if (!temporary || attempt === 3) {
-      throw error;
-    }
-
-    console.warn(
-      `Risk It AI busy. Retry ${attempt}/3...`,
-    );
-
-    await new Promise((resolve) => {
-      setTimeout(resolve, attempt * 1500);
-    });
-  }
-}
-
-if (!response) {
-  throw lastError ?? new Error("AI returned no response");
-}
 
     const result = JSON.parse(response.text);
 
@@ -347,8 +328,7 @@ Return ONLY valid JSON in this exact format:
 }
 `;
 
-    const response = await ai.models.generateContent({
-      model: "gemini-3.5-flash",
+    const response = await gameAi.generateContent({
       contents: prompt,
       config: {
         responseMimeType: "application/json",
@@ -409,8 +389,7 @@ Return ONLY valid JSON in this exact format:
 }
 `;
 
-    const response = await ai.models.generateContent({
-      model: "gemini-3.5-flash",
+    const response = await gameAi.generateContent({
       contents: prompt,
       config: {
   responseMimeType: "application/json",
@@ -497,8 +476,7 @@ Return ONLY valid JSON in this exact structure:
 }
 `;
 
-    const response = await ai.models.generateContent({
-      model: "gemini-3.5-flash",
+    const response = await gameAi.generateContent({
       contents: prompt,
       config: {
         responseMimeType: "application/json",
@@ -602,8 +580,7 @@ Return ONLY valid JSON in this structure:
 }
 `;
 
-    const response = await ai.models.generateContent({
-      model: "gemini-3.5-flash",
+    const response = await gameAi.generateContent({
       contents: prompt,
       config: {
         responseMimeType: "application/json",
@@ -690,8 +667,7 @@ Return ONLY valid JSON in this structure:
 }
 `;
 
-    const response = await ai.models.generateContent({
-      model: "gemini-3.5-flash",
+    const response = await gameAi.generateContent({
       contents: prompt,
       config: {
         responseMimeType: "application/json",
@@ -867,8 +843,7 @@ Return ONLY valid JSON in this structure:
       ? ["question"]
       : ["question", "options"];
 
-    const response = await ai.models.generateContent({
-      model: "gemini-3.5-flash",
+    const response = await gameAi.generateContent({
       contents: prompt,
       config: {
         responseMimeType: "application/json",
@@ -1013,8 +988,7 @@ Important rules:
 Return ONLY valid JSON.
 `;
 
-    const response = await ai.models.generateContent({
-      model: "gemini-3.5-flash",
+    const response = await gameAi.generateContent({
       contents: [
         {
           inlineData: {
@@ -1151,8 +1125,7 @@ Return ONLY valid JSON in this exact structure:
 }
 `;
 
-    const response = await ai.models.generateContent({
-      model: "gemini-3.5-flash",
+    const response = await gameAi.generateContent({
       contents: prompt,
       config: {
         responseMimeType: "application/json",
@@ -1283,8 +1256,7 @@ Return ONLY valid JSON:
 }
 `;
 
-    const response = await ai.models.generateContent({
-      model: "gemini-3.5-flash",
+    const response = await gameAi.generateContent({
       contents: prompt,
       config: {
         responseMimeType: "application/json",
@@ -1404,8 +1376,7 @@ Return ONLY valid JSON:
 }
 `;
 
-    const response = await ai.models.generateContent({
-      model: "gemini-3.5-flash",
+    const response = await gameAi.generateContent({
       contents: prompt,
       config: {
         responseMimeType: "application/json",
@@ -1516,8 +1487,7 @@ Return ONLY valid JSON in this exact structure:
 }
 `;
 
-    const response = await ai.models.generateContent({
-      model: "gemini-3.5-flash",
+    const response = await gameAi.generateContent({
       contents: prompt,
       config: {
         responseMimeType: "application/json",
@@ -1626,8 +1596,7 @@ Return ONLY valid JSON:
 }
 `;
 
-    const response = await ai.models.generateContent({
-      model: "gemini-3.5-flash",
+    const response = await gameAi.generateContent({
       contents: prompt,
       config: {
         responseMimeType: "application/json",
@@ -1711,8 +1680,7 @@ Return ONLY valid JSON in this exact structure:
 }
 `;
 
-    const response = await ai.models.generateContent({
-      model: "gemini-3.5-flash",
+    const response = await gameAi.generateContent({
       contents: prompt,
       config: {
         responseMimeType: "application/json",
@@ -1835,13 +1803,7 @@ Allowed verdict values:
 Confidence must be a number from 0 to 1.
 `;
 
-    let response;
-    let lastError;
-
-    for (let attempt = 1; attempt <= 3; attempt += 1) {
-      try {
-        response = await ai.models.generateContent({
-          model: "gemini-3.5-flash",
+    const response = await gameAi.generateContent({
           contents: [
             {
               text: prompt,
@@ -1875,32 +1837,6 @@ Confidence must be a number from 0 to 1.
             },
           },
         });
-
-        break;
-      } catch (error) {
-        lastError = error;
-
-        const temporary =
-          error?.status === 429 ||
-          error?.status === 503;
-
-        if (!temporary || attempt === 3) {
-          throw error;
-        }
-
-        console.warn(
-          `Mission verification AI busy. Retry ${attempt}/3...`,
-        );
-
-        await new Promise((resolve) => {
-          setTimeout(resolve, attempt * 1500);
-        });
-      }
-    }
-
-    if (!response) {
-      throw lastError ?? new Error("AI returned no response");
-    }
 
     const result = JSON.parse(response.text);
 
@@ -1988,8 +1924,7 @@ Return ONLY valid JSON in this exact structure:
 }
 `;
 
-    const response = await ai.models.generateContent({
-      model: "gemini-3.5-flash",
+    const response = await gameAi.generateContent({
       contents: prompt,
       config: {
         responseMimeType: "application/json",
@@ -2072,8 +2007,7 @@ Return ONLY valid JSON:
 }
 `;
 
-const response = await ai.models.generateContent({
-  model: "gemini-3.5-flash",
+const response = await gameAi.generateContent({
   contents: prompt,
   config: {
     responseMimeType: "application/json",
@@ -2186,8 +2120,7 @@ RULES:
 Return ONLY valid JSON.
 `;
 
-    const response = await ai.models.generateContent({
-      model: "gemini-3.5-flash",
+    const response = await gameAi.generateContent({
       contents: prompt,
       config: {
         responseMimeType: "application/json",
@@ -2364,8 +2297,7 @@ Return ONLY valid JSON in this structure:
 }
 `;
 
-    const response = await ai.models.generateContent({
-      model: "gemini-3.5-flash",
+    const response = await gameAi.generateContent({
       contents: prompt,
       config: {
         responseMimeType: "application/json",
@@ -2428,7 +2360,7 @@ const PORT = process.env.PORT || 3000;
 
 if (require.main === module) {
   app.listen(PORT, () => {
-    console.log(`Sila Gemini server running on port ${PORT}`);
+    console.log(`Sila AI service running on port ${PORT}`);
   });
 }
 

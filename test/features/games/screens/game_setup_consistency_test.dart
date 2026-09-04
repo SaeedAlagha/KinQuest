@@ -140,9 +140,18 @@ void main() {
   });
 
   final previewAiGames = <String, Widget>{
-    'ارسم وخمّن': const DrawAndGuessScreen(developerPreview: true),
-    'لا تقلها': const DontSayItScreen(developerPreview: true),
-    'مرّر القنبلة': const PassTheBombScreen(developerPreview: true),
+    'ارسم وخمّن': const DrawAndGuessScreen(
+      developerPreview: true,
+      participantIds: {'preview-1', 'preview-2', 'preview-3', 'preview-4'},
+    ),
+    'لا تقلها': const DontSayItScreen(
+      developerPreview: true,
+      participantIds: {'preview-1', 'preview-2', 'preview-3', 'preview-4'},
+    ),
+    'مرّر القنبلة': const PassTheBombScreen(
+      developerPreview: true,
+      participantIds: {'preview-1', 'preview-2', 'preview-3', 'preview-4'},
+    ),
   };
 
   for (final game in previewAiGames.entries) {
@@ -172,12 +181,10 @@ void main() {
         find.byKey(const ValueKey('sila-game-coach-button')),
         findsNothing,
       );
-      expect(find.text(game.key), findsOneWidget);
+      expect(find.text(game.key), findsWidgets);
       expect(find.text('من سيلعب؟'), findsOneWidget);
 
-      final startLabel = game.key == 'مرّر القنبلة'
-          ? 'ابدأ مرّر القنبلة'
-          : 'متابعة';
+      final startLabel = 'ابدأ ${game.key}';
       final startButton = find.text(startLabel);
       await tester.ensureVisible(startButton);
       await tester.tap(startButton);

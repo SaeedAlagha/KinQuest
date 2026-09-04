@@ -2,14 +2,17 @@ const assert = require("node:assert/strict");
 const test = require("node:test");
 
 const {
+  DEFAULT_OPENROUTER_MODEL,
   MAX_RETAINED_MESSAGES,
   MAX_MESSAGE_LENGTH,
+  OPENROUTER_CHAT_URL,
   SilaChatError,
   buildSilaPrompt,
   chatWithSila,
   clearSilaChat,
   getSilaChatHistory,
   normalizeSilaReply,
+  requestOpenRouterReply,
   validateSilaMessage,
 } = require("../sila_chat");
 
@@ -45,7 +48,7 @@ test("Sila prompt includes only supplied safe family context", () => {
   assert.doesNotMatch(prompt, /email|birthDate|invitationCode|fcmToken/);
 });
 
-test("Sila reply uses an allowlisted pose and rejects malformed output", () => {
+test("Sila reply uses an allowlisted pose and accepts OpenRouter text", () => {
   assert.deepEqual(
     normalizeSilaReply('{"reply":"Great idea!","pose":"celebrating"}'),
     { reply: "Great idea!", pose: "celebrating" },
@@ -54,9 +57,46 @@ test("Sila reply uses an allowlisted pose and rejects malformed output", () => {
     normalizeSilaReply('{"reply":"I can help.","pose":"dangerous"}'),
     { reply: "I can help.", pose: "encouraging" },
   );
-  assert.throws(
-    () => normalizeSilaReply("not-json"),
-    (error) => error instanceof SilaChatError && error.statusCode === 502,
+  assert.deepEqual(
+    normalizeSilaReply("A plain but useful response"),
+    { reply: "A plain but useful response", pose: "encouraging" },
+  );
+});
+
+test("Sila sends chat only to the configured OpenRouter model", async () => {
+  let request;
+  const reply = await requestOpenRouterReply({
+    prompt: "Help this family choose a game",
+    apiKey: "test-openrouter-key",
+    fetchImpl: async (url, options) => {
+      request = { url, options };
+      return {
+        ok: true,
+        status: 200,
+        text: async () =>
+          JSON.stringify({
+            choices: [{ message: { content: "Try charades!" } }],
+          }),
+      };
+    },
+  });
+
+  assert.equal(reply, "Try charades!");
+  assert.equal(request.url, OPENROUTER_CHAT_URL);
+  assert.equal(
+    request.options.headers.Authorization,
+    "Bearer test-openrouter-key",
+  );
+  assert.equal(
+    JSON.parse(request.options.body).model,
+    DEFAULT_OPENROUTER_MODEL,
+  );
+});
+
+test("Sila fails closed when its OpenRouter key is missing", async () => {
+  await assert.rejects(
+    () => requestOpenRouterReply({ prompt: "Hello", apiKey: "" }),
+    (error) => error instanceof SilaChatError && error.statusCode === 503,
   );
 });
 
@@ -161,23 +201,17 @@ test("a completed Sila exchange prunes legacy history to the retention cap", asy
   }
   const database = new FakeFirestore(entries);
   let generatedPrompt = "";
-  const ai = {
-    models: {
-      async generateContent({ contents }) {
-        generatedPrompt = contents;
-        return {
-          text: JSON.stringify({
-            reply: "Let us celebrate with a family game!",
-            pose: "celebrating",
-          }),
-        };
-      },
-    },
+  const requestReply = async ({ prompt }) => {
+    generatedPrompt = prompt;
+    return JSON.stringify({
+      reply: "Let us celebrate with a family game!",
+      pose: "celebrating",
+    });
   };
 
   const exchange = await chatWithSila({
     database,
-    ai,
+    requestReply,
     userId: "alice",
     rawMessage: "What should we play?",
     locale: "en-AE",

@@ -1029,7 +1029,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get legalAiTitle => 'AI-assisted features';
 
   @override
-  String get legalAiBody => 'When you use an AI game, mission proof, or Sila Chat, the app sends only the text, selected image, or family member names needed for that request through its protected server to Google Gemini. Anything you type in a chat is included in that request. Private Sila Chat history is stored with your account so the conversation can continue and can be cleared in Sila Studio. Mission proof images are evaluated without being stored by Sila. Spoken replies use your device\'s text-to-speech service and never turn on the microphone.';
+  String get legalAiBody => 'When you use an AI game or mission proof, the app sends only the text, selected image, or family member names needed for that request through its protected server to Google Gemini. Sila Chat sends what you type and the limited family context needed for the conversation through the same protected server to OpenRouter. Private Sila Chat history is stored with your account so the conversation can continue and can be cleared in Sila Studio. Mission proof images are evaluated without being stored by Sila. Spoken replies use your device\'s text-to-speech service and never turn on the microphone.';
 
   @override
   String get legalControlsTitle => 'Your controls';

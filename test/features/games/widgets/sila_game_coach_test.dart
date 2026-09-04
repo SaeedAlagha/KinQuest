@@ -68,6 +68,14 @@ void main() {
     expect(find.byKey(const ValueKey('sila-game-coach-phone')), findsNothing);
     expect(
       tester
+          .widget<Material>(
+            find.byKey(const ValueKey('sila-game-coach-surface')),
+          )
+          .clipBehavior,
+      Clip.none,
+    );
+    expect(
+      tester
           .getBottomLeft(find.byKey(const ValueKey('sila-game-coach-compact')))
           .dy,
       lessThan(560),

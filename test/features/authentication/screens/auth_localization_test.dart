@@ -24,7 +24,7 @@ void main() {
     await _pumpArabic(tester, const WelcomeScreen());
 
     final description = find.text(
-      'مساحة عائلية خاصة للقصص المشتركة والتحديات الممتعة واللحظات التي تبقي الجميع على تواصل.',
+      'مرحبًا! أنا صلة، رفيق عائلتكم المرح. سأرشد ألعابكم وألهم لحظاتكم وأحتفل بكل رابطة تنمونها معًا.',
     );
     expect(description, findsOneWidget);
     expect(Directionality.of(tester.element(description)), TextDirection.rtl);

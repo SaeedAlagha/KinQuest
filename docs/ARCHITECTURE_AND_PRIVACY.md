@@ -16,12 +16,13 @@ Flutter client
        ├─ request-size limit
        ├─ security headers
        ├─ Firebase token verification
-       └─ Google GenAI (server-held key)
+       ├─ Google Gemini (games and mission proof; server-held key)
+       └─ OpenRouter (Sila Chat only; server-held key)
 ```
 
 The client is responsible for presentation and authenticated family journeys.
 Firebase rules are the data authorization boundary. The Express service is the
-AI trust boundary: the generative API key never belongs in the Flutter bundle.
+AI trust boundary: generative API keys never belong in the Flutter bundle.
 
 ## Data boundaries
 
@@ -32,7 +33,8 @@ AI trust boundary: the generative API key never belongs in the Flutter bundle.
 | Tokens and owned digital rewards | User Firestore subcollections | User ownership and transactional updates |
 | Memories and permitted media | Family Firestore/Storage paths | Family membership rules |
 | Push tokens and notifications | User subcollections | User-scoped access; server-side delivery |
-| AI prompts and generated game content | Authenticated HTTPS gateway | Firebase bearer token, CORS, limits |
+| Game prompts, generated game content, and mission proof | Authenticated HTTPS gateway → Google Gemini | Firebase bearer token, CORS, limits, Gemini model fallback |
+| Sila Chat messages and limited family context | Authenticated HTTPS gateway → OpenRouter | Firebase bearer token, per-user limits, bounded retained history |
 | Judge demo state | In-memory simulated client state | No account and no photo upload |
 
 ## Implemented controls
@@ -57,8 +59,10 @@ AI trust boundary: the generative API key never belongs in the Flutter bundle.
 The code controls access paths, but deployment still matters. Before launch:
 
 - rotate any credential ever pasted into chat, logs, screenshots, or a commit;
-- store `GEMINI_API_KEY` and Firebase service credentials in the hosting
-  platform's secret manager;
+- store `GEMINI_API_KEY`, `OPENROUTER_API_KEY`, and Firebase service credentials
+  in the hosting platform's secret manager;
+- keep games on `GEMINI_MODEL`/`GEMINI_FALLBACK_MODEL` and Sila Chat on
+  `OPENROUTER_MODEL`; never route game prompts through the chat provider;
 - set `NODE_ENV=production` and an exact `KINQUEST_ALLOWED_ORIGINS` list;
 - deploy the API behind HTTPS and build the client with that exact URL;
 - enable Firebase budget alerts, App Check where supported, and log retention

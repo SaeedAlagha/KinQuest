@@ -34,8 +34,6 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('استوديو صلة'), findsOneWidget);
-    expect(find.text('رابطة عائلتكم'), findsOneWidget);
-    expect(find.text('المستوى 2: صديق العائلة'), findsOneWidget);
     expect(find.text('أغطية الرأس'), findsOneWidget);
     expect(find.text('تاج حارس العائلة'), findsOneWidget);
     expect(find.text('تحدث مع صلة'), findsOneWidget);

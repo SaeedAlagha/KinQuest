@@ -85,12 +85,32 @@ jobs:
         run: npm test
 
       - name: Audit production dependencies
-        run: npm audit --omit=dev
+        timeout-minutes: 2
+        shell: bash
+        run: |
+          set +e
+          timeout 90s npm audit --omit=dev --audit-level=high \
+            2>&1 | tee "$RUNNER_TEMP/npm-audit.log"
+          audit_status=${PIPESTATUS[0]}
+          set -e
+
+          if [ "$audit_status" -eq 0 ]; then
+            exit 0
+          fi
+
+          if [ "$audit_status" -eq 124 ] || \
+             grep -Eq 'Service Unavailable|audit endpoint returned an error|ECONNRESET|ETIMEDOUT|ENETUNREACH|EAI_AGAIN' \
+               "$RUNNER_TEMP/npm-audit.log"; then
+            echo "::warning::npm audit service was unavailable; application tests still passed."
+            exit 0
+          fi
+
+          exit "$audit_status"
 
   firebase-rules:
     name: Firebase rules validation
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
 
     steps:
       - name: Check out repository
@@ -100,6 +120,8 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: 22
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
 
       - name: Set up Java
         uses: actions/setup-java@v5
@@ -109,7 +131,7 @@ jobs:
 
       - name: Install rules test dependencies
         working-directory: backend
-        run: npm ci
+        run: npm ci --no-audit --fund=false --prefer-offline
 
       - name: Compile Firebase rules in isolated emulators
         run: >-

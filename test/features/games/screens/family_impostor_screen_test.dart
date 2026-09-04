@@ -16,7 +16,10 @@ void main() {
       const MaterialApp(
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
-        home: FamilyImpostorScreen(developerPreview: true),
+        home: FamilyImpostorScreen(
+          developerPreview: true,
+          participantIds: {'preview-1', 'preview-2', 'preview-3', 'preview-4'},
+        ),
       ),
     );
     await tester.pump();
@@ -30,8 +33,9 @@ void main() {
     expect(find.text('Technology'), findsOneWidget);
     expect(find.text('UAE & Heritage'), findsOneWidget);
 
-    await tester.drag(find.byType(ListView), const Offset(0, -300));
-    await tester.pump();
+    await tester.ensureVisible(
+      find.byKey(const ValueKey('impostor-category-UAE & Heritage')),
+    );
     await tester.tap(
       find.byKey(const ValueKey('impostor-category-UAE & Heritage')),
     );
@@ -42,15 +46,15 @@ void main() {
       findsOneWidget,
     );
 
-    await tester.drag(find.byType(ListView), const Offset(0, -500));
-    await tester.pump();
+    await tester.ensureVisible(
+      find.byKey(const ValueKey('impostor-round-option-5')),
+    );
 
     expect(find.text('1 round'), findsOneWidget);
     expect(find.text('3 rounds'), findsOneWidget);
     expect(find.text('5 rounds'), findsOneWidget);
 
-    await tester.drag(find.byType(ListView), const Offset(0, -700));
-    await tester.pump();
+    await tester.ensureVisible(find.text('Start Game'));
 
     expect(find.text('4 players selected'), findsOneWidget);
     expect(find.text('Start Game'), findsOneWidget);
@@ -70,13 +74,19 @@ void main() {
         locale: Locale('ar'),
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
-        home: FamilyImpostorScreen(developerPreview: true),
+        home: FamilyImpostorScreen(
+          developerPreview: true,
+          participantIds: {'preview-1', 'preview-2', 'preview-3', 'preview-4'},
+        ),
       ),
     );
     await tester.pump();
 
-    expect(find.text('الدخيل بين العائلة'), findsOneWidget);
-    expect(find.text('جهّزوا لغزكم'), findsOneWidget);
+    expect(find.text('الدخيل بين العائلة'), findsWidgets);
+    expect(
+      find.textContaining('اختر فئة واحدة لكل الكلمات السرية'),
+      findsOneWidget,
+    );
     expect(find.text('مزيج عشوائي'), findsOneWidget);
     expect(find.text('الإمارات والتراث'), findsOneWidget);
 

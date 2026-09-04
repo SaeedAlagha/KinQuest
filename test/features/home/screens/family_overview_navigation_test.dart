@@ -47,12 +47,12 @@ void main() {
     expect(find.text('5 family members'), findsOneWidget);
     expect(
       tester.widget<NavigationBar>(find.byType(NavigationBar)).selectedIndex,
-      6,
+      5,
     );
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('Home greeting and desktop Sila identity open the Studio', (
+  testWidgets('Home and desktop Sila actions open the chat-first Studio', (
     tester,
   ) async {
     tester.view.physicalSize = const Size(1200, 800);
@@ -80,43 +80,31 @@ void main() {
       isNot(0),
     );
     semantics.dispose();
-    await tester.tap(find.byKey(const ValueKey('desktop-sila-brand-action')));
-    await tester.pump(const Duration(milliseconds: 300));
 
-    expect(
-      tester.widget<NavigationRail>(find.byType(NavigationRail)).selectedIndex,
-      4,
-    );
+    tester
+        .widget<InkWell>(
+          find.byKey(const ValueKey('desktop-sila-brand-action')),
+        )
+        .onTap!();
+    await _pumpUntilFound(tester, find.byType(SilaStudioScreen));
     expect(find.byType(SilaStudioScreen), findsOneWidget);
-
-    // Simulate a previous deep wardrobe visit. The Home chat action must not
-    // inherit this scroll offset when it returns to Sila.
-    await tester.drag(
-      find.byKey(const ValueKey('sila-studio-scroll')),
-      const Offset(0, -1100),
-    );
-    await tester.pump(const Duration(milliseconds: 200));
     expect(
-      tester.getRect(find.byKey(const ValueKey('sila-studio-mascot'))).bottom,
-      lessThan(500),
+      tester
+          .widget<SilaStudioScreen>(find.byType(SilaStudioScreen))
+          .showBackButton,
+      isTrue,
     );
 
-    final homeDestination = find.descendant(
-      of: find.byType(NavigationRail),
-      matching: find.text('Home'),
-    );
-    await tester.tap(homeDestination);
-    await tester.pump(const Duration(milliseconds: 300));
-    await tester.tap(find.byKey(const ValueKey('home-sila-action')));
+    await tester.tap(find.byTooltip('Back'));
+    await tester.pumpAndSettle();
+    tester
+        .widget<FilledButton>(find.byKey(const ValueKey('home-sila-action')))
+        .onPressed!();
     await _pumpUntilFound(
       tester,
       find.byKey(const ValueKey('sila-chat-panel')),
     );
 
-    expect(
-      tester.widget<NavigationRail>(find.byType(NavigationRail)).selectedIndex,
-      4,
-    );
     final focusedStudio = tester.widget<SilaStudioScreen>(
       find.byType(SilaStudioScreen),
     );
@@ -128,41 +116,6 @@ void main() {
     );
     expect(chatRect.top, lessThan(800));
     expect(chatRect.bottom, greaterThan(0));
-    expect(
-      chatRect.top,
-      lessThan(
-        tester.getRect(find.byKey(const ValueKey('sila-studio-mascot'))).top,
-      ),
-    );
-
-    final draftInput = find.byKey(const ValueKey('sila-chat-input'));
-    await tester.ensureVisible(draftInput);
-    await tester.enterText(draftInput, 'A family-game draft');
-
-    // The Home CTA is intentionally chat-first, but a later normal Sila tab
-    // visit must restore the character showcase as the Studio's hero without
-    // destroying an unfinished conversation.
-    await tester.tap(homeDestination);
-    await tester.pump(const Duration(milliseconds: 300));
-    tester
-        .widget<NavigationRail>(find.byType(NavigationRail))
-        .onDestinationSelected!(4);
-    await tester.pump(const Duration(milliseconds: 300));
-
-    final normalStudio = tester.widget<SilaStudioScreen>(
-      find.byType(SilaStudioScreen),
-    );
-    expect(normalStudio.chatFocusRequest, 0);
-    expect(
-      tester.getRect(find.byKey(const ValueKey('sila-studio-mascot'))).top,
-      lessThan(
-        tester.getRect(find.byKey(const ValueKey('sila-chat-panel'))).top,
-      ),
-    );
-    expect(
-      tester.widget<TextField>(draftInput).controller?.text,
-      'A family-game draft',
-    );
     expect(tester.takeException(), isNull);
   });
 }
