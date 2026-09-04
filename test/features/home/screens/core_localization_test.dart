@@ -4,7 +4,6 @@ import 'package:kinquest/core/theme/app_theme.dart';
 import 'package:kinquest/features/competitions/screens/daily_challenge_screen.dart';
 import 'package:kinquest/features/home/screens/home_screen.dart';
 import 'package:kinquest/features/home/screens/main_navigation_screen.dart';
-import 'package:kinquest/features/mascot/screens/sila_studio_screen.dart';
 import 'package:kinquest/l10n/app_localizations.dart';
 
 void main() {
@@ -70,7 +69,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('Arabic seven-destination navigation fits at 320px', (
+  testWidgets('Arabic six-destination navigation fits at 320px', (
     tester,
   ) async {
     await _setViewport(tester, const Size(320, 568));
@@ -88,25 +87,12 @@ void main() {
       'الذكريات',
       'اللعب',
       'المهام',
-      'صلة',
       'المكافآت',
       'الملف الشخصي',
     ]);
     expect(
       navigation.labelBehavior,
       NavigationDestinationLabelBehavior.onlyShowSelected,
-    );
-    expect(tester.takeException(), isNull);
-
-    await tester.tap(find.byKey(const ValueKey('nav-sila-destination')));
-    await tester.pump(const Duration(milliseconds: 300));
-
-    navigation = tester.widget<NavigationBar>(find.byType(NavigationBar));
-    expect(navigation.selectedIndex, 4);
-    expect(find.byType(SilaStudioScreen), findsOneWidget);
-    expect(
-      Directionality.of(tester.element(find.byType(SilaStudioScreen))),
-      TextDirection.rtl,
     );
     expect(tester.takeException(), isNull);
   });

@@ -51,10 +51,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get spaceThemeDescription => 'Starlit adventures, glowing orbits, and deep-space wonder';
 
   @override
-  String get khalifaUniversityTheme => 'KU Future Lab';
+  String get khalifaUniversityTheme => 'Future Lab';
 
   @override
-  String get khalifaUniversityThemeDescription => 'A precise blue innovation system inspired by Khalifa University';
+  String get khalifaUniversityThemeDescription => 'A clean blue theme inspired by technology and innovation.';
 
   @override
   String get desertNightsTheme => 'Desert Nights';
@@ -2412,7 +2412,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get weeklyCrown => 'Weekly crown';
 
   @override
-  String get monthlyCompetitionDescription => 'Four family members. Two semifinals. One final. One champion.';
+  String get monthlyCompetitionDescription => 'Choose your competitors and battle through a knockout tournament to crown one Monthly Cup champion.';
 
   @override
   String get monthlyRewards => 'Monthly rewards';
@@ -2428,7 +2428,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get chooseFourCompetitors => 'Choose exactly 4 competitors';
+  String get chooseFourCompetitors => 'Choose at least 2 competitors';
 
   @override
   String get startingMonthlyCup => 'Starting Monthly Cup...';
@@ -4636,6 +4636,32 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get attackLanded => 'Attack landed!';
+
+  @override
+  String playerCouldNotDefend(String name, int damage) {
+    String _temp0 = intl.Intl.pluralLogic(
+      damage,
+      locale: localeName,
+      other: '$damage hearts were removed.',
+      one: '1 heart was removed.',
+    );
+    return '$name couldn\'t defend. $_temp0';
+  }
+
+  @override
+  String heartsRemaining(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count hearts remaining',
+      one: '1 heart remaining',
+      zero: 'No hearts remaining',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get otherPlayerLookAwayShort => 'The other player should look away.';
 
   @override
@@ -4730,4 +4756,49 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get highStakesDuel => 'HIGH-STAKES DUEL';
+
+  @override
+  String get gameCharadesTitle => 'Charades';
+
+  @override
+  String get gameCharadesDescription => 'Act out creative prompts for the whole family.';
+
+  @override
+  String get gameCharadesBadge => 'ACT IT OUT';
+
+  @override
+  String get gameWouldYouRatherTitle => 'Would You Rather';
+
+  @override
+  String get gameWouldYouRatherDescription => 'Choose between two playful options.';
+
+  @override
+  String get gameWouldYouRatherBadge => 'CHOICE GAME';
+
+  @override
+  String get gameTruthOrDareTitle => 'Truth or Dare';
+
+  @override
+  String get gameTruthOrDareDescription => 'Pick a friendly truth or a fun challenge.';
+
+  @override
+  String get gameTruthOrDareBadge => 'PARTY CHALLENGE';
+
+  @override
+  String get gameNeverHaveIEverTitle => 'Never Have I Ever';
+
+  @override
+  String get gameNeverHaveIEverDescription => 'Share family-friendly moments and surprises.';
+
+  @override
+  String get gameNeverHaveIEverBadge => 'PARTY TALK';
+
+  @override
+  String get leaveGameTitle => 'Leave game?';
+
+  @override
+  String get leaveGameMessage => 'Your current match will be lost if you leave now.';
+
+  @override
+  String get leaveGame => 'Leave Game';
 }

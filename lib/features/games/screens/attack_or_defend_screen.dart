@@ -22,6 +22,7 @@ enum _BattlePhase {
   earnEnergyQuestion,
   actionChoice,
   defenseQuestion,
+  defenseResult,
   battleResult,
   finalResults,
 }
@@ -82,6 +83,7 @@ class _AttackOrDefendScreenState extends State<AttackOrDefendScreen> {
   int _attackerIndex = 0;
 
   _BattleAction? _pendingAttack;
+  int _lastDamage = 0;
 
   Timer? _timer;
   int _secondsRemaining = 0;
@@ -513,13 +515,19 @@ class _AttackOrDefendScreenState extends State<AttackOrDefendScreen> {
       return;
     }
 
-    final newHealth = max(0, (_health[_defender.id] ?? 0) - _attackDamage);
+    final damage = _attackDamage;
+    final newHealth = max(0, (_health[_defender.id] ?? 0) - damage);
 
-    _health[_defender.id] = newHealth;
+    setState(() {
+      _health[_defender.id] = newHealth;
+      _lastDamage = damage;
+      _pendingAttack = null;
+      _phase = _BattlePhase.defenseResult;
+    });
+  }
 
-    _pendingAttack = null;
-
-    if (newHealth <= 0) {
+  void _continueAfterDefenseResult() {
+    if ((_health[_defender.id] ?? 0) <= 0) {
       _completeBattle(_attacker);
       return;
     }
@@ -642,6 +650,7 @@ class _AttackOrDefendScreenState extends State<AttackOrDefendScreen> {
             _BattlePhase.earnEnergyQuestion => _buildQuestion(defending: false),
             _BattlePhase.actionChoice => _buildActionChoice(),
             _BattlePhase.defenseQuestion => _buildQuestion(defending: true),
+            _BattlePhase.defenseResult => _buildDefenseResult(),
             _BattlePhase.battleResult => _buildBattleResult(),
             _BattlePhase.finalResults => _buildFinalResults(),
           },
@@ -1062,6 +1071,68 @@ class _AttackOrDefendScreenState extends State<AttackOrDefendScreen> {
             const SizedBox(height: 4),
             Text(subtitle, textAlign: TextAlign.center),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDefenseResult() {
+    final strings = AppLocalizations.of(context)!;
+    final remainingHealth = _health[_defender.id] ?? 0;
+
+    return Center(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(24),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 560),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.favorite_rounded, size: 80),
+              const SizedBox(height: 20),
+
+              Text(
+                strings.attackLanded,
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+
+              const SizedBox(height: 14),
+
+              Text(
+                strings.playerCouldNotDefend(_defender.name, _lastDamage),
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+
+              const SizedBox(height: 22),
+
+              Text(
+                '❤️' * remainingHealth,
+                textAlign: TextAlign.center,
+                style: const TextStyle(fontSize: 30),
+              ),
+
+              const SizedBox(height: 8),
+
+              Text(
+                strings.heartsRemaining(remainingHealth),
+                textAlign: TextAlign.center,
+              ),
+
+              const SizedBox(height: 30),
+
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton(
+                  onPressed: _continueAfterDefenseResult,
+                  child: Text(strings.continueLabel),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

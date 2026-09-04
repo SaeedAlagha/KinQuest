@@ -100,9 +100,11 @@ class _SecretMissionScreenState extends State<SecretMissionScreen> {
     _familyMembers
       ..clear()
       ..addAll(availableMembers);
-    _selectedPlayerIds
-      ..clear()
-      ..addAll(availableMembers.map((member) => member.id));
+    _selectedPlayerIds.clear();
+
+    if (widget.participantIds != null) {
+      _selectedPlayerIds.addAll(widget.participantIds!);
+    }
     _isLoading = false;
   }
 
@@ -181,9 +183,11 @@ class _SecretMissionScreenState extends State<SecretMissionScreen> {
           ..clear()
           ..addAll(members);
 
-        _selectedPlayerIds
-          ..clear()
-          ..addAll(widget.participantIds ?? members.map((member) => member.id));
+        _selectedPlayerIds.clear();
+
+        if (widget.participantIds != null) {
+          _selectedPlayerIds.addAll(widget.participantIds!);
+        }
 
         _isLoading = false;
       });
@@ -607,6 +611,7 @@ class _SecretMissionScreenState extends State<SecretMissionScreen> {
 
   Widget _buildSetupScreen() {
     final strings = AppLocalizations.of(context)!;
+
     if (_isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -618,6 +623,7 @@ class _SecretMissionScreenState extends State<SecretMissionScreen> {
           strings.joinOrCreateFamilyBeforeGame(strings.secretMission),
         _SecretMissionLoadError.loadFailed => strings.couldNotLoadFamilyMembers,
       };
+
       return Center(
         child: Padding(
           padding: const EdgeInsets.all(24),
@@ -662,80 +668,83 @@ class _SecretMissionScreenState extends State<SecretMissionScreen> {
       );
     }
 
-    return Padding(
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Expanded(
-            child: ListView(
-              padding: EdgeInsets.zero,
-              children: [
-                Text(
-                  strings.whoIsPlaying,
-                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
+    return GameSetupView(
+      icon: Icons.visibility_off_rounded,
+      title: strings.secretMission,
+      description: strings.secretMissionSetupInstructions,
+      children: [
+        GameSetupSectionCard(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                strings.whoIsPlaying,
+                style: Theme.of(
+                  context,
+                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                strings.chooseMissionPlayers,
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+              const SizedBox(height: 14),
+
+              for (final player in _familyMembers)
+                CheckboxListTile(
+                  contentPadding: EdgeInsets.zero,
+                  dense: true,
+                  value: _selectedPlayerIds.contains(player.id),
+                  onChanged: widget.participantIds == null
+                      ? (_) => _togglePlayer(player)
+                      : null,
+                  secondary: Icon(
+                    Icons.person_rounded,
+                    size: 18,
+                    color: Theme.of(context).colorScheme.primary,
                   ),
-                ),
-                const SizedBox(height: 8),
-                Text(strings.chooseMissionPlayers),
-                const SizedBox(height: 18),
-                SilaGameCoachBanner(message: strings.mascotGameSetupMessage),
-                const SizedBox(height: 18),
-                Text(strings.secretMissionSetupSummary(_selectedRounds)),
-                const SizedBox(height: 10),
-                Text(strings.secretMissionSetupInstructions),
-                const SizedBox(height: 18),
-                GameRoundSelector(
-                  value: _selectedRounds,
-                  onChanged: (rounds) {
-                    setState(() {
-                      _selectedRounds = rounds;
-                    });
-                  },
-                  keyPrefix: 'mission-round-option',
-                ),
-                const SizedBox(height: 24),
-                for (final player in _familyMembers) ...[
-                  Card(
-                    child: CheckboxListTile(
-                      value: _selectedPlayerIds.contains(player.id),
-                      onChanged: widget.participantIds == null
-                          ? (_) => _togglePlayer(player)
-                          : null,
-                      title: Text(player.name),
-                      secondary: CircleAvatar(
-                        child: Text(
-                          player.name.isEmpty
-                              ? '?'
-                              : player.name[0].toUpperCase(),
-                        ),
-                      ),
-                    ),
+                  title: Text(
+                    player.name,
+                    style: const TextStyle(fontWeight: FontWeight.w600),
                   ),
-                  const SizedBox(height: 10),
-                ],
-              ],
-            ),
+                  controlAffinity: ListTileControlAffinity.trailing,
+                ),
+            ],
           ),
-          const SizedBox(height: 16),
-          FilledButton.icon(
-            onPressed: _isGeneratingMissions ? null : _startGame,
-            icon: _isGeneratingMissions
-                ? const SizedBox(
-                    width: 18,
-                    height: 18,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : const Icon(Icons.visibility_off_rounded),
-            label: Text(
-              _isGeneratingMissions
-                  ? strings.generatingRound(1)
-                  : strings.startNamedGame(strings.secretMission),
-            ),
+        ),
+
+        const SizedBox(height: 18),
+
+        GameRoundSelector(
+          value: _selectedRounds,
+          onChanged: (rounds) {
+            setState(() {
+              _selectedRounds = rounds;
+            });
+          },
+          keyPrefix: 'mission-round-option',
+        ),
+
+        const SizedBox(height: 22),
+
+        FilledButton.icon(
+          onPressed: _selectedPlayerIds.length >= 2 && !_isGeneratingMissions
+              ? _startGame
+              : null,
+          icon: _isGeneratingMissions
+              ? const SizedBox(
+                  width: 18,
+                  height: 18,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : const Icon(Icons.visibility_off_rounded),
+          label: Text(
+            _isGeneratingMissions
+                ? strings.generatingRound(1)
+                : strings.startNamedGame(strings.secretMission),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 

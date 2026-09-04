@@ -43,12 +43,6 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       label: strings.navMissions,
     ),
     NavigationDestination(
-      key: const ValueKey('nav-sila-destination'),
-      icon: const _SilaNavigationIcon(),
-      selectedIcon: const _SilaNavigationIcon(selected: true),
-      label: strings.navSila,
-    ),
-    NavigationDestination(
       icon: const Icon(Icons.redeem_outlined),
       selectedIcon: const Icon(Icons.redeem_rounded),
       label: strings.navRewards,
@@ -84,11 +78,6 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       label: Text(strings.navMissions),
     ),
     NavigationRailDestination(
-      icon: const _SilaNavigationIcon(),
-      selectedIcon: const _SilaNavigationIcon(selected: true),
-      label: Text(strings.navSila),
-    ),
-    NavigationRailDestination(
       icon: const Icon(Icons.redeem_outlined),
       selectedIcon: const Icon(Icons.redeem_rounded),
       label: Text(strings.navRewards),
@@ -101,8 +90,6 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   ];
 
   int _selectedIndex = 0;
-  int _silaChatFocusRequest = 0;
-  int _silaStageFocusRequest = 0;
 
   List<Widget> _screens(AppLocalizations strings) {
     return widget.developerPreview
@@ -119,13 +106,6 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
             const MemoriesScreen(developerPreview: true),
             const CompetitionsScreen(developerPreview: true),
             const FamilyMissionsScreen(developerPreview: true),
-            SilaStudioScreen(
-              developerPreview: true,
-              showBackButton: false,
-              active: _selectedIndex == 4,
-              chatFocusRequest: _silaChatFocusRequest,
-              stageFocusRequest: _silaStageFocusRequest,
-            ),
             const RewardsHubScreen(developerPreview: true),
             const ProfileScreen(developerPreview: true),
           ]
@@ -137,42 +117,28 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
             const MemoriesScreen(),
             const CompetitionsScreen(),
             const FamilyMissionsScreen(),
-            SilaStudioScreen(
-              showBackButton: false,
-              active: _selectedIndex == 4,
-              chatFocusRequest: _silaChatFocusRequest,
-              stageFocusRequest: _silaStageFocusRequest,
-            ),
             const RewardsHubScreen(),
             const ProfileScreen(),
           ];
   }
 
   void _openFamilyOverview() {
-    _selectScreen(6);
-  }
-
-  void _openSilaStudio() {
-    setState(() {
-      _silaChatFocusRequest = 0;
-      _silaStageFocusRequest += 1;
-      _selectedIndex = 4;
-    });
+    _selectScreen(5);
   }
 
   void _openSilaChat() {
-    setState(() {
-      _silaChatFocusRequest += 1;
-      _selectedIndex = 4;
-    });
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => SilaStudioScreen(
+          developerPreview: widget.developerPreview,
+          chatFocusRequest: 1,
+        ),
+      ),
+    );
   }
 
   void _selectScreen(int index) {
     setState(() {
-      // A tap on the regular navigation always opens Sila's character stage.
-      // Chat-first is a one-shot intent reserved for the Home "Ask Sila" CTA.
-      _silaChatFocusRequest = 0;
-      if (index == 4) _silaStageFocusRequest += 1;
       _selectedIndex = index;
     });
   }
@@ -259,7 +225,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                       leading: Padding(
                         padding: const EdgeInsets.fromLTRB(16, 14, 16, 30),
                         child: _NavigationBrand(
-                          onTap: _openSilaStudio,
+                          onTap: _openSilaChat,
                           tooltip: strings.silaNavigationHint,
                         ),
                       ),
@@ -335,50 +301,6 @@ class _MobileNavigationShell extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _SilaNavigationIcon extends StatelessWidget {
-  const _SilaNavigationIcon({this.selected = false});
-
-  final bool selected;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
-    final reduceMotion = MediaQuery.disableAnimationsOf(context);
-    final size = selected ? 34.0 : 27.0;
-
-    return AnimatedContainer(
-      duration: reduceMotion
-          ? Duration.zero
-          : const Duration(milliseconds: 180),
-      width: size,
-      height: size,
-      clipBehavior: Clip.antiAlias,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        border: Border.all(
-          color: selected ? colors.primary : colors.outlineVariant,
-          width: selected ? 2.5 : 1,
-        ),
-        boxShadow: selected
-            ? [
-                BoxShadow(
-                  color: colors.primary.withValues(alpha: 0.28),
-                  blurRadius: 7,
-                ),
-              ]
-            : null,
-      ),
-      child: Image.asset(
-        'assets/mascot/sila_app_icon.png',
-        fit: BoxFit.cover,
-        cacheWidth: 96,
-        cacheHeight: 96,
-        excludeFromSemantics: true,
       ),
     );
   }

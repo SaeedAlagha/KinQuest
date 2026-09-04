@@ -131,6 +131,17 @@ class _EmojiGuessScreenState extends State<EmojiGuessScreen> {
     _selectedPlayerIds
       ..clear()
       ..addAll(availableMembers.map((member) => member.id));
+
+    if (widget.participantIds != null && availableMembers.length >= 2) {
+      _teamA
+        ..clear()
+        ..add(availableMembers[0]);
+
+      _teamB
+        ..clear()
+        ..add(availableMembers[1]);
+    }
+
     _isLoadingFamily = false;
   }
 
@@ -207,6 +218,14 @@ class _EmojiGuessScreenState extends State<EmojiGuessScreen> {
           _selectedPlayerIds
             ..clear()
             ..addAll(availableMembers.map((member) => member.id));
+
+          _teamA.clear();
+          _teamB.clear();
+
+          if (availableMembers.length >= 2) {
+            _teamA.add(availableMembers[0]);
+            _teamB.add(availableMembers[1]);
+          }
         }
 
         _isLoadingFamily = false;
@@ -222,6 +241,10 @@ class _EmojiGuessScreenState extends State<EmojiGuessScreen> {
   }
 
   void _togglePlayer(_EmojiPlayer player) {
+    if (widget.participantIds != null) {
+      return;
+    }
+
     setState(() {
       if (_selectedPlayerIds.contains(player.id)) {
         _selectedPlayerIds.remove(player.id);
@@ -685,7 +708,9 @@ class _EmojiGuessScreenState extends State<EmojiGuessScreen> {
                   child: CheckboxListTile(
                     contentPadding: EdgeInsets.zero,
                     value: _selectedPlayerIds.contains(player.id),
-                    onChanged: (_) => _togglePlayer(player),
+                    onChanged: widget.participantIds == null
+                        ? (_) => _togglePlayer(player)
+                        : null,
                     secondary: const Icon(Icons.person_rounded),
                     title: Text(player.name),
                   ),
@@ -693,75 +718,78 @@ class _EmojiGuessScreenState extends State<EmojiGuessScreen> {
             ],
           ),
         ),
-        const SizedBox(height: 16),
-        GameSetupSectionCard(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                strings.chooseTeams,
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-              const SizedBox(height: 6),
-              Text(strings.assignPlayersToTeams),
-              const SizedBox(height: 14),
-              ..._familyMembers
-                  .where((player) => _selectedPlayerIds.contains(player.id))
-                  .map((player) {
-                    final inTeamA = _teamA.any(
-                      (member) => member.id == player.id,
-                    );
-                    final inTeamB = _teamB.any(
-                      (member) => member.id == player.id,
-                    );
+        if (widget.participantIds == null) ...[
+          const SizedBox(height: 16),
+          GameSetupSectionCard(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  strings.chooseTeams,
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+                const SizedBox(height: 6),
+                Text(strings.assignPlayersToTeams),
+                const SizedBox(height: 14),
+                ..._familyMembers
+                    .where((player) => _selectedPlayerIds.contains(player.id))
+                    .map((player) {
+                      final inTeamA = _teamA.any(
+                        (member) => member.id == player.id,
+                      );
 
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 10),
-                      child: Card(
-                        child: Padding(
-                          padding: const EdgeInsets.all(12),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  player.name,
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.w700,
+                      final inTeamB = _teamB.any(
+                        (member) => member.id == player.id,
+                      );
+
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 10),
+                        child: Card(
+                          child: Padding(
+                            padding: const EdgeInsets.all(12),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    player.name,
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.w700,
+                                    ),
                                   ),
                                 ),
-                              ),
-                              ChoiceChip(
-                                label: Text(strings.teamA),
-                                selected: inTeamA,
-                                onSelected: (_) {
-                                  _assignPlayerToTeam(player, 'A');
-                                },
-                              ),
-                              const SizedBox(width: 8),
-                              ChoiceChip(
-                                label: Text(strings.teamB),
-                                selected: inTeamB,
-                                onSelected: (_) {
-                                  _assignPlayerToTeam(player, 'B');
-                                },
-                              ),
-                            ],
+                                ChoiceChip(
+                                  label: Text(strings.teamA),
+                                  selected: inTeamA,
+                                  onSelected: (_) {
+                                    _assignPlayerToTeam(player, 'A');
+                                  },
+                                ),
+                                const SizedBox(width: 8),
+                                ChoiceChip(
+                                  label: Text(strings.teamB),
+                                  selected: inTeamB,
+                                  onSelected: (_) {
+                                    _assignPlayerToTeam(player, 'B');
+                                  },
+                                ),
+                              ],
+                            ),
                           ),
                         ),
-                      ),
-                    );
-                  }),
-              const SizedBox(height: 4),
-              OutlinedButton.icon(
-                onPressed: _selectedPlayerIds.length >= 2
-                    ? _shuffleTeams
-                    : null,
-                icon: const Icon(Icons.shuffle_rounded),
-                label: Text(strings.shuffleTeams),
-              ),
-            ],
+                      );
+                    }),
+                const SizedBox(height: 4),
+                OutlinedButton.icon(
+                  onPressed: _selectedPlayerIds.length >= 2
+                      ? _shuffleTeams
+                      : null,
+                  icon: const Icon(Icons.shuffle_rounded),
+                  label: Text(strings.shuffleTeams),
+                ),
+              ],
+            ),
           ),
-        ),
+        ],
         const SizedBox(height: 16),
         GameSetupSectionCard(
           child: Column(

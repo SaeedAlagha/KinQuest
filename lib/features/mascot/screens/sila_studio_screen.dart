@@ -15,7 +15,6 @@ import '../../rewards/digital/digital_reward_localization.dart';
 import '../../rewards/digital/digital_reward_service.dart';
 import '../../rewards/digital/equipped_digital_rewards.dart';
 import '../widgets/sila_chat_panel.dart';
-import '../widgets/sila_companion_progress_card.dart';
 
 enum _StudioCategory { headwear, outfits, auras }
 
@@ -439,10 +438,6 @@ class _SilaStudioScreenState extends State<SilaStudioScreen> {
                       chat,
                       const SizedBox(height: 24),
                     ],
-                    SilaCompanionProgressCard(
-                      developerPreview: widget.developerPreview,
-                    ),
-                    const SizedBox(height: 24),
                     closet,
                   ],
                 ),

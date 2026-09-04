@@ -51,10 +51,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get spaceThemeDescription => 'مغامرات بين النجوم ومدارات مضيئة وسحر الفضاء';
 
   @override
-  String get khalifaUniversityTheme => 'مختبر جامعة خليفة للمستقبل';
+  String get khalifaUniversityTheme => 'مختبر المستقبل';
 
   @override
-  String get khalifaUniversityThemeDescription => 'هوية ابتكار زرقاء ودقيقة مستوحاة من جامعة خليفة';
+  String get khalifaUniversityThemeDescription => 'مظهر أزرق عصري مستوحى من التقنية والابتكار.';
 
   @override
   String get desertNightsTheme => 'ليالي الصحراء';
@@ -2435,7 +2435,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get weeklyCrown => 'لقب الأسبوع';
 
   @override
-  String get monthlyCompetitionDescription => 'أربعة أفراد، ونصفا نهائي، ونهائي واحد، وبطل واحد.';
+  String get monthlyCompetitionDescription => 'اختاروا المتنافسين وتقدموا عبر بطولة إقصائية حتى يتوّج بطل واحد للكأس الشهري.';
 
   @override
   String get monthlyRewards => 'مكافآت الشهر';
@@ -2451,7 +2451,7 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String get chooseFourCompetitors => 'اختر 4 متنافسين بالضبط';
+  String get chooseFourCompetitors => 'اختر متنافسين اثنين على الأقل';
 
   @override
   String get startingMonthlyCup => 'جارٍ بدء الكأس الشهري...';
@@ -4677,6 +4677,32 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
+  String get attackLanded => 'نجح الهجوم!';
+
+  @override
+  String playerCouldNotDefend(String name, int damage) {
+    String _temp0 = intl.Intl.pluralLogic(
+      damage,
+      locale: localeName,
+      other: 'تمت إزالة $damage قلوب.',
+      one: 'تمت إزالة قلب واحد.',
+    );
+    return 'لم يتمكن $name من الدفاع. $_temp0';
+  }
+
+  @override
+  String heartsRemaining(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'تبقى $count قلوب',
+      one: 'تبقى قلب واحد',
+      zero: 'لم تتبقَ أي قلوب',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get otherPlayerLookAwayShort => 'على اللاعب الآخر ألا ينظر.';
 
   @override
@@ -4771,4 +4797,49 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get highStakesDuel => 'مواجهة عالية المخاطر';
+
+  @override
+  String get gameCharadesTitle => 'التمثيل الصامت';
+
+  @override
+  String get gameCharadesDescription => 'مثّل أفكارًا إبداعية ليستمتع بها جميع أفراد العائلة.';
+
+  @override
+  String get gameCharadesBadge => 'مثّلها';
+
+  @override
+  String get gameWouldYouRatherTitle => 'ماذا تفضّل؟';
+
+  @override
+  String get gameWouldYouRatherDescription => 'اختر بين خيارين مرحين.';
+
+  @override
+  String get gameWouldYouRatherBadge => 'لعبة الاختيار';
+
+  @override
+  String get gameTruthOrDareTitle => 'صراحة أم تحدٍ';
+
+  @override
+  String get gameTruthOrDareDescription => 'اختر سؤال صراحة لطيفًا أو تحديًا ممتعًا.';
+
+  @override
+  String get gameTruthOrDareBadge => 'تحدٍ جماعي';
+
+  @override
+  String get gameNeverHaveIEverTitle => 'لم يسبق لي';
+
+  @override
+  String get gameNeverHaveIEverDescription => 'شاركوا مواقف ومفاجآت عائلية ممتعة.';
+
+  @override
+  String get gameNeverHaveIEverBadge => 'حديث جماعي';
+
+  @override
+  String get leaveGameTitle => 'مغادرة اللعبة؟';
+
+  @override
+  String get leaveGameMessage => 'ستفقد المباراة الحالية إذا غادرت الآن.';
+
+  @override
+  String get leaveGame => 'مغادرة اللعبة';
 }

@@ -89,7 +89,11 @@ class _PassTheBombScreenState extends State<PassTheBombScreen> {
               .where((member) => widget.participantIds!.contains(member.id))
               .toList();
     _familyMembers.addAll(availableMembers);
-    _selectedPlayerIds.addAll(availableMembers.map((member) => member.id));
+    _selectedPlayerIds.clear();
+
+    if (widget.participantIds != null) {
+      _selectedPlayerIds.addAll(widget.participantIds!);
+    }
     _isLoading = false;
   }
 
@@ -172,9 +176,11 @@ class _PassTheBombScreenState extends State<PassTheBombScreen> {
           ..clear()
           ..addAll(members);
 
-        _selectedPlayerIds
-          ..clear()
-          ..addAll(widget.participantIds ?? members.map((member) => member.id));
+        _selectedPlayerIds.clear();
+
+        if (widget.participantIds != null) {
+          _selectedPlayerIds.addAll(widget.participantIds!);
+        }
 
         _isLoading = false;
       });
@@ -511,6 +517,7 @@ class _PassTheBombScreenState extends State<PassTheBombScreen> {
 
   Widget _buildSetupScreen() {
     final strings = AppLocalizations.of(context)!;
+
     if (_isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -523,6 +530,7 @@ class _PassTheBombScreenState extends State<PassTheBombScreen> {
         ),
         _BombLoadError.loadFailed => strings.couldNotLoadFamilyMembers,
       };
+
       return Center(
         child: Padding(
           padding: const EdgeInsets.all(24),
@@ -567,84 +575,83 @@ class _PassTheBombScreenState extends State<PassTheBombScreen> {
       );
     }
 
-    return Padding(
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(
-            strings.whoIsPlaying,
-            style: Theme.of(
-              context,
-            ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 8),
-          Text(strings.chooseTogetherPlayers),
-          const SizedBox(height: 10),
-          Text(strings.bombSetupInstructions),
-          const SizedBox(height: 18),
-          GameRoundSelector(
-            value: _selectedRounds,
-            onChanged: (rounds) {
-              setState(() {
-                _selectedRounds = rounds;
-              });
-            },
-            keyPrefix: 'bomb-round-option',
-          ),
-          const SizedBox(height: 24),
-          Expanded(
-            child: ListView.separated(
-              itemCount: _familyMembers.length + 1,
-              separatorBuilder: (_, _) => const SizedBox(height: 10),
-              itemBuilder: (context, index) {
-                if (index == 0) {
-                  return SilaGameCoachBanner(
-                    message: strings.mascotGameSetupMessage,
-                  );
-                }
+    return GameSetupView(
+      icon: Icons.timer_rounded,
+      title: strings.passTheBomb,
+      description: strings.bombSetupInstructions,
+      children: [
+        GameSetupSectionCard(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                strings.whoIsPlaying,
+                style: Theme.of(
+                  context,
+                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                strings.chooseTogetherPlayers,
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+              const SizedBox(height: 14),
 
-                final player = _familyMembers[index - 1];
-
-                final selected = _selectedPlayerIds.contains(player.id);
-
-                return Card(
-                  child: CheckboxListTile(
-                    value: selected,
-                    onChanged: widget.participantIds == null
-                        ? (_) => _togglePlayer(player)
-                        : null,
-                    title: Text(player.name),
-                    secondary: CircleAvatar(
-                      child: Text(
-                        player.name.isEmpty
-                            ? '?'
-                            : player.name[0].toUpperCase(),
-                      ),
-                    ),
+              for (final player in _familyMembers)
+                CheckboxListTile(
+                  contentPadding: EdgeInsets.zero,
+                  dense: true,
+                  value: _selectedPlayerIds.contains(player.id),
+                  onChanged: widget.participantIds == null
+                      ? (_) => _togglePlayer(player)
+                      : null,
+                  secondary: Icon(
+                    Icons.person_rounded,
+                    size: 18,
+                    color: Theme.of(context).colorScheme.primary,
                   ),
-                );
-              },
-            ),
+                  title: Text(
+                    player.name,
+                    style: const TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                  controlAffinity: ListTileControlAffinity.trailing,
+                ),
+            ],
           ),
-          const SizedBox(height: 16),
-          FilledButton.icon(
-            onPressed: _isStartingGame ? null : _startGame,
-            icon: _isStartingGame
-                ? const SizedBox(
-                    width: 18,
-                    height: 18,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : const Icon(Icons.timer_rounded),
-            label: Text(
-              _isStartingGame
-                  ? strings.generatingCategories
-                  : strings.startNamedGame(strings.passTheBomb),
-            ),
+        ),
+
+        const SizedBox(height: 18),
+
+        GameRoundSelector(
+          value: _selectedRounds,
+          onChanged: (rounds) {
+            setState(() {
+              _selectedRounds = rounds;
+            });
+          },
+          keyPrefix: 'bomb-round-option',
+        ),
+
+        const SizedBox(height: 22),
+
+        FilledButton.icon(
+          onPressed: _selectedPlayerIds.length >= 2 && !_isStartingGame
+              ? _startGame
+              : null,
+          icon: _isStartingGame
+              ? const SizedBox(
+                  width: 18,
+                  height: 18,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : const Icon(Icons.timer_rounded),
+          label: Text(
+            _isStartingGame
+                ? strings.generatingCategories
+                : strings.startNamedGame(strings.passTheBomb),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 

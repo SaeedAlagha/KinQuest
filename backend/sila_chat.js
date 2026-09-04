@@ -48,21 +48,39 @@ function safeName(value, fallback = "Family member") {
 }
 
 function normalizeSilaReply(responseText) {
-  let decoded;
-  try {
-    decoded = JSON.parse(responseText);
-  } catch (_) {
+  if (typeof responseText !== "string" || !responseText.trim()) {
     throw new SilaChatError("Sila could not prepare a reply.", 502);
   }
 
-  const reply = typeof decoded?.reply === "string" ? decoded.reply.trim() : "";
-  if (!reply) {
-    throw new SilaChatError("Sila could not prepare a reply.", 502);
+  const cleaned = responseText
+    .trim()
+    .replace(/^```json\s*/i, "")
+    .replace(/^```\s*/i, "")
+    .replace(/\s*```$/i, "")
+    .trim();
+
+  try {
+    const decoded = JSON.parse(cleaned);
+
+    const reply =
+      typeof decoded?.reply === "string" ? decoded.reply.trim() : "";
+
+    if (reply) {
+      return {
+        reply: reply.slice(0, 1200),
+        pose: ALLOWED_POSES.has(decoded?.pose)
+          ? decoded.pose
+          : "encouraging",
+      };
+    }
+  } catch (_) {
+    // Some OpenRouter free models return normal text instead of JSON.
+    // Use the text itself as Sila's reply rather than failing the chat.
   }
 
   return {
-    reply: reply.slice(0, 1200),
-    pose: ALLOWED_POSES.has(decoded?.pose) ? decoded.pose : "encouraging",
+    reply: cleaned.slice(0, 1200),
+    pose: "encouraging",
   };
 }
 
@@ -269,22 +287,89 @@ async function chatWithSila({ database, ai, userId, rawMessage, locale }) {
     context,
   });
 
-  const response = await ai.models.generateContent({
-    model: "gemini-3.5-flash",
-    contents: buildSilaPrompt({
-      locale: normalizedLocale,
-      currentMemberName: context.currentMemberName,
-      familyMemberNames: context.familyMemberNames,
-      history,
-      message,
-    }),
-    config: {
-      responseMimeType: "application/json",
-      maxOutputTokens: 500,
-    },
-  });
-  const silaReply = normalizeSilaReply(response.text);
+  const openRouterApiKey = process.env.OPENROUTER_API_KEY;
 
+if (!openRouterApiKey) {
+  throw new SilaChatError(
+    "Sila AI is not configured on the server.",
+    503,
+  );
+}
+
+const prompt = buildSilaPrompt({
+  locale: normalizedLocale,
+  currentMemberName: context.currentMemberName,
+  familyMemberNames: context.familyMemberNames,
+  history,
+  message,
+});
+
+const response = await fetch(
+  "https://openrouter.ai/api/v1/chat/completions",
+  {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${openRouterApiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model: "openrouter/free",
+      messages: [
+        {
+          role: "user",
+          content: prompt,
+        },
+      ],
+      max_tokens: 500,
+      temperature: 0.7,
+    }),
+  },
+);
+
+const responseBody = await response.text();
+
+if (!response.ok) {
+  console.error(
+    "OpenRouter request failed:",
+    response.status,
+    responseBody,
+  );
+
+  if (response.status === 429) {
+    throw new SilaChatError(
+      "Sila is busy right now. Please try again in a little while.",
+      429,
+    );
+  }
+
+  throw new SilaChatError(
+    "Sila could not reach the AI service.",
+    502,
+  );
+}
+
+let openRouterData;
+
+try {
+  openRouterData = JSON.parse(responseBody);
+} catch (_) {
+  throw new SilaChatError(
+    "Sila received an invalid AI response.",
+    502,
+  );
+}
+
+const responseText =
+  openRouterData?.choices?.[0]?.message?.content;
+
+if (typeof responseText !== "string" || !responseText.trim()) {
+  throw new SilaChatError(
+    "Sila could not prepare a reply.",
+    502,
+  );
+}
+
+const silaReply = normalizeSilaReply(responseText);
   const messages = chatCollection(context.userRef);
   const userMessageRef = messages.doc();
   const silaMessageRef = messages.doc();

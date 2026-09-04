@@ -182,13 +182,13 @@ abstract class AppLocalizations {
   /// No description provided for @khalifaUniversityTheme.
   ///
   /// In en, this message translates to:
-  /// **'KU Future Lab'**
+  /// **'Future Lab'**
   String get khalifaUniversityTheme;
 
   /// No description provided for @khalifaUniversityThemeDescription.
   ///
   /// In en, this message translates to:
-  /// **'A precise blue innovation system inspired by Khalifa University'**
+  /// **'A clean blue theme inspired by technology and innovation.'**
   String get khalifaUniversityThemeDescription;
 
   /// No description provided for @desertNightsTheme.
@@ -4592,7 +4592,7 @@ abstract class AppLocalizations {
   /// No description provided for @monthlyCompetitionDescription.
   ///
   /// In en, this message translates to:
-  /// **'Four family members. Two semifinals. One final. One champion.'**
+  /// **'Choose your competitors and battle through a knockout tournament to crown one Monthly Cup champion.'**
   String get monthlyCompetitionDescription;
 
   /// No description provided for @monthlyRewards.
@@ -4616,7 +4616,7 @@ abstract class AppLocalizations {
   /// No description provided for @chooseFourCompetitors.
   ///
   /// In en, this message translates to:
-  /// **'Choose exactly 4 competitors'**
+  /// **'Choose at least 2 competitors'**
   String get chooseFourCompetitors;
 
   /// No description provided for @startingMonthlyCup.
@@ -8249,6 +8249,24 @@ abstract class AppLocalizations {
   /// **'{name} must answer correctly to block the attack.'**
   String playerMustBlock(String name);
 
+  /// No description provided for @attackLanded.
+  ///
+  /// In en, this message translates to:
+  /// **'Attack landed!'**
+  String get attackLanded;
+
+  /// No description provided for @playerCouldNotDefend.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} couldn\'t defend. {damage, plural, =1{1 heart was removed.} other{{damage} hearts were removed.}}'**
+  String playerCouldNotDefend(String name, int damage);
+
+  /// No description provided for @heartsRemaining.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No hearts remaining} =1{1 heart remaining} other{{count} hearts remaining}}'**
+  String heartsRemaining(int count);
+
   /// No description provided for @otherPlayerLookAwayShort.
   ///
   /// In en, this message translates to:
@@ -8416,6 +8434,96 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'HIGH-STAKES DUEL'**
   String get highStakesDuel;
+
+  /// No description provided for @gameCharadesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Charades'**
+  String get gameCharadesTitle;
+
+  /// No description provided for @gameCharadesDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Act out creative prompts for the whole family.'**
+  String get gameCharadesDescription;
+
+  /// No description provided for @gameCharadesBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'ACT IT OUT'**
+  String get gameCharadesBadge;
+
+  /// No description provided for @gameWouldYouRatherTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Would You Rather'**
+  String get gameWouldYouRatherTitle;
+
+  /// No description provided for @gameWouldYouRatherDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose between two playful options.'**
+  String get gameWouldYouRatherDescription;
+
+  /// No description provided for @gameWouldYouRatherBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'CHOICE GAME'**
+  String get gameWouldYouRatherBadge;
+
+  /// No description provided for @gameTruthOrDareTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Truth or Dare'**
+  String get gameTruthOrDareTitle;
+
+  /// No description provided for @gameTruthOrDareDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a friendly truth or a fun challenge.'**
+  String get gameTruthOrDareDescription;
+
+  /// No description provided for @gameTruthOrDareBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'PARTY CHALLENGE'**
+  String get gameTruthOrDareBadge;
+
+  /// No description provided for @gameNeverHaveIEverTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Never Have I Ever'**
+  String get gameNeverHaveIEverTitle;
+
+  /// No description provided for @gameNeverHaveIEverDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Share family-friendly moments and surprises.'**
+  String get gameNeverHaveIEverDescription;
+
+  /// No description provided for @gameNeverHaveIEverBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'PARTY TALK'**
+  String get gameNeverHaveIEverBadge;
+
+  /// No description provided for @leaveGameTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave game?'**
+  String get leaveGameTitle;
+
+  /// No description provided for @leaveGameMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Your current match will be lost if you leave now.'**
+  String get leaveGameMessage;
+
+  /// No description provided for @leaveGame.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave Game'**
+  String get leaveGame;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

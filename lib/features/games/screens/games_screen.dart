@@ -872,6 +872,10 @@ String _localizedGameTitle(AppLocalizations strings, String title) =>
       'Code Breaker' => strings.codeBreakerTitle,
       'Attack or Defend' => strings.attackOrDefendTitle,
       'Risk It' => strings.riskItTitle,
+      'Would You Rather' => strings.wouldYouRather,
+      'Charades' => strings.charades,
+      'Never Have I Ever' => strings.neverHaveIEver,
+      'Truth or Dare' => strings.truthOrDare,
       _ => title,
     };
 
@@ -893,6 +897,10 @@ String _localizedGameDescription(
   'Code Breaker' => strings.codeBreakerDescription,
   'Attack or Defend' => strings.attackOrDefendDescription,
   'Risk It' => strings.riskItDescription,
+  'Would You Rather' => strings.wouldYouRatherDescription,
+  'Charades' => strings.charadesDescription,
+  'Never Have I Ever' => strings.neverHaveIEverDescription,
+  'Truth or Dare' => strings.truthOrDareDescription,
   _ => fallback,
 };
 
@@ -914,6 +922,10 @@ String _localizedGameEyebrow(
   'Code Breaker' => strings.logicDuel,
   'Attack or Defend' => strings.battleDuel,
   'Risk It' => strings.highStakesDuel,
+  'Would You Rather' => strings.gameWouldYouRatherBadge,
+  'Charades' => strings.gameCharadesBadge,
+  'Never Have I Ever' => strings.gameNeverHaveIEverBadge,
+  'Truth or Dare' => strings.gameTruthOrDareBadge,
   _ => fallback,
 };
 
