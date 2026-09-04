@@ -89,11 +89,11 @@ void main() {
     expect(find.text('العائلة الكونية'), findsOneWidget);
 
     await tester.scrollUntilVisible(
-      find.text('مختبر جامعة خليفة للمستقبل'),
+      find.text('مختبر المستقبل'),
       260,
       scrollable: find.byType(Scrollable).last,
     );
-    expect(find.text('مختبر جامعة خليفة للمستقبل'), findsOneWidget);
+    expect(find.text('مختبر المستقبل'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 

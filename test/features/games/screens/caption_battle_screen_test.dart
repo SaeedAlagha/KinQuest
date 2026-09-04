@@ -38,8 +38,12 @@ void main() {
     await tester.pump();
 
     expect(
-      find.text('What Happened Next? • Before This Photo • Plot Twist'),
-      findsOneWidget,
+      tester
+          .widget<ChoiceChip>(
+            find.byKey(const ValueKey('caption-style-Storytelling')),
+          )
+          .selected,
+      isTrue,
     );
 
     await tester.ensureVisible(

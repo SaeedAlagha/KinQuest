@@ -79,7 +79,12 @@ void main() {
     expect(find.text('Developer Family Leaderboard'), findsOneWidget);
     expect(tester.takeException(), isNull);
 
-    await tester.tap(find.byKey(const ValueKey('nav-sila-destination')));
+    await tester.tap(_navigationDestination(navigationBar, 'Home'));
+    await tester.pump(const Duration(milliseconds: 300));
+    tester
+        .widget<FilledButton>(find.byKey(const ValueKey('home-sila-action')))
+        .onPressed!();
+    await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
 
     expect(find.byType(SilaStudioScreen), findsOneWidget);
@@ -87,7 +92,7 @@ void main() {
       tester
           .widget<SilaStudioScreen>(find.byType(SilaStudioScreen))
           .showBackButton,
-      isFalse,
+      isTrue,
     );
     expect(
       tester.widget<SilaStudioScreen>(find.byType(SilaStudioScreen)).active,
@@ -95,6 +100,8 @@ void main() {
     );
     expect(tester.takeException(), isNull);
 
+    await tester.tap(find.byTooltip('Back'));
+    await tester.pumpAndSettle();
     await tester.tap(_navigationDestination(navigationBar, 'Profile'));
     await tester.pump(const Duration(milliseconds: 400));
 

@@ -17,6 +17,17 @@ test("server wires health, privacy headers, and JSON validation", async (t) => {
   assert.equal(health.headers.get("cache-control"), "no-store");
   assert.equal(health.headers.get("x-content-type-options"), "nosniff");
   assert.equal(health.headers.has("x-powered-by"), false);
+  const healthBody = await health.json();
+  assert.equal(healthBody.providers.games.provider, "Google Gemini");
+  assert.equal(healthBody.providers.games.model, "gemini-3.8-flash");
+  assert.equal(
+    healthBody.providers.games.fallbackModel,
+    "gemini-2.5-flash",
+  );
+  assert.equal(typeof healthBody.providers.games.configured, "boolean");
+  assert.equal(healthBody.providers.silaChat.provider, "OpenRouter");
+  assert.equal(healthBody.providers.silaChat.model, "openrouter/free");
+  assert.equal(typeof healthBody.providers.silaChat.configured, "boolean");
 
   const clearChatPreflight = await fetch(`${baseUrl}/api/sila/chat`, {
     method: "OPTIONS",

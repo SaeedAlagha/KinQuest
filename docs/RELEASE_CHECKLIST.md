@@ -34,7 +34,10 @@ npx --yes firebase-tools@15.27.0 emulators:exec \
 
 - [ ] Rotate any credential that may have appeared in chat, logs, screenshots,
       or source history.
-- [ ] Keep `GEMINI_API_KEY` and Firebase Admin credentials in a secret manager.
+- [ ] Keep `GEMINI_API_KEY`, `OPENROUTER_API_KEY`, and Firebase Admin
+      credentials in a secret manager.
+- [ ] Confirm game and mission-proof routes report Google Gemini in `/`, and
+      Sila Chat alone reports OpenRouter.
 - [ ] Set backend `NODE_ENV=production`.
 - [ ] Set `KINQUEST_ALLOWED_ORIGINS` to exact deployed client origins.
 - [ ] Confirm Firebase project IDs and service credentials target the intended
@@ -42,6 +45,8 @@ npx --yes firebase-tools@15.27.0 emulators:exec \
 - [ ] Confirm no production secret is embedded in the Flutter bundle.
 
 ## 4. Build
+
+### Web
 
 ```sh
 flutter build web --release \
@@ -52,6 +57,29 @@ flutter build web --release \
 - [ ] `build/web/main.dart.js` contains the configured public API origin.
 - [ ] The build completes its WebAssembly dry-run check.
 - [ ] Store the release artifact with its source commit SHA.
+
+### iOS / TestFlight
+
+- [ ] Install full Xcode and accept its license/components.
+- [ ] Join the Apple Developer Program and install an Apple Distribution
+      signing identity.
+- [ ] Replace `com.example.kinquest` with a unique registered bundle ID.
+- [ ] Regenerate Firebase's iOS app configuration for that exact bundle ID.
+- [ ] Enable Push Notifications and Background Modes / Remote notifications
+      for the App ID and provisioning profile.
+- [ ] Set a new monotonically increasing build number.
+
+```sh
+KINQUEST_API_BASE_URL=https://api.example.com \
+  ./tool/build_ios_release.sh --build-number=2
+```
+
+- [ ] Confirm the helper creates `build/ios/archive/Runner.xcarchive` and an IPA
+      in `build/ios/ipa`.
+- [ ] Upload the IPA to App Store Connect and complete TestFlight compliance,
+      privacy, age-rating, and tester information.
+- [ ] Install the processed TestFlight build on a real iPhone and complete the
+      product smoke test below.
 
 ## 5. Product smoke test
 

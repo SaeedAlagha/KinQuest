@@ -17,10 +17,36 @@ void main() {
 
   test('iOS explains every photo and camera permission used by the app', () {
     final infoPlist = File('ios/Runner/Info.plist').readAsStringSync();
+    final entitlements = File(
+      'ios/Runner/Runner.entitlements',
+    ).readAsStringSync();
+    final project = File(
+      'ios/Runner.xcodeproj/project.pbxproj',
+    ).readAsStringSync();
 
     expect(infoPlist, contains('<key>NSCameraUsageDescription</key>'));
     expect(infoPlist, contains('<key>NSPhotoLibraryUsageDescription</key>'));
     expect(infoPlist, contains('<key>NSPhotoLibraryAddUsageDescription</key>'));
+    expect(infoPlist, contains('<key>CFBundleLocalizations</key>'));
+    expect(infoPlist, contains('<string>ar</string>'));
+    expect(infoPlist, contains('<key>UIBackgroundModes</key>'));
+    expect(infoPlist, contains('<string>remote-notification</string>'));
+    expect(entitlements, contains('<key>aps-environment</key>'));
+    expect(
+      project,
+      contains('CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements'),
+    );
+    expect(project, contains('com.apple.Push'));
+  });
+
+  test('iOS release helper rejects placeholder or insecure releases', () {
+    final script = File('tool/build_ios_release.sh').readAsStringSync();
+
+    expect(script, contains('KINQUEST_API_BASE_URL'));
+    expect(script, contains('^https://'));
+    expect(script, contains('com.example.kinquest'));
+    expect(script, contains('Apple Distribution'));
+    expect(script, contains('flutter build ipa --release'));
   });
 
   test('native launch screens use the approved Sila artwork', () {
@@ -102,6 +128,41 @@ void main() {
       expect(image.existsSync(), isTrue, reason: image.path);
       expect(image.lengthSync(), greaterThan(1000), reason: image.path);
     }
+  });
+
+  test('judge web release is installable and refresh-safe', () {
+    final webIndex = File('web/index.html').readAsStringSync();
+    final webManifest =
+        jsonDecode(File('web/manifest.json').readAsStringSync())
+            as Map<String, dynamic>;
+    final firebase =
+        jsonDecode(File('firebase.json').readAsStringSync())
+            as Map<String, dynamic>;
+    final hosting = firebase['hosting'] as Map<String, dynamic>;
+    final rewrites = hosting['rewrites'] as List<dynamic>;
+    final headers = hosting['headers'] as List<dynamic>;
+    final welcome = File(
+      'lib/features/authentication/screens/welcome_screen.dart',
+    ).readAsStringSync();
+
+    expect(webIndex, contains('width=device-width'));
+    expect(webIndex, contains('apple-mobile-web-app-title'));
+    expect(webManifest['id'], '/');
+    expect(webManifest['start_url'], '/');
+    expect(webManifest['scope'], '/');
+    expect(webManifest['display'], 'standalone');
+    expect(hosting['public'], 'build/web');
+    expect(rewrites, hasLength(1));
+    expect(rewrites.single, containsPair('source', '**'));
+    expect(rewrites.single, containsPair('destination', '/index.html'));
+    expect(headers, hasLength(1));
+    expect(headers.single, containsPair('source', '**'));
+    expect(
+      (headers.single as Map<String, dynamic>)['headers'].toString(),
+      contains('no-cache, max-age=0, must-revalidate'),
+    );
+    expect(welcome, contains('onDemo: kIsWeb'));
+    expect(welcome, contains("ValueKey('competition-demo-cta')"));
   });
 
   test('user-facing copy and AI context no longer expose the legacy name', () {

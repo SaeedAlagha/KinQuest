@@ -38,7 +38,10 @@ void main() {
         locale: Locale('ar'),
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
-        home: SecretMissionScreen(developerPreview: true),
+        home: SecretMissionScreen(
+          developerPreview: true,
+          participantIds: {'preview-1', 'preview-2', 'preview-3', 'preview-4'},
+        ),
       ),
     );
     await tester.pump();
@@ -47,9 +50,9 @@ void main() {
       find.byKey(const ValueKey('sila-game-coach-banner')),
       findsOneWidget,
     );
-    expect(find.text('مهمة سرية'), findsOneWidget);
+    expect(find.text('مهمة سرية'), findsWidgets);
     expect(find.text('من سيلعب؟'), findsOneWidget);
-    expect(find.textContaining('10 دقائق لكل جولة'), findsOneWidget);
+    expect(find.textContaining('أنجز مهمتك بصورة طبيعية'), findsOneWidget);
 
     final startButton = find.text('ابدأ مهمة سرية');
     await tester.ensureVisible(startButton);
