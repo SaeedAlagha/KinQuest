@@ -35,7 +35,6 @@ AI trust boundary: generative API keys never belong in the Flutter bundle.
 | Push tokens and notifications | User subcollections | User-scoped access; server-side delivery |
 | Game prompts, generated game content, and mission proof | Authenticated HTTPS gateway → Google Gemini | Firebase bearer token, CORS, limits, Gemini model fallback |
 | Sila Chat messages and limited family context | Authenticated HTTPS gateway → OpenRouter | Firebase bearer token, per-user limits, bounded retained history |
-| Judge demo state | In-memory simulated client state | No account and no photo upload |
 
 ## Implemented controls
 
@@ -50,7 +49,6 @@ AI trust boundary: generative API keys never belong in the Flutter bundle.
 - Firestore and Storage rules are tested with official Firebase emulators,
   including cross-family denial, owner-only reward management, mission verdict
   storage without retained proof images, wishlist isolation, and storage access.
-- The Competition Demo labels its data as simulated and uploads no photos.
 - API keys, service accounts, and local `.env` files are excluded from source
   control and must be managed as deployment secrets.
 
@@ -76,7 +74,7 @@ The code controls access paths, but deployment still matters. Before launch:
 The repository tests production authentication, CORS, privacy headers, rate
 limiting, verifier error handling, family rule isolation, reward ownership,
 mission proof retention, wishlist separation, responsive layouts, Arabic/RTL,
-and the complete judge demo loop.
+and the core authenticated family journeys.
 
 Automated checks do not replace penetration testing, legal review, production
 monitoring, or a backup/restore drill. Those remain release responsibilities.

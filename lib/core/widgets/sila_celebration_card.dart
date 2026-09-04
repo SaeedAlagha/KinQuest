@@ -15,7 +15,7 @@ class SilaCelebrationReward {
   final String label;
 }
 
-/// A reusable winner moment for daily, weekly, monthly, and demo journeys.
+/// A reusable winner moment for daily, weekly, and monthly journeys.
 ///
 /// The animation is deliberately short and one-shot so it remains friendly to
 /// accessibility settings and deterministic in widget tests.
