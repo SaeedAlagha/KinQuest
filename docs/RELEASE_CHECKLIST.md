@@ -84,8 +84,6 @@ KINQUEST_API_BASE_URL=https://api.example.com \
 ## 5. Product smoke test
 
 - [ ] Welcome screen paints on a narrow phone and a desktop viewport.
-- [ ] Competition Demo completes Mission → Competition → Reward → Memory →
-      Impact without authentication.
 - [ ] Account creation/login and family creation/join work in the target
       environment.
 - [ ] Family Overview opens from Home.

@@ -9,19 +9,13 @@ a shared reward, and save the moment—into a habit that helps families reconnec
 The Flutter package and Firebase project retain the internal `kinquest`
 identifier for compatibility. The user-facing product is **Sila | صِلَة**.
 
-## The three-minute judge experience
+## Judge-ready web access
 
-No account, backend, or family data is needed for the competition demo.
-
-1. Launch Sila and select **Try the 3-minute Competition Demo**.
-2. Complete the mission and crown a family quiz champion.
-3. Redeem a shared family reward.
-4. Save the simulated challenge night as a memory.
-5. Finish on the Impact screen, where the complete connection loop is visible.
-
-The route uses clearly labelled simulated data and uploads no photos. See the
-[full presenter script](docs/COMPETITION_DEMO.md) for timing, narration, and a
-fallback plan.
+Judges can scan the project QR code and use the complete Sila app in Safari,
+Chrome, or another modern browser. The hosted app opens the real authentication
+and family experience; it does not include a simulated presentation journey.
+See [Judge web access](docs/JUDGE_WEB_ACCESS.md) for the permanent HTTPS address
+and optional iPhone installation steps.
 
 ## What makes Sila competition-ready
 
@@ -44,7 +38,6 @@ prompt styles beyond a single “funny” mode.
 
 ```text
 Welcome
-  ├─ Competition Demo (safe simulated judge journey)
   └─ Account + Family
        ├─ Home and Family Overview
        ├─ Memories

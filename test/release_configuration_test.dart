@@ -161,8 +161,8 @@ void main() {
       (headers.single as Map<String, dynamic>)['headers'].toString(),
       contains('no-cache, max-age=0, must-revalidate'),
     );
-    expect(welcome, contains('onDemo: kIsWeb'));
-    expect(welcome, contains("ValueKey('competition-demo-cta')"));
+    expect(welcome, isNot(contains('CompetitionDemo')));
+    expect(welcome, isNot(contains("ValueKey('competition-demo-cta')")));
   });
 
   test('user-facing copy and AI context no longer expose the legacy name', () {

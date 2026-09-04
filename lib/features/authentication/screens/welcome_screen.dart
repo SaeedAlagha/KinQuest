@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/branding/app_brand.dart';
@@ -6,7 +5,6 @@ import '../../../core/mascot/sila_mascot.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/family_year_banner.dart';
 import '../../../l10n/app_localizations.dart';
-import '../../demo/screens/competition_demo_screen.dart';
 import 'login_screen.dart';
 import 'signup_screen.dart';
 
@@ -24,13 +22,6 @@ class WelcomeScreen extends StatelessWidget {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (_) => const SignupScreen()),
-    );
-  }
-
-  void _openCompetitionDemo(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => const CompetitionDemoScreen()),
     );
   }
 
@@ -74,10 +65,6 @@ class WelcomeScreen extends StatelessWidget {
                                       child: _WelcomeActions(
                                         onLogin: () => _openLogin(context),
                                         onSignup: () => _openSignup(context),
-                                        onDemo: kIsWeb
-                                            ? () =>
-                                                  _openCompetitionDemo(context)
-                                            : null,
                                       ),
                                     ),
                                   ],
@@ -89,9 +76,6 @@ class WelcomeScreen extends StatelessWidget {
                                     _WelcomeActions(
                                       onLogin: () => _openLogin(context),
                                       onSignup: () => _openSignup(context),
-                                      onDemo: kIsWeb
-                                          ? () => _openCompetitionDemo(context)
-                                          : null,
                                     ),
                                   ],
                                 ),
@@ -294,15 +278,10 @@ class _WelcomeSilaSpotlight extends StatelessWidget {
 }
 
 class _WelcomeActions extends StatelessWidget {
-  const _WelcomeActions({
-    required this.onLogin,
-    required this.onSignup,
-    this.onDemo,
-  });
+  const _WelcomeActions({required this.onLogin, required this.onSignup});
 
   final VoidCallback onLogin;
   final VoidCallback onSignup;
-  final VoidCallback? onDemo;
 
   @override
   Widget build(BuildContext context) {
@@ -375,18 +354,6 @@ class _WelcomeActions extends StatelessWidget {
               label: Text(strings.createAccount),
             ),
           ),
-          if (onDemo != null) ...[
-            const SizedBox(height: 12),
-            SizedBox(
-              width: double.infinity,
-              child: FilledButton.tonalIcon(
-                key: const ValueKey('competition-demo-cta'),
-                onPressed: onDemo,
-                icon: const Icon(Icons.play_circle_outline_rounded),
-                label: Text(CompetitionDemoCopy.launchLabel(context)),
-              ),
-            ),
-          ],
           const SizedBox(height: 18),
           Row(
             children: [
