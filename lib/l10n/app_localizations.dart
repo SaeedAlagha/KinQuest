@@ -1655,6 +1655,36 @@ abstract class AppLocalizations {
   /// **'A compatible English or Arabic voice is not available on this device. You can still read every reply.'**
   String get silaChatVoiceUnavailable;
 
+  /// No description provided for @silaChatOfflineNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Sila is using built-in offline guidance until the AI service reconnects. This session stays on this device.'**
+  String get silaChatOfflineNotice;
+
+  /// No description provided for @silaChatOfflineGameReply.
+  ///
+  /// In en, this message translates to:
+  /// **'Let’s play Emoji Guess! Split into two teams, choose three rounds, and let everyone take turns revealing the clues.'**
+  String get silaChatOfflineGameReply;
+
+  /// No description provided for @silaChatOfflineBondReply.
+  ///
+  /// In en, this message translates to:
+  /// **'Try a five-minute family check-in: each person shares one good moment, one challenge, and one thing they appreciate about someone here.'**
+  String get silaChatOfflineBondReply;
+
+  /// No description provided for @silaChatOfflineCheerReply.
+  ///
+  /// In en, this message translates to:
+  /// **'Family challenge: build the tallest tower you can from safe household items in five minutes, then celebrate everyone’s best idea!'**
+  String get silaChatOfflineCheerReply;
+
+  /// No description provided for @silaChatOfflineGeneralReply.
+  ///
+  /// In en, this message translates to:
+  /// **'I’m in offline mode right now, but I’m still with you. Ask me to pick a game, suggest a bonding moment, or give your family a fun challenge.'**
+  String get silaChatOfflineGeneralReply;
+
   /// No description provided for @silaChatDeveloperPreview.
   ///
   /// In en, this message translates to:

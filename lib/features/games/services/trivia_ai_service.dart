@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:kinquest/core/config/api_config.dart';
 
+import '../utils/offline_quiz_bank.dart';
+
 class TriviaQuestion {
   final String question;
   final List<String> options;
@@ -29,27 +31,54 @@ class TriviaAiService {
     required int count,
     required String languageCode,
   }) async {
-    final response = await http
-        .post(
-          ApiConfig.endpoint('/api/trivia'),
-          headers: await ApiConfig.authenticatedJsonHeaders(),
-          body: jsonEncode({
-            'category': category,
-            'count': count,
-            'language': languageCode,
-          }),
-        )
-        .timeout(const Duration(seconds: 20));
+    try {
+      final response = await http
+          .post(
+            ApiConfig.endpoint('/api/trivia'),
+            headers: await ApiConfig.authenticatedJsonHeaders(),
+            body: jsonEncode({
+              'category': category,
+              'count': count,
+              'language': languageCode,
+            }),
+          )
+          .timeout(const Duration(seconds: 20));
 
-    if (response.statusCode != 200) {
-      throw Exception('Failed to generate trivia questions');
+      if (response.statusCode != 200) {
+        throw Exception('Failed to generate trivia questions');
+      }
+
+      final data = jsonDecode(response.body) as Map<String, dynamic>;
+      final rawQuestions = data['questions'] as List<dynamic>;
+      final questions = rawQuestions
+          .map((item) => TriviaQuestion.fromJson(item as Map<String, dynamic>))
+          .where(
+            (question) =>
+                question.question.trim().isNotEmpty &&
+                question.options.length == 4 &&
+                question.correctIndex >= 0 &&
+                question.correctIndex < 4,
+          )
+          .take(count)
+          .toList();
+
+      if (questions.length == count) return questions;
+    } on Object {
+      // The real game remains playable when the production AI gateway is down.
     }
 
-    final data = jsonDecode(response.body) as Map<String, dynamic>;
-    final questions = data['questions'] as List<dynamic>;
-
-    return questions
-        .map((item) => TriviaQuestion.fromJson(item as Map<String, dynamic>))
-        .toList();
+    return OfflineQuizBank.questions(
+          category: category,
+          count: count,
+          languageCode: languageCode,
+        )
+        .map(
+          (question) => TriviaQuestion(
+            question: question.question,
+            options: question.options,
+            correctIndex: question.correctIndex,
+          ),
+        )
+        .toList(growable: false);
   }
 }

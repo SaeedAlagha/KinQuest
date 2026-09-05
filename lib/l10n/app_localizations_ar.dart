@@ -839,6 +839,21 @@ class AppLocalizationsAr extends AppLocalizations {
   String get silaChatVoiceUnavailable => 'لا يتوفر صوت عربي أو إنجليزي متوافق على هذا الجهاز. لا يزال بإمكانك قراءة كل رد.';
 
   @override
+  String get silaChatOfflineNotice => 'يستخدم صلة إرشادات مدمجة دون اتصال حتى تعود خدمة الذكاء الاصطناعي. تبقى هذه الجلسة على هذا الجهاز.';
+
+  @override
+  String get silaChatOfflineGameReply => 'لنلعب تخمين الرموز التعبيرية! انقسموا إلى فريقين واختاروا ثلاث جولات وتناوبوا على كشف التلميحات.';
+
+  @override
+  String get silaChatOfflineBondReply => 'جرّبوا لقاءً عائليًا لخمس دقائق: يشارك كل شخص لحظة جميلة وتحديًا وشيئًا يقدّره في أحد الموجودين.';
+
+  @override
+  String get silaChatOfflineCheerReply => 'تحدي العائلة: ابنوا أطول برج ممكن من أدوات منزلية آمنة خلال خمس دقائق، ثم احتفلوا بأفضل فكرة لدى كل شخص!';
+
+  @override
+  String get silaChatOfflineGeneralReply => 'أنا في وضع عدم الاتصال الآن، لكنني ما زلت معكم. اطلبوا مني اختيار لعبة أو اقتراح لحظة تقارب أو تقديم تحدٍ عائلي ممتع.';
+
+  @override
   String get silaChatDeveloperPreview => 'محادثة تجريبية—لن يتم حفظ الرسائل.';
 
   @override
