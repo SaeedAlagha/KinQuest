@@ -2261,6 +2261,18 @@ abstract class AppLocalizations {
   /// **'Your invitation code'**
   String get yourInvitationCode;
 
+  /// No description provided for @showInvitationCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Show invitation code'**
+  String get showInvitationCode;
+
+  /// No description provided for @hideInvitationCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide invitation code'**
+  String get hideInvitationCode;
+
   /// No description provided for @shareInvitationCode.
   ///
   /// In en, this message translates to:

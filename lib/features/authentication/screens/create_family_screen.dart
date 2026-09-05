@@ -262,14 +262,7 @@ class _CreateFamilyScreenState extends State<CreateFamilyScreen> {
 
                             const SizedBox(height: 10),
 
-                            SelectableText(
-                              _invitationCode!,
-                              style: const TextStyle(
-                                fontSize: 30,
-                                fontWeight: FontWeight.bold,
-                                letterSpacing: 5,
-                              ),
-                            ),
+                            InvitationCodeReveal(code: _invitationCode!),
 
                             const SizedBox(height: 10),
 
@@ -328,6 +321,86 @@ class _CreateFamilyScreenState extends State<CreateFamilyScreen> {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+class InvitationCodeReveal extends StatefulWidget {
+  const InvitationCodeReveal({super.key, required this.code});
+
+  final String code;
+
+  @override
+  State<InvitationCodeReveal> createState() => _InvitationCodeRevealState();
+}
+
+class _InvitationCodeRevealState extends State<InvitationCodeReveal> {
+  bool _isVisible = false;
+
+  @override
+  void didUpdateWidget(InvitationCodeReveal oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.code != widget.code) {
+      _isVisible = false;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context)!;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsetsDirectional.fromSTEB(16, 6, 6, 6),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.72),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 180),
+              child: _isVisible
+                  ? SelectableText(
+                      widget.code,
+                      key: const ValueKey('visible-invitation-code'),
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontSize: 30,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 5,
+                      ),
+                    )
+                  : const ExcludeSemantics(
+                      child: Text(
+                        '••••••',
+                        key: ValueKey('hidden-invitation-code'),
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 30,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 5,
+                        ),
+                      ),
+                    ),
+            ),
+          ),
+          IconButton(
+            key: const ValueKey('invitation-code-visibility-toggle'),
+            tooltip: _isVisible
+                ? strings.hideInvitationCode
+                : strings.showInvitationCode,
+            onPressed: () => setState(() => _isVisible = !_isVisible),
+            icon: Icon(
+              _isVisible
+                  ? Icons.visibility_off_outlined
+                  : Icons.visibility_outlined,
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -1150,6 +1150,12 @@ class AppLocalizationsAr extends AppLocalizations {
   String get yourInvitationCode => 'رمز دعوتك';
 
   @override
+  String get showInvitationCode => 'إظهار رمز الدعوة';
+
+  @override
+  String get hideInvitationCode => 'إخفاء رمز الدعوة';
+
+  @override
   String get shareInvitationCode => 'شارك هذا الرمز مع أقاربك ليتمكنوا من الانضمام إلى عائلتك.';
 
   @override

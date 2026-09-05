@@ -2,7 +2,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/validation/form_validators.dart';
-import '../../../core/widgets/sila_brand_mark.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../home/screens/main_navigation_screen.dart';
 import 'signup_screen.dart';
@@ -150,10 +149,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const SizedBox(height: 20),
-
-                    const SilaBrandMark(size: 68, showShadow: false),
-
-                    const SizedBox(height: 24),
 
                     Text(
                       strings.welcomeBackToSila,

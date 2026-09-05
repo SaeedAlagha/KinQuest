@@ -396,6 +396,8 @@
   "familyDescriptionHint": "رسالة قصيرة عن عائلتك",
   "creatingFamily": "جارٍ إنشاء العائلة...",
   "yourInvitationCode": "رمز دعوتك",
+  "showInvitationCode": "إظهار رمز الدعوة",
+  "hideInvitationCode": "إخفاء رمز الدعوة",
   "shareInvitationCode": "شارك هذا الرمز مع أقاربك ليتمكنوا من الانضمام إلى عائلتك.",
   "copyingComing": "سيتم تفعيل النسخ قريبًا.",
   "copyCode": "نسخ الرمز",

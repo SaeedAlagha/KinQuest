@@ -1143,6 +1143,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get yourInvitationCode => 'Your invitation code';
 
   @override
+  String get showInvitationCode => 'Show invitation code';
+
+  @override
+  String get hideInvitationCode => 'Hide invitation code';
+
+  @override
   String get shareInvitationCode => 'Share this code with relatives so they can join your family.';
 
   @override
