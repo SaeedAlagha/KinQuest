@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/mascot/sila_mascot.dart';
 import '../../../core/widgets/family_year_banner.dart';
-import '../../../core/widgets/sila_brand_mark.dart';
 import '../../../core/widgets/sila_page_backdrop.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../competitions/screens/daily_challenge_screen.dart';
@@ -435,8 +434,6 @@ class _HomeHeader extends StatelessWidget {
             ],
           ),
         ),
-        const SizedBox(width: 16),
-        const SilaBrandMark(size: 48, showShadow: false),
       ],
     );
   }
