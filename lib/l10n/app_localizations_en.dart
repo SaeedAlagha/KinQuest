@@ -832,6 +832,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get silaChatVoiceUnavailable => 'A compatible English or Arabic voice is not available on this device. You can still read every reply.';
 
   @override
+  String get silaChatOfflineNotice => 'Sila is using built-in offline guidance until the AI service reconnects. This session stays on this device.';
+
+  @override
+  String get silaChatOfflineGameReply => 'Let’s play Emoji Guess! Split into two teams, choose three rounds, and let everyone take turns revealing the clues.';
+
+  @override
+  String get silaChatOfflineBondReply => 'Try a five-minute family check-in: each person shares one good moment, one challenge, and one thing they appreciate about someone here.';
+
+  @override
+  String get silaChatOfflineCheerReply => 'Family challenge: build the tallest tower you can from safe household items in five minutes, then celebrate everyone’s best idea!';
+
+  @override
+  String get silaChatOfflineGeneralReply => 'I’m in offline mode right now, but I’m still with you. Ask me to pick a game, suggest a bonding moment, or give your family a fun challenge.';
+
+  @override
   String get silaChatDeveloperPreview => 'Preview conversation—messages are not saved.';
 
   @override

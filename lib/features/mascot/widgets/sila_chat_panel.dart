@@ -50,6 +50,7 @@ class _SilaChatPanelState extends State<SilaChatPanel> {
   bool _loading = true;
   bool _sending = false;
   bool _clearing = false;
+  bool _offlineMode = false;
   bool _loadFailed = false;
   Object? _loadError;
   bool _autoVoice = false;
@@ -160,10 +161,21 @@ class _SilaChatPanelState extends State<SilaChatPanel> {
           ..clear()
           ..addAll(history);
         _loading = false;
+        _offlineMode = false;
       });
       _scrollToBottom();
     } on Object catch (error) {
       if (!mounted || generation != _operationGeneration) return;
+      if (_canUseOfflineChat(error)) {
+        setState(() {
+          _loading = false;
+          _offlineMode = true;
+          _loadFailed = false;
+          _loadError = null;
+        });
+        widget.onPoseChanged?.call(SilaMascotPose.encouraging);
+        return;
+      }
       setState(() {
         _loading = false;
         _loadFailed = true;
@@ -197,13 +209,17 @@ class _SilaChatPanelState extends State<SilaChatPanel> {
 
     try {
       late final SilaChatMessage reply;
-      if (widget.developerPreview) {
+      if (widget.developerPreview || _offlineMode) {
         await Future<void>.delayed(const Duration(milliseconds: 420));
         if (!mounted || generation != _operationGeneration) return;
         reply = SilaChatMessage(
-          id: 'preview-${DateTime.now().microsecondsSinceEpoch}',
+          id:
+              '${_offlineMode ? 'offline' : 'preview'}-'
+              '${DateTime.now().microsecondsSinceEpoch}',
           role: SilaChatRole.assistant,
-          content: AppLocalizations.of(context)!.silaChatPreviewReply,
+          content: _offlineMode
+              ? _offlineReply(text)
+              : AppLocalizations.of(context)!.silaChatPreviewReply,
           pose: SilaChatPose.encouraging,
           createdAt: DateTime.now().toUtc(),
         );
@@ -231,6 +247,25 @@ class _SilaChatPanelState extends State<SilaChatPanel> {
       if (_autoVoice && widget.active) unawaited(_speak(reply));
     } on Object catch (error) {
       if (!mounted || generation != _operationGeneration) return;
+      if (_canUseOfflineChat(error)) {
+        final reply = SilaChatMessage(
+          id: 'offline-${DateTime.now().microsecondsSinceEpoch}',
+          role: SilaChatRole.assistant,
+          content: _offlineReply(text),
+          pose: SilaChatPose.encouraging,
+          createdAt: DateTime.now().toUtc(),
+        );
+        setState(() {
+          _offlineMode = true;
+          _messages.add(reply);
+          _sending = false;
+          _liveReplyId = reply.id;
+        });
+        widget.onPoseChanged?.call(SilaMascotPose.encouraging);
+        _scrollToBottom();
+        if (_autoVoice && widget.active) unawaited(_speak(reply));
+        return;
+      }
       setState(() {
         _messages.removeWhere((message) => message.id == localMessage.id);
         _sending = false;
@@ -249,6 +284,47 @@ class _SilaChatPanelState extends State<SilaChatPanel> {
         ),
       );
     }
+  }
+
+  bool _canUseOfflineChat(Object error) {
+    if (error is! SilaChatException) return false;
+    return switch (error.failure) {
+      SilaChatFailure.unavailable ||
+      SilaChatFailure.invalidResponse ||
+      SilaChatFailure.unknown => true,
+      SilaChatFailure.signInRequired ||
+      SilaChatFailure.invalidRequest ||
+      SilaChatFailure.familyRequired ||
+      SilaChatFailure.forbidden ||
+      SilaChatFailure.notFound ||
+      SilaChatFailure.rateLimited => false,
+    };
+  }
+
+  String _offlineReply(String message) {
+    final strings = AppLocalizations.of(context)!;
+    final normalized = message.toLowerCase();
+    final isArabic = Localizations.localeOf(context).languageCode == 'ar';
+    final gameWords = isArabic
+        ? const ['لعبة', 'لعب', 'نلعب', 'اختار']
+        : const ['game', 'play', 'choose'];
+    final bondWords = isArabic
+        ? const ['عائل', 'تقارب', 'نتقارب', 'نتواصل', 'رابطة']
+        : const ['family', 'bond', 'connect', 'together'];
+    final challengeWords = isArabic
+        ? const ['تحدي', 'ممتع', 'تشجيع', 'شجع']
+        : const ['challenge', 'fun', 'cheer', 'encourage'];
+
+    if (gameWords.any(normalized.contains)) {
+      return strings.silaChatOfflineGameReply;
+    }
+    if (bondWords.any(normalized.contains)) {
+      return strings.silaChatOfflineBondReply;
+    }
+    if (challengeWords.any(normalized.contains)) {
+      return strings.silaChatOfflineCheerReply;
+    }
+    return strings.silaChatOfflineGeneralReply;
   }
 
   Future<void> _speak(SilaChatMessage message) async {
@@ -322,7 +398,9 @@ class _SilaChatPanelState extends State<SilaChatPanel> {
     setState(() => _clearing = true);
     try {
       await _stopVoice();
-      if (!widget.developerPreview) await _chatService.clearHistory();
+      if (!widget.developerPreview && !_offlineMode) {
+        await _chatService.clearHistory();
+      }
       if (!mounted || generation != _operationGeneration) return;
       setState(() {
         _messages.clear();
@@ -504,6 +582,7 @@ class _SilaChatPanelState extends State<SilaChatPanel> {
       controller: _scrollController,
       padding: const EdgeInsets.all(14),
       children: [
+        if (_offlineMode) const _OfflineChatNotice(),
         if (_messages.isEmpty) _ChatEmptyState(onStarterSelected: _send),
         for (final message in _messages)
           _ChatBubble(
@@ -515,6 +594,40 @@ class _SilaChatPanelState extends State<SilaChatPanel> {
           ),
         if (_sending) _ThinkingBubble(label: strings.silaChatResponding),
       ],
+    );
+  }
+}
+
+class _OfflineChatNotice extends StatelessWidget {
+  const _OfflineChatNotice();
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    return Container(
+      key: const ValueKey('sila-chat-offline-notice'),
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: colors.secondaryContainer.withValues(alpha: 0.7),
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(Icons.offline_bolt_rounded, color: colors.onSecondaryContainer),
+          const SizedBox(width: 9),
+          Expanded(
+            child: Text(
+              AppLocalizations.of(context)!.silaChatOfflineNotice,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: colors.onSecondaryContainer,
+                height: 1.35,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

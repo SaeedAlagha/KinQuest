@@ -348,6 +348,52 @@ void main() {
     },
   );
 
+  testWidgets('unavailable AI gateway switches to usable offline guidance', (
+    tester,
+  ) async {
+    final chatService = _FakeChatService(
+      onLoad: () => Future<List<SilaChatMessage>>.error(
+        const SilaChatException(SilaChatFailure.invalidResponse),
+      ),
+    );
+
+    await tester.pumpWidget(
+      _app(
+        SilaChatPanel(
+          chatService: chatService,
+          voiceService: SilaVoiceService(
+            engine: _RecordingSpeechEngine(),
+            platformSupported: false,
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byKey(const ValueKey('sila-chat-offline-notice')),
+      findsOneWidget,
+    );
+    expect(_chatInput(tester).enabled, isTrue);
+
+    await tester.enterText(
+      find.byKey(const ValueKey('sila-chat-input')),
+      'Pick a game for us',
+    );
+    await tester.tap(find.byKey(const ValueKey('sila-chat-send')));
+    await tester.pump(const Duration(milliseconds: 500));
+
+    expect(find.text('Pick a game for us'), findsOneWidget);
+    expect(
+      find.text(
+        'Let’s play Emoji Guess! Split into two teams, choose three rounds, '
+        'and let everyone take turns revealing the clues.',
+      ),
+      findsOneWidget,
+    );
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('disposing the panel stops an injected device voice', (
     tester,
   ) async {
