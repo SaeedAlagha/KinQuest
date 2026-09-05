@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:kinquest/core/theme/app_theme.dart';
-import 'package:kinquest/core/widgets/sila_brand_mark.dart';
 import 'package:kinquest/features/authentication/screens/login_screen.dart';
 import 'package:kinquest/features/home/screens/main_navigation_screen.dart';
 import 'package:kinquest/features/mascot/screens/sila_studio_screen.dart';
@@ -26,12 +25,11 @@ void main() {
     expect(find.byKey(const ValueKey('competition-demo-cta')), findsNothing);
   });
 
-  testWidgets('login omits the legacy mark while signup keeps its branding', (
+  testWidgets('authentication pages open without the family banner', (
     tester,
   ) async {
     await tester.pumpWidget(_testApp(const LoginScreen()));
 
-    expect(find.byType(SilaBrandMark), findsNothing);
     expect(find.text('عام الأسرة 2026'), findsNothing);
 
     await tester.ensureVisible(find.text('Create one'));
@@ -39,7 +37,6 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Join Sila'), findsOneWidget);
-    expect(find.byType(SilaBrandMark), findsOneWidget);
     expect(find.text('عام الأسرة 2026'), findsNothing);
   });
 

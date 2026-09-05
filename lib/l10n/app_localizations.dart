@@ -1265,12 +1265,6 @@ abstract class AppLocalizations {
   /// **'Sila, your family companion'**
   String get mascotSemanticLabel;
 
-  /// No description provided for @silaLogoSemanticLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Sila family connection logo'**
-  String get silaLogoSemanticLabel;
-
   /// No description provided for @familyYearSemanticLabel.
   ///
   /// In en, this message translates to:

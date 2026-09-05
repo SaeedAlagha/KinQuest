@@ -631,9 +631,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mascotSemanticLabel => 'Sila, your family companion';
 
   @override
-  String get silaLogoSemanticLabel => 'Sila family connection logo';
-
-  @override
   String get familyYearSemanticLabel => 'UAE Year of Family 2026, Growing in Unity';
 
   @override

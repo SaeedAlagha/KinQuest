@@ -638,9 +638,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get mascotSemanticLabel => 'صلة، رفيق عائلتك';
 
   @override
-  String get silaLogoSemanticLabel => 'شعار صلة للترابط العائلي';
-
-  @override
   String get familyYearSemanticLabel => 'عام الأسرة في الإمارات 2026، نماء وانتماء';
 
   @override

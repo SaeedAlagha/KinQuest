@@ -3,7 +3,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/validation/form_validators.dart';
-import '../../../core/widgets/sila_brand_mark.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../profile/screens/legal_privacy_screen.dart';
 import 'family_choice_screen.dart';
@@ -217,10 +216,6 @@ class _SignupScreenState extends State<SignupScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const SizedBox(height: 12),
-
-                    const SilaBrandMark(size: 68, showShadow: false),
-
-                    const SizedBox(height: 24),
 
                     Text(
                       strings.joinSila,
