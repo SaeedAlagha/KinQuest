@@ -26,12 +26,12 @@ void main() {
     expect(find.byKey(const ValueKey('competition-demo-cta')), findsNothing);
   });
 
-  testWidgets('authentication pages keep the logo without the family banner', (
+  testWidgets('login omits the legacy mark while signup keeps its branding', (
     tester,
   ) async {
     await tester.pumpWidget(_testApp(const LoginScreen()));
 
-    expect(find.byType(SilaBrandMark), findsOneWidget);
+    expect(find.byType(SilaBrandMark), findsNothing);
     expect(find.text('عام الأسرة 2026'), findsNothing);
 
     await tester.ensureVisible(find.text('Create one'));

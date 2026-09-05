@@ -396,6 +396,8 @@
   "familyDescriptionHint": "A short message about your family",
   "creatingFamily": "Creating Family...",
   "yourInvitationCode": "Your invitation code",
+  "showInvitationCode": "Show invitation code",
+  "hideInvitationCode": "Hide invitation code",
   "shareInvitationCode": "Share this code with relatives so they can join your family.",
   "copyingComing": "Copying will be connected next.",
   "copyCode": "Copy Code",
